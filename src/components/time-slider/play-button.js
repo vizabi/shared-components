@@ -1,19 +1,26 @@
 import BaseComponent from "../base-component.js";
 
-export default class PlayButton extends BaseComponent {
 
-  constructor(config){
-    config.template = `<button class="vzb-playbutton"></button>`;
-    super(config);
+export default function PlayButton(config){
+
+  config.template = `<button class="vzb-playbutton"></button>`;
+  const base = BaseComponent(config);
+
+  let buttonEl = null;
+
+  function setup() {
+    buttonEl = base.view.select(".vzb-playbutton")
+      .on("click", () => {base.encoding.get("frame").togglePlaying();});
   }
 
-  setup() {
-    this.buttonEl = this.view.select(".vzb-playbutton")
-      .on("click", () => {this.model.encoding.get("frame").togglePlaying();});
+  function draw() {
+    buttonEl.text(base.encoding.get("frame").playing ? "Pause" : "Play");
+    console.log(base.services.layout.layoutModel.width);
   }
 
-  draw() {
-    this.buttonEl.text(this.model.encoding.get("frame").playing ? "Pause" : "Play");
-    console.log(this.services.layout.layoutModel.width);
-  }
-}  
+  return Object.assign({}, base, {
+    setup,
+    draw
+  });
+}
+
