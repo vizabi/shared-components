@@ -35,14 +35,14 @@ class BaseComponent {
   setup() {}
 
   updateState(){
-    if (Object.values(this.services).every(service => service.state == STATE.READY)) {
+    const dependencies = Object.values(this.services).concat(this.children);
+    if (dependencies.every(dep => dep.state == STATE.READY)) {
       this.state = STATE.READY;
-    } else if (Object.values(this.services).find(service => service.state == STATE.ERROR)) {
+    } else if (dependencies.find(dep => dep.state == STATE.ERROR)) {
       this.state = STATE.ERROR;
     } else {
       this.state = STATE.PENDING;
     }
-    console.log(this);
   }
 
   render() {
