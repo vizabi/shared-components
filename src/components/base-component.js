@@ -1,8 +1,11 @@
-import { autorun } from "mobx";
+import { autorun, decorate, observable } from "mobx";
 
-export default class BaseComponent {
+const STATE = {INIT: "init", PENDING: "pending", READY: "ready", ERROR: "error"};
+
+class BaseComponent {
 
   constructor({placeholder, model, services, subcomponents, template}){
+    this.state = STATE.INIT;
     this.template = this.template || template || "";
     this.subcomponents = this.subcomponents || subcomponents || [];
     this.services = this.services || services || {};
@@ -26,9 +29,22 @@ export default class BaseComponent {
         
     this.setup();
     autorun(this.render.bind(this));
+    autorun(this.updateState.bind(this));
   }
 
   setup() {}
+
+  updateState(){
+    if (Object.values(this.services).every(service => service.state == STATE.READY)) {
+      this.state = STATE.READY;
+    } else if (Object.values(this.services).find(service => service.state == STATE.ERROR)) {
+      this.state = STATE.ERROR;
+    } else {
+      this.state = STATE.PENDING;
+    }
+    console.log(this);
+  }
+
   render() {
     if(this.model) this.model.on("fulfilled", this.draw.bind(this));
     //this.model.on("pending", this.loading.bind(this));
@@ -39,3 +55,7 @@ export default class BaseComponent {
   loading() {}
   error() {}
 }
+
+export default decorate(BaseComponent, {
+  "state": observable
+});

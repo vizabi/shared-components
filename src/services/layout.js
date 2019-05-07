@@ -1,5 +1,5 @@
 import BaseService from "./base-service.js";
-import { observable, action } from "mobx";
+import { observable, action, decorate } from "mobx";
 
 const PROFILES = {
   SMALL: {
@@ -19,16 +19,17 @@ const PROFILES = {
   }
 };
 
-export default class LayoutService extends BaseService {
+class LayoutService extends BaseService {
 
   setup(){
     this.name = "layout";
+    this.state = "ready";
     window.addEventListener("resize", this.resizeHandler.bind(this));
-    this.layoutModel = observable({
+    this.layoutModel = {
       "width": 1,
       "height": 1,
       "profile": PROFILES.SMALL
-    });
+    };
   }
 
   resizeHandler(){
@@ -39,3 +40,8 @@ export default class LayoutService extends BaseService {
     })();
   }
 }
+
+export default decorate(LayoutService, {
+  "layoutModel": observable,
+  "state": observable
+});

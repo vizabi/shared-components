@@ -1,7 +1,7 @@
 import BarChart from "./tools/barchart.js";
-import TranslationService from "./services/translation";
-import LayoutService from "./services/layout";
+import LocaleService from "./services/locale.js";
+import LayoutService from "./services/layout.js";
 
 window.BarChart = BarChart;
-window.TranslationService = TranslationService;
+window.LocaleService = LocaleService;
 window.LayoutService = LayoutService;

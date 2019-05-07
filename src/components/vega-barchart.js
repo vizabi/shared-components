@@ -4,7 +4,7 @@ import BaseComponent from "./base-component.js";
 export default class VegaBarchart extends BaseComponent {
 
   constructor(config){
-    config.template = `<div class="vzb-bc"></div>`
+    config.template = `<div class="vzb-bc"></div>`;
     super(config);
   }
   setup() {

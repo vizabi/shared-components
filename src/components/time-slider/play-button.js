@@ -8,12 +8,14 @@ export default class PlayButton extends BaseComponent {
   }
 
   setup() {
+    this.t = this.services.locale.getTFunction();
     this.buttonEl = this.view.select(".vzb-playbutton")
       .on("click", () => {this.model.encoding.get("frame").togglePlaying();});
   }
 
   draw() {
-    this.buttonEl.text(this.model.encoding.get("frame").playing ? "Pause" : "Play");
+    if(this.state !== "ready") return;
+    this.buttonEl.text(this.model.encoding.get("frame").playing ? this.t("button-pause") : this.t("button-play"));
     console.log(this.services.layout.layoutModel.width);
   }
 }  

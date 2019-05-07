@@ -1,0 +1,8 @@
+{
+    "currency": "rur",
+    "rtl": false,
+    "dictionary": {
+        "button-play": "Пуск",
+        "button-pause": "Пауза"
+    }
+}

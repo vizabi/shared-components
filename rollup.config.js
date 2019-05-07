@@ -13,6 +13,7 @@ import livereload from "rollup-plugin-livereload";
 import json from "rollup-plugin-json";
 import visualizer from "rollup-plugin-visualizer";
 import trash from "rollup-plugin-delete";
+import copy from "rollup-plugin-copy";
 
 const copyright = `// ${meta.homepage} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author.name}`;
 
@@ -40,6 +41,11 @@ export default {
     commonjs(),
     replace({
       ENV: JSON.stringify(process.env.NODE_ENV || "development")
+    }),
+    copy({
+      targets: {
+        "src/assets": "build/assets"
+      }
     }),
     (process.env.NODE_ENV === "production" && terser({output: {preamble: copyright}})),
     (process.env.NODE_ENV === "devserver" && serve("build")),

@@ -1,0 +1,8 @@
+{
+    "currency": "usd",
+    "rtl": false,
+    "dictionary": {
+        "button-play": "Play",
+        "button-pause": "Pause"
+    }
+}
