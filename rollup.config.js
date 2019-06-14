@@ -44,7 +44,11 @@ export default {
     }),
     copy({
       targets: {
-        "src/assets": "build/assets"
+        "src/assets": "build/assets",
+        "lib": "build/lib",
+        "data": "build/data",
+        "index.html": "build/index.html",
+        "main.js": "build/main.js"
       }
     }),
     (process.env.NODE_ENV === "production" && terser({output: {preamble: copyright}})),
