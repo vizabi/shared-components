@@ -1,5 +1,6 @@
 import BaseComponent from "./base-component.js";
 //import { changeset } from 'vega/build/vega-module.js';
+import { autorun } from "mobx";
 
 export default class VegaBarchart extends BaseComponent {
 
@@ -10,8 +11,9 @@ export default class VegaBarchart extends BaseComponent {
   setup() {
     const spec = {
       "$schema": "https://vega.github.io/schema/vega/v4.0.json",
-      "width": 800,
+      "width": this.services.layout.layoutModel.width,
       "height": 400,
+      "autosize": {"type":"fit","resize":"true"},
       "padding": 0,
           
       "data": [
@@ -99,18 +101,28 @@ export default class VegaBarchart extends BaseComponent {
     };
           
     this.chart = null;
-          
+
     vegaEmbed(".vzb-bc", spec)
     // result.view provides access to the Vega View API
       .then(result => this.chart = result.view)
-      .catch(console.warn);        
+      .catch(console.warn);
   }
 
   draw(data) {
+    this.view.classed("loading", false);
     data.forEach(d => d.x = d[Symbol.for("key")]);
     // Changeset needs to remove everything first, then insert new data
     let chg = vega.changeset().remove(() => true).insert(data);
     // For some reason source_0 is the default dataset name
     this.chart.change("table", chg).run();
+  }
+  
+  resize() {
+    const width = this.services.layout.layoutModel.width;
+    if(this.chart) this.chart.width(width).run();
+  }
+
+  loading() {
+    this.view.classed("loading", true);
   }
 }  

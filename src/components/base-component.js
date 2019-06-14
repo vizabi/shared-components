@@ -1,11 +1,11 @@
 import { autorun, decorate, observable } from "mobx";
+import { STATUS } from "../utils.js";
 
-const STATE = {INIT: "init", PENDING: "pending", READY: "ready", ERROR: "error"};
 
 class BaseComponent {
 
   constructor({placeholder, model, services, subcomponents, template}){
-    this.state = STATE.INIT;
+    this.status = STATUS.INIT;
     this.template = this.template || template || "";
     this.subcomponents = this.subcomponents || subcomponents || [];
     this.services = this.services || services || {};
@@ -30,32 +30,36 @@ class BaseComponent {
     this.setup();
     autorun(this.render.bind(this));
     autorun(this.updateState.bind(this));
+    autorun(this.resize.bind(this));
   }
 
   setup() {}
 
   updateState(){
-    const dependencies = Object.values(this.services).concat(this.children);
-    if (dependencies.every(dep => dep.state == STATE.READY)) {
-      this.state = STATE.READY;
-    } else if (dependencies.find(dep => dep.state == STATE.ERROR)) {
-      this.state = STATE.ERROR;
-    } else {
-      this.state = STATE.PENDING;
-    }
+    const dependencies = Object.values(this.services).map((m)=>m.status)
+      .concat(this.children.map((m)=>m.status))
+      .concat(this.model.state);
+    
+    if (dependencies.every(dep => dep === STATUS.READY))
+      this.status = STATUS.READY;
+    else if (dependencies.find(dep => dep === STATUS.ERROR))
+      this.status = STATUS.ERROR;
+    else
+      this.status = STATUS.PENDING;
   }
 
   render() {
-    if(this.model) this.model.on("fulfilled", this.draw.bind(this));
-    //this.model.on("pending", this.loading.bind(this));
-    //this.model.on("rejected", this.error.bind(this));
+    if(this.status === STATUS.READY) this.draw(this.model.dataArray);
+    if(this.status === STATUS.PENDING) this.loading();
+    if(this.status === STATUS.ERROR) this.error();
   }
 
   draw() {}
   loading() {}
   error() {}
+  resize() {}
 }
 
 export default decorate(BaseComponent, {
-  "state": observable
+  "status": observable
 });
