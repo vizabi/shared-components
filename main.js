@@ -22,17 +22,12 @@ var initialMarkerConfig = {
   encoding: {
     "x": {
       data: {
-        concept: 'time'
+        concept: 'population_total'
       }
     },
     "y": {
       data: {
         concept: 'country'
-      }
-    },
-    "color": {
-      data: {
-        concept: 'population_total'
       }
     },
     frame: {

@@ -88,11 +88,11 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   draw(data) {
     this.view.classed("loading", false);
-    data.forEach(d => d.x = d[Symbol.for("key")]);
+    /*data.forEach(d => d.x = d[Symbol.for("key")]);
     // Changeset needs to remove everything first, then insert new data
     let chg = vega.changeset().remove(() => true).insert(data);
     // For some reason source_0 is the default dataset name
-    this.chart.change("table", chg).run();
+    this.chart.change("table", chg).run();*/
   }
 
   resize() {
