@@ -1,0 +1,214 @@
+@import "../../node_modules/bourbon/core/bourbon";
+@import "../styles/vizabi-old/_mixins";
+@import "../styles/vizabi-old/_common";
+@import "../styles/vizabi-old/_chart";
+
+.vzb-tool {
+  $vzb-br-year-size: 16em;
+
+  &.vzb-small {
+    .vzb-barrankchart {
+      .vzb-br-total {
+        font-size: $vzb-font-size-small;
+      }
+
+      .vzb-br-tooltip,
+      .vzb-br-rank,
+      .vzb-br-label {
+        font-size: $vzb-font-size-small;
+      }
+
+      .vzb-br-value {
+        font-size: $vzb-font-size-tiny;
+      }
+
+      .vzb-br-title {
+
+        font-size: $vzb-font-size-small;
+      }
+    }
+  }
+
+  &.vzb-medium {
+    .vzb-barrankchart {
+      .vzb-br-total {
+        font-size: $vzb-font-size-medium;
+      }
+
+      .vzb-br-tooltip,
+      .vzb-br-rank,
+      .vzb-br-label {
+        font-size: $vzb-font-size-medium;
+      }
+
+      .vzb-br-value {
+        font-size: $vzb-font-size-small;
+      }
+
+      .vzb-br-title {
+        font-size: $vzb-font-size-medium;
+      }
+    }
+  }
+
+  &.vzb-large {
+    .vzb-barrankchart {
+      .vzb-br-total {
+        font-size: $vzb-font-size-large;
+      }
+
+      .vzb-br-tooltip,
+      .vzb-br-rank,
+      .vzb-br-label {
+        font-size: $vzb-font-size-large;
+      }
+
+      .vzb-br-value {
+        font-size: $vzb-font-size-small;
+      }
+
+      .vzb-br-title {
+        font-size: $vzb-font-size-large;
+      }
+    }
+  }
+
+  &.vzb-presentation {
+    &.vzb-medium {
+      .vzb-barrankchart {
+        .vzb-br-total {
+          font-size: $vzb-font-size-large;
+        }
+
+        .vzb-br-tooltip,
+        .vzb-br-rank,
+        .vzb-br-label {
+          font-size: $vzb-font-size-large;
+        }
+
+        .vzb-br-value {
+          font-size: $vzb-font-size-medium;
+        }
+
+        .vzb-br-title {
+          font-size: $vzb-font-size-large;
+        }
+      }
+    }
+
+    &.vzb-large {
+      .vzb-barrankchart {
+        .vzb-br-total {
+          font-size: $vzb-font-size-larger;
+        }
+
+        .vzb-br-tooltip,
+        .vzb-br-rank,
+        .vzb-br-label {
+          font-size: $vzb-font-size-larger;
+        }
+
+        .vzb-br-value {
+          font-size: $vzb-font-size-medium;
+        }
+
+        .vzb-br-title {
+          font-size: $vzb-font-size-larger;
+        }
+      }
+    }
+  }
+
+  .vzb-barrankchart {
+    @extend %vzb-chart-wrapper;
+
+    .vzb-br-axis-info {
+      @extend %vzb-chart-info;
+    }
+
+    .vzb-br-header {
+      width: 100%;
+      display: block; // svg is standard inline
+
+      .vzb-br-title {
+        @extend %vzb-chart-axis-title;
+      }
+      .vzb-br-total {
+        fill: $vzb-color-black;
+      }
+    }
+
+    .vzb-br-barsviewport {
+      margin-right: 5px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .vzb-br-bars-svg {
+      width: 100%;
+
+      .vzb-br-year {
+        @include opacity(.3);
+        font-size: $vzb-br-year-size;
+        fill: $vzb-color-grey;
+        text-anchor: middle;
+        -webkit-touch-callout: none;
+        user-select: none;
+      }
+
+      .vzb-dimmed {
+        > .vzb-br-bar {
+          opacity: .5;
+          &.vzb-hovered {
+            opacity: 1;
+          }
+        }
+      }
+      .vzb-dimmed-selected {
+        > .vzb-br-bar {
+          opacity: .5;
+          &.vzb-hovered {
+            opacity: .8;
+          }
+          &.vzb-selected {
+            opacity: 1;
+          }
+        }
+      }
+
+      .vzb-br-rank {
+        font-weight: bolder;
+      }
+
+    }
+    .vzb-data-warning-svg {
+      width: 100%;
+      .vzb-data-warning-missed-positions {
+        text-anchor: end;
+      }
+    }
+
+    .vzb-br-tooltip-svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .vzb-br-tooltip {
+      @extend %vzb-chart-tooltip;
+      @include rtl {
+        text {
+          direction: rtl;
+          text-anchor: start;
+          unicode-bidi: embed;
+        }
+      }
+      text {
+        fill: $vzb-color-accent-orange;
+      }
+    }
+  }
+}

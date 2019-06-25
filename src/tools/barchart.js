@@ -18,12 +18,12 @@ export default class BarChart extends BaseComponent {
       placeholder: ".vzb-timeslider",
       //model: this.model
     }];
-  
+
     config.template = `
       <div class="vzb-chart"></div>
       <div class="vzb-timeslider"></div>
     `;
-  
+
     config.services = {
       locale: new LocaleService(),
       layout: new LayoutService()

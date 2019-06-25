@@ -16,17 +16,17 @@ class BaseComponent {
     this.viewRaw = this.view.node();
     this.children = [];
     this.parent = null;
-    
+
     this.subcomponents.forEach( comp => {
       const subcomponent = new comp.type({
-        placeholder: comp.placeholder, 
-        model: comp.model || this.model, 
+        placeholder: comp.placeholder,
+        model: comp.model || this.model,
         services: this.services
       });
       subcomponent.parent = this;
       this.children.push(subcomponent);
     });
-        
+
     this.setup();
     autorun(this.render.bind(this));
     autorun(this.updateState.bind(this));
@@ -39,7 +39,7 @@ class BaseComponent {
     const dependencies = Object.values(this.services).map((m)=>m.status)
       .concat(this.children.map((m)=>m.status))
       .concat(this.model.state);
-    
+
     if (dependencies.every(dep => dep === STATUS.READY))
       this.status = STATUS.READY;
     else if (dependencies.find(dep => dep === STATUS.ERROR))
