@@ -7,11 +7,73 @@ import * as utils from "./legacy/base/utils";
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
 
+const profiles = {
+  small: {
+    margin: {top: 60, right: 20, left: 5, bottom: 20},
+    headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
+    infoElHeight: 16,
+    infoElMargin: 5,
+    barHeight: 18,
+    barMargin: 3,
+    barLabelMargin: 5,
+    barValueMargin: 5,
+    barRankMargin: 6,
+    scrollMargin: 25,
+  },
+  medium: {
+    margin: {top: 60, right: 25, left: 5, bottom: 20},
+    headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
+    infoElHeight: 16,
+    infoElMargin: 5,
+    barHeight: 21,
+    barMargin: 3,
+    barLabelMargin: 5,
+    barValueMargin: 5,
+    barRankMargin: 10,
+    scrollMargin: 30,
+  },
+  large: {
+    margin: {top: 60, right: 30, left: 5, bottom: 20},
+    headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
+    infoElHeight: 16,
+    infoElMargin: 5,
+    barHeight: 28,
+    barMargin: 4,
+    barLabelMargin: 5,
+    barValueMargin: 5,
+    barRankMargin: 10,
+    scrollMargin: 30,
+  }
+};
+
+const presentationProfileChanges = {
+  medium: {
+    margin: {top: 60, right: 30, left: 10, bottom: 40},
+    headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
+    infoElHeight: 25,
+    infoElMargin: 10,
+    barHeight: 25,
+    barMargin: 6
+  },
+  large: {
+    margin: {top: 60, right: 35, left: 10, bottom: 40},
+    headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
+    infoElHeight: 16,
+    infoElMargin: 10,
+    barHeight: 30,
+    barMargin: 6
+  }
+};
+
 export default class VizabiBarrankchart extends BaseComponent {
   _entities = {};
 
   constructor(config) {
     config.template = `
+<div class="vzbp-viewer vzb-placeholder">
+<div class="vzb-tool vzb-tool-barrankchart vzb-small vzb-portrait vzb-dialog-expand-true">
+<div class="vzb-tool-stage">
+<div class="vzb-tool-viz">
 <div class="vzb-barrankchart">
   <svg class="vzb-br-header">
     <g class="vzb-br-title">
@@ -55,37 +117,49 @@ export default class VizabiBarrankchart extends BaseComponent {
     </defs>
 </svg>
 </div>
+</div>
+</div>
+</div>
+</div>
 `;
     super(config);
   }
 
   /*
-      this.KEYS = this.model.data.space.filter(v => v != 'time');
+    this.KEYS = this.model.data.space.filter(v => v != 'time');
     this.markerKeys = this.model.encoding.get('y').data.domain.map(v => ({[this.model.encoding.get('y').data.concept]: v}));
    */
 
   setup() {
-    this.element = d3.select(this.element);
-
-    this.header = this.element.select('.vzb-br-header');
-    this.infoEl = this.element.select('.vzb-br-axis-info');
-    this.barViewport = this.element.select('.vzb-br-barsviewport');
-    this.barSvg = this.element.select('.vzb-br-bars-svg');
-    this.barContainer = this.element.select('.vzb-br-bars');
-    this.dataWarningEl = this.element.select('.vzb-data-warning');
+    this.element = d3.select(".vzb-tool");
+    this.header = this.element.select(".vzb-br-header");
+    this.infoEl = this.element.select(".vzb-br-axis-info");
+    this.barViewport = this.element.select(".vzb-br-barsviewport");
+    this.barSvg = this.element.select(".vzb-br-bars-svg");
+    this.barContainer = this.element.select(".vzb-br-bars");
+    this.dataWarningEl = this.element.select(".vzb-data-warning");
     this.tooltipSvg = this.element.select(".vzb-br-tooltip-svg");
     this.tooltip = this.element.select(".vzb-br-tooltip");
     this.forecastOverlay = this.element.select(".vzb-br-forecastoverlay");
-    this.missedPositionsWarningEl = this.element.select('.vzb-data-warning-missed-positions');
+    this.missedPositionsWarningEl = this.element.select(".vzb-data-warning-missed-positions");
+
+    this.activeProfile = profiles.medium;// this.getActiveProfile(profiles, presentationProfileChanges);
+
+    const {
+      margin,
+      headerMargin,
+      infoElHeight,
+      infoElMargin,
+    } = this.activeProfile;
 
     this.barViewport
-      .style("height", `300px`);
+      .style('height', `${this.height - margin.bottom - margin.top}px`);
     this.nullValuesCount = 0;
 
     // ???
-    this.barContainer.classed('vzb-dimmed-selected', false);
-    this.barContainer.selectAll('.vzb-br-bar.vzb-selected').classed('vzb-selected', false);
-
+    this.barContainer.classed("vzb-dimmed-selected", false);
+    this.barContainer.selectAll(".vzb-br-bar.vzb-selected").classed("vzb-selected", false);
+    this.cScale = d3.scaleOrdinal(d3.schemeCategory10);
   }
 
   draw(data) {
@@ -108,7 +182,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     const KEY = this.KEY;
     this._createAndDeleteBars(
       this.barContainer.selectAll(".vzb-br-bar")
-        .data(this.sortedEntities, d => d[KEY])
+        .data(this.sortedEntities, d => d[Symbol.for("key")])
     );
 
     this.drawProc(true);
@@ -118,7 +192,10 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   resize() {
     const width = this.services.layout.layoutModel.width;
+    const height = this.services.layout.layoutModel.height;
     // if(this.chart) this.chart.width(width).run();
+    console.log(width, height);
+    this.element.width(width).height(height).run();
   }
 
   loading() {
@@ -196,7 +273,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     updatedBars.exit().remove();
 
     // make the groups for the entities which were not drawn yet (.data.enter() does this)
-    updatedBars = (localeChanged ? updatedBars : updatedBars.enter().append('g'))
+    updatedBars = (localeChanged ? updatedBars : updatedBars.enter().append("g"))
       .each(function (d) {
         const self = d3.select(this);
         const label = d.label;
@@ -219,36 +296,36 @@ export default class VizabiBarrankchart extends BaseComponent {
           barLabel,
         });
 
-        // if (!localeChanged) {
-        self
-          .attr("class", "vzb-br-bar")
-          // .classed('vzb-selected', _this.model.marker.isSelected(d.entity))
-          .attr('id', `vzb-br-bar-${utils.getKey(d.entity, KEYS)}`)
-          // .on('mousemove', d => _this.model.marker.highlightMarker(d.entity))
-          // .on('mouseout', () => _this.model.marker.clearHighlighted())
-          .on("click", d => {
-            // _this.model.marker.selectMarker(d.entity);
+        if (!localeChanged) {
+          self
+            .attr("class", "vzb-br-bar")
+            // .classed('vzb-selected', _this.model.marker.isSelected(d.entity))
+            .attr("id", `vzb-br-bar-${utils.getKey(d.entity, KEYS)}`)
+            // .on('mousemove', d => _this.model.marker.highlightMarker(d.entity))
+            // .on('mouseout', () => _this.model.marker.clearHighlighted())
+            .on("click", d => {
+              // _this.model.marker.selectMarker(d.entity);
+            });
+
+          const barRect = self.append("rect")
+            .attr("stroke", "transparent");
+
+          const barValue = self.append("text")
+            .attr("class", "vzb-br-value")
+            .attr("dy", ".325em");
+
+          const barRank = self.append("text")
+            .attr("class", "vzb-br-rank")
+            .attr("dy", ".325em");
+
+          Object.assign(d, {
+            self,
+            isNew: true,
+            barRect,
+            barValue,
+            barRank
           });
-
-        const barRect = self.append("rect")
-          .attr("stroke", "transparent");
-
-        const barValue = self.append("text")
-          .attr("class", "vzb-br-value")
-          .attr("dy", ".325em");
-
-        const barRank = self.append("text")
-          .attr("class", "vzb-br-rank")
-          .attr("dy", ".325em");
-
-        Object.assign(d, {
-          self,
-          isNew: true,
-          barRect,
-          barValue,
-          barRank
-        });
-        // }
+        }
       })
       .merge(updatedBars);
   }
@@ -259,70 +336,17 @@ export default class VizabiBarrankchart extends BaseComponent {
     // const duration = this.model.time.playing && (this.time - this.time_1 > 0) ? this.model.time.delayAnimations : 0;
     this._updateForecastOverlay();
     const duration = 0;
-    if (this.drawAxes(duration, force)) return;
+    // if (this.drawAxes(duration, force)) return;
+    this.drawAxes(duration, force);
     this.drawData(duration, force);
   }
 
   drawAxes(duration = 0) {
-    const profiles = {
-      small: {
-        margin: {top: 60, right: 20, left: 5, bottom: 20},
-        headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
-        infoElHeight: 16,
-        infoElMargin: 5,
-        barHeight: 18,
-        barMargin: 3,
-        barLabelMargin: 5,
-        barValueMargin: 5,
-        barRankMargin: 6,
-        scrollMargin: 25,
-      },
-      medium: {
-        margin: {top: 60, right: 25, left: 5, bottom: 20},
-        headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
-        infoElHeight: 16,
-        infoElMargin: 5,
-        barHeight: 21,
-        barMargin: 3,
-        barLabelMargin: 5,
-        barValueMargin: 5,
-        barRankMargin: 10,
-        scrollMargin: 30,
-      },
-      large: {
-        margin: {top: 60, right: 30, left: 5, bottom: 20},
-        headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
-        infoElHeight: 16,
-        infoElMargin: 5,
-        barHeight: 28,
-        barMargin: 4,
-        barLabelMargin: 5,
-        barValueMargin: 5,
-        barRankMargin: 10,
-        scrollMargin: 30,
-      }
-    };
+    // this.height = parseInt(this.element.style('height'), 10) || 0;
+    // this.width = parseInt(this.element.style('width'), 10) || 0;
 
-    const presentationProfileChanges = {
-      medium: {
-        margin: {top: 60, right: 30, left: 10, bottom: 40},
-        headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
-        infoElHeight: 25,
-        infoElMargin: 10,
-        barHeight: 25,
-        barMargin: 6
-      },
-      large: {
-        margin: {top: 60, right: 35, left: 10, bottom: 40},
-        headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
-        infoElHeight: 16,
-        infoElMargin: 10,
-        barHeight: 30,
-        barMargin: 6
-      }
-    };
-
-    this.activeProfile = profiles.medium;// this.getActiveProfile(profiles, presentationProfileChanges);
+    this.width = this.services.layout.layoutModel.width;
+    this.height = this.services.layout.layoutModel.height;
 
     const {
       margin,
@@ -331,19 +355,14 @@ export default class VizabiBarrankchart extends BaseComponent {
       infoElMargin,
     } = this.activeProfile;
 
-    // this.height = parseInt(this.element.style('height'), 10) || 0;
-    // this.width = parseInt(this.element.style('width'), 10) || 0;
-    this.height = 600;
-    this.width = 800;
-
     if (!this.height || !this.width) return utils.warn("Dialog resize() abort: vizabi container is too little or has display:none");
 
     this.barViewport
       .style("height", `${this.height - margin.bottom - margin.top}px`);
 
     // header
-    // this.header.attr('height', margin.top);
-    // const headerTitle = this.header.select('.vzb-br-title');
+    this.header.attr('height', margin.top);
+    const headerTitle = this.header.select('.vzb-br-title');
 
     // change header titles for new data
     // const { name, unit } = this.model.marker.axis_x.getConceptprops();
@@ -351,7 +370,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     const name = "Population, total";
     const unit = "";
 
-    /*const headerTitleText = headerTitle
+    const headerTitleText = headerTitle
       .select('text');
 
     if (unit) {
@@ -427,20 +446,15 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.missedPositionsWarningEl
       .attr('transform', `translate(${this.width - margin.right - warningBBox.width - warningBBox.height * 3}, ${warningBBox.height})`);
 
-    this._updateDoubtOpacity();*/
+    // this._updateDoubtOpacity();
   }
 
   drawData(duration = 0, force = false) {
     const KEY = this.KEY;
     // update the shown bars for new data-set
-    // TODO: fix it!
-    console.log(this.sortedEntities, this.barContainer.selectAll(".vzb-br-bar"));
     this._createAndDeleteBars(
       this.barContainer.selectAll(".vzb-br-bar")
-        .data(this.sortedEntities, d => {
-          console.log('77777', d);
-          return d[KEY];
-        })
+        .data(this.sortedEntities, d => d[KEY])
     );
 
 
@@ -464,7 +478,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     const presentationModeChanged = false;
 
     this._resizeSvg();
-    /*this._scroll(duration);*/
+    this._scroll();
     this._drawColors();
 
 
@@ -498,7 +512,8 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     const shift = hasNegativeValues ? rightEdge : this._getWidestLabelWidth();
 
-    const barWidth = (value) => this.xScale(value);
+    const xAxis = d3.axisBottom();
+    const barWidth = (value) => xAxis.scale(value); // this.xScale(value);
     const isLtrValue = value => ltr ? value >= 0 : value > 0;
 
     const labelAnchor = value => isLtrValue(value) ? "end" : "start";
@@ -515,9 +530,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.sortedEntities.forEach((bar) => {
       const {value} = bar;
 
-      // console.log("=======", bar, bar.barLabel);
-
-      /*if (force || presentationModeChanged || bar.isNew || bar.changedValue) {
+      if (force || presentationModeChanged || bar.isNew || bar.changedValue) {
         bar.barLabel
           .attr("x", labelX(value))
           .attr("y", this.activeProfile.barHeight / 2)
@@ -537,14 +550,15 @@ export default class VizabiBarrankchart extends BaseComponent {
         bar.barRank
           .text((d, i) => value || value === 0 ? "#" + d.rank : "")
           .attr("y", this.activeProfile.barHeight / 2);
-      }*/
+      }
 
-      /*if (force || bar.changedWidth || presentationModeChanged) {
+      if (force || bar.changedWidth || presentationModeChanged) {
         const width = Math.max(0, value && barWidth(Math.abs(value))) || 0;
 
         if (force || bar.changedValue) {
-          bar.barValue
-            .text(this._formatter(value) || this.translator("hints/nodata"));
+          /*bar.barValue
+            .text(this._formatter(value) || this.translator("hints/nodata"));*/
+          bar.barValue.text(`${value}`);
           bar.barValueWidth = barValueMargin + bar.barValue.node().getBBox().width;
         }
 
@@ -568,18 +582,18 @@ export default class VizabiBarrankchart extends BaseComponent {
           .attr("transform", `translate(0, ${this._getBarPosition(bar.index)})`);
         bar.barRank
           .text((d, i) => value || value === 0 ? "#" + (d.rank) : "");
-      }*/
+      }
     });
   }
 
   _resizeSvg() {
-    const { barHeight, barMargin } = this.activeProfile;
-    this.barSvg.attr('height', `${(barHeight + barMargin) * this.sortedEntities.length}px`);
+    const {barHeight, barMargin} = this.activeProfile;
+    this.barSvg.attr("height", `${(barHeight + barMargin) * this.sortedEntities.length}px`);
   }
 
 
   _getWidestLabelWidth(big = false) {
-    /*const widthKey = big ? 'labelWidth' : 'labelSmallWidth';
+    const widthKey = big ? 'labelWidth' : 'labelSmallWidth';
     const labelKey = big ? 'label' : 'labelSmall';
 
     const bar = this.sortedEntities
@@ -589,30 +603,33 @@ export default class VizabiBarrankchart extends BaseComponent {
     const width = bar.barLabel.text(bar[labelKey]).node().getBBox().width;
     bar.barLabel.text(text);
 
-    return width;*/
-    return 50;
+    return width;
   }
 
   _drawColors() {
     const _this = this;
     const dataKeys = this.dataKeys;
 
-    this.barContainer.selectAll('.vzb-br-bar>rect')
-      .each(function({ entity }) {
+    this.barContainer.selectAll(".vzb-br-bar>rect")
+      .each(function ({entity}) {
         const rect = d3.select(this);
 
-        const colorValue = _this.values.color[utils.getKey(entity, dataKeys.color)];
+        // const colorValue = _this.values.color[utils.getKey(entity, dataKeys.color)];
+        const colorValue = "asia";
         const isColorValid = colorValue || colorValue === 0;
 
-        const fillColor = isColorValid ? String(_this._getColor(colorValue)) : COLOR_WHITEISH;
-        const strokeColor = isColorValid ? 'transparent' : COLOR_BLACKISH;
+        // const fillColor = isColorValid ? String(_this._getColor(colorValue)) : COLOR_WHITEISH;
+        const fillColor = COLOR_WHITEISH;
+        const strokeColor = isColorValid ? "transparent" : COLOR_BLACKISH;
 
-        rect.style('fill') !== fillColor && rect.style('fill', fillColor);
-        rect.style('stroke') !== strokeColor && rect.style('stroke', strokeColor);
+        rect.style("fill") !== fillColor && rect.style("fill", fillColor);
+        rect.style("stroke") !== strokeColor && rect.style("stroke", strokeColor);
       });
 
-    this.barContainer.selectAll('.vzb-br-bar>text')
-      .style('fill', ({ entity }) => this._getDarkerColor(this.values.color[utils.getKey(entity, dataKeys.color)] || null));
+    /*this.barContainer.selectAll('.vzb-br-bar>text')
+      .style('fill', ({ entity }) => this._getDarkerColor(this.values.color[utils.getKey(entity, dataKeys.color)] || null));*/
+    this.barContainer.selectAll(".vzb-br-bar>text")
+      .style("fill", ({entity}) => this._getDarkerColor("asia"));
   }
 
   _getColor(value) {
@@ -625,5 +642,24 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   _updateForecastOverlay() {
     this.forecastOverlay.classed("vzb-hidden", false);
+  }
+
+  _getBarPosition(i) {
+    return (this.activeProfile.barHeight + this.activeProfile.barMargin) * i;
+  }
+
+  _scroll(duration = 0) {
+    const follow = this.barContainer.select('.vzb-selected');
+    if (!follow.empty()) {
+      const d = follow.datum();
+      const yPos = this._getBarPosition(d.index);
+
+      const { margin } = this.activeProfile;
+      const height = this.height - margin.top - margin.bottom;
+
+      const scrollTo = yPos - (height + this.activeProfile.barHeight) / 2;
+      this.barViewport.transition().duration(duration)
+        .tween('scrollfor' + d.entity, this._scrollTopTween(scrollTo));
+    }
   }
 }
