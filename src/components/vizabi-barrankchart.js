@@ -70,8 +70,7 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   constructor(config) {
     config.template = `
-<div class="vzbp-viewer vzb-placeholder">
-<div class="vzb-tool vzb-tool-barrankchart vzb-small vzb-portrait vzb-dialog-expand-true">
+<div class="vzb-tool vzb-tool-barrankchart vzb-portrait vzb-medium">
 <div class="vzb-tool-stage">
 <div class="vzb-tool-viz">
 <div class="vzb-barrankchart">
@@ -120,7 +119,6 @@ export default class VizabiBarrankchart extends BaseComponent {
 </div>
 </div>
 </div>
-</div>
 `;
     super(config);
   }
@@ -131,7 +129,7 @@ export default class VizabiBarrankchart extends BaseComponent {
    */
 
   setup() {
-    this.element = d3.select(".vzb-tool");
+    this.element = d3.select(".vzb-barrankchart");
     this.header = this.element.select(".vzb-br-header");
     this.infoEl = this.element.select(".vzb-br-axis-info");
     this.barViewport = this.element.select(".vzb-br-barsviewport");
@@ -163,6 +161,12 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   draw(data) {
+    console.log(data);
+    // TODO: refactor me!
+    this.countryToRegion = {};
+    for (const record of data) {
+      this.countryToRegion[record.country] = record.color;
+    }
     this.KEYS = this.model.data.space.filter(v => v != "time");
     this.KEY = this.KEYS.join(",");
 
@@ -191,11 +195,9 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   resize() {
-    const width = this.services.layout.layoutModel.width;
-    const height = this.services.layout.layoutModel.height;
+    // const width = this.services.layout.layoutModel.width;
+    // const height = this.services.layout.layoutModel.height;
     // if(this.chart) this.chart.width(width).run();
-    console.log(width, height);
-    this.element.width(width).height(height).run();
   }
 
   loading() {
@@ -346,7 +348,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     // this.width = parseInt(this.element.style('width'), 10) || 0;
 
     this.width = this.services.layout.layoutModel.width;
-    this.height = this.services.layout.layoutModel.height;
+    this.height = 400; // this.services.layout.layoutModel.height;
 
     const {
       margin,
@@ -412,13 +414,15 @@ export default class VizabiBarrankchart extends BaseComponent {
       headerTotal.select('text')
         .transition('text')
         .delay(duration)
-        .text(this.model.time.formatDate(this.time));
+        // .text(this.model.time.formatDate(this.time));
+        .text(`${this.time}`);
     } else {
       headerTotal.select('text')
         .interrupt()
-        .text(this.model.time.formatDate(this.time));
+        // .text(this.model.time.formatDate(this.time));
+        .text(`${this.time}`);
     }
-    headerTotal.style('opacity', Number(this.getLayoutProfile() !== 'large'));
+    // headerTotal.style('opacity', Number(this.getLayoutProfile() !== 'large'));
 
     const headerTotalBBox = headerTotal.node().getBBox();
 
@@ -553,7 +557,9 @@ export default class VizabiBarrankchart extends BaseComponent {
       }
 
       if (force || bar.changedWidth || presentationModeChanged) {
-        const width = Math.max(0, value && barWidth(Math.abs(value))) || 0;
+        // TODO: barWidth is an issue!
+        // const width = Math.max(0, value && barWidth(Math.abs(value))) || 0;
+        const width = value / 10000;
 
         if (force || bar.changedValue) {
           /*bar.barValue
@@ -614,22 +620,18 @@ export default class VizabiBarrankchart extends BaseComponent {
       .each(function ({entity}) {
         const rect = d3.select(this);
 
-        // const colorValue = _this.values.color[utils.getKey(entity, dataKeys.color)];
-        const colorValue = "asia";
+        const colorValue = _this.countryToRegion[utils.getKey(entity, dataKeys.color)];
         const isColorValid = colorValue || colorValue === 0;
 
-        // const fillColor = isColorValid ? String(_this._getColor(colorValue)) : COLOR_WHITEISH;
-        const fillColor = COLOR_WHITEISH;
+        const fillColor = isColorValid ? String(_this._getColor(colorValue)) : COLOR_WHITEISH;
         const strokeColor = isColorValid ? "transparent" : COLOR_BLACKISH;
 
         rect.style("fill") !== fillColor && rect.style("fill", fillColor);
         rect.style("stroke") !== strokeColor && rect.style("stroke", strokeColor);
       });
 
-    /*this.barContainer.selectAll('.vzb-br-bar>text')
-      .style('fill', ({ entity }) => this._getDarkerColor(this.values.color[utils.getKey(entity, dataKeys.color)] || null));*/
-    this.barContainer.selectAll(".vzb-br-bar>text")
-      .style("fill", ({entity}) => this._getDarkerColor("asia"));
+    this.barContainer.selectAll('.vzb-br-bar>text')
+      .style('fill', ({ entity }) => this._getDarkerColor(_this.countryToRegion[utils.getKey(entity, dataKeys.color)] || null));
   }
 
   _getColor(value) {

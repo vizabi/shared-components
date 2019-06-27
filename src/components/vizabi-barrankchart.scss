@@ -1,7 +1,7 @@
-@import "../../node_modules/bourbon/core/bourbon";
-@import "../styles/vizabi-old/_mixins";
-@import "../styles/vizabi-old/_common";
-@import "../styles/vizabi-old/_chart";
+@import "../../node_modules/bourbon/core/_bourbon.scss";
+@import "../styles/vizabi-old/_mixins.scss";
+@import "../styles/vizabi-old/_common.scss";
+@import "../styles/vizabi-old/_chart.scss";
 
 .vzb-tool {
   $vzb-br-year-size: 16em;

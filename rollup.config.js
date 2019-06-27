@@ -48,14 +48,15 @@ export default {
         "lib": "build/lib",
         "data": "build/data",
         "index.html": "build/index.html",
-        "main.js": "build/main.js"
+        "main.js": "build/main.js",
+        "vizabi.css": "build/vizabi.css"
       }
     }),
     (process.env.NODE_ENV === "production" && terser({output: {preamble: copyright}})),
     (process.env.NODE_ENV === "devserver" && serve("build")),
-    (process.env.NODE_ENV === "devserver" && livereload("build")), 
+    (process.env.NODE_ENV === "devserver" && livereload("build")),
     visualizer({
       filename: "./build/stats.html"
-    }),       
+    }),
   ],
 };

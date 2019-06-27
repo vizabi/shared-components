@@ -30,6 +30,15 @@ var initialMarkerConfig = {
         concept: 'country'
       }
     },
+    "color": {
+      data: {
+        space: ["country"],
+        concept: "world_4region"
+      },
+      scale: {
+        type: "ordinal"
+      }
+    },
     frame: {
       modelType: "frame",
       data: {
