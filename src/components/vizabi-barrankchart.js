@@ -493,8 +493,10 @@ export default class VizabiBarrankchart extends BaseComponent {
     const ltr = Math.abs(limits.max) >= Math.abs(limits.min);
     const hasNegativeValues = ltr ? limits.min < 0 : limits.max > 0;*/
 
-    const hasNegativeValues = true;
+    const hasNegativeValues = false;
     const ltr = false;
+
+    console.log();
 
     const rightEdge = (
       this.width
@@ -559,7 +561,7 @@ export default class VizabiBarrankchart extends BaseComponent {
       if (force || bar.changedWidth || presentationModeChanged) {
         // TODO: barWidth is an issue!
         // const width = Math.max(0, value && barWidth(Math.abs(value))) || 0;
-        const width = value / 10000;
+        const width = value / 950000;
 
         if (force || bar.changedValue) {
           /*bar.barValue
