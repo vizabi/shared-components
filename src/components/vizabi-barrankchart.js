@@ -155,13 +155,12 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.nullValuesCount = 0;
 
     // ???
-    this.barContainer.classed("vzb-dimmed-selected", false);
-    this.barContainer.selectAll(".vzb-br-bar.vzb-selected").classed("vzb-selected", false);
+    // this.barContainer.classed("vzb-dimmed-selected", false);
+    // this.barContainer.selectAll(".vzb-br-bar.vzb-selected").classed("vzb-selected", false);
     this.cScale = d3.scaleOrdinal(d3.schemeCategory10);
   }
 
   draw(data) {
-    console.log(data);
     // TODO: refactor me!
     this.countryToRegion = {};
     for (const record of data) {
@@ -182,12 +181,6 @@ export default class VizabiBarrankchart extends BaseComponent {
       xAxisValues[record.y] = record.x;
     }
     this.sortedEntities = this._sortByIndicator(xAxisValues, this.dataKeys.axis_x);
-
-    const KEY = this.KEY;
-    this._createAndDeleteBars(
-      this.barContainer.selectAll(".vzb-br-bar")
-        .data(this.sortedEntities, d => d[Symbol.for("key")])
-    );
 
     this.drawProc(true);
     // this._updateOpacity();
@@ -275,6 +268,10 @@ export default class VizabiBarrankchart extends BaseComponent {
     updatedBars.exit().remove();
 
     // make the groups for the entities which were not drawn yet (.data.enter() does this)
+
+    // TODO: !!!
+    console.log(222, updatedBars.enter());
+
     updatedBars = (localeChanged ? updatedBars : updatedBars.enter().append("g"))
       .each(function (d) {
         const self = d3.select(this);
@@ -327,6 +324,8 @@ export default class VizabiBarrankchart extends BaseComponent {
             barValue,
             barRank
           });
+
+          // console.log(888, d);
         }
       })
       .merge(updatedBars);
@@ -340,7 +339,8 @@ export default class VizabiBarrankchart extends BaseComponent {
     const duration = 0;
     // if (this.drawAxes(duration, force)) return;
     this.drawAxes(duration, force);
-    this.drawData(duration, force);
+    // this.drawData(duration, force);
+    this.drawData(duration, true);
   }
 
   drawAxes(duration = 0) {
@@ -456,6 +456,9 @@ export default class VizabiBarrankchart extends BaseComponent {
   drawData(duration = 0, force = false) {
     const KEY = this.KEY;
     // update the shown bars for new data-set
+
+    console.log('drawData', this.barContainer.selectAll(".vzb-br-bar"), this.sortedEntities);
+
     this._createAndDeleteBars(
       this.barContainer.selectAll(".vzb-br-bar")
         .data(this.sortedEntities, d => d[KEY])
@@ -495,8 +498,6 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     const hasNegativeValues = false;
     const ltr = false;
-
-    console.log();
 
     const rightEdge = (
       this.width

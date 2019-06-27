@@ -20,7 +20,7 @@ export default class Barrankchart extends BaseComponent {
     }];
 
     config.template = `
-      <div class="vzbp-viewer vzb-placeholder" style="width: 1200px; height: 600px; cursor: default;"></div>
+      <div class="vzbp-viewer vzb-placeholder" style="width: 1200px; height: 300px; cursor: default;"></div>
       <div class="vzb-timeslider"></div>
     `;
 
