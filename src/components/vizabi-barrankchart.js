@@ -2,6 +2,7 @@ import BaseComponent from "./base-component.js";
 import {autorun} from "mobx";
 import "./vizabi-barrankchart.scss";
 import * as utils from "./legacy/base/utils";
+import {STATUS} from "../utils";
 // import axisWithLabelPicker from "./legacy/helpers/d3.axisWithLabelPicker";
 
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
@@ -191,6 +192,12 @@ export default class VizabiBarrankchart extends BaseComponent {
     // const width = this.services.layout.layoutModel.width;
     // const height = this.services.layout.layoutModel.height;
     // if(this.chart) this.chart.width(width).run();
+    if(this.status === STATUS.READY){
+      this.drawProc(true);
+      // this._updateOpacity();
+      this._drawColors();
+
+    }
   }
 
   loading() {
@@ -332,8 +339,8 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   drawProc(force = false) {
-    // this.time_1 = this.time == null ? this.model.time.value : this.time;
-    // this.time = this.model.time.value;
+    this.time_1 = this.time == null ? this.model.encoding.get('frame').value : this.time;
+    this.time = this.model.encoding.get('frame').value;
     // const duration = this.model.time.playing && (this.time - this.time_1 > 0) ? this.model.time.delayAnimations : 0;
     this._updateForecastOverlay();
     const duration = 0;
