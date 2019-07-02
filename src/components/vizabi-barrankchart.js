@@ -68,6 +68,7 @@ const presentationProfileChanges = {
 
 export default class VizabiBarrankchart extends BaseComponent {
   _entities = {};
+  isFirstUsage = false;
 
   constructor(config) {
     config.template = `
@@ -250,10 +251,10 @@ export default class VizabiBarrankchart extends BaseComponent {
         }));
   }
 
-  _createAndDeleteBars(updatedBars) {
-    const _this = this;
+  _createAndDeleteBars(_updatedBars) {
+    // const _this = this;
     const KEYS = this.KEYS;
-    const dataKeys = this.dataKeys;
+    // const dataKeys = this.dataKeys;
 
     const [entity] = this.sortedEntities;
     /*if (!this._entityLabels[entity.entity]) {
@@ -271,16 +272,14 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     const localeChanged = false;
 
+    // make the groups for the entities which were not drawn yet (.data.enter() does this)
+
+    const updatedBars = !this.isFirstUsage ? _updatedBars.enter().append("g") : _updatedBars;
+
     // remove groups for entities that are gone
     updatedBars.exit().remove();
 
-    // make the groups for the entities which were not drawn yet (.data.enter() does this)
-
-    // TODO: !!!
-    console.log(222, updatedBars.enter());
-
-    updatedBars = (localeChanged ? updatedBars : updatedBars.enter().append("g"))
-      .each(function (d) {
+    const newUpdatedBars = updatedBars.each(function (d) {
         const self = d3.select(this);
         const label = d.label;
         const labelSmall = label.length < 12 ? label : `${label.substring(0, 9)}...`;//…
@@ -331,11 +330,11 @@ export default class VizabiBarrankchart extends BaseComponent {
             barValue,
             barRank
           });
-
-          // console.log(888, d);
         }
-      })
-      .merge(updatedBars);
+      });
+
+    updatedBars.merge(newUpdatedBars);
+    this.isFirstUsage = true;
   }
 
   drawProc(force = false) {
@@ -463,8 +462,6 @@ export default class VizabiBarrankchart extends BaseComponent {
   drawData(duration = 0, force = false) {
     const KEY = this.KEY;
     // update the shown bars for new data-set
-
-    console.log('drawData', this.barContainer.selectAll(".vzb-br-bar"), this.sortedEntities);
 
     this._createAndDeleteBars(
       this.barContainer.selectAll(".vzb-br-bar")
