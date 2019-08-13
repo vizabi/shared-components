@@ -5,8 +5,8 @@ import { STATUS } from "../utils.js";
 const PROFILES = {
   SMALL: {
     description: "small layout profile - a phone usually",
-    min_width: 0,
-    min_height: 0
+    min_width: 1,
+    min_height: 1
   },
   MEDIUM: {
     description: "medium layout profile - a tablet usually",
@@ -25,25 +25,36 @@ class LayoutService extends BaseService {
   setup(){
     this.name = "layout";
     this.status = STATUS.READY;
-    this.layoutModel = {
-      "width": 1,
-      "height": 1,
-      "profile": PROFILES.SMALL
-    };
+    this.width = 1;
+    this.height = 1;
+    this.profile = "SMALL";
     this.resizeHandler();
     window.addEventListener("resize", this.resizeHandler.bind(this));
   }
 
   resizeHandler(){
     action(()=>{
-      const view = d3.select("body").node();
-      this.layoutModel.width = view.clientWidth;
-      this.layoutModel.height = view.clientHeight;
+      const view = d3.select(this.model.placeholder || "body").node();
+      this.width = view.clientWidth;
+      this.height = view.clientHeight;
+      this.profile = this.detectProfile(this.width, this.height);
+      if (!this.profile) console.warn(`
+        Placeholder ${this.model.placeholder || "body"} is too little: ${this.width} x ${this.height} px, 
+        nothing should be rendered
+      `);
     })();
+  }
+  
+  detectProfile(w, h) {
+    let profile = null;
+    Object.keys(PROFILES).forEach(p => {
+      if (h >= PROFILES[p].min_height && w >= PROFILES[p].min_width) profile = p;
+    });
+    return profile;
   }
 }
 
 export default decorate(LayoutService, {
-  "layoutModel": observable,
+  "profile": observable,
   "status": observable
 });

@@ -9,7 +9,7 @@ const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
 
 const profiles = {
-  small: {
+  SMALL: {
     margin: {top: 60, right: 20, left: 5, bottom: 20},
     headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
     infoElHeight: 16,
@@ -21,7 +21,7 @@ const profiles = {
     barRankMargin: 6,
     scrollMargin: 25,
   },
-  medium: {
+  MEDIUM: {
     margin: {top: 60, right: 25, left: 5, bottom: 20},
     headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
     infoElHeight: 16,
@@ -33,7 +33,7 @@ const profiles = {
     barRankMargin: 10,
     scrollMargin: 30,
   },
-  large: {
+  LARGE: {
     margin: {top: 60, right: 30, left: 5, bottom: 20},
     headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
     infoElHeight: 16,
@@ -48,7 +48,7 @@ const profiles = {
 };
 
 const presentationProfileChanges = {
-  medium: {
+  MEDIUM: {
     margin: {top: 60, right: 30, left: 10, bottom: 40},
     headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
     infoElHeight: 25,
@@ -56,7 +56,7 @@ const presentationProfileChanges = {
     barHeight: 25,
     barMargin: 6
   },
-  large: {
+  LARGE: {
     margin: {top: 60, right: 35, left: 10, bottom: 40},
     headerMargin: {top: 10, right: 20, bottom: 20, left: 20},
     infoElHeight: 16,
@@ -143,19 +143,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.forecastOverlay = this.element.select(".vzb-br-forecastoverlay");
     this.missedPositionsWarningEl = this.element.select(".vzb-data-warning-missed-positions");
 
-    this.activeProfile = profiles.medium;// this.getActiveProfile(profiles, presentationProfileChanges);
-
-    const {
-      margin,
-      headerMargin,
-      infoElHeight,
-      infoElMargin,
-    } = this.activeProfile;
-
-    this.barViewport
-      .style("height", `${this.height - margin.bottom - margin.top}px`);
     this.nullValuesCount = 0;
-
     // ???
     // this.barContainer.classed("vzb-dimmed-selected", false);
     // this.barContainer.selectAll(".vzb-br-bar.vzb-selected").classed("vzb-selected", false);
@@ -352,8 +340,10 @@ export default class VizabiBarrankchart extends BaseComponent {
     // this.height = parseInt(this.element.style('height'), 10) || 0;
     // this.width = parseInt(this.element.style('width'), 10) || 0;
 
-    this.width = this.services.layout.layoutModel.width;
-    this.height = 400; // this.services.layout.layoutModel.height;
+    this.width = this.services.layout.width;
+    this.height = this.services.layout.height;
+
+    this.activeProfile = profiles[this.services.layout.profile];// this.getActiveProfile(profiles, presentationProfileChanges);
 
     const {
       margin,
@@ -361,6 +351,12 @@ export default class VizabiBarrankchart extends BaseComponent {
       infoElHeight,
       infoElMargin,
     } = this.activeProfile;
+
+    this.barViewport
+      .style("height", `${this.height - margin.bottom - margin.top}px`);
+   
+
+
 
     if (!this.height || !this.width) return utils.warn("Dialog resize() abort: vizabi container is too little or has display:none");
 

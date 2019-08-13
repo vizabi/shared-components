@@ -20,13 +20,13 @@ export default class Barrankchart extends BaseComponent {
     }];
 
     config.template = `
-      <div class="vzbp-viewer vzb-placeholder" style="width: 1200px; height: 300px; cursor: default;"></div>
+      <div class="vzbp-viewer vzb-placeholder" style="width:100%; height:100%;"></div>
       <div class="vzb-timeslider"></div>
     `;
 
     config.services = {
       locale: new LocaleService(),
-      layout: new LayoutService()
+      layout: new LayoutService(config)
     };
 
     //register locale service in the marker model

@@ -2,7 +2,7 @@ export default class BaseService {
 
   isService() {return true;}
 
-  constructor(model){
+  constructor(model = {}){
     this.model = model;
     this.setup();
   }

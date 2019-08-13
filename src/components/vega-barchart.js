@@ -11,7 +11,7 @@ export default class VegaBarchart extends BaseComponent {
   setup() {
     const spec = {
       "$schema": "https://vega.github.io/schema/vega/v4.0.json",
-      "width": this.services.layout.layoutModel.width,
+      "width": this.services.layout.width,
       "height": 400,
       "autosize": {"type":"fit","resize":"true"},
       "padding": 0,
@@ -118,7 +118,7 @@ export default class VegaBarchart extends BaseComponent {
   }
   
   resize() {
-    const width = this.services.layout.layoutModel.width;
+    const width = this.services.layout.width;
     if(this.chart) this.chart.width(width).run();
   }
 
