@@ -23,7 +23,8 @@ export default class TimeSlider extends BaseComponent {
   }
 
   draw() {
-    this.sliderEL.text(JSON.stringify(this.model.encoding.get("frame").value));
+    const localise = this.services.locale.auto();
+    this.sliderEL.text(localise(this.model.encoding.get("frame").value));
   }
 }  
 

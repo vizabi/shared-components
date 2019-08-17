@@ -11,14 +11,15 @@ class LocaleService extends BaseService {
     this.status = STATUS.INIT;
     this.id = FALLBACK_ID;
     this.content = {};
-    autorun(this.loadFile.bind(this));
+    autorun(this._loadFile.bind(this));
   }
 
-  loadFile(){
+  _loadFile(){
     this.status = STATUS.PENDING;
     d3.json(PATH_TO_FILE + this.id + ".json")
       .then((content) => {
         this.content[this.id] = content;
+        this._initFormatters();
         this.status = STATUS.READY;
       })
       .catch((error) => {
@@ -27,27 +28,35 @@ class LocaleService extends BaseService {
       });
   }
 
-  auto(arg){
-    if (arg instanceof Date) return this.getFormattedDate(arg);
-    if (typeof arg === "string") return this.getUIstring(arg);
-    if (typeof arg === "number") return this.getFormattedNumber(arg);
-  }
-
-  getDateFormatter(date) {
-    return date;
-  }
-
-  getNumberFormatter(number) {
-    return number;
-  }
-
-  getStringTranslator(){
-    return (function(string){
+  _initFormatters(){
+    this.numberF = new Intl.NumberFormat(this.id, { maximumSignificantDigits: 3 }).format;
+    this.dateF = d3.timeFormat("%Y");
+    this.stringF = function(string){
       let translated = this.content[this.id].dictionary[string];
       if (translated || translated === "") return translated;
       translated = this.content[FALLBACK_ID].dictionary[string];
       if (translated || translated === "") return translated;
       return string;
+    };
+  }
+  
+  getFormattedNumber(arg) {
+    return this.numberF(arg);
+  }
+
+  getFormattedDate(arg) {
+    return this.dateF(arg);
+  }
+  
+  getUIstring(arg) {
+    return this.stringF(arg);
+  }
+
+  auto(){
+    return (function(arg){
+      if (typeof arg === "number") return this.getFormattedNumber(arg);
+      if (arg instanceof Date) return this.getFormattedDate(arg);
+      if (typeof arg === "string") return this.getUIstring(arg);
     }).bind(this);
   }
 }

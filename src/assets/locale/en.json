@@ -1,5 +1,6 @@
 {
     "currency": "usd",
+    "currencySymbol": "$",
     "rtl": false,
     "dictionary": {
         "button-play": "Play",

@@ -13,7 +13,7 @@ export default class PlayButton extends BaseComponent {
   }
 
   draw() {
-    const translate = this.services.locale.getStringTranslator();
-    this.buttonEl.text(this.model.encoding.get("frame").playing ? translate("button-pause") : translate("button-play"));
+    const localise = this.services.locale.auto();
+    this.buttonEl.text(this.model.encoding.get("frame").playing ? localise("button-pause") : localise("button-play"));
   }
 }  
