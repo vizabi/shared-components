@@ -20,14 +20,17 @@ var initialMarkerConfig = {
     }
   },
   encoding: {
+    "selected": {
+      modelType: "selection"
+    },
     "x": {
       data: {
-        concept: 'population_total'
+        concept: "population_total"
       }
     },
     "y": {
       data: {
-        concept: 'country'
+        concept: "country"
       }
     },
     "color": {
@@ -37,6 +40,13 @@ var initialMarkerConfig = {
       },
       scale: {
         type: "ordinal"
+      }
+    },
+    "label": {
+      data: {
+        space: ["country"],
+        modelType: "entityPropertyDataConfig",
+        concept: "name"
       }
     },
     frame: {
