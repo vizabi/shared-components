@@ -2,7 +2,7 @@ import BaseComponent from "./base-component.js";
 import "./vizabi-barrankchart.scss";
 import * as utils from "./legacy/base/utils";
 import {STATUS} from "../utils";
-// import axisWithLabelPicker from "./legacy/helpers/d3.axisWithLabelPicker";
+import {ICON_WARN, ICON_QUESTION} from "../assets/icons/iconset.js";
 
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
@@ -126,14 +126,13 @@ export default class VizabiBarrankchart extends BaseComponent {
     super(config);
   }
 
-  /*
-    this.KEYS = this.model.data.space.filter(v => v != 'time');
-    this.markerKeys = this.model.encoding.get('y').data.domain.map(v => ({[this.model.encoding.get('y').data.concept]: v}));
-   */
 
   setup() {
     this.state = {
       showForecastOverlay: false,
+      opacityHighlightDim: 0.1,
+      opacitySelectDim: 0.3,
+      opacityRegular: 1,
       datawarning: {
         doubtDomain: [],
         doubtRange: []
@@ -163,20 +162,26 @@ export default class VizabiBarrankchart extends BaseComponent {
   
   draw(data) {
     //JASPER: i can't move this to "setup"
-    this.frame = this.model.encoding.get("frame");
-    this.selected = this.model.encoding.get("selected");
-    this.selectedFilter = this.selected.data.filter;
+    //JASPER: how to make methods more atomic? so that only the code that needs to run would get executed
+    this.frameMdl = this.model.encoding.get("frame");
+    this.selectedMdl = this.model.encoding.get("selected");
+    this.selectedFilter = this.selectedMdl.data.filter;
+    this.highlightedMdl = this.model.encoding.get("highlighted");
+    this.highlightedFilter = this.highlightedMdl.data.filter;
+    this.xMdl = this.model.encoding.get("x");
+    this.colorMdl = this.model.encoding.get("color");
     this.localise = this.services.locale.auto();
 
-    this.dataSpace = this.model.data.space.filter(d => !this.frame || d !== this.frame.data.concept);
+    this.dataSpace = this.model.data.space.filter(d => !this.frameMdl || d !== this.frameMdl.data.concept);
 
     this._drawForecastOverlay();
-    //return if exists with error
-    if (this._updateProfile()) return;
+    
+    if (this._updateProfile()) return; //return if exists with error
     const duration = this._getDuration();
     this._loadData(data);
     this._drawHeaderFooter(duration);
     this._drawData(duration);
+    this._updateOpacity();
     
   }
   
@@ -185,19 +190,19 @@ export default class VizabiBarrankchart extends BaseComponent {
     //JASPER: add duration to frame model. or do we want to have separate animation model?
     //JASPER: date formatting?
     //MIGRATION: no this.time anymore, because frames are not only over time now
-    //WHATIF: frame existed at first but then is removed from the model. will this.frame get reset to null?
-    if(!this.frame) return 0;
-    this.frameValue_1 = this.frameValue;
-    this.frameValue = this.frame.value;
-    return this.frame.playing && (this.frameValue - this.frameValue_1 > 0) ? ANIMATION_DURATION : 0;
+    //WHATIF: frame existed at first but then is removed from the model. will this.frameMdl get reset to null?
+    if(!this.frameMdl) return 0;
+    this.frame_1 = this.frame;
+    this.frame = this.frameMdl.value;
+    return this.frameMdl.playing && (this.frame - this.frame_1 > 0) ? ANIMATION_DURATION : 0;
   }
   
   _drawForecastOverlay() {
     this.forecastOverlay.classed("vzb-hidden", 
       //JASPER: add frame.endBeforeForecast
-      !this.frame.endBeforeForecast || 
+      !this.frameMdl.endBeforeForecast || 
       !this.state.showForecastOverlay || 
-      (this.frame.value <= this.frame.endBeforeForecast)
+      (this.frameMdl.value <= this.frameMdl.endBeforeForecast)
     );
   }
 
@@ -237,7 +242,7 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     // change header titles for new data
     //MIGRATION: how to get concept props this.model.marker.axis_x.getConceptprops()
-    const { name, unit } = this.model.encoding.get("x").data.conceptProps;
+    const { name, unit } = this.xMdl.data.conceptProps;
 
     const headerTitleText = headerTitle
       .select("text");
@@ -281,11 +286,11 @@ export default class VizabiBarrankchart extends BaseComponent {
       headerTotal.select("text")
         .transition("text")
         .delay(duration)
-        .text(this.localise(this.frameValue));
+        .text(this.localise(this.frameMdl.value));
     } else {
       headerTotal.select("text")
         .interrupt()
-        .text(this.localise(this.frameValue));
+        .text(this.localise(this.frameMdl.value));
     }
     headerTotal.classed("vzb-hidden", this.services.layout.profile !== "LARGE");
 
@@ -324,7 +329,7 @@ export default class VizabiBarrankchart extends BaseComponent {
       opacity || (
         //MIGRATION this.model.marker.select.length becomes...
         !this.selectedFilter.markers.size ?
-          this.wScale(this.frame.value.getUTCFullYear()) :
+          this.wScale(this.frameMdl.value.getUTCFullYear()) :
           1
       )
     );
@@ -359,12 +364,12 @@ export default class VizabiBarrankchart extends BaseComponent {
     // new scales and axes
     //MIGRATE this.xScale = this.model.marker.axis_x.getScale().copy();
 
-    this.xScale = this.model.encoding.get("x").scale.d3Scale.copy();
-    this.cScale = this.model.encoding.get("color").scale.d3Scale;
+    this.xScale = this.xMdl.scale.d3Scale.copy();
+    this.cScale = this.colorMdl.scale.d3Scale;
 
-    // utils.setIcon(this.dataWarningEl, iconWarn)
-    //   .select('svg')
-    //   .attr('width', 0).attr('height', 0);
+    this.dataWarningEl.html(ICON_WARN)
+      .select('svg')
+      .attr('width', 0).attr('height', 0);
 
     this.dataWarningEl.append('text')
       .text(this.localise('hints/dataWarning'));
@@ -380,10 +385,10 @@ export default class VizabiBarrankchart extends BaseComponent {
       .attr("data-text", this.localise("hints/barrank/missedPositionsTooltip"))
       .text(this.localise("hints/barrank/missedPositionsWarning"))
 
-    const conceptPropsX = this.model.encoding.get("x").data.conceptProps;
-    // utils.setIcon(this.infoEl, iconQuestion)
-    //   .select('svg').attr('width', 0).attr('height', 0)
-    //   .style('opacity', Number(Boolean(conceptPropsX.description || conceptPropsX.sourceLink)));
+    const conceptPropsX = this.xMdl.data.conceptProps;
+    this.infoEl.html(ICON_QUESTION)
+    //  .select('svg').attr('width', 0).attr('height', 0)
+    //  .style('opacity', Number(Boolean(conceptPropsX.description || conceptPropsX.sourceLink)));
 
     this.infoEl.on('click', () => {
       this.parent.findChildByName('gapminder-datanotes').pin();
@@ -421,6 +426,7 @@ export default class VizabiBarrankchart extends BaseComponent {
       const value = d[encoding];
       if (!value && value !== 0) this.nullValuesCount++;
       const label = this._getLabelText(d);
+      //JASPER: how to tell formatter that this is possibly a percentage... or time? this was easy when formatters were part of hook
       const formattedValue = this.localise(value);
 
       if (cached) {
@@ -482,7 +488,7 @@ export default class VizabiBarrankchart extends BaseComponent {
 
 
     const { barLabelMargin, barValueMargin, barRankMargin, scrollMargin, margin } = this.profileConstants;
-    let limits = this.model.encoding.get("x").scale.domain;
+    let limits = this.xMdl.scale.domain;
     limits = {min: d3.min(limits), max: d3.max(limits)};
     const ltr = Math.abs(limits.max) >= Math.abs(limits.min);
     const hasNegativeValues = ltr ? limits.min < 0 : limits.max > 0;
@@ -500,7 +506,8 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.xScale
       .range([0, rightEdge]);
     
-    if (this.model.encoding.get("x").scale.type !== "log") {
+      //MIGRATE scaletype
+    if (this.xMdl.scale.type !== "log") {
       this.xScale
         .domain([0, Math.max(...this.xScale.domain())]);
     }
@@ -630,13 +637,11 @@ export default class VizabiBarrankchart extends BaseComponent {
         if (!localeChanged) {
           self
             .attr('class', 'vzb-br-bar')
-            //.classed('vzb-selected', _this.model.marker.isSelected(d.entity))
+            .classed('vzb-selected', () => _this.selectedFilter.has(d))
             .attr('id', `vzb-br-bar-${id}-${_this.id}`)
-            //.on('mousemove', d => _this.model.marker.highlightMarker(d.entity))
-            //.on('mouseout', () => _this.model.marker.clearHighlighted())
-            .on('click', d => {
-            //  _this.model.marker.selectMarker(d.entity);
-            });
+            .on('mousemove', () => _this.highlightedFilter.set(d))
+            .on('mouseout', () => _this.highlightedFilter.delete(d))
+            .on('click', () => _this.selectedFilter.toggle(d));
 
           const barRect = self.append('rect')
             .attr('stroke', 'transparent');
@@ -736,5 +741,31 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   _getDarkerColor(d) {
     return this._getColor(d).darker(2);
+  }
+
+  _updateOpacity() {
+    const _this = this;
+
+    //JASPER: add params to select and highlight models or to this component ui model?
+
+    const {
+      opacityHighlightDim,
+      opacitySelectDim,
+      opacityRegular,
+    } = this.state;
+
+    const someHighlighted = this.highlightedFilter.markers.size > 0;
+    const someSelected = this.selectedFilter.markers.size > 0;
+
+    this.barContainer.selectAll('.vzb-br-bar')
+      .style('opacity', d => {
+        if (_this.highlightedFilter.has(d)) return opacityRegular;
+        if (_this.selectedFilter.has(d)) return opacityRegular;
+
+        if (someSelected) return opacitySelectDim;
+        if (someHighlighted) return opacityHighlightDim;
+
+        return opacityRegular;
+      });
   }
 }

@@ -23,6 +23,9 @@ var initialMarkerConfig = {
     "selected": {
       modelType: "selection"
     },
+    "highlighted": {
+      modelType: "selection"
+    },
     "x": {
       data: {
         concept: "population_total"
