@@ -4,12 +4,14 @@ import { STATUS } from "../utils.js";
 
 class BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template}){
+  constructor({placeholder, model, services, subcomponents, template, id}){
+    this.id = id || "c0";
     this.status = STATUS.INIT;
     this.template = this.template || template || "";
     this.subcomponents = this.subcomponents || subcomponents || [];
     this.services = this.services || services || {};
     this.model = this.model || model;
+    this.state = {};
 
     const scope = this.parent && this.parent.view ? this.parent.view : d3; //d3 would search global scope
     this.view = scope.select(placeholder).html(this.template);
@@ -17,11 +19,12 @@ class BaseComponent {
     this.children = [];
     this.parent = null;
 
-    this.subcomponents.forEach( comp => {
+    this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
         placeholder: comp.placeholder,
         model: comp.model || this.model,
-        services: this.services
+        services: this.services,
+        id: this.id + "-" + index
       });
       subcomponent.parent = this;
       this.children.push(subcomponent);
@@ -29,20 +32,20 @@ class BaseComponent {
 
     this.setup();
     autorun(this.render.bind(this));
-    autorun(this.updateState.bind(this));
+    autorun(this.updateStatus.bind(this));
     autorun(this.resize.bind(this));
   }
 
   setup() {}
 
-  updateState(){
+  updateStatus(){
     const dependencies = Object.values(this.services).map((m)=>m.status)
       .concat(this.children.map((m)=>m.status))
       .concat(this.model.state);
 
     if (dependencies.every(dep => dep === STATUS.READY))
       this.status = STATUS.READY;
-    else if (dependencies.find(dep => dep === STATUS.ERROR))
+    else if (dependencies.some(dep => dep === STATUS.ERROR))
       this.status = STATUS.ERROR;
     else
       this.status = STATUS.PENDING;
@@ -61,5 +64,6 @@ class BaseComponent {
 }
 
 export default decorate(BaseComponent, {
-  "status": observable
+  "status": observable,
+  "state": observable
 });
