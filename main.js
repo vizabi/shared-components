@@ -71,21 +71,3 @@ var barrankChart = new BarrankChart({
   model: marker
 });
 
-
-// new BaseComponent({
-//   placeholder: "#root",
-//   services: {
-//     translation: new TranslationService(),
-//     layout: new LayOutService()
-//   },
-//   subcomponents: [{
-//       component: VegaBarchart,
-//       placeholder: "#chart",
-//       model: marker
-//     },{
-//       component: timeSlider,
-//       placeholder: "#timeslider",
-//       model: marker
-//   }],
-//   template: "<div id=\"chart\"></div><div id=\"timeSlider\"></div>"
-// })
