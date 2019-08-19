@@ -163,7 +163,6 @@ export default class VizabiBarrankchart extends BaseComponent {
   
   draw(data) {
     //JASPER: i can't move this to "setup", ideally would avoid running getters on each time ticklk
-    //JASPER: how to make methods more atomic? so that only the code that needs to run would get executed
     this.frameMdl = this.model.encoding.get("frame");
     this.selectedMdl = this.model.encoding.get("selected");
     this.selectedFilter = this.selectedMdl.data.filter;
@@ -176,7 +175,7 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     this._drawForecastOverlay();
     
-    if (this._updateProfile()) return; //return if exists with error
+    if (this._updateLayoutProfile()) return; //return if exists with error
     const duration = this._getDuration();
     this._loadData(data);
     this._drawHeaderFooter(duration);
@@ -187,10 +186,6 @@ export default class VizabiBarrankchart extends BaseComponent {
   
   _getDuration() {
     //smooth animation is needed when playing, except for the case when time jumps from end to start
-    //JASPER: add duration to frame model. or do we want to have separate animation model?
-    //JASPER: date formatting?
-    //MIGRATION: no this.time anymore, because frames are not only over time now
-    //WHATIF: frame existed at first but then is removed from the model. will this.frameMdl get reset to null?
     if(!this.frameMdl) return 0;
     this.frame_1 = this.frame;
     this.frame = this.frameMdl.value;
@@ -199,33 +194,22 @@ export default class VizabiBarrankchart extends BaseComponent {
   
   _drawForecastOverlay() {
     this.forecastOverlay.classed("vzb-hidden", 
-      //JASPER: add frame.endBeforeForecast
       !this.frameMdl.endBeforeForecast || 
       !this.state.showForecastOverlay || 
       (this.frameMdl.value <= this.frameMdl.endBeforeForecast)
     );
   }
 
-  _updateProfile(){
+  _updateLayoutProfile(){
+    this.services.layout.width + this.services.layout.height;
+
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = parseInt(this.element.style("height"), 10) || 0;
     this.width = parseInt(this.element.style("width"), 10) || 0;
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
   }
-  
-  resize(){
-    if (this.status !== STATUS.READY) return; //JASPER: otherwise it fires prematurely
-    //JASPER: i'm listening to updates in w and h but doing nothing with them, it's confusing
-    this.services.layout.width + this.services.layout.height;
-
-    if (this._updateProfile()) return;
-    this._drawHeaderFooter();
-    this._drawData();
-  }
 
   _drawHeaderFooter(duration = 0) {
-
-
     const {
       margin,
       headerMargin,
@@ -241,7 +225,6 @@ export default class VizabiBarrankchart extends BaseComponent {
     const headerTitle = this.header.select(".vzb-br-title");
 
     // change header titles for new data
-    //MIGRATION: how to get concept props this.model.marker.axis_x.getConceptprops()
     const { name, unit } = this.xMdl.data.conceptProps;
 
     const headerTitleText = headerTitle
@@ -324,10 +307,8 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   _updateDoubtOpacity(opacity) {
-    //JASPER how to check if anything is selected?
     this.dataWarningEl.style("opacity",
       opacity || (
-        //MIGRATION this.model.marker.select.length becomes...
         !this.selectedFilter.markers.size ?
           this.wScale(this.frameMdl.value.getUTCFullYear()) :
           1
@@ -339,9 +320,6 @@ export default class VizabiBarrankchart extends BaseComponent {
   _loadData(data) {
     const _this = this;
 
-    //MIGRATE this.translator = this.model.locale.getTFunction();
-    // sort the data (also sets this.total)
-    //MIGRATE values array structure this.values.axis_x;
     const valuesCount = data.length;
     if (!valuesCount) return false;
 
@@ -362,7 +340,6 @@ export default class VizabiBarrankchart extends BaseComponent {
       );
 
     // new scales and axes
-    //MIGRATE this.xScale = this.model.marker.axis_x.getScale().copy();
 
     this.xScale = this.xMdl.scale.d3Scale.copy();
     this.cScale = this.colorMdl.scale.d3Scale;
@@ -411,7 +388,6 @@ export default class VizabiBarrankchart extends BaseComponent {
     return true;
   }
 
-  //JASPER: my "data" has no "label". why?
 
   _getLabelText(d) {
     if (!d.label) return d[Symbol.for("key")];
@@ -426,7 +402,6 @@ export default class VizabiBarrankchart extends BaseComponent {
       const cached = this._entities[id];
       const value = d[encoding];
       if (!value && value !== 0) this.nullValuesCount++;
-      //JASPER: how to tell formatter that this is possibly a percentage... or time? this was easy when formatters were part of hook
       const formattedValue = this.localise(value);
 
       if (cached) {
@@ -504,7 +479,6 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.xScale
       .range([0, rightEdge]);
     
-      //MIGRATE scaletype
     if (this.xMdl.scale.type !== "log") {
       this.xScale
         .domain([0, Math.max(...this.xScale.domain())]);
@@ -743,8 +717,6 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   _updateOpacity() {
     const _this = this;
-
-    //JASPER: add params to select and highlight models or to this component ui model?
 
     const {
       opacityHighlightDim,
