@@ -48,7 +48,6 @@ var initialMarkerConfig = {
     "label": {
       data: {
         space: ["country"],
-        modelType: "entityPropertyDataConfig",
         concept: "name"
       }
     },

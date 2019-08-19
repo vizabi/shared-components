@@ -3,6 +3,7 @@ import "./vizabi-barrankchart.scss";
 import * as utils from "./legacy/base/utils";
 import {STATUS} from "../utils";
 import {ICON_WARN, ICON_QUESTION} from "../assets/icons/iconset.js";
+import { autorun } from "mobx";
 
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
@@ -161,7 +162,7 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
   
   draw(data) {
-    //JASPER: i can't move this to "setup"
+    //JASPER: i can't move this to "setup", ideally would avoid running getters on each time ticklk
     //JASPER: how to make methods more atomic? so that only the code that needs to run would get executed
     this.frameMdl = this.model.encoding.get("frame");
     this.selectedMdl = this.model.encoding.get("selected");
@@ -170,9 +171,8 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.highlightedFilter = this.highlightedMdl.data.filter;
     this.xMdl = this.model.encoding.get("x");
     this.colorMdl = this.model.encoding.get("color");
+    this.labelMdl = this.model.encoding.get("label");
     this.localise = this.services.locale.auto();
-
-    this.dataSpace = this.model.data.space.filter(d => !this.frameMdl || d !== this.frameMdl.data.concept);
 
     this._drawForecastOverlay();
     
@@ -181,7 +181,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     this._loadData(data);
     this._drawHeaderFooter(duration);
     this._drawData(duration);
-    this._updateOpacity();
+    autorun(this._updateOpacity.bind(this));
     
   }
   
@@ -414,7 +414,8 @@ export default class VizabiBarrankchart extends BaseComponent {
   //JASPER: my "data" has no "label". why?
 
   _getLabelText(d) {
-    return this.dataSpace.map(dim => d[dim]).join(", ");    
+    if (!d.label) return d[Symbol.for("key")];
+    return (typeof d.label === "string") ? d.label : Object.keys(d.label).join(", ");
   }
 
 
@@ -425,14 +426,12 @@ export default class VizabiBarrankchart extends BaseComponent {
       const cached = this._entities[id];
       const value = d[encoding];
       if (!value && value !== 0) this.nullValuesCount++;
-      const label = this._getLabelText(d);
       //JASPER: how to tell formatter that this is possibly a percentage... or time? this was easy when formatters were part of hook
       const formattedValue = this.localise(value);
 
       if (cached) {
         return Object.assign(cached, {
           value,
-          label,
           formattedValue,
           changedValue: formattedValue !== cached.formattedValue,
           changedWidth: value !== cached.value,
@@ -442,7 +441,6 @@ export default class VizabiBarrankchart extends BaseComponent {
 
       return this._entities[id] = Object.assign({}, d, {
         value,
-        label,
         formattedValue,
         changedValue: true,
         changedWidth: true,
@@ -536,7 +534,7 @@ export default class VizabiBarrankchart extends BaseComponent {
           .attr('x', labelX(value))
           .attr('y', this.profileConstants.barHeight / 2)
           .attr('text-anchor', labelAnchor(value))
-          .text(isLabelBig ? bar.label : bar.labelSmall);
+          .text(isLabelBig ? this._getLabelText(bar) : bar.labelSmall);
 
         bar.barRect
           .attr('rx', this.profileConstants.barHeight / 4)
@@ -614,7 +612,7 @@ export default class VizabiBarrankchart extends BaseComponent {
         const id = d[Symbol.for("key")];
         const self = d3.select(this);
 
-        const label = d.label;
+        const label = _this._getLabelText(d);
         const labelSmall = label.length < 12 ? label : `${label.substring(0, 9)}...`;//…
 
         const selectedLabel = self.select('.vzb-br-label');
