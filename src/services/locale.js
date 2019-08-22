@@ -124,6 +124,10 @@ class LocaleService extends BaseService {
       if (typeof arg === "string") return this.getUIstring(arg);
     }).bind(this);
   }
+
+  isRTL(){
+    return !!this.content[this.id].rtl;
+  }
 }
 
 export default decorate(LocaleService, {

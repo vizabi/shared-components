@@ -66,7 +66,7 @@ var initialMarkerConfig = {
 
 var marker = Vizabi.marker(initialMarkerConfig);
 
-var barrankChart = new BarrankChart({
+var viz = new BarrankChart({
   placeholder: "#root",
   model: marker
 });

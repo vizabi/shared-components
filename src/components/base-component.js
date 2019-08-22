@@ -4,7 +4,7 @@ import { STATUS } from "../utils.js";
 
 class BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template, id}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name}){
     this.id = id || "c0";
     this.status = STATUS.INIT;
     this.template = this.template || template || "";
@@ -13,20 +13,23 @@ class BaseComponent {
     this.model = this.model || model;
     this.state = {};
 
-    const scope = this.parent && this.parent.view ? this.parent.view : d3; //d3 would search global scope
-    this.view = scope.select(placeholder).html(this.template);
-    this.viewRaw = this.view.node();
+    const scope = this.parent && this.parent.element ? this.parent.element : d3; //d3 would search global scope
+    this.element = scope.select(placeholder).html(this.template);
     this.children = [];
-    this.parent = null;
+    this.parent = parent || null;
+    this.root = root || this;
+    this.name = name || "";
+    this.reactions = {};
 
     this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
         placeholder: comp.placeholder,
         model: comp.model || this.model,
         services: this.services,
-        id: this.id + "-" + index
+        id: this.id + "-" + index,
+        parent: this,
+        root: this.root
       });
-      subcomponent.parent = this;
       this.children.push(subcomponent);
     });
 
@@ -37,6 +40,26 @@ class BaseComponent {
   }
 
   setup() {}
+
+  addReaction(methodName){
+    if(this[methodName] && !this.reactions[methodName]){
+      this.reactions[methodName] = autorun(this[methodName].bind(this));
+    }
+  }
+  removeReaction(methodName){
+    if(this[methodName] && this.reactions[methodName]){
+      this.reactions[methodName]();
+      delete this.reactions[methodName];
+    }
+  }
+  removeAllReactions(){
+    Object.keys(this.reactions).forEach(this.removeReaction);
+  }
+
+  findChild({name, id, type}){
+    if (this.name === name || this.id === id || this.constructor.name === type) return this;
+    return this.children.find(c => c.findChild({name, id, type}));
+  }
 
   updateStatus(){
     const dependencies = Object.values(this.services).map((m)=>m.status)
@@ -52,9 +75,12 @@ class BaseComponent {
   }
 
   render() {
-    if(this.status === STATUS.READY) this.draw(this.model.dataArray);
+    if(this.status === STATUS.READY) this.draw();
     if(this.status === STATUS.PENDING) this.loading();
-    if(this.status === STATUS.ERROR) this.error();
+    if(this.status === STATUS.ERROR) {
+      this.removeAllReactions();
+      this.error();
+    }
   }
 
   draw() {}

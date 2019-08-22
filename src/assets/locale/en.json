@@ -4,6 +4,7 @@
     "rtl": false,
     "dictionary": {
         "button-play": "Play",
-        "button-pause": "Pause"
+        "button-pause": "Pause",
+        "hints/dataWarning": "Data doubts"
     }
 }

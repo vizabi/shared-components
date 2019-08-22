@@ -1,9 +1,7 @@
 import BaseComponent from "./base-component.js";
 import "./vizabi-barrankchart.scss";
 import * as utils from "./legacy/base/utils";
-import {STATUS} from "../utils";
 import {ICON_WARN, ICON_QUESTION} from "../assets/icons/iconset.js";
-import { autorun } from "mobx";
 
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
@@ -69,8 +67,6 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
 };
 
 export default class VizabiBarrankchart extends BaseComponent {
-  _entities = {};
-  isFirstUsage = false;
 
   constructor(config) {
     config.template = `
@@ -140,63 +136,84 @@ export default class VizabiBarrankchart extends BaseComponent {
       }
     };
 
-    this.element = d3.select(".vzb-barrankchart");
-    this.header = this.element.select(".vzb-br-header");
-    this.infoEl = this.element.select(".vzb-br-axis-info");
-    this.barViewport = this.element.select(".vzb-br-barsviewport");
-    this.barSvg = this.element.select(".vzb-br-bars-svg");
-    this.barContainer = this.element.select(".vzb-br-bars");
-    this.dataWarningEl = this.element.select(".vzb-data-warning");
-    this.tooltipSvg = this.element.select(".vzb-br-tooltip-svg");
-    this.tooltip = this.element.select(".vzb-br-tooltip");
-    this.forecastOverlay = this.element.select(".vzb-br-forecastoverlay");
-    this.missedPositionsWarningEl = this.element.select(".vzb-data-warning-missed-positions");
+    this.DOM = {
+      header: this.element.select(".vzb-br-header"),
+      title: this.element.select(".vzb-br-title"),
+      total: this.element.select(".vzb-br-total"),
+      info: this.element.select(".vzb-br-axis-info"),
+  
+      barViewport: this.element.select(".vzb-br-barsviewport"),
+      barSvg: this.element.select(".vzb-br-bars-svg"),
+      barContainer: this.element.select(".vzb-br-bars"),
+      forecastOverlay: this.element.select(".vzb-br-forecastoverlay"),
+  
+      footer: this.element.select(".vzb-data-warning-svg"),
+      dataWarning: this.element.select(".vzb-data-warning"),
+      missedPositionsWarning: this.element.select(".vzb-data-warning-missed-positions"),
+  
+      tooltipSvg: this.element.select(".vzb-br-tooltip-svg"),
+      tooltip: this.element.select(".vzb-br-tooltip")
+    };
 
     this.wScale = d3.scaleLinear()
       .domain(this.state.datawarning.doubtDomain)
       .range(this.state.datawarning.doubtRange);
 
-    this._entities = {};
-    this.nullValuesCount = 0;
-    this.cScale = d3.scaleOrdinal(d3.schemeCategory10);
+    this._cache = {};
   }
   
   draw(data) {
     //JASPER: i can't move this to "setup", ideally would avoid running getters on each time ticklk
-    this.frameMdl = this.model.encoding.get("frame");
-    this.selectedMdl = this.model.encoding.get("selected");
-    this.selectedFilter = this.selectedMdl.data.filter;
-    this.highlightedMdl = this.model.encoding.get("highlighted");
-    this.highlightedFilter = this.highlightedMdl.data.filter;
-    this.xMdl = this.model.encoding.get("x");
-    this.colorMdl = this.model.encoding.get("color");
-    this.labelMdl = this.model.encoding.get("label");
+    this.MDL = {
+      frame: this.model.encoding.get("frame"),
+      selected: this.model.encoding.get("selected").data.filter,
+      highlighted: this.model.encoding.get("highlighted").data.filter,
+      x: this.model.encoding.get("x"),
+      color: this.model.encoding.get("color"),
+      label: this.model.encoding.get("label")
+    };
     this.localise = this.services.locale.auto();
 
-    this._drawForecastOverlay();
+    // new scales and axes
+    this.xScale = this.MDL.x.scale.d3Scale.copy();
+    this.cScale = this.MDL.color.scale.d3Scale;
+
+
+    
+    this.addReaction("_drawForecastOverlay");
     
     if (this._updateLayoutProfile()) return; //return if exists with error
-    const duration = this._getDuration();
-    this._loadData(data);
-    this._drawHeaderFooter(duration);
-    this._drawData(duration);
-    autorun(this._updateOpacity.bind(this));
+    this.addReaction("_getDuration");
+    this.addReaction("_drawHeader");
+    this.addReaction("_drawInfoEl");
+    this.addReaction("_drawFooter");
+
+    //this.addReaction("_processFrameData");
+    //this.addReaction("_createAndDeleteBars");
+    this.addReaction("_drawData");
+    this.addReaction("_updateOpacity");
+    this.addReaction("_resizeSvg");
+    this.addReaction("_scroll");
+    this.addReaction("_drawColors");
+
+    this.addReaction("_updateDataWarning");
+    this.addReaction("_updateMissedPositionWarning");
     
   }
-  
+
   _getDuration() {
     //smooth animation is needed when playing, except for the case when time jumps from end to start
-    if(!this.frameMdl) return 0;
-    this.frame_1 = this.frame;
-    this.frame = this.frameMdl.value;
-    return this.frameMdl.playing && (this.frame - this.frame_1 > 0) ? ANIMATION_DURATION : 0;
+    if(!this.MDL.frame) return 0;
+    this.frameValue_1 = this.frameValue;
+    this.frameValue = this.MDL.frame.value;
+    return this.__duration = this.MDL.frame.playing && (this.frameValue - this.frameValue_1 > 0) ? ANIMATION_DURATION : 0;
   }
   
   _drawForecastOverlay() {
-    this.forecastOverlay.classed("vzb-hidden", 
-      !this.frameMdl.endBeforeForecast || 
+    this.DOM.forecastOverlay.classed("vzb-hidden", 
+      !this.MDL.frame.endBeforeForecast || 
       !this.state.showForecastOverlay || 
-      (this.frameMdl.value <= this.frameMdl.endBeforeForecast)
+      (this.MDL.frame.value <= this.MDL.frame.endBeforeForecast)
     );
   }
 
@@ -204,12 +221,12 @@ export default class VizabiBarrankchart extends BaseComponent {
     this.services.layout.width + this.services.layout.height;
 
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
-    this.height = parseInt(this.element.style("height"), 10) || 0;
-    this.width = parseInt(this.element.style("width"), 10) || 0;
+    this.height = this.element.node().clientHeight || 0;
+    this.width = this.element.node().clientWidth || 0;
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
   }
 
-  _drawHeaderFooter(duration = 0) {
+  _drawHeader(duration = 0) {
     const {
       margin,
       headerMargin,
@@ -217,18 +234,16 @@ export default class VizabiBarrankchart extends BaseComponent {
       infoElMargin,
     } = this.profileConstants;
 
-    this.barViewport
-      .style("height", `${this.height - margin.bottom - margin.top}px`);
+
 
     // header
-    this.header.attr("height", margin.top);
-    const headerTitle = this.header.select(".vzb-br-title");
+    this.DOM.header.attr("height", margin.top);
+    const headerTitle = this.DOM.title;
 
     // change header titles for new data
-    const { name, unit } = this.xMdl.data.conceptProps;
+    const { name, unit } = this.MDL.x.data.conceptProps;
 
-    const headerTitleText = headerTitle
-      .select("text");
+    const headerTitleText = headerTitle.select("text");
 
     if (unit) {
       headerTitleText.text(`${name}, ${unit}`);
@@ -252,7 +267,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     headerTitle
       .attr("transform", `translate(${titleTx}, ${titleTy})`);
 
-    const headerInfo = this.infoEl;
+    const headerInfo = this.DOM.info;
 
     headerInfo.select("svg")
       .attr("width", `${infoElHeight}px`)
@@ -263,17 +278,17 @@ export default class VizabiBarrankchart extends BaseComponent {
     headerInfo.attr("transform", `translate(${infoTx}, ${infoTy})`);
 
 
-    const headerTotal = this.header.select(".vzb-br-total");
+    const headerTotal = this.DOM.total;
 
     if (duration) {
       headerTotal.select("text")
         .transition("text")
         .delay(duration)
-        .text(this.localise(this.frameMdl.value));
+        .text(this.localise(this.MDL.frame.value));
     } else {
       headerTotal.select("text")
         .interrupt()
-        .text(this.localise(this.frameMdl.value));
+        .text(this.localise(this.MDL.frame.value));
     }
     headerTotal.classed("vzb-hidden", this.services.layout.profile !== "LARGE");
 
@@ -285,201 +300,182 @@ export default class VizabiBarrankchart extends BaseComponent {
       .attr("transform", `translate(${totalTx}, ${totalTy})`)
       .classed("vzb-transparent", headerTitleBBox.width + headerTotalBBox.width + 10 > this.width);
 
-    this.element.select(".vzb-data-warning-svg")
+
+
+    this.DOM.title
+      .on("click", () =>
+        this.root.findChild({type: "gapminder-treemenu"})
+          .markerID("axis_x")
+          .alignX("left")
+          .alignY("top")
+          .updateView()
+          .toggle()
+      );
+
+  }
+
+  _drawInfoEl(){
+    const dataNotes = this.root.findChild({type: "gapminder-datanotes"});
+    const conceptPropsX = this.MDL.x.data.conceptProps;
+
+    this.DOM.info
+      .on("click", () => {
+        dataNotes.pin();
+      })
+      .on("mouseover", () => {
+        const rect = this.getBBox();
+        const ctx = utils.makeAbsoluteContext(this, this.farthestViewportElement);
+        const coord = ctx(rect.x - 10, rect.y + rect.height + 10);
+        dataNotes
+          .setConceptProps(conceptPropsX)
+          .show()
+          .setPos(coord.x, coord.y);
+      })
+      .on("mouseout", () => {
+        dataNotes.hide();
+      })
+      .html(ICON_QUESTION)
+      .select("svg").attr("width", 0).attr("height", 0)
+      .classed("vzb-hidden", !conceptPropsX.description && !conceptPropsX.sourceLink);
+  }
+
+  _drawFooter(){
+    const { margin } = this.profileConstants;
+
+    this.DOM.footer
       .style("height", `${margin.bottom}px`);
 
-
-    const warningBBox = this.dataWarningEl.select("text").node().getBBox();
-    this.dataWarningEl
+    const warningBBox = this.DOM.dataWarning.select("text").node().getBBox();
+    this.DOM.dataWarning
       .attr("transform", `translate(${this.width - margin.right - warningBBox.width}, ${warningBBox.height})`);
 
-    this.dataWarningEl
+    this.DOM.dataWarning
       .select("svg")
       .attr("width", warningBBox.height)
       .attr("height", warningBBox.height)
       .attr("x", -warningBBox.height - 5)
-      .attr("y", -warningBBox.height + 1);
+      .attr("y", -warningBBox.height + 1);    
 
-    this.missedPositionsWarningEl
+    this.DOM.dataWarning.html(ICON_WARN)
+      .select("svg")
+      .attr("width", 0).attr("height", 0);
+
+    this.DOM.dataWarning.append("text")
+      .text(this.localise("hints/dataWarning"));
+
+    this.DOM.dataWarning
+      .on("click", () => this.root.findChildByName("gapminder-datawarning").toggle())
+      .on("mouseover", () => this._updateDataWarning(1))
+      .on("mouseout", () => this._updateDataWarning());
+
+    this.DOM.missedPositionsWarning
       .attr("transform", `translate(${this.width - margin.right - warningBBox.width - warningBBox.height * 3}, ${warningBBox.height})`);
 
-    this._updateDoubtOpacity();
+    this.DOM.missedPositionsWarning
+      .select("text")
+      .attr("data-text", this.localise("hints/barrank/missedPositionsTooltip"))
+      .text(this.localise("hints/barrank/missedPositionsWarning"));
   }
 
-  _updateDoubtOpacity(opacity) {
-    this.dataWarningEl.style("opacity",
-      opacity || (
-        !this.selectedFilter.markers.size ?
-          this.wScale(this.frameMdl.value.getUTCFullYear()) :
+  _updateMissedPositionWarning() {
+    this.DOM.missedPositionsWarning
+      .classed("vzb-hidden", 0 && (1 - this.nullValuesCount / this.__dataProcessed.length) > 0.85);
+  }
+
+  _updateDataWarning(opacity) {
+    this.DOM.dataWarning.style("opacity",
+      1 || opacity || (
+        !this.MDL.selected.markers.size ?
+          this.wScale(this.MDL.frame.value.getUTCFullYear()) :
           1
       )
     );
   }
 
-
-  _loadData(data) {
-    const _this = this;
-
-    const valuesCount = data.length;
-    if (!valuesCount) return false;
-
-    this.nullValuesCount = 0;
-    this.sortedEntities = this._sortByIndicator(data, "x");
-
-    this.header
-      .select('.vzb-br-title')
-      .select('text')
-      .on('click', () =>
-        this.parent
-          .findChildByName('gapminder-treemenu')
-          .markerID('axis_x')
-          .alignX('left')
-          .alignY('top')
-          .updateView()
-          .toggle()
-      );
-
-    // new scales and axes
-
-    this.xScale = this.xMdl.scale.d3Scale.copy();
-    this.cScale = this.colorMdl.scale.d3Scale;
-
-    this.dataWarningEl.html(ICON_WARN)
-      .select('svg')
-      .attr('width', 0).attr('height', 0);
-
-    this.dataWarningEl.append('text')
-      .text(this.localise('hints/dataWarning'));
-
-    this.dataWarningEl
-      .on('click', () => this.parent.findChildByName('gapminder-datawarning').toggle())
-      .on('mouseover', () => this._updateDoubtOpacity(1))
-      .on('mouseout', () => this._updateDoubtOpacity());
-
-    this.missedPositionsWarningEl
-      .classed("vzb-hidden", (1 - this.nullValuesCount / valuesCount) > 0.85)
-      .select("text")
-      .attr("data-text", this.localise("hints/barrank/missedPositionsTooltip"))
-      .text(this.localise("hints/barrank/missedPositionsWarning"))
-
-    const conceptPropsX = this.xMdl.data.conceptProps;
-    this.infoEl.html(ICON_QUESTION)
-    //  .select('svg').attr('width', 0).attr('height', 0)
-    //  .style('opacity', Number(Boolean(conceptPropsX.description || conceptPropsX.sourceLink)));
-
-    this.infoEl.on('click', () => {
-      this.parent.findChildByName('gapminder-datanotes').pin();
-    });
-
-    this.infoEl.on('mouseover', function() {
-      const rect = this.getBBox();
-      const ctx = utils.makeAbsoluteContext(this, this.farthestViewportElement);
-      const coord = ctx(rect.x - 10, rect.y + rect.height + 10);
-      _this.parent.findChildByName('gapminder-datanotes')
-        .setHook('axis_x')
-        .show()
-        .setPos(coord.x, coord.y);
-    });
-
-    this.infoEl.on('mouseout', () => {
-      _this.parent.findChildByName('gapminder-datanotes').hide();
-    });
-
-    return true;
-  }
-
-
   _getLabelText(d) {
     if (!d.label) return d[Symbol.for("key")];
-    return (typeof d.label === "string") ? d.label : Object.keys(d.label).join(", ");
+    let label = (typeof d.label === "string") ? d.label : Object.keys(d.label).join(", ");
+    if (label.length >= 12) label = `${label.substring(0, 11)}…`;
+    return label;
   }
 
+  _processFrameData() {
+    this.nullValuesCount = 0;
 
-  _sortByIndicator(data = [], encoding = "x") {
+    return this.__dataProcessed = this.model.dataArray
+      //copy array in order to not sort in place
+      .concat()
+      //sort array by x value
+      .sort((a, b) => d3.descending(a.x, b.x))
+      //reduce allows looking at the previous value to calcaulte the rank, as we go
+      .reduce((result, d, index) => {
+        const id = d[Symbol.for("key")];
+        const cached = this._cache[id];
+        const value = d.x;
+        if (!value && value !== 0) this.nullValuesCount++;
+        const formattedValue = this.localise(value);
+        const formattedLabel = this._getLabelText(d);
+        const rank = !index || result[index - 1].formattedValue !== formattedValue ? index + 1 : result[index - 1].rank;
+  
+        if (cached) {
+          result.push(Object.assign(cached, {
+            value,
+            formattedValue,
+            formattedLabel,
+            index,
+            rank,
+            changedFormattedValue: formattedValue !== cached.formattedValue,
+            changedValue: value !== cached.value,
+            changedIndex: index !== cached.index,
+            isNew: false
+          }));
+        } else {
+          result.push(this._cache[id] = Object.assign({}, d, {
+            value,
+            formattedValue,
+            formattedLabel,
+            index,
+            rank,
+            changedFormattedValue: true,
+            changedValue: true,
+            changedIndex: true,
+            isNew: true
+          }));
+        }
 
-    return data.map(d => {
-      const id = d[Symbol.for("key")];
-      const cached = this._entities[id];
-      const value = d[encoding];
-      if (!value && value !== 0) this.nullValuesCount++;
-      const formattedValue = this.localise(value);
-
-      if (cached) {
-        return Object.assign(cached, {
-          value,
-          formattedValue,
-          changedValue: formattedValue !== cached.formattedValue,
-          changedWidth: value !== cached.value,
-          isNew: false
-        });
-      }
-
-      return this._entities[id] = Object.assign({}, d, {
-        value,
-        formattedValue,
-        changedValue: true,
-        changedWidth: true,
-        isNew: true
-      });
-    }).sort(({ value: a }, { value: b }) => (b || (b === 0 ? 0 : -Infinity)) - (a || (a === 0 ? 0 : -Infinity)))
-      .map((entity, index, entities) =>
-        Object.assign(entity, {
-          index: index,
-          rank: !index || entities[index - 1].formattedValue !== entity.formattedValue ? index + 1 : entities[index - 1].rank,
-          changedIndex: index !== entity.index
-        }));
+        return result;
+      }, []);
   }
 
-  _drawData(duration = 0, force = false) {
-    // update the shown bars for new data-set
-    this._createAndDeleteBars(
-      this.barContainer.selectAll('.vzb-br-bar')
-        .data(this.sortedEntities, d => d[Symbol.for("key")])
-    );
+  _drawData(duration = 500, force = true) {
+    duration = 200;
+    this._processFrameData();
+    this._createAndDeleteBars();
+    
+    const valuesCount = this.__dataProcessed.length;
+    if (!valuesCount) return false;
 
-
-    const { projector } = this.services.layout;
-    const projectorModeChanged = this._projector !== projector;
-
-    if (projectorModeChanged) {
-      this._projector = projector;
-    }
-
-
-    const entitiesCountChanged = typeof this._entitiesCount === 'undefined'
-      || this._entitiesCount !== this.sortedEntities.length;
-
-    if (projectorModeChanged || entitiesCountChanged) {
-      if (entitiesCountChanged) {
-        this._entitiesCount = this.sortedEntities.length;
-      }
-    }
-
-    this._resizeSvg();
-    this._scroll(duration);
-    this._drawColors();
-
-
+    
     const { barLabelMargin, barValueMargin, barRankMargin, scrollMargin, margin } = this.profileConstants;
-    let limits = this.xMdl.scale.domain;
+    let limits = this.MDL.x.scale.domain;
     limits = {min: d3.min(limits), max: d3.max(limits)};
     const ltr = Math.abs(limits.max) >= Math.abs(limits.min);
     const hasNegativeValues = ltr ? limits.min < 0 : limits.max > 0;
 
 
     const rightEdge = (
-        this.width
-        - margin.right
-        - margin.left
-        - barLabelMargin
-        - scrollMargin
-        - (hasNegativeValues ? 0 : this._getWidestLabelWidth())
-      ) / (hasNegativeValues ? 2 : 1);
+      this.width
+      - margin.right
+      - margin.left
+      - barLabelMargin
+      - scrollMargin
+      - (hasNegativeValues ? 0 : this._getWidestLabelWidth())
+    ) / (hasNegativeValues ? 2 : 1);
 
     this.xScale
       .range([0, rightEdge]);
     
-    if (this.xMdl.scale.type !== "log") {
+    if (this.MDL.x.scale.type !== "log") {
       this.xScale
         .domain([0, Math.max(...this.xScale.domain())]);
     }
@@ -489,8 +485,8 @@ export default class VizabiBarrankchart extends BaseComponent {
     const barWidth = (value) => this.xScale(value);
     const isLtrValue = value => ltr ? value >= 0 : value > 0;
 
-    const labelAnchor = value => isLtrValue(value) ? 'end' : 'start';
-    const valueAnchor = value => isLtrValue(value) ? 'start' : 'end';
+    const labelAnchor = value => isLtrValue(value) ? "end" : "start";
+    const valueAnchor = value => isLtrValue(value) ? "start" : "end";
 
     const labelX = value => isLtrValue(value) ? -barLabelMargin : barLabelMargin;
 
@@ -498,151 +494,134 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     const isLabelBig = (this._getWidestLabelWidth(true) + (ltr ? margin.left : margin.right)) < shift;
 
-    this.barContainer.attr("transform", `translate(${shift + (ltr ? margin.left : margin.right) + barLabelMargin}, 0)`);
+    this.DOM.barContainer.attr("transform", `translate(${shift + (ltr ? margin.left : margin.right) + barLabelMargin}, 0)`);
 
-    this.sortedEntities.forEach((bar) => {
+    
+    this.__dataProcessed.forEach((bar) => {
       const { value } = bar;
 
-      if (force || projectorModeChanged || bar.isNew || bar.changedValue) {
-        bar.barLabel
-          .attr('x', labelX(value))
-          .attr('y', this.profileConstants.barHeight / 2)
-          .attr('text-anchor', labelAnchor(value))
-          .text(isLabelBig ? this._getLabelText(bar) : bar.labelSmall);
+    
+      
+      // const labelWidth = barLabel.text(label).node().getBBox().width;
+      // const labelSmallWidth = barLabel.text(labelSmall).node().getBBox().width;
 
-        bar.barRect
-          .attr('rx', this.profileConstants.barHeight / 4)
-          .attr('ry', this.profileConstants.barHeight / 4)
-          .attr('height', this.profileConstants.barHeight);
+      // Object.assign(d, {
+      //   labelWidth,
+      //   labelSmallWidth,
+      //   labelSmall,
+      //   barLabel,
+      // });
 
-        bar.barValue
-          .attr('x', valueX(value))
-          .attr('y', this.profileConstants.barHeight / 2)
-          .attr('text-anchor', valueAnchor(value));
+      if (force || bar.isNew || bar.changedFormattedValue) {
+        bar.DOM.label
+          .attr("x", labelX(value))
+          .attr("y", this.profileConstants.barHeight / 2)
+          .attr("text-anchor", labelAnchor(value))
+          .text(bar.formattedLabel);
 
-        bar.barRank          
-          .text((d, i) => value || value === 0 ? "#" + d.rank : "")
-          .attr('y', this.profileConstants.barHeight / 2);
+        bar.DOM.rect
+          .attr("rx", this.profileConstants.barHeight / 4)
+          .attr("ry", this.profileConstants.barHeight / 4)
+          .attr("height", this.profileConstants.barHeight);
+
+        bar.DOM.value
+          .attr("x", valueX(value))
+          .attr("y", this.profileConstants.barHeight / 2)
+          .attr("text-anchor", valueAnchor(value));
+
+        bar.DOM.rank          
+          .text((d) => value || value === 0 ? "#" + d.rank : "")
+          .attr("y", this.profileConstants.barHeight / 2);
       }
 
-      if (force || bar.changedWidth || projectorModeChanged) {
+      if (force || bar.changedValue) {
         const width = Math.max(0, value && barWidth(Math.abs(value))) || 0;
 
+        if (force || bar.changedFormattedValue) {
+          bar.DOM.value
+            .text(this.localise(value) || this.localise("hints/nodata"));
+          bar.barValueWidth = barValueMargin + bar.DOM.value.node().getBBox().width;
+        }
+
         if (force || bar.changedValue) {
-          bar.barValue
-            .text(this.localise(value) || this.localise('hints/nodata'));
-          bar.barValueWidth = barValueMargin + bar.barValue.node().getBBox().width;
+          bar.DOM.rect
+            .transition().duration(duration).ease(d3.easeLinear)
+            .attr("width", width);
+          bar.DOM.rank
+            .transition().duration(duration).ease(d3.easeLinear)
+            .attr("x", (Math.max(width, bar.barValueWidth) + barRankMargin) * (isLtrValue(value) ? 1 : -1))
+            .attr("text-anchor", valueAnchor(value));
         }
 
-        if (force || bar.changedWidth || projectorModeChanged) {
-          bar.barRect
-            .transition().duration(duration).ease(d3.easeLinear)
-            .attr('width', width);
-          bar.barRank
-            .transition().duration(duration).ease(d3.easeLinear)
-            .attr('x', (Math.max(width, bar.barValueWidth) + barRankMargin) * (isLtrValue(value) ? 1 : -1))
-            .attr("text-anchor", valueAnchor(value))
-        }
-
-        bar.barRect
-          .attr('x', value < 0 ? -width : 0);
+        bar.DOM.rect
+          .attr("x", value < 0 ? -width : 0);
       }
 
-      if (force || bar.changedIndex || projectorModeChanged) {
-        !duration && bar.self.interrupt();
-        (duration ? bar.self.transition().duration(duration).ease(d3.easeLinear) : bar.self)
-          .attr('transform', `translate(0, ${this._getBarPosition(bar.index)})`);
-        bar.barRank          
-          .text((d, i) => value || value === 0 ? "#" + (d.rank) : "");
+      if (force || bar.changedIndex) {
+        !duration && bar.DOM.group.interrupt();
+        (duration ? bar.DOM.group.transition().duration(duration).ease(d3.easeLinear) : bar.DOM.group)
+          .attr("transform", `translate(0, ${this._getBarPosition(bar.index)})`);
+        bar.DOM.rank          
+          .text((d) => value || value === 0 ? "#" + (d.rank) : "");
       }
     });
   }
 
-  _createAndDeleteBars(updatedBars) {
+  _createAndDeleteBars() {
     const _this = this;
 
-    // TODO: revert this commit after fixing https://github.com/vizabi/vizabi/issues/2450
-    // const [entity] = this.sortedEntities;
-    // if (!this._entityLabels[entity.entity]) {
-    //   this._entityLabels[entity.entity] = entity.label;
-    // }
-
-    // const label = this._getLabelText(this.values, this.labelNames, entity.entity)
-    // const localeChanged = this._entityLabels[entity.entity] !== label
-    //   && this.model.locale.id !== this._localeId;
-
-    // if (localeChanged) {
-    //   this._localeId = this.model.locale.id;
-    //   this._entityLabels[entity.entity] = label;
-    // }
-    const localeChanged = false;
+    const updatedBars = this.DOM.barContainer.selectAll(".vzb-br-bar")
+      .data(this.__dataProcessed, d => d[Symbol.for("key")]);
 
     // remove groups for entities that are gone
     updatedBars.exit().remove();
 
     // make the groups for the entities which were not drawn yet (.data.enter() does this)
-    updatedBars = (localeChanged ? updatedBars : updatedBars.enter().append('g'))
+    updatedBars.enter().append("g")
       .each(function(d) {
         const id = d[Symbol.for("key")];
-        const self = d3.select(this);
 
-        const label = _this._getLabelText(d);
-        const labelSmall = label.length < 12 ? label : `${label.substring(0, 9)}...`;//…
+        const group = d3.select(this)
+          .attr("class", "vzb-br-bar")
+          .attr("id", `vzb-br-bar-${id}-${_this.id}`)
+          .classed("vzb-selected", () => _this.MDL.selected.has(d))
+          .on("mousemove", () => _this.MDL.highlighted.set(d))
+          .on("mouseout", () => _this.MDL.highlighted.delete(d))
+          .on("click", () => _this.MDL.selected.toggle(d));
 
-        const selectedLabel = self.select('.vzb-br-label');
-        const barLabel = selectedLabel.size() ?
-          selectedLabel :
-          self.append('text')
-            .attr('class', 'vzb-br-label')
-            .attr('dy', '.325em');
+        const label = group.append("text")
+          .attr("class", "vzb-br-label")
+          .attr("dy", ".325em");
 
-        const labelWidth = barLabel.text(label).node().getBBox().width;
-        const labelSmallWidth = barLabel.text(labelSmall).node().getBBox().width;
+        const rect = group.append("rect")
+          .attr("stroke", "transparent");
+
+        const value = group.append("text")
+          .attr("class", "vzb-br-value")
+          .attr("dy", ".325em");
+
+        const rank = group.append("text")
+          .attr("class", "vzb-br-rank")
+          .attr("dy", ".325em");
 
         Object.assign(d, {
-          labelWidth,
-          labelSmallWidth,
-          labelSmall,
-          barLabel,
+          DOM: {
+            group,
+            label,
+            rect,
+            value,
+            rank
+          }
         });
-
-        if (!localeChanged) {
-          self
-            .attr('class', 'vzb-br-bar')
-            .classed('vzb-selected', () => _this.selectedFilter.has(d))
-            .attr('id', `vzb-br-bar-${id}-${_this.id}`)
-            .on('mousemove', () => _this.highlightedFilter.set(d))
-            .on('mouseout', () => _this.highlightedFilter.delete(d))
-            .on('click', () => _this.selectedFilter.toggle(d));
-
-          const barRect = self.append('rect')
-            .attr('stroke', 'transparent');
-
-          const barValue = self.append('text')
-            .attr('class', 'vzb-br-value')
-            .attr('dy', '.325em');
-
-          const barRank = self.append('text')
-            .attr('class', 'vzb-br-rank')
-            .attr('dy', '.325em');
-
-          Object.assign(d, {
-            self,
-            isNew: true,
-            barRect,
-            barValue,
-            barRank
-          });
-        }
-      })
-      .merge(updatedBars);
+      });
   }
 
   _getWidestLabelWidth(big = false) {
-    const widthKey = big ? 'labelWidth' : 'labelSmallWidth';
-    const labelKey = big ? 'label' : 'labelSmall';
+    return 100;
+    const widthKey = big ? "labelWidth" : "labelSmallWidth";
+    const labelKey = big ? "label" : "labelSmall";
 
-    const bar = this.sortedEntities
+    const bar = this.__dataProcessed
       .reduce((a, b) => a[widthKey] < b[widthKey] ? b : a);
 
     const text = bar.barLabel.text();
@@ -657,13 +636,18 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   _resizeSvg() {
-    const { barHeight, barMargin } = this.profileConstants;
-    this.barSvg.attr('height', `${(barHeight + barMargin) * this.sortedEntities.length}px`);
+    const { margin, barHeight, barMargin } = this.profileConstants;
+
+    this.DOM.barViewport
+      .style("height", `${this.height - margin.bottom - margin.top}px`);
+
+    this.DOM.barSvg
+      .attr("height", `${(barHeight + barMargin) * this.__dataProcessed.length}px`);
   }
 
 
   _scroll(duration = 0) {
-    const follow = this.barContainer.select('.vzb-selected');
+    const follow = this.DOM.barContainer.select(".vzb-selected");
     if (!follow.empty()) {
       const d = follow.datum();
       const yPos = this._getBarPosition(d.index);
@@ -672,8 +656,8 @@ export default class VizabiBarrankchart extends BaseComponent {
       const height = this.height - margin.top - margin.bottom;
 
       const scrollTo = yPos - (height + this.profileConstants.barHeight) / 2;
-      this.barViewport.transition().duration(duration)
-        .tween('scrollfor' + d.entity, this._scrollTopTween(scrollTo));
+      this.DOM.barViewport.transition().duration(duration)
+        .tween("scrollfor" + d.entity, this._scrollTopTween(scrollTo));
     }
   }
 
@@ -689,7 +673,7 @@ export default class VizabiBarrankchart extends BaseComponent {
   _drawColors() {
     const _this = this;
 
-    this.barContainer.selectAll('.vzb-br-bar>rect')
+    this.DOM.barContainer.selectAll(".vzb-br-bar>rect")
       .each(function(d) {
         const rect = d3.select(this);
 
@@ -697,14 +681,14 @@ export default class VizabiBarrankchart extends BaseComponent {
         const isColorValid = colorValue || colorValue === 0;
 
         const fillColor = isColorValid ? String(_this._getColor(colorValue)) : COLOR_WHITEISH;
-        const strokeColor = isColorValid ? 'transparent' : COLOR_BLACKISH;
+        const strokeColor = isColorValid ? "transparent" : COLOR_BLACKISH;
 
-        rect.style('fill') !== fillColor && rect.style('fill', fillColor);
-        rect.style('stroke') !== strokeColor && rect.style('stroke', strokeColor);
+        rect.style("fill") !== fillColor && rect.style("fill", fillColor);
+        rect.style("stroke") !== strokeColor && rect.style("stroke", strokeColor);
       });
 
-    this.barContainer.selectAll('.vzb-br-bar>text')
-      .style('fill', (d) => this._getDarkerColor(d.color || null));
+    this.DOM.barContainer.selectAll(".vzb-br-bar>text")
+      .style("fill", (d) => this._getDarkerColor(d.color || null));
   }
 
   _getColor(value) {
@@ -724,13 +708,13 @@ export default class VizabiBarrankchart extends BaseComponent {
       opacityRegular,
     } = this.state;
 
-    const someHighlighted = this.highlightedFilter.markers.size > 0;
-    const someSelected = this.selectedFilter.markers.size > 0;
+    const someHighlighted = this.MDL.highlighted.markers.size > 0;
+    const someSelected = this.MDL.selected.markers.size > 0;
 
-    this.barContainer.selectAll('.vzb-br-bar')
-      .style('opacity', d => {
-        if (_this.highlightedFilter.has(d)) return opacityRegular;
-        if (_this.selectedFilter.has(d)) return opacityRegular;
+    this.DOM.barContainer.selectAll(".vzb-br-bar")
+      .style("opacity", d => {
+        if (_this.MDL.highlighted.has(d)) return opacityRegular;
+        if (_this.MDL.selected.has(d)) return opacityRegular;
 
         if (someSelected) return opacitySelectDim;
         if (someHighlighted) return opacityHighlightDim;

@@ -8,7 +8,7 @@ export default class PlayButton extends BaseComponent {
   }
 
   setup() {
-    this.buttonEl = this.view.select(".vzb-playbutton")
+    this.buttonEl = this.element.select(".vzb-playbutton")
       .on("click", () => {this.model.encoding.get("frame").togglePlaying();});
   }
 

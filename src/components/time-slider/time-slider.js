@@ -19,12 +19,14 @@ export default class TimeSlider extends BaseComponent {
   }
 
   setup() {
-    this.sliderEL = this.view.select(".vzb-ts-slider");
+    this.DOM = {
+      slider: this.element.select(".vzb-ts-slider")
+    };
   }
 
   draw() {
     const localise = this.services.locale.auto();
-    this.sliderEL.text(localise(this.model.encoding.get("frame").value));
+    this.DOM.slider.text(localise(this.model.encoding.get("frame").value));
   }
 }  
 

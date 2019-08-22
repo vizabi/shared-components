@@ -4,6 +4,7 @@
     "rtl": false,
     "dictionary": {
         "button-play": "Пуск",
-        "button-pause": "Пауза"
+        "button-pause": "Пауза",
+        "hints/dataWarning": "Неточности"
     }
 }
