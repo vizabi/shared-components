@@ -19,7 +19,7 @@ class BaseComponent {
     this.parent = parent || null;
     this.root = root || this;
     this.name = name || "";
-    this.reactions = {};
+    this.reactions = new Map();
 
     this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
@@ -41,19 +41,19 @@ class BaseComponent {
 
   setup() {}
 
-  addReaction(methodName){
-    if(this[methodName] && !this.reactions[methodName]){
-      this.reactions[methodName] = autorun(this[methodName].bind(this));
+  addReaction(method){
+    if(!this.reactions.has(method)){
+      this.reactions.set(method, autorun(method.bind(this)));
     }
   }
-  removeReaction(methodName){
-    if(this[methodName] && this.reactions[methodName]){
-      this.reactions[methodName]();
-      delete this.reactions[methodName];
+  removeReaction(method){
+    if(this.reactions.has(method)){
+      this.reactions.get(method)();
+      this.reactions.delete(method);
     }
   }
   removeAllReactions(){
-    Object.keys(this.reactions).forEach(this.removeReaction);
+    this.reactions.forEach((_disposer, method) => this.removeReaction(method));
   }
 
   findChild({name, id, type}){

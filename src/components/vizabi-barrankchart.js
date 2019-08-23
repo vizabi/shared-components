@@ -2,11 +2,12 @@ import BaseComponent from "./base-component.js";
 import "./vizabi-barrankchart.scss";
 import * as utils from "./legacy/base/utils";
 import {ICON_WARN, ICON_QUESTION} from "../assets/icons/iconset.js";
+import { trace } from 'mobx';
 
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
 
-const ANIMATION_DURATION = 500;
+const ANIMATION_DURATION = 200;
 
 const PROFILE_CONSTANTS = {
   SMALL: {
@@ -20,6 +21,7 @@ const PROFILE_CONSTANTS = {
     barValueMargin: 5,
     barRankMargin: 6,
     scrollMargin: 25,
+    longestLabelLength: 12 //chars
   },
   MEDIUM: {
     margin: {top: 60, right: 25, left: 5, bottom: 20},
@@ -32,6 +34,7 @@ const PROFILE_CONSTANTS = {
     barValueMargin: 5,
     barRankMargin: 10,
     scrollMargin: 30,
+    longestLabelLength: 12 //chars
   },
   LARGE: {
     margin: {top: 60, right: 30, left: 5, bottom: 20},
@@ -44,6 +47,7 @@ const PROFILE_CONSTANTS = {
     barValueMargin: 5,
     barRankMargin: 10,
     scrollMargin: 30,
+    longestLabelLength: 12 //chars
   }
 };
 
@@ -162,7 +166,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     this._cache = {};
   }
   
-  draw(data) {
+  draw() {
     //JASPER: i can't move this to "setup", ideally would avoid running getters on each time ticklk
     this.MDL = {
       frame: this.model.encoding.get("frame"),
@@ -180,24 +184,25 @@ export default class VizabiBarrankchart extends BaseComponent {
 
 
     
-    this.addReaction("_drawForecastOverlay");
+    this.addReaction(this._drawForecastOverlay);
     
     if (this._updateLayoutProfile()) return; //return if exists with error
-    this.addReaction("_getDuration");
-    this.addReaction("_drawHeader");
-    this.addReaction("_drawInfoEl");
-    this.addReaction("_drawFooter");
+    this.addReaction(this._getDuration);
+    this.addReaction(this._drawHeader);
+    this.addReaction(this._drawInfoEl);
+    this.addReaction(this._drawFooter);
+    this.addReaction(this._getWidestLabelWidth);
 
-    //this.addReaction("_processFrameData");
-    //this.addReaction("_createAndDeleteBars");
-    this.addReaction("_drawData");
-    this.addReaction("_updateOpacity");
-    this.addReaction("_resizeSvg");
-    this.addReaction("_scroll");
-    this.addReaction("_drawColors");
+    //this.addReaction(this._processFrameData);
+    //this.addReaction(this._createAndDeleteBars);
+    this.addReaction(this._drawData);
+    this.addReaction(this._updateOpacity);
+    this.addReaction(this._resizeSvg);
+    this.addReaction(this._scroll);
+    this.addReaction(this._drawColors);
 
-    this.addReaction("_updateDataWarning");
-    this.addReaction("_updateMissedPositionWarning");
+    this.addReaction(this._updateDataWarning);
+    this.addReaction(this._updateMissedPositionWarning);
     
   }
 
@@ -226,7 +231,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
   }
 
-  _drawHeader(duration = 0) {
+  _drawHeader() {
     const {
       margin,
       headerMargin,
@@ -280,10 +285,10 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     const headerTotal = this.DOM.total;
 
-    if (duration) {
+    if (this.__duration) {
       headerTotal.select("text")
         .transition("text")
-        .delay(duration)
+        .delay(this.__duration)
         .text(this.localise(this.MDL.frame.value));
     } else {
       headerTotal.select("text")
@@ -393,9 +398,16 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   _getLabelText(d) {
-    if (!d.label) return d[Symbol.for("key")];
-    let label = (typeof d.label === "string") ? d.label : Object.keys(d.label).join(", ");
-    if (label.length >= 12) label = `${label.substring(0, 11)}…`;
+    const longestAllowed = this.profileConstants.longestLabelLength;
+    let label = "";
+    if (!d.label) 
+      label = d[Symbol.for("key")];
+    else if (typeof d.label === "string") 
+      label = d.label;
+    else 
+      label = Object.keys(d.label).join(", ");
+
+    if (label.length >= longestAllowed) label = label.substring(0, longestAllowed - 1) + "…";
     return label;
   }
 
@@ -447,14 +459,12 @@ export default class VizabiBarrankchart extends BaseComponent {
       }, []);
   }
 
-  _drawData(duration = 500, force = true) {
-    duration = 200;
+  _drawData() {
+
+    this.services.layout.width + this.services.layout.height;
+    
     this._processFrameData();
     this._createAndDeleteBars();
-    
-    const valuesCount = this.__dataProcessed.length;
-    if (!valuesCount) return false;
-
     
     const { barLabelMargin, barValueMargin, barRankMargin, scrollMargin, margin } = this.profileConstants;
     let limits = this.MDL.x.scale.domain;
@@ -462,110 +472,77 @@ export default class VizabiBarrankchart extends BaseComponent {
     const ltr = Math.abs(limits.max) >= Math.abs(limits.min);
     const hasNegativeValues = ltr ? limits.min < 0 : limits.max > 0;
 
-
     const rightEdge = (
       this.width
       - margin.right
       - margin.left
       - barLabelMargin
       - scrollMargin
-      - (hasNegativeValues ? 0 : this._getWidestLabelWidth())
+      - (hasNegativeValues ? 0 : this.__widestLabelWidth)
     ) / (hasNegativeValues ? 2 : 1);
 
-    this.xScale
-      .range([0, rightEdge]);
+    this.xScale.range([0, rightEdge]);
     
     if (this.MDL.x.scale.type !== "log") {
-      this.xScale
-        .domain([0, Math.max(...this.xScale.domain())]);
+      this.xScale.domain([0, Math.max(...this.xScale.domain())]);
     }
 
-    const shift = hasNegativeValues ? rightEdge : this._getWidestLabelWidth();
+    const shift = hasNegativeValues ? rightEdge : this.__widestLabelWidth;
 
-    const barWidth = (value) => this.xScale(value);
     const isLtrValue = value => ltr ? value >= 0 : value > 0;
+
+    const transition = (selection) =>
+      this.__duration ? selection.transition().duration(this.__duration).ease(d3.easeLinear) : selection.interrupt();
 
     const labelAnchor = value => isLtrValue(value) ? "end" : "start";
     const valueAnchor = value => isLtrValue(value) ? "start" : "end";
 
     const labelX = value => isLtrValue(value) ? -barLabelMargin : barLabelMargin;
-
     const valueX = value => isLtrValue(value) ? barValueMargin : -barValueMargin;
-
-    const isLabelBig = (this._getWidestLabelWidth(true) + (ltr ? margin.left : margin.right)) < shift;
 
     this.DOM.barContainer.attr("transform", `translate(${shift + (ltr ? margin.left : margin.right) + barLabelMargin}, 0)`);
 
-    
     this.__dataProcessed.forEach((bar) => {
       const { value } = bar;
+      const { barHeight } = this.profileConstants;
+      const width = Math.max(0, value && this.xScale(Math.abs(value))) || 0;
 
-    
+      bar.DOM.label
+        .attr("x", labelX(value))
+        .attr("y", barHeight / 2)
+        .attr("text-anchor", labelAnchor(value))
+        .text(bar.formattedLabel);
+
+      bar.DOM.rect
+        .attr("rx", barHeight / 4)
+        .attr("ry", barHeight / 4)
+        .attr("height", barHeight);
+
+      bar.DOM.value
+        .attr("x", valueX(value))
+        .attr("y", barHeight / 2)
+        .attr("text-anchor", valueAnchor(value))
+        .text(this.localise(value) || this.localise("hints/nodata"));
+
+      const barValueWidth = barValueMargin + bar.DOM.value.node().getBBox().width;
+
+      bar.DOM.rank
+        .text((d) => value || value === 0 ? "#" + d.rank : "")
+        .attr("y", barHeight / 2)
+        .attr("text-anchor", valueAnchor(value));
+
+      transition(bar.DOM.group)
+        .attr("transform", `translate(0, ${this._getBarPosition(bar.index)})`);
       
-      // const labelWidth = barLabel.text(label).node().getBBox().width;
-      // const labelSmallWidth = barLabel.text(labelSmall).node().getBBox().width;
+      transition(bar.DOM.rect)
+        .attr("width", width)
+        .attr("x", value < 0 ? -width : 0);
 
-      // Object.assign(d, {
-      //   labelWidth,
-      //   labelSmallWidth,
-      //   labelSmall,
-      //   barLabel,
-      // });
-
-      if (force || bar.isNew || bar.changedFormattedValue) {
-        bar.DOM.label
-          .attr("x", labelX(value))
-          .attr("y", this.profileConstants.barHeight / 2)
-          .attr("text-anchor", labelAnchor(value))
-          .text(bar.formattedLabel);
-
-        bar.DOM.rect
-          .attr("rx", this.profileConstants.barHeight / 4)
-          .attr("ry", this.profileConstants.barHeight / 4)
-          .attr("height", this.profileConstants.barHeight);
-
-        bar.DOM.value
-          .attr("x", valueX(value))
-          .attr("y", this.profileConstants.barHeight / 2)
-          .attr("text-anchor", valueAnchor(value));
-
-        bar.DOM.rank          
-          .text((d) => value || value === 0 ? "#" + d.rank : "")
-          .attr("y", this.profileConstants.barHeight / 2);
-      }
-
-      if (force || bar.changedValue) {
-        const width = Math.max(0, value && barWidth(Math.abs(value))) || 0;
-
-        if (force || bar.changedFormattedValue) {
-          bar.DOM.value
-            .text(this.localise(value) || this.localise("hints/nodata"));
-          bar.barValueWidth = barValueMargin + bar.DOM.value.node().getBBox().width;
-        }
-
-        if (force || bar.changedValue) {
-          bar.DOM.rect
-            .transition().duration(duration).ease(d3.easeLinear)
-            .attr("width", width);
-          bar.DOM.rank
-            .transition().duration(duration).ease(d3.easeLinear)
-            .attr("x", (Math.max(width, bar.barValueWidth) + barRankMargin) * (isLtrValue(value) ? 1 : -1))
-            .attr("text-anchor", valueAnchor(value));
-        }
-
-        bar.DOM.rect
-          .attr("x", value < 0 ? -width : 0);
-      }
-
-      if (force || bar.changedIndex) {
-        !duration && bar.DOM.group.interrupt();
-        (duration ? bar.DOM.group.transition().duration(duration).ease(d3.easeLinear) : bar.DOM.group)
-          .attr("transform", `translate(0, ${this._getBarPosition(bar.index)})`);
-        bar.DOM.rank          
-          .text((d) => value || value === 0 ? "#" + (d.rank) : "");
-      }
+      transition(bar.DOM.rank)
+        .attr("x", (Math.max(width, barValueWidth) + barRankMargin) * (isLtrValue(value) ? 1 : -1));
     });
   }
+
 
   _createAndDeleteBars() {
     const _this = this;
@@ -616,19 +593,20 @@ export default class VizabiBarrankchart extends BaseComponent {
       });
   }
 
-  _getWidestLabelWidth(big = false) {
-    return 100;
-    const widthKey = big ? "labelWidth" : "labelSmallWidth";
-    const labelKey = big ? "label" : "labelSmall";
+  _getWidestLabelWidth() {
+    this.services.layout.width + this.services.layout.height;
 
-    const bar = this.__dataProcessed
-      .reduce((a, b) => a[widthKey] < b[widthKey] ? b : a);
+    const longestLabel = "N".repeat(this.profileConstants.longestLabelLength);
 
-    const text = bar.barLabel.text();
-    const width = bar.barLabel.text(bar[labelKey]).node().getBBox().width;
-    bar.barLabel.text(text);
+    const probe = this.DOM.barContainer
+      .append("g").attr("class", "vzb-br-bar vzb-br-probe vzb-hidden");
 
-    return width;
+    const width = probe.append("text")
+      .attr("class", "vzb-br-label")
+      .text(longestLabel).node().getBBox().width;
+
+    probe.remove();
+    return this.__widestLabelWidth = width;
   }
 
   _getBarPosition(i) {
@@ -646,7 +624,7 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
 
-  _scroll(duration = 0) {
+  _scroll() {
     const follow = this.DOM.barContainer.select(".vzb-selected");
     if (!follow.empty()) {
       const d = follow.datum();
@@ -656,7 +634,7 @@ export default class VizabiBarrankchart extends BaseComponent {
       const height = this.height - margin.top - margin.bottom;
 
       const scrollTo = yPos - (height + this.profileConstants.barHeight) / 2;
-      this.DOM.barViewport.transition().duration(duration)
+      this.DOM.barViewport.transition().duration(this.__duration)
         .tween("scrollfor" + d.entity, this._scrollTopTween(scrollTo));
     }
   }
@@ -673,22 +651,23 @@ export default class VizabiBarrankchart extends BaseComponent {
   _drawColors() {
     const _this = this;
 
-    this.DOM.barContainer.selectAll(".vzb-br-bar>rect")
-      .each(function(d) {
-        const rect = d3.select(this);
+    this.__dataProcessed.forEach( bar =>{
 
-        const colorValue = d.color;
-        const isColorValid = colorValue || colorValue === 0;
+      const colorValue = bar.color;
+      const isColorValid = colorValue || colorValue === 0;
 
-        const fillColor = isColorValid ? String(_this._getColor(colorValue)) : COLOR_WHITEISH;
-        const strokeColor = isColorValid ? "transparent" : COLOR_BLACKISH;
+      const fillColor = isColorValid ? _this._getColor(colorValue) : COLOR_WHITEISH;
+      const strokeColor = isColorValid ? "transparent" : COLOR_BLACKISH;
+      const darkerColor = isColorValid ? this._getDarkerColor(bar.color) : COLOR_BLACKISH;
 
-        rect.style("fill") !== fillColor && rect.style("fill", fillColor);
-        rect.style("stroke") !== strokeColor && rect.style("stroke", strokeColor);
-      });
+      bar.DOM.rect
+        .style("fill", fillColor)
+        .style("stroke", strokeColor);
 
-    this.DOM.barContainer.selectAll(".vzb-br-bar>text")
-      .style("fill", (d) => this._getDarkerColor(d.color || null));
+      bar.DOM.value.style("fill", darkerColor);
+      bar.DOM.label.style("fill", darkerColor);
+      bar.DOM.rank.style("fill", darkerColor);
+    });
   }
 
   _getColor(value) {
