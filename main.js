@@ -53,6 +53,7 @@ var initialMarkerConfig = {
     },
     frame: {
       modelType: "frame",
+      speed: 200,
       data: {
         concept: {
           autoconfig: {

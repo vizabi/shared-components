@@ -2,12 +2,10 @@ import BaseComponent from "./base-component.js";
 import "./vizabi-barrankchart.scss";
 import * as utils from "./legacy/base/utils";
 import {ICON_WARN, ICON_QUESTION} from "../assets/icons/iconset.js";
-import { trace } from 'mobx';
+import { trace, observable } from 'mobx';
 
 const COLOR_BLACKISH = "rgb(51, 51, 51)";
 const COLOR_WHITEISH = "rgb(253, 253, 253)";
-
-const ANIMATION_DURATION = 200;
 
 const PROFILE_CONSTANTS = {
   SMALL: {
@@ -211,7 +209,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     if(!this.MDL.frame) return 0;
     this.frameValue_1 = this.frameValue;
     this.frameValue = this.MDL.frame.value;
-    return this.__duration = this.MDL.frame.playing && (this.frameValue - this.frameValue_1 > 0) ? ANIMATION_DURATION : 0;
+    return this.__duration = this.MDL.frame.playing && (this.frameValue - this.frameValue_1 > 0) ? this.MDL.frame.speed : 0;
   }
   
   _drawForecastOverlay() {
@@ -398,7 +396,7 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   _getLabelText(d) {
-    const longestAllowed = this.profileConstants.longestLabelLength;
+    const longestLabelLength = this.profileConstants.longestLabelLength;
     let label = "";
     if (!d.label) 
       label = d[Symbol.for("key")];
@@ -407,7 +405,7 @@ export default class VizabiBarrankchart extends BaseComponent {
     else 
       label = Object.keys(d.label).join(", ");
 
-    if (label.length >= longestAllowed) label = label.substring(0, longestAllowed - 1) + "…";
+    if (label.length >= longestLabelLength) label = label.substring(0, longestLabelLength - 1) + "…";
     return label;
   }
 
@@ -424,8 +422,9 @@ export default class VizabiBarrankchart extends BaseComponent {
         const id = d[Symbol.for("key")];
         const cached = this._cache[id];
         const value = d.x;
-        if (!value && value !== 0) this.nullValuesCount++;
-        const formattedValue = this.localise(value);
+        const valueValid = value || value === 0;
+        if (!valueValid) this.nullValuesCount++;
+        const formattedValue = valueValid? this.localise(value) : this.localise("hints/nodata");
         const formattedLabel = this._getLabelText(d);
         const rank = !index || result[index - 1].formattedValue !== formattedValue ? index + 1 : result[index - 1].rank;
   
@@ -437,6 +436,7 @@ export default class VizabiBarrankchart extends BaseComponent {
             index,
             rank,
             changedFormattedValue: formattedValue !== cached.formattedValue,
+            changedFormattedLabel: formattedLabel !== cached.formattedLabel,
             changedValue: value !== cached.value,
             changedIndex: index !== cached.index,
             isNew: false
@@ -449,6 +449,7 @@ export default class VizabiBarrankchart extends BaseComponent {
             index,
             rank,
             changedFormattedValue: true,
+            changedFormattedLabel: true,
             changedValue: true,
             changedIndex: true,
             isNew: true
@@ -461,7 +462,9 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   _drawData() {
 
-    this.services.layout.width + this.services.layout.height;
+    this.sizes = this.services.layout.width + this.services.layout.height;
+    const sizeChanged = this.sizes !== this.sizes_1;
+    this.sizes_1 = this.services.layout.width + this.services.layout.height;  
     
     this._processFrameData();
     this._createAndDeleteBars();
@@ -507,39 +510,53 @@ export default class VizabiBarrankchart extends BaseComponent {
       const { barHeight } = this.profileConstants;
       const width = Math.max(0, value && this.xScale(Math.abs(value))) || 0;
 
-      bar.DOM.label
-        .attr("x", labelX(value))
-        .attr("y", barHeight / 2)
-        .attr("text-anchor", labelAnchor(value))
-        .text(bar.formattedLabel);
+      if (bar.changedValue || sizeChanged)
+        bar.DOM.label
+          .attr("x", labelX(value))
+          .attr("y", barHeight / 2)
+          .attr("text-anchor", labelAnchor(value));
 
-      bar.DOM.rect
-        .attr("rx", barHeight / 4)
-        .attr("ry", barHeight / 4)
-        .attr("height", barHeight);
+      if (bar.changedFormattedLabel) 
+        bar.DOM.label
+          .text(bar.formattedLabel);
 
-      bar.DOM.value
-        .attr("x", valueX(value))
-        .attr("y", barHeight / 2)
-        .attr("text-anchor", valueAnchor(value))
-        .text(this.localise(value) || this.localise("hints/nodata"));
+      if (sizeChanged)
+        bar.DOM.rect
+          .attr("rx", barHeight / 4)
+          .attr("ry", barHeight / 4)
+          .attr("height", barHeight);
 
-      const barValueWidth = barValueMargin + bar.DOM.value.node().getBBox().width;
+      if (bar.changedValue || sizeChanged)
+        bar.DOM.value
+          .attr("x", valueX(value))
+          .attr("y", barHeight / 2)
+          .attr("text-anchor", valueAnchor(value));
 
-      bar.DOM.rank
-        .text((d) => value || value === 0 ? "#" + d.rank : "")
-        .attr("y", barHeight / 2)
-        .attr("text-anchor", valueAnchor(value));
+      if (bar.changedFormattedValue) {
+        bar.DOM.value
+          .text(bar.formattedValue);
+        bar.valueWidth = barValueMargin + bar.DOM.value.node().getBBox().width;
+      }
 
-      transition(bar.DOM.group)
-        .attr("transform", `translate(0, ${this._getBarPosition(bar.index)})`);
+      if (bar.changedIndex || bar.changedValue || sizeChanged)
+        bar.DOM.rank
+          .text(value || value === 0 ? "#" + bar.rank : "")
+          .attr("y", barHeight / 2)
+          .attr("text-anchor", valueAnchor(value));
+
+      if (bar.changedIndex || sizeChanged)
+        transition(bar.DOM.group)
+          .attr("transform", `translate(0, ${this._getBarPosition(bar.index)})`);
       
-      transition(bar.DOM.rect)
-        .attr("width", width)
-        .attr("x", value < 0 ? -width : 0);
+      if (bar.changedValue || sizeChanged)
+        transition(bar.DOM.rect)
+          .attr("width", width)
+          .attr("x", value < 0 ? -width : 0);
 
-      transition(bar.DOM.rank)
-        .attr("x", (Math.max(width, barValueWidth) + barRankMargin) * (isLtrValue(value) ? 1 : -1));
+      if (bar.changedValue || sizeChanged){
+        transition(bar.DOM.rank)
+          .attr("x", (Math.max(width, bar.valueWidth || 0) + barRankMargin) * (isLtrValue(value) ? 1 : -1));
+      }
     });
   }
 
@@ -594,6 +611,7 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   _getWidestLabelWidth() {
+    //updates on resize
     this.services.layout.width + this.services.layout.height;
 
     const longestLabel = "N".repeat(this.profileConstants.longestLabelLength);
