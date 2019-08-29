@@ -23,7 +23,7 @@ export default {
     file: "build/bundle.js",
     format: "umd",
     banner: copyright,
-    sourceMap: "inline"
+    sourcemap: "inline"
   },
   plugins: [
     trash({
