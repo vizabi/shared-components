@@ -9,59 +9,100 @@ $vzb-ts-value-width: 40px;
 
 $color-text: rgb(15, 14, 14);
 
-.vzb-timeslider {
-  min-height: $vzb-ts-btn-area;
-  position: relative;
+.vzb-tool {
+  .vzb-timeslider {
+    min-height: $vzb-ts-btn-area;
+    position: relative;
 
-  &.vzb-ts-disabled {
-    opacity: 0.4;
-    pointer-events: none;
-    .vzb-ts-slider-slide {
-      .background {
+    &.vzb-ts-disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      .vzb-ts-slider-slide {
+        .background {
+          pointer-events: none;
+        }
+      }
+      .vzb-ts-slider-handle {
+        visibility: hidden;
         pointer-events: none;
       }
     }
-    .vzb-ts-slider-handle {
-      visibility: hidden;
+
+    .vzb-ts-btns {
+      @include position(absolute, 0 null 0 0);
+      margin-left: 5px;
+      width: $vzb-ts-btn-area;
       pointer-events: none;
-    }
-  }
-
-  .vzb-ts-btns {
-    @include position(absolute, 0 null 0 0);
-    margin-left: 5px;
-    width: $vzb-ts-btn-area;
-    pointer-events: none;
-    .vzb-ts-btn {
-      @include border-radius(40px);
-      font-size: $vzb-font-size-regular;
-      width: $vzb-ts-btn-width;
-      height: $vzb-ts-btn-width;
-      background: $vzb-color-white;
-      display: block;
-      border: 0;
-      padding: 0;
-      margin: 5px;
-      cursor: pointer;
-      pointer-events: auto;
-
-      .vzb-icon {
+      .vzb-ts-btn {
+        @include border-radius(40px);
+        font-size: $vzb-font-size-regular;
         width: $vzb-ts-btn-width;
         height: $vzb-ts-btn-width;
-        path {
-          fill: $vzb-ts-btn-bg;
+        background: $vzb-color-white;
+        display: block;
+        border: 0;
+        padding: 0;
+        margin: 5px;
+        cursor: pointer;
+        pointer-events: auto;
+
+        .vzb-icon {
+          width: $vzb-ts-btn-width;
+          height: $vzb-ts-btn-width;
+          path {
+            fill: $vzb-ts-btn-bg;
+          }
+        }
+        &.vzb-ts-btn-loading {
+          background: $vzb-ts-btn-bg;
+        }
+        &:active,
+        &:focus {
+          outline: none;
+          path {
+            fill: $vzb-ts-btn-bg;
+          }
         }
       }
-      // &.vzb-ts-btn-loading {
-      //   background: $vzb-ts-btn-bg;
-      // }
-      &:active,
-      &:focus {
-        outline: none;
-        path {
-          fill: $vzb-ts-btn-bg;
+      .vzb-loader {
+        @extend %vzb-loader;
+        @include size(38px);
+        border-color: rgba($vzb-color-white, 0);
+        border-top-color: rgba($vzb-color-white, 1);
+        margin-top: -1 * 38px/2;
+        margin-left: -1 * 38px/2;
+      }   
+    }
+  }
+  
+  &.vzb-medium {
+    .vzb-timeslider {
+      min-height: $vzb-ts-btn-area;
+      .vzb-ts-slider {
+        margin-left: 5px;
+      }
+      .vzb-ts-slider-wrapper {
+        margin-right: 5px;
+        .vzb-ts-slider-axis .vzb-axis-line {
+          stroke-width: 7px;
+        }
+        .vzb-ts-slider-handle {
+          stroke-width: 5px;
+        }
+      }
+      .vzb-ts-btns {
+        @include position(absolute, -10px null 0 0);
+        .vzb-ts-btn {
+          margin-left: auto;
+          margin-right: 15px;
+        }
+      }
+      &.vzb-ts-axis-aligned {
+        .vzb-ts-btns {
+          @include position(absolute, 0 0 5px 5px);
         }
       }
     }
   }
+  
 }
