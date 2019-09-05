@@ -320,17 +320,18 @@ export default class VizabiBarrankchart extends BaseComponent {
   _drawInfoEl(){
     const dataNotes = this.root.findChild({type: "DataNotes"});
     const conceptPropsX = this.MDL.x.data.conceptProps;
+    const infoElHeight = this.profileConstants.infoElHeight;
 
     this.DOM.info
       .on("click", () => {
         dataNotes.pin();
       })
-      .on("mouseover", () => {
+      .on("mouseover", function() {
         const rect = this.getBBox();
         const ctx = utils.makeAbsoluteContext(this, this.farthestViewportElement);
         const coord = ctx(rect.x - 10, rect.y + rect.height + 10);
         dataNotes
-          .setConceptProps(conceptPropsX)
+          .setEncoding("x")
           .show()
           .setPos(coord.x, coord.y);
       })
@@ -338,8 +339,9 @@ export default class VizabiBarrankchart extends BaseComponent {
         dataNotes.hide();
       })
       .html(ICON_QUESTION)
-      .select("svg").attr("width", 0).attr("height", 0)
-      .classed("vzb-hidden", !conceptPropsX.description && !conceptPropsX.sourceLink);
+      .select("svg")
+      .attr("width", infoElHeight + "px").attr("height", infoElHeight + "px")
+      .classed("vzb-hidden", !(conceptPropsX.description || "test") && !(conceptPropsX.sourceLink || "https://www.sitepoint.com/javascript-private-class-fields/"));
   }
 
   _drawFooter(){

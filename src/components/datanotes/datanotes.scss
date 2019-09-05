@@ -1,3 +1,5 @@
+@import "../../styles/common.scss";
+
 .vzb-tool-datanotes {
     @include rtl {
       padding-left: 15px;
@@ -96,7 +98,7 @@
     }
   }
   
-  &.vzb-small {
+  .vzb-small {
     .vzb-tool-datanotes {
       width: 300px;
       max-height: 150px;
@@ -120,7 +122,7 @@
     }
   }
   
-  &.vzb-medium {
+  .vzb-medium {
     .vzb-tool-datanotes {
       width: 350px;
       max-height: 175px;
@@ -143,7 +145,7 @@
     }
   }
   
-  &.vzb-large {
+  .vzb-large {
     .vzb-tool-datanotes {
       width: 400px;
       max-height: 200px;

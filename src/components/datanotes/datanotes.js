@@ -1,4 +1,4 @@
-import * as utils from "./legacy/base/utils";
+import * as utils from "../legacy/base/utils.js";
 import BaseComponent from "../base-component.js";
 import "./datanotes.scss";
 
@@ -50,7 +50,6 @@ export default class DataNotes extends BaseComponent {
     this.left = 0;
     this.top = 0;
     this.hookName = null;
-    this.newHookName = null;
 
 
     this.element.append("div")
@@ -92,15 +91,8 @@ export default class DataNotes extends BaseComponent {
     }
   }
 
-  setHook(_hookName) {
-    if (!this._readyOnce) return this;
-    if (this.pinned) {
-      this.newHookName = _hookName;
-      return this;
-    }
-    if (this.hookName) this.model.marker[this.hookName].off("change:which", this.close);
-    this.hookName = this.newHookName = _hookName;
-    this.model.marker[this.hookName].on("change:which", this.close);
+  setEncoding(_hookName) {
+    this.hookName = _hookName;
 
     this.setValues();
 
@@ -109,14 +101,14 @@ export default class DataNotes extends BaseComponent {
 
   setValues() {
     if (!this.hookName) return;
-    const hook = this.model.marker[this.hookName];
-    const concept = hook.getConceptprops();
+    const hook = this.model.encoding.get(this.hookName);
+    const concept = hook.data.conceptProps;
 
     this.element.select(".vzb-data-notes-body")
-      .classed("vzb-hidden", !concept.description)
-      .text(utils.replaceNumberSpacesToNonBreak(concept.description) || "");
+      .classed("vzb-hidden", !(concept.description || "test"))
+      .text(utils.replaceNumberSpacesToNonBreak(concept.description) || "test");
 
-    this.element.select(".vzb-data-notes-link").classed("vzb-hidden", !concept.sourceLink);
+    this.element.select(".vzb-data-notes-link").classed("vzb-hidden", !(concept.sourceLink || "test"));
 
     if (concept.sourceLink) {
       const _source = this.localise("hints/source");
@@ -124,7 +116,7 @@ export default class DataNotes extends BaseComponent {
       this.element.select(".vzb-data-notes-link").html("<span>" + (sourceName ? (_source + ": ") : "") +
         '<a href="' + utils.normaliseLink(concept.sourceLink) + '" target="_blank">' + (sourceName ? sourceName : _source) + "</a></span>");
     }
-    this.showNotes = concept.sourceLink || concept.description;
+    this.showNotes = concept.sourceLink || concept.description || 1;
   }
 
   setPos(_left, _top, force) {
@@ -163,7 +155,6 @@ export default class DataNotes extends BaseComponent {
     if (arg != null) this.pinned = arg;
     this.element.select(".vzb-data-notes-close").classed("vzb-hidden", !this.pinned);
     this.element.classed("vzb-data-notes-pinned", this.pinned);
-    if (this.hookName != this.newHookName) this.setHook(this.newHookName);
     this.element.select(".vzb-data-notes-body").node().scrollTop = 0;
 
     return this.showNotes ?
