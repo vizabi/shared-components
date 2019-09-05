@@ -7,12 +7,12 @@ export default class TimeSlider extends BaseComponent {
   constructor(config){
     config.subcomponents = [{
       type: PlayButton,
-      placeholder: ".vzb-ts-playbutton",
+      placeholder: ".vzb-ts-btns",
       //model: this.model
     }];
 
     config.template = `
-      <div class="vzb-ts-playbutton"></div>
+      <div class="vzb-ts-btns"></div>
       <div class="vzb-ts-slider"></div>
     `;
     super(config);
