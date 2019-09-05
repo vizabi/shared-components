@@ -318,7 +318,7 @@ export default class VizabiBarrankchart extends BaseComponent {
   }
 
   _drawInfoEl(){
-    const dataNotes = this.root.findChild({type: "gapminder-datanotes"});
+    const dataNotes = this.root.findChild({type: "DataNotes"});
     const conceptPropsX = this.MDL.x.data.conceptProps;
 
     this.DOM.info

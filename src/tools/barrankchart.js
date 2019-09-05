@@ -1,10 +1,9 @@
 import TimeSlider from "../components/time-slider/time-slider.js";
+import DataNotes from "../components/datanotes/datanotes.js";
 import VizabiBarrankchart from "../components/vizabi-barrankchart.js";
 import BaseComponent from "../components/base-component.js";
 import LocaleService from "../services/locale.js";
 import LayoutService from "../services/layout.js";
-import { reaction, action } from "mobx";
-
 
 export default class Barrankchart extends BaseComponent {
 
@@ -17,11 +16,16 @@ export default class Barrankchart extends BaseComponent {
       type: TimeSlider,
       placeholder: ".vzb-timeslider",
       //model: this.model
+    },{
+      type: DataNotes,
+      placeholder: ".vzb-datanotes",
+      //model: this.model
     }];
 
     config.template = `
       <div class="vzbp-viewer vzb-placeholder" style="width:100%; height:100%;"></div>
       <div class="vzb-timeslider"></div>
+      <div class="vzb-datanotes"></div>
     `;
 
     config.services = {
