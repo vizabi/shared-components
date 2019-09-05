@@ -72,10 +72,7 @@ export default class VizabiBarrankchart extends BaseComponent {
 
   constructor(config) {
     config.template = `
-      <div class="vzb-tool vzb-tool-barrankchart vzb-portrait vzb-medium">
-      <div class="vzb-tool-stage">
-      <div class="vzb-tool-viz">
-      <div class="vzb-barrankchart">
+      <div class="vzb-br-component">
         <svg class="vzb-br-header">
           <g class="vzb-br-title">
             <text></text>
@@ -116,10 +113,7 @@ export default class VizabiBarrankchart extends BaseComponent {
                   <path d='M-1,1 l2,-2M0,10 l10,-10M9,11 l2,-2' stroke='black' stroke-width='3' opacity='0.08'/>
               </pattern> 
           </defs>
-      </svg>
-      </div>
-      </div>
-      </div>
+        </svg>
       </div>
     `;
     super(config);

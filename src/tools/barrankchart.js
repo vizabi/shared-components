@@ -10,7 +10,7 @@ export default class Barrankchart extends BaseComponent {
   constructor(config){
     config.subcomponents = [{
       type: VizabiBarrankchart,
-      placeholder: ".vzb-placeholder",
+      placeholder: ".vzb-barrankchart",
       //model: this.model
     },{
       type: TimeSlider,
@@ -23,7 +23,7 @@ export default class Barrankchart extends BaseComponent {
     }];
 
     config.template = `
-      <div class="vzbp-viewer vzb-placeholder" style="width:100%; height:100%;"></div>
+      <div class="vzb-barrankchart" style="width:100%; height:100%;"></div>
       <div class="vzb-timeslider"></div>
       <div class="vzb-datanotes"></div>
     `;
