@@ -121,6 +121,9 @@
 
   .vzb-barrankchart {
     @extend %vzb-chart-wrapper;
+    display: grid;
+    grid-auto-rows: 0;
+    grid-template-rows: 60px auto 20px;
 
     .vzb-br-axis-info {
       @extend %vzb-chart-info;
