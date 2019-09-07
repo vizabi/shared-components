@@ -1,0 +1,22 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #eee;
+}
+
+.vzbp-header {
+  height: 40px;
+}
+
+.vzbp-footer {
+  height: 100px;
+}
+
+.vzbp-viewer {
+  height: calc(100% - 50px - 15px);
+  background-color: #fff;
+}
