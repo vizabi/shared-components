@@ -27,7 +27,7 @@ export default {
   },
   plugins: [
     trash({
-      targets: ['build/bundle.js', 'build/bundle.css', 'build/stats.html']
+      targets: ['build/*']
     }),
     sass({
       output: "build/bundle.css",
@@ -49,7 +49,7 @@ export default {
         "data": "build/data",
         "index.html": "build/index.html",
         "main.js": "build/main.js",
-        "vizabi.css": "build/vizabi.css"
+        "index.css": "build/index.css"
       }
     }),
     (process.env.NODE_ENV === "production" && terser({output: {preamble: copyright}})),
