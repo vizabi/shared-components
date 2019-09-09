@@ -48,7 +48,7 @@ class LayoutService extends BaseService {
       const profile = PROFILES.find(p => (this.width >= p.min_width && this.height >= p.min_height));
 
       if (!profile) {
-        this.profile = null;
+        this.profile = "SMALL";
         this.status = STATUS.ERROR;
         console.warn(`
           Layout service: nothing should be rendered, because
