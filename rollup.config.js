@@ -23,7 +23,10 @@ export default {
     file: "build/bundle.js",
     format: "umd",
     banner: copyright,
-    sourcemap: "inline"
+    sourcemap: "inline",
+    globals: {
+      "mobx": "Vizabi.mobx"
+    }
   },
   plugins: [
     trash({
@@ -59,4 +62,5 @@ export default {
       filename: "./build/stats.html"
     }),
   ],
+  external: ["mobx"],
 };
