@@ -2,10 +2,10 @@ var ddfcsv = new DDFCsvReader.getDDFCsvReaderObject();
 Vizabi.stores.dataSources.createAndAddType("ddfcsv", ddfcsv);
 
 
-var data = Vizabi.dataSource({
+const data = {
   modelType: "ddfcsv",
   path: "./data/ddf--jheeffer--mdtest/"
-});
+};
 
 var initialMarkerConfig = {
   data: {

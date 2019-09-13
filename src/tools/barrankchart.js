@@ -23,9 +23,9 @@ export default class Barrankchart extends BaseComponent {
     }];
 
     config.template = `
-      <div class="vzb-barrankchart"></div>
-      <div class="vzb-timeslider"></div>
-      <div class="vzb-datanotes"></div>
+      <div class="vzb-barrankchart" style="grid-row-start: 1; grid-column-start: 1;"></div>
+      <div class="vzb-timeslider" style="grid-row-start: 2; grid-column-start: 1;"></div>
+      <div class="vzb-datanotes vzb-hidden" style="grid-row-start: 1; grid-column-start: 1;"></div>
     `;
 
     config.services = {

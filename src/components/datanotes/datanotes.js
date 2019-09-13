@@ -39,7 +39,6 @@ export default class DataNotes extends BaseComponent {
     };
 
     this.DOM = {
-      header: this.element.select(".vzb-br-header"),
 
     };
 
@@ -49,7 +48,7 @@ export default class DataNotes extends BaseComponent {
     this.pinned = false;
     this.left = 0;
     this.top = 0;
-    this.hookName = null;
+    this.encoding = null;
 
 
     this.element.append("div")
@@ -85,38 +84,28 @@ export default class DataNotes extends BaseComponent {
     this.close();
   }
 
-  close() {
-    if (!this.hidden) {
-      this.pin(false).hide();
-    }
-  }
-
-  setEncoding(_hookName) {
-    this.hookName = _hookName;
-
+  setEncoding(enc) {
+    this.encoding = enc;
     this.setValues();
-
     return this;
   }
 
   setValues() {
-    if (!this.hookName) return;
-    const hook = this.model.encoding.get(this.hookName);
-    const concept = hook.data.conceptProps;
+    if (!this.encoding) return;
+    const { description, sourceLink, sourceName } = this.encoding.data.conceptProps;
 
     this.element.select(".vzb-data-notes-body")
-      .classed("vzb-hidden", !(concept.description || "test"))
-      .text(utils.replaceNumberSpacesToNonBreak(concept.description) || "test");
+      .classed("vzb-hidden", !description)
+      .text(utils.replaceNumberSpacesToNonBreak(description));
 
-    this.element.select(".vzb-data-notes-link").classed("vzb-hidden", !(concept.sourceLink || "test"));
+    const label = this.localise("hints/source");
+    this.element.select(".vzb-data-notes-link")
+      .classed("vzb-hidden", !sourceLink)
+      .html("<span>" + (sourceName ? (label + ": ") : "") 
+        + '<a href="' + utils.normaliseLink(sourceLink) + '" target="_blank">' + (sourceName ? sourceName : label) 
+        + "</a></span>");
 
-    if (concept.sourceLink) {
-      const _source = this.localise("hints/source");
-      const sourceName = concept.sourceName || "";
-      this.element.select(".vzb-data-notes-link").html("<span>" + (sourceName ? (_source + ": ") : "") +
-        '<a href="' + utils.normaliseLink(concept.sourceLink) + '" target="_blank">' + (sourceName ? sourceName : _source) + "</a></span>");
-    }
-    this.showNotes = concept.sourceLink || concept.description || 1;
+    this.showNotes = sourceLink || description;
   }
 
   setPos(_left, _top, force) {
@@ -163,7 +152,7 @@ export default class DataNotes extends BaseComponent {
   }
 
   toggle(arg) {
-    if (this.pinned || !this.hookName) return this;
+    if (this.pinned) return this;
     if (arg == null) arg = !this.hidden;
     this.hidden = arg;
     this.element.classed("vzb-hidden", this.hidden || !this.showNotes);
@@ -177,5 +166,11 @@ export default class DataNotes extends BaseComponent {
   hide() {
     return this.toggle(true);
   }
+
+  close() {
+    if (!this.hidden) {
+      this.pin(false).hide();
+    }
+  }  
 
 }

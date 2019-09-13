@@ -1,11 +1,11 @@
 @import "../../styles/common.scss";
 
-.vzb-tool-datanotes {
+.vzb-datanotes {
     @include rtl {
       padding-left: 15px;
       padding-right: 25px;
     }
-    @include position(absolute, 0 null null null);
+    position: relative;
     @include box-shadow(0, 8px, 15px, rgba(0, 0, 0, 0.24));
     //transition: all 300ms ease-in-out;
     z-index: 9997;
@@ -16,8 +16,8 @@
     display: flex;
     flex-direction: column;
     width: 300px;
-    //height: 100%;
     min-height: 100px;
+    max-height: 300px;
   
     &.vzb-blur {
       z-index: 0;

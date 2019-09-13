@@ -1603,6 +1603,7 @@ export const getBrowserDetails = () => {
 };
 
 export const normaliseLink = input => {
+  if (!input) return input;
   if (input.indexOf("http://") === 0 || input.indexOf("https://") === 0) return input;
   if (input.indexOf("//") === 0) return "http://" + input.slice(2);
   return "http://" + input;
