@@ -1513,8 +1513,7 @@ export const isFunction = value => typeof value === "function";
  * utils.getProp(object, ["one", "two"]); // "your value"
  */
 export const getProp = (object, props, defaultValue) => {
-  while (props.length) {
-    const prop = props.shift();
+  for (let prop of Array.isArray(props) ? props : [props]) {
     if (object.hasOwnProperty(prop)) {
       object = object[prop];
     } else {
