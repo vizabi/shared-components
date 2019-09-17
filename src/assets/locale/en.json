@@ -5,6 +5,8 @@
     "dictionary": {
         "button-play": "Play",
         "button-pause": "Pause",
-        "hints/dataWarning": "Data doubts"
+        "hints/dataWarning": "Data doubts",
+        "scaletype/linear": "linear",
+        "scaletype/log": "log"
     }
 }

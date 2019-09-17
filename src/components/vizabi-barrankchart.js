@@ -299,8 +299,8 @@ export default class VizabiBarrankchart extends BaseComponent {
 
     this.DOM.title
       .on("click", () =>
-        this.root.findChild({type: "gapminder-treemenu"})
-          .markerID("axis_x")
+        this.root.findChild({type: "TreeMenu"})
+          .encoding("x")
           .alignX("left")
           .alignY("top")
           .updateView()

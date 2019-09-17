@@ -4,6 +4,7 @@ import VizabiBarrankchart from "../components/vizabi-barrankchart.js";
 import BaseComponent from "../components/base-component.js";
 import LocaleService from "../services/locale.js";
 import LayoutService from "../services/layout.js";
+import TreeMenu from "../components/treemenu/treemenu.js";
 
 export default class Barrankchart extends BaseComponent {
 
@@ -17,15 +18,20 @@ export default class Barrankchart extends BaseComponent {
       placeholder: ".vzb-timeslider",
       //model: this.model
     },{
+      type: TreeMenu,
+      placeholder: ".vzb-treemenu",
+      //model: this.model
+    },{
       type: DataNotes,
       placeholder: ".vzb-datanotes",
       //model: this.model
     }];
 
     config.template = `
-      <div class="vzb-barrankchart" style="grid-row-start: 1; grid-column-start: 1;"></div>
-      <div class="vzb-timeslider" style="grid-row-start: 2; grid-column-start: 1;"></div>
-      <div class="vzb-datanotes vzb-hidden" style="grid-row-start: 1; grid-column-start: 1;"></div>
+      <div class="vzb-barrankchart"></div>
+      <div class="vzb-timeslider"></div>
+      <div class="vzb-treemenu"></div>
+      <div class="vzb-datanotes"></div>
     `;
 
     config.services = {
