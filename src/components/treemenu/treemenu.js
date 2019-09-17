@@ -322,14 +322,15 @@ export default class TreeMenu extends BaseComponent {
     this.services.layout.width + this.services.layout.height;
     
     const _this = this;
+    const { wrapper, wrapperOuter } = this.DOM;
 
     let top = this._top;
     let left = this._left;
 
-    if (!this.DOM.wrapper) return utils.warn("treemenu resize() abort because container is undefined");
+    if (!wrapper) return utils.warn("treemenu resize() abort because container is undefined");
 
-    this.DOM.wrapper.classed(css.noTransition, true);
-    this.DOM.wrapper.node().scrollTop = 0;
+    wrapper.classed(css.noTransition, true);
+    wrapper.node().scrollTop = 0;
 
     this.OPTIONS.IS_MOBILE = this.services.layout.profile === "SMALL";
 
@@ -351,7 +352,7 @@ export default class TreeMenu extends BaseComponent {
 
     this.width = _this.element.node().offsetWidth;
     this.height = _this.element.node().offsetHeight;
-    const rect = this.DOM.wrapperOuter.node().getBoundingClientRect();
+    const rect = wrapperOuter.node().getBoundingClientRect();
     const containerWidth = rect.width;
     let containerHeight = rect.height;
     if (containerWidth) {
@@ -359,37 +360,37 @@ export default class TreeMenu extends BaseComponent {
         this.clearPos();
       } else {
         if (top || left) {
-          if (this.DOM.wrapperOuter.node().offsetTop < 10) {
-            this.DOM.wrapperOuter.style("top", "10px");
+          if (wrapperOuter.node().offsetTop < 10) {
+            wrapperOuter.style("top", "10px");
           }
-          if (this.height - this.DOM.wrapperOuter.node().offsetTop - containerHeight < 0) {
+          if (this.height - wrapperOuter.node().offsetTop - containerHeight < 0) {
             if (containerHeight > this.height) {
               containerHeight = this.height - 20;
             }
-            this.DOM.wrapperOuter.style("top", (this.height - containerHeight - 10) + "px");
-            this.DOM.wrapperOuter.style("bottom", "auto");
+            wrapperOuter.style("top", (this.height - containerHeight - 10) + "px");
+            wrapperOuter.style("bottom", "auto");
           }
-          if (top) top = this.DOM.wrapperOuter.node().offsetTop;
+          if (top) top = wrapperOuter.node().offsetTop;
         }
 
         let maxHeight;
-        if (this.DOM.wrapperOuter.classed(css.alignYb)) {
-          maxHeight = this.DOM.wrapperOuter.node().offsetTop + this.DOM.wrapperOuter.node().offsetHeight;
+        if (wrapperOuter.classed(css.alignYb)) {
+          maxHeight = wrapperOuter.node().offsetTop + wrapperOuter.node().offsetHeight;
         } else {
-          maxHeight = this.height - this.DOM.wrapperOuter.node().offsetTop;
+          maxHeight = this.height - wrapperOuter.node().offsetTop;
         }
-        this.DOM.wrapper.style("max-height", (maxHeight - 10) + "px");
+        wrapper.style("max-height", (maxHeight - 10) + "px");
 
-        this.DOM.wrapperOuter.classed(css.alignXc, this._alignX === "center");
-        this.DOM.wrapperOuter.style("margin-left", this._alignX === "center" ? "-" + containerWidth / 2 + "px" : null);
+        wrapperOuter.classed(css.alignXc, this._alignX === "center");
+        wrapperOuter.style("margin-left", this._alignX === "center" ? "-" + containerWidth / 2 + "px" : null);
         if (this._alignX === "center") {
           this.OPTIONS.MAX_MENU_WIDTH = this.width / 2 - containerWidth * 0.5 - 10;
         } else {
-          this.OPTIONS.MAX_MENU_WIDTH = this.width - this.DOM.wrapperOuter.node().offsetLeft - containerWidth - 10; // 10 - padding around wrapper
+          this.OPTIONS.MAX_MENU_WIDTH = this.width - wrapperOuter.node().offsetLeft - containerWidth - 10; // 10 - padding around wrapper
         }
 
         const minMenuWidth = this.profileConstants.col_width + this.OPTIONS.MIN_COL_WIDTH * 2;
-        let leftPos = this.DOM.wrapperOuter.node().offsetLeft;
+        let leftPos = wrapperOuter.node().offsetLeft;
         this.OPTIONS.MENU_OPEN_LEFTSIDE = this.OPTIONS.MAX_MENU_WIDTH < minMenuWidth && leftPos > (this.OPTIONS.MAX_MENU_WIDTH + 10);
         if (this.OPTIONS.MENU_OPEN_LEFTSIDE) {
           if (leftPos <  (minMenuWidth + 10)) leftPos = (minMenuWidth + 10);
@@ -404,9 +405,9 @@ export default class TreeMenu extends BaseComponent {
         if (left) {
           left = leftPos;
         } else {
-          if (leftPos != this.DOM.wrapperOuter.node().offsetLeft) {
-            this.DOM.wrapperOuter.style("left", "auto");
-            this.DOM.wrapperOuter.style("right", (this.width - leftPos - rect.width) + "px");
+          if (leftPos != wrapperOuter.node().offsetLeft) {
+            wrapperOuter.style("left", "auto");
+            wrapperOuter.style("right", (this.width - leftPos - rect.width) + "px");
           }
         }
 
@@ -415,14 +416,14 @@ export default class TreeMenu extends BaseComponent {
 
         if (left || top) this.setPos();
 
-        this.DOM.wrapperOuter.classed("vzb-treemenu-open-left-side", !this.OPTIONS.IS_MOBILE && this.OPTIONS.MENU_OPEN_LEFTSIDE);
+        wrapperOuter.classed("vzb-treemenu-open-left-side", !this.OPTIONS.IS_MOBILE && this.OPTIONS.MENU_OPEN_LEFTSIDE);
       }
     }
 
-    this.DOM.wrapper.node().offsetHeight;
-    this.DOM.wrapper.classed(css.noTransition, false);
+    wrapper.node().offsetHeight;
+    wrapper.classed(css.noTransition, false);
 
-    this.setHorizontalMenuHeight();
+    this._setHorizontalMenuHeight();
 
     return this;
   }
@@ -444,7 +445,7 @@ export default class TreeMenu extends BaseComponent {
       this.setPos();
       !utils.isTouchDevice() && this._focusSearch();
       this._resize();
-      this.scrollToSelected();
+      this._scrollToSelected();
     }
 
     this.root.children.forEach(c => {
@@ -463,16 +464,9 @@ export default class TreeMenu extends BaseComponent {
     return this;
   }
 
-  scrollToSelected() {
+  _scrollToSelected() {
     if (!this.selectedNode) return;
     const _this = this;
-    const scrollToItem = function(listNode, itemNode) {
-      listNode.scrollTop = 0;
-      const rect = listNode.getBoundingClientRect();
-      const itemRect = itemNode.getBoundingClientRect();
-      const scrollTop = itemRect.bottom - rect.top - listNode.offsetHeight + 10;
-      listNode.scrollTop = scrollTop;
-    };
 
     if (this.menuEntity.direction == MENU_VERTICAL) {
       scrollToItem(this.DOM.wrapper.node(), this.selectedNode);
@@ -493,51 +487,65 @@ export default class TreeMenu extends BaseComponent {
         parent = parent.parentNode;
       }
     }
+
+    function scrollToItem(listNode, itemNode){
+      listNode.scrollTop = 0;
+      const rect = listNode.getBoundingClientRect();
+      const itemRect = itemNode.getBoundingClientRect();
+      const scrollTop = itemRect.bottom - rect.top - listNode.offsetHeight + 10;
+      listNode.scrollTop = scrollTop;
+    };
   }
 
   setPos() {
+    const { wrapperOuter } = this.DOM;
+
     const top = this._top;
     const left = this._left;
-    const rect = this.DOM.wrapperOuter.node().getBoundingClientRect();
+    const rect = wrapperOuter.node().getBoundingClientRect();
 
     if (top) {
-      this.DOM.wrapperOuter.style("top", top + "px");
-      this.DOM.wrapperOuter.style("bottom", "auto");
-      this.DOM.wrapperOuter.classed(css.absPosVert, top);
+      wrapperOuter.style("top", top + "px");
+      wrapperOuter.style("bottom", "auto");
+      wrapperOuter.classed(css.absPosVert, top);
     }
     if (left) {
       let right = this.element.node().offsetWidth - left - rect.width;
       right = right < 10 ? 10 : right;
-      this.DOM.wrapperOuter.style("right", right + "px");
-      this.DOM.wrapperOuter.style("left", "auto");
-      this.DOM.wrapperOuter.classed(css.absPosHoriz, right);
+      wrapperOuter.style("right", right + "px");
+      wrapperOuter.style("left", "auto");
+      wrapperOuter.classed(css.absPosHoriz, right);
     }
 
   }
 
   clearPos() {
+    const { wrapper, wrapperOuter } = this.DOM;
+
     this._top = "";
     this._left = "";
-    this.DOM.wrapperOuter.attr("style", "");
-    this.DOM.wrapperOuter.classed(css.absPosVert, "");
-    this.DOM.wrapperOuter.classed(css.absPosHoriz, "");
-    this.DOM.wrapperOuter.classed(css.menuOpenLeftSide, "");
-    this.DOM.wrapper.style("max-height", "");
+    wrapperOuter.attr("style", "");
+    wrapperOuter.classed(css.absPosVert, "");
+    wrapperOuter.classed(css.absPosHoriz, "");
+    wrapperOuter.classed(css.menuOpenLeftSide, "");
+    wrapper.style("max-height", "");
   }
 
-  setHorizontalMenuHeight() {
+  _setHorizontalMenuHeight() {
+    const { wrapper } = this.DOM;
+
     let wrapperHeight = null;
     if (this.menuEntity && this.OPTIONS.MENU_DIRECTION == MENU_HORIZONTAL && this.menuEntity.menuItems.length) {
       const oneItemHeight = parseInt(this.menuEntity.menuItems[0].entity.style("height"), 10) || 0;
       const menuMaxHeight = oneItemHeight * this._maxChildCount;
-      const rootMenuHeight = Math.max(this.menuEntity.menuItems.length, 3) * oneItemHeight + this.menuEntity.entity.node().offsetTop + parseInt(this.DOM.wrapper.style("padding-bottom"), 10);
+      const rootMenuHeight = Math.max(this.menuEntity.menuItems.length, 3) * oneItemHeight + this.menuEntity.entity.node().offsetTop + parseInt(wrapper.style("padding-bottom"), 10);
       wrapperHeight = "" + Math.max(menuMaxHeight, rootMenuHeight) + "px";
     }
-    this.DOM.wrapper.classed(css.noTransition, true);
-    this.DOM.wrapper.node().offsetHeight;
-    this.DOM.wrapper.style("height", wrapperHeight);
-    this.DOM.wrapper.node().offsetHeight;
-    this.DOM.wrapper.classed(css.noTransition, false);
+    wrapper.classed(css.noTransition, true);
+    wrapper.node().offsetHeight;
+    wrapper.style("height", wrapperHeight);
+    wrapper.node().offsetHeight;
+    wrapper.classed(css.noTransition, false);
   }
 
   //search listener
@@ -667,7 +675,8 @@ export default class TreeMenu extends BaseComponent {
       this.dataFiltered = dataFiltered;
     }
 
-    this.DOM.wrapper.classed("vzb-hidden", !useDataFiltered).select("ul").remove();
+    const { wrapper } = this.DOM;
+    wrapper.classed("vzb-hidden", !useDataFiltered).select("ul").remove();
 
     let title = "";
     if (this._title || this._title === "") {
@@ -705,11 +714,11 @@ export default class TreeMenu extends BaseComponent {
     this.OPTIONS.COL_WIDTH = this.profileConstants.col_width;
 
     this.selectedNode = null;
-    this.DOM.wrapper.datum(dataFiltered);
-    this.menuEntity = new Menu(null, this.DOM.wrapper, this.OPTIONS);
-    this.DOM.wrapper.classed("vzb-hidden", false);
+    wrapper.datum(dataFiltered);
+    this.menuEntity = new Menu(null, wrapper, this.OPTIONS);
+    wrapper.classed("vzb-hidden", false);
 
-    this.setHorizontalMenuHeight();
+    this._setHorizontalMenuHeight();
 
     if (!useDataFiltered) {
       let pointer = "_default";
@@ -853,12 +862,14 @@ export default class TreeMenu extends BaseComponent {
 
     if (!this._targetModel) return;
 
-    this.DOM.wrapperOuter.classed(css.absPosVert, this._top);
-    this.DOM.wrapperOuter.classed(css.alignYt, this._alignY === "top");
-    this.DOM.wrapperOuter.classed(css.alignYb, this._alignY === "bottom");
-    this.DOM.wrapperOuter.classed(css.absPosHoriz, this._left);
-    this.DOM.wrapperOuter.classed(css.alignXl, this._alignX === "left");
-    this.DOM.wrapperOuter.classed(css.alignXr, this._alignX === "right");
+    const { wrapper, wrapperOuter } = this.DOM;
+
+    wrapperOuter.classed(css.absPosVert, this._top);
+    wrapperOuter.classed(css.alignYt, this._alignY === "top");
+    wrapperOuter.classed(css.alignYb, this._alignY === "bottom");
+    wrapperOuter.classed(css.absPosHoriz, this._left);
+    wrapperOuter.classed(css.alignXl, this._alignX === "left");
+    wrapperOuter.classed(css.alignXr, this._alignX === "right");
 
     const setModel = this._setModel.bind(this);
     this
@@ -867,7 +878,7 @@ export default class TreeMenu extends BaseComponent {
 
     if (this._showWhenReady) this.setHiddenOrVisible(false).showWhenReady(false);
 
-    this.DOM.wrapper.select("." + css.search).node().value = "";
+    wrapper.select("." + css.search).node().value = "";
 
     return this;
   }
@@ -885,7 +896,7 @@ export default class TreeMenu extends BaseComponent {
   _setModel(what, value) {
     const mdl = this._targetModel;
     if (what == "scaleType") mdl.scale.config.type = value;
-    if (what[1] == "concept") mdl.setWhich(value);
+    if (what[1] == "concept") mdl.setWhich({ key: value.key.slice(0), value });
     if (what[1] == "space") mdl.data.config.space = value.concept.split(",");
   }
 
@@ -924,18 +935,18 @@ export default class TreeMenu extends BaseComponent {
       .classed(css.wrapper_outer, true)
       .classed(css.noTransition, true);
 
-    this.DOM.wrapper = this.DOM.wrapperOuter
+    const wrapper = this.DOM.wrapper = this.DOM.wrapperOuter
       .append("div")
       .classed(css.wrapper, true)
       .classed(css.noTransition, true)
       .classed("vzb-dialog-scrollable", true);
 
-    this.DOM.wrapper
+    wrapper
       .on("click", () => {
         d3.event.stopPropagation();
       });
 
-    this.DOM.wrapper.append("div")
+    wrapper.append("div")
       .attr("class", css.close)
       .html(iconClose)
       .on("click", () => {
@@ -947,21 +958,22 @@ export default class TreeMenu extends BaseComponent {
       .attr("height", "0px")
       .attr("class", css.close + "-icon");
 
-    this.DOM.wrapper.append("div")
+    wrapper.append("div")
       .classed(css.scaletypes, true)
       .append("span");
-    this.DOM.wrapper.append("div")
+
+    wrapper.append("div")
       .classed(css.title, true)
       .append("span");
 
-    this.DOM.wrapper.append("div")
+    wrapper.append("div")
       .classed(css.search_wrap, true)
       .append("input")
       .classed(css.search, true)
       .attr("type", "search")
       .attr("id", css.search);
 
-    this.DOM.wrapper.on("mouseleave", () => {
+    wrapper.on("mouseleave", () => {
       //if(_this.menuEntity.direction != MENU_VERTICAL) _this.menuEntity.closeAllChildren();
     });
 
