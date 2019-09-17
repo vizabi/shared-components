@@ -3,7 +3,7 @@
 @import 'reset';
 @import 'chart';
 
-.vzb-placeholder {
+.vzb-tool {
   background-color: $vzb-color-white;
   position: relative;
 
@@ -167,6 +167,14 @@
     border: 2px solid transparent;
   }
 }
+
+$height-title: 8px;
+$size-button-list: 60px;
+$size-button-list-small: 50px;
+$size-timeslider: 50px;
+$size-timeslider-medium: 40px;
+$size-timeslider-small: 40px;
+$vzb-button-expand-width: 290px;
 
 .vzb-tool {
   $height-title: 8px;
