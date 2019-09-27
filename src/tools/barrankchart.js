@@ -32,6 +32,7 @@ export default class Barrankchart extends BaseComponent {
       <div class="vzb-timeslider"></div>
       <div class="vzb-treemenu"></div>
       <div class="vzb-datanotes"></div>
+      <div class="vzb-buttonlist"></div>
     `;
 
     config.services = {
