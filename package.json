@@ -37,9 +37,9 @@
     "rollup-plugin-serve": "^1.0.1",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-visualizer": "^1.1.1",
-    "rollup-watch": "^4.3.1"
-  },
-  "dependencies": {
-    "mobx": "^5.13.0"
+    "rollup-watch": "^4.3.1",
+    "mobx": "^5.9.0",
+    "d3": "^5.12.0",
+    "vizabi-reactive": "^1.0.0"
   }
 }
