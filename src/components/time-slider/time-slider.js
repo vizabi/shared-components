@@ -9,7 +9,7 @@ const PROFILE_CONSTANTS = {
   SMALL: {
     margin: {
       top: 7,
-      right: 15,
+      right: 25,
       bottom: 10,
       left: 60
     },
@@ -19,9 +19,9 @@ const PROFILE_CONSTANTS = {
   MEDIUM: {
     margin: {
       top: 0,
-      right: 15,
+      right: 25,
       bottom: 10,
-      left: 50
+      left: 55
     },
     radius: 9,
     label_spacing: 5
@@ -29,9 +29,9 @@ const PROFILE_CONSTANTS = {
   LARGE: {
     margin: {
       top: -5,
-      right: 15,
+      right: 25,
       bottom: 10,
-      left: 75
+      left: 80
     },
     radius: 11,
     label_spacing: 8

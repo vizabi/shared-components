@@ -13,6 +13,8 @@ $color-text: rgb(15, 14, 14);
   .vzb-timeslider {
     min-height: $vzb-ts-btn-area;
     position: relative;
+    display: flex;
+    margin-right: 35px;
 
     &.vzb-ts-disabled {
       opacity: 0.4;
@@ -36,7 +38,6 @@ $color-text: rgb(15, 14, 14);
         display: block !important;
       }
     }
-
 
     .vzb-ts-btns {
       @include position(absolute, 0 null 0 0);
@@ -86,9 +87,8 @@ $color-text: rgb(15, 14, 14);
   }
   
   .vzb-ts-slider {
-    @include position(absolute, 0 9px 0 0);
-    // margin: 17px 7px;
-    // Slider
+    @include position(relative, 0 9px 0 0);
+    flex: 1 1 auto;
     .vzb-ts-slider-svg {
       @include position(absolute, 0);
       font-size: $vzb-font-size-small;
@@ -189,7 +189,11 @@ $color-text: rgb(15, 14, 14);
     }
   }
 
-
+  .vzb-ts-speed {
+    flex: 0 0 35px;
+    margin-left: auto;
+    margin-right: -35px;    
+  }
 
   &.vzb-small {
     .vzb-timeslider {
@@ -250,10 +254,10 @@ $color-text: rgb(15, 14, 14);
     .vzb-timeslider {
       min-height: $vzb-ts-btn-area;
       .vzb-ts-slider {
-        margin-left: 5px;
+        //margin-left: 5px;
       }
       .vzb-ts-slider-svg {
-        margin-right: 5px;
+        //margin-right: 5px;
         .vzb-ts-slider-axis .vzb-axis-line {
           stroke-width: 7px;
         }
@@ -280,9 +284,9 @@ $color-text: rgb(15, 14, 14);
     .vzb-timeslider {
       min-height: $vzb-ts-btn-area + 10;
       .vzb-ts-slider {
-        margin-right: 5px;
+        //margin-right: 5px;
         .vzb-ts-slider-svg {
-          margin-left: 5px;
+          //margin-left: 5px;
           font-size: $vzb-font-size-regular;
         }
         .vzb-ts-slider-axis .vzb-axis-line {
