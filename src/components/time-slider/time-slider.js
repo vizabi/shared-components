@@ -1,5 +1,6 @@
 import BaseComponent from "../base-component.js";
 import PlayButton from "./play-button.js";
+import SteppedSlider from "../stepped-slider/stepped-slider.js";
 import axisSmart from "../legacy/helpers/d3.axisWithLabelPicker";
 import * as utils from "../legacy/base/utils";
 import "./time-slider.scss";
@@ -68,6 +69,10 @@ export default class TimeSlider extends BaseComponent {
       type: PlayButton,
       placeholder: ".vzb-ts-btns",
       //model: this.model
+    },{
+      type: SteppedSlider,
+      placeholder: ".vzb-ts-speed",
+      //model: this.model
     }];
 
     config.template = `
@@ -85,6 +90,7 @@ export default class TimeSlider extends BaseComponent {
         </svg>      
       </div>
       <div class="vzb-ts-btns"></div>
+      <div class="vzb-ts-speed"></div>
     `;
     super(config);
   }
@@ -163,7 +169,8 @@ export default class TimeSlider extends BaseComponent {
 
   draw() {
     this.MDL = {
-      frame: this.model.encoding.get("frame")
+      frame: this.model.encoding.get("frame"),
+      animation: this.model.encoding.get("animation")
     }
     this.localise = this.services.locale.auto();
     
@@ -337,7 +344,7 @@ export default class TimeSlider extends BaseComponent {
 
       //set time according to dragged position
       if (value - _this.MDL.frame.value !== 0) {
-        _this._setTime(value);
+        _this._setTime(value, true);
       }
     };
   }
@@ -354,11 +361,13 @@ export default class TimeSlider extends BaseComponent {
       _this.element.classed(class_dragging, _this.dragging);
       //_this.model.time.dragStop();
       //_this.model.time.snap();
+      _this._setTime(_this.MDL.animation.value);
     };
   }
 
   _setHandle(transition) {
-    const { value, speed, playing } = this.MDL.frame;
+    const { speed, playing } = this.MDL.frame;
+    const { value } = this.MDL.animation;
 
     if (this.dragging) return;
     const { handle, valueText } = this.DOM; 
@@ -414,7 +423,7 @@ export default class TimeSlider extends BaseComponent {
    * Sets the current time model to time
    * @param {number} time The time
    */
-  _setTime(time) {
+  _setTime(time, transaction) {
     //update state
     const _this = this;
     //  frameRate = 50;
@@ -425,7 +434,7 @@ export default class TimeSlider extends BaseComponent {
     //this._updTime = now;
     //const persistent = !this.model.time.dragging && !this.model.time.playing;
     //_this.model.time.getModelObject("value").set(time, false, persistent); // non persistent
-    _this.MDL.frame.setValue(time);
+    _this.MDL.animation.setValue(time, transaction);
 
   }
 

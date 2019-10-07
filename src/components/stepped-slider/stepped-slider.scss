@@ -1,0 +1,37 @@
+@import "../../styles/common.scss";
+
+.vzb-tool {
+  .vzb-stepped-slider {
+    position: relative;
+    height: $size-timeslider-small;
+    padding-right: 15px;
+
+    .vzb-stepped-slider-axis {
+      pointer-events: none;
+      .domain {
+        display: none;
+      }
+    }
+
+    .vzb-stepped-slider-triangle {
+      fill: $vzb-color-primary;
+      pointer-events: none;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    line {
+      stroke: $vzb-color-primary;
+    }
+  }
+
+  &.vzb-large {
+      .vzb-stepped-slider {
+      padding-top: 5px;
+    }
+  }
+}
