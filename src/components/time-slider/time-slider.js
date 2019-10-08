@@ -169,8 +169,7 @@ export default class TimeSlider extends BaseComponent {
 
   draw() {
     this.MDL = {
-      frame: this.model.encoding.get("frame"),
-      animation: this.model.encoding.get("animation")
+      frame: this.model.encoding.get("frame")
     }
     this.localise = this.services.locale.auto();
     
@@ -361,13 +360,12 @@ export default class TimeSlider extends BaseComponent {
       _this.element.classed(class_dragging, _this.dragging);
       //_this.model.time.dragStop();
       //_this.model.time.snap();
-      _this._setTime(_this.MDL.animation.value);
+      _this._setTime(_this.MDL.frame.value);
     };
   }
 
   _setHandle(transition) {
-    const { speed, playing } = this.MDL.frame;
-    const { value } = this.MDL.animation;
+    const { value, speed, playing } = this.MDL.frame;
 
     if (this.dragging) return;
     const { handle, valueText } = this.DOM; 
@@ -434,7 +432,7 @@ export default class TimeSlider extends BaseComponent {
     //this._updTime = now;
     //const persistent = !this.model.time.dragging && !this.model.time.playing;
     //_this.model.time.getModelObject("value").set(time, false, persistent); // non persistent
-    _this.MDL.animation.setValue(time, transaction);
+    _this.MDL.frame.setValue(time, transaction);
 
   }
 
