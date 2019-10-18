@@ -5,6 +5,7 @@ import BaseComponent from "../components/base-component.js";
 import LocaleService from "../services/locale.js";
 import LayoutService from "../services/layout.js";
 import TreeMenu from "../components/treemenu/treemenu.js";
+import SteppedSlider from "../components/stepped-slider/stepped-slider.js";
 
 export default class Barrankchart extends BaseComponent {
 
@@ -13,13 +14,21 @@ export default class Barrankchart extends BaseComponent {
       type: VizabiBarrankchart,
       placeholder: ".vzb-barrankchart",
       //model: this.model
+      name: "chart"
     },{
       type: TimeSlider,
       placeholder: ".vzb-timeslider",
+      name: "time-slider"
+      //model: this.model
+    },{
+      type: SteppedSlider,
+      placeholder: ".vzb-speedslider",
+      name: "speed-slider"
       //model: this.model
     },{
       type: TreeMenu,
       placeholder: ".vzb-treemenu",
+      name: "tree-menu"
       //model: this.model
     },{
       type: DataNotes,
@@ -29,7 +38,10 @@ export default class Barrankchart extends BaseComponent {
 
     config.template = `
       <div class="vzb-barrankchart"></div>
-      <div class="vzb-timeslider"></div>
+      <div class="vzb-animationcontrols">
+        <div class="vzb-timeslider"></div>
+        <div class="vzb-speedslider"></div>
+      </div>
       <div class="vzb-treemenu"></div>
       <div class="vzb-datanotes"></div>
       <div class="vzb-buttonlist"></div>

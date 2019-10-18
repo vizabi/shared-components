@@ -1,6 +1,5 @@
 import BaseComponent from "../base-component.js";
 import PlayButton from "./play-button.js";
-import SteppedSlider from "../stepped-slider/stepped-slider.js";
 import axisSmart from "../legacy/helpers/d3.axisWithLabelPicker";
 import * as utils from "../legacy/base/utils";
 import "./time-slider.scss";
@@ -63,15 +62,19 @@ const class_show_value = "vzb-ts-show-value";
 const class_show_value_when_drag_play = "vzb-ts-show-value-when-drag-play";
 
 export default class TimeSlider extends BaseComponent {
-
+  
+  static DEFAULT_UI = {
+    show_ticks: false,
+    show_value: false,
+    show_value_when_drag_play: true,
+    axis_aligned: false,
+    show_button: true
+  }
+  
   constructor(config){
     config.subcomponents = [{
       type: PlayButton,
       placeholder: ".vzb-ts-btns",
-      //model: this.model
-    },{
-      type: SteppedSlider,
-      placeholder: ".vzb-ts-speed",
       //model: this.model
     }];
 
@@ -90,21 +93,12 @@ export default class TimeSlider extends BaseComponent {
         </svg>      
       </div>
       <div class="vzb-ts-btns"></div>
-      <div class="vzb-ts-speed"></div>
     `;
     super(config);
   }
 
   setup() {
     this.dragging = false;
-
-    this.ui = {
-      show_ticks: false,
-      show_value: false,
-      show_value_when_drag_play: true,
-      axis_aligned: false,
-      show_button: true
-    };
 
     this.DOM = {
       //slider: this.element.select(".vzb-ts-slider")

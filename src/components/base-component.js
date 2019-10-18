@@ -1,17 +1,19 @@
 import { autorun, decorate, observable } from "mobx";
 import { STATUS } from "../utils.js";
+import { ui as _ui} from "../ui.js";
 
 
 class BaseComponent {
+  static DEFAULT_UI = {}
 
-  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state}){
     this.id = id || "c0";
     this.status = STATUS.INIT;
     this.template = this.template || template || "";
     this.subcomponents = this.subcomponents || subcomponents || [];
     this.services = this.services || services || {};
     this.model = this.model || model;
-    this.state = {};
+    this.state = state || {};
 
     const scope = this.parent && this.parent.element ? this.parent.element : d3; //d3 would search global scope
     this.element = scope.select(placeholder).html(this.template);
@@ -28,15 +30,22 @@ class BaseComponent {
         services: this.services,
         id: this.id + "-" + index,
         parent: this,
-        root: this.root
+        root: this.root,
+        ui: comp.name ? (ui[comp.name] ? ui[comp.name] : (ui[comp.name] = {})) : ui,
+        state: comp.state
       });
       this.children.push(subcomponent);
     });
 
+    this.ui = this.setupUI(ui);
     this.setup();
     autorun(this.render.bind(this));
     autorun(this.updateStatus.bind(this));
     autorun(this.resize.bind(this));
+  }
+
+  setupUI(ui) {
+    return _ui(this.constructor.DEFAULT_UI, ui);
   }
 
   setup() {}

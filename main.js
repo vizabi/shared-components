@@ -3,8 +3,8 @@ Vizabi.stores.dataSources.createAndAddType("ddfcsv", ddfcsv);
 
 
 const data = {
-  modelType: "ddfcsv",
-  path: "./data/ddf--jheeffer--mdtest/"
+    modelType: "ddfcsv",
+    path: "./data/ddf--jheeffer--mdtest/"
 };
 
 var initialMarkerConfig = {
@@ -67,8 +67,20 @@ var initialMarkerConfig = {
 
 var marker = Vizabi.marker(initialMarkerConfig);
 
+var ui = Vizabi.mobx.observable({
+//ui
+  "time-slider": {
+    "show_value": true
+  }
+});
+
+Vizabi.mobx.autorun(() => {
+  console.log(JSON.stringify(ui));
+})
+
 var viz = new BarrankChart({
   placeholder: "#root",
-  model: marker
+  model: marker,
+  ui: ui
 });
 
