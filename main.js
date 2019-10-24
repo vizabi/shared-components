@@ -71,7 +71,16 @@ var ui = Vizabi.mobx.observable({
 //ui
   "time-slider": {
     "show_value": true
-  }
+  },
+  "buttons": {
+    "buttons": ["colors", "find", "moreoptions", "presentation", "sidebarcollapse", "fullscreen"],
+  },
+  "dialogs": {
+    "popup": ["timedisplay", "colors", "find", "moreoptions"],
+    "sidebar": ["timedisplay", "colors", "find"],
+    "moreoptions": ["opacity", "speed", "colors", "presentation", "about"]
+  },
+
 });
 
 Vizabi.mobx.autorun(() => {

@@ -1,9 +1,16 @@
 .vzb-tool {
+  $size-button-list: 60px;
+  $size-button-list-small: 50px;
+  $size-button-list-large: 62px;
+  $size-animation-large: 50px;
+  $size-animation: 40px;
+  $vzb-button-expand-width: 290px;
+
   overflow: hidden;
 
   display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: auto;          
+  grid-template-columns: auto $size-button-list;
+  grid-template-rows: auto $size-animation;
 
   .vzb-animationcontrols {
     grid-row-start: 2;
@@ -20,47 +27,78 @@
     }
   }
 
-  .vzb-buttonlist {
+  .vzb-sidebar {
     grid-row-start: 1;
     grid-row-end: 3;
     grid-column-start: 2;
     grid-column-end: 2;
-    
-    min-width: 60px;
+
+    background-color: $vzb-color-primary-lightest;
+
+    .vzb-buttonlist {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      white-space: normal;
+      position: static;
+      //overflow: visible;
+      text-align: center;
+
+      input,
+      textarea,
+      keygen,
+      select,
+      button {
+        font-family: $vzb-font-family;
+      }
+
+      &:-webkit-scrollbar {
+        display: none;
+      }
+    }
   }
 
   &.vzb-small {
     &.vzb-portrait {
       grid-template-columns: auto;
-      grid-template-rows: auto min-content min-content;
+      grid-template-rows: auto $size-animation $size-button-list-small;
       
-      .vzb-buttonlist {
+      .vzb-sidebar {
         grid-row-start: 3;
         grid-row-end: 3;
         grid-column-start: 1;
         grid-column-end: 1;
 
-        min-height: 50px;
-        min-width: auto;
+        .vzb-buttonlist {
+          flex-direction: row;
+          justify-content: center;
+        }
       }
     }
     &.vzb-landscape {
-      grid-template-columns: auto min-content;
-      grid-template-rows: auto min-content;
     }
   }
 
   &.vzb-medium {
-    grid-template-columns: auto min-content;
-    grid-template-rows: auto min-content;
   }
 
   &.vzb-large {
-    grid-template-columns: auto min-content;
-    grid-template-rows: auto min-content;
+    grid-template-rows: auto $size-animation-large;
+
     &.vzb-dialog-expand-true {
-      grid-template-columns: auto 230px;
-      grid-template-rows: auto 12px 50px;
+      grid-template-columns: auto $vzb-button-expand-width;
+
+      .vzb-sidebar {
+        display: flex;
+        flex-direction: column;
+
+        .vzb-buttonlist {
+          height: $size-button-list-large;
+          flex-direction: row;
+          justify-content: center;
+          margin-top: auto;
+        }
+      }
     }
   }
 }

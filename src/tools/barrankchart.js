@@ -6,6 +6,7 @@ import LocaleService from "../services/locale.js";
 import LayoutService from "../services/layout.js";
 import TreeMenu from "../components/treemenu/treemenu.js";
 import SteppedSlider from "../components/stepped-slider/stepped-slider.js";
+import ButtonList from "../components/buttonlist/buttonlist.js";
 
 export default class Barrankchart extends BaseComponent {
 
@@ -34,6 +35,11 @@ export default class Barrankchart extends BaseComponent {
       type: DataNotes,
       placeholder: ".vzb-datanotes",
       //model: this.model
+    },{
+      type: ButtonList,
+      placeholder: ".vzb-buttonlist",
+      name: "buttons"
+      //model: this.model
     }];
 
     config.template = `
@@ -42,9 +48,11 @@ export default class Barrankchart extends BaseComponent {
         <div class="vzb-timeslider"></div>
         <div class="vzb-speedslider"></div>
       </div>
+      <div class="vzb-sidebar">
+        <div class="vzb-buttonlist"></div>
+      </div>
       <div class="vzb-treemenu"></div>
       <div class="vzb-datanotes"></div>
-      <div class="vzb-buttonlist"></div>
     `;
 
     config.services = {

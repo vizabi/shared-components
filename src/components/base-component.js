@@ -23,6 +23,8 @@ class BaseComponent {
     this.name = name || "";
     this.reactions = new Map();
 
+    this.ui = this.setupUI(ui);
+
     this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
         placeholder: comp.placeholder,
@@ -37,7 +39,6 @@ class BaseComponent {
       this.children.push(subcomponent);
     });
 
-    this.ui = this.setupUI(ui);
     this.setup();
     autorun(this.render.bind(this));
     autorun(this.updateStatus.bind(this));
