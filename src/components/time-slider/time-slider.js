@@ -41,11 +41,18 @@ const PROFILE_CONSTANTS = {
 const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   MEDIUM: {
     margin: {
-      top: 9
+      top: 9,
+      right: 25,
+      bottom: 10,
+      left: 55
     }
   },
   LARGE: {
     margin: {
+      top: -5,
+      right: 25,
+      bottom: 10,
+      left: 80
     }
   }
 };
@@ -190,6 +197,7 @@ export default class TimeSlider extends BaseComponent {
   // }
 
   _updateLayoutProfile(){
+    this.services.layout.size;
     this.services.layout.width + this.services.layout.height;
 
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
@@ -203,6 +211,7 @@ export default class TimeSlider extends BaseComponent {
    * Ideally,it contains only operations related to size
    */
   _updateSize() {
+    this.services.layout.size;
     this.services.layout.width + this.services.layout.height;
 
     const {
@@ -359,6 +368,7 @@ export default class TimeSlider extends BaseComponent {
   }
 
   _setHandle(transition) {
+    this.services.layout.size;
     const { value, speed, playing } = this.MDL.frame;
 
     if (this.dragging) return;

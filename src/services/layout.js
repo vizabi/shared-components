@@ -24,6 +24,7 @@ const CSS_PLACEHOLDER_CLASS = "vzb-tool";
 const CSS_CLASS_PREFIX = "vzb-";
 const CSS_LANDSCAPE_CLASS = "vzb-landscape";
 const CSS_PORTRAIT_CLASS = "vzb-portrait";
+const CSS_PROJECTOR_CLASS = "vzb-presentation";
 
 class LayoutService extends BaseService {
 
@@ -32,6 +33,7 @@ class LayoutService extends BaseService {
     this.status = STATUS.INIT;
     this.width = 1;
     this.height = 1;
+    this.size = this.getSize();
     this.profile = "SMALL";
     this.projector = false;
     this.element = d3.select(this.model.placeholder || "body")
@@ -40,11 +42,16 @@ class LayoutService extends BaseService {
     window.addEventListener("resize", this._resizeHandler.bind(this));
   }
 
+  getSize() {
+    const { width, height } = this;
+    return { width, height };
+  }
+
   _resizeHandler(){
     action(()=>{
       this.width = this.element.node().clientWidth;
       this.height = this.element.node().clientHeight;
-      
+      this.size = this.getSize();
       const profile = PROFILES.find(p => (this.width >= p.min_width && this.height >= p.min_height));
 
       if (!profile) {
@@ -72,9 +79,16 @@ class LayoutService extends BaseService {
     else
       return Object.assign({}, normalConstants[this.profile] || {}, forProjector[this.profile] || {});
   }
+
+  setProjector(value) {
+    this.projector = value;
+    this.element.classed(CSS_PROJECTOR_CLASS, this.projector);
+  }
 }
 
 export default decorate(LayoutService, {
+  "setProjector": action.bound,
+  "size": observable.ref,
   "projector": observable,
   "width": observable,
   "height": observable,
