@@ -29,6 +29,15 @@ export default {
     trash({
       targets: ['build/*']
     }),
+    copy({
+      targets: [{
+        src: ["index.html", "main.js", "index.css"],
+        dest: "build"
+      },{
+        src: ["src/assets","lib","data"],
+        dest: "build"
+      }]
+    }),
     sass({
       output: "build/bundle.css",
     }),
@@ -41,16 +50,6 @@ export default {
     commonjs(),
     replace({
       ENV: JSON.stringify(process.env.NODE_ENV || "development")
-    }),
-    copy({
-      targets: {
-        "src/assets": "build/assets",
-        "lib": "build/lib",
-        "data": "build/data",
-        "index.html": "build/index.html",
-        "main.js": "build/main.js",
-        "index.css": "build/index.css"
-      }
     }),
     (process.env.NODE_ENV === "production" && terser({output: {preamble: copyright}})),
     (process.env.NODE_ENV === "devserver" && serve("build")),
