@@ -2,9 +2,7 @@ import { autorun, decorate, observable } from "mobx";
 import { STATUS } from "../utils.js";
 import { ui as _ui} from "../ui.js";
 
-
-class BaseComponent {
-  static DEFAULT_UI = {}
+class _BaseComponent {
 
   constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state}){
     this.id = id || "c0";
@@ -99,7 +97,9 @@ class BaseComponent {
   resize() {}
 }
 
-export default decorate(BaseComponent, {
+_BaseComponent.DEFAULT_UI = {};
+
+export const BaseComponent = decorate(_BaseComponent, {
   "status": observable,
   "state": observable
 });

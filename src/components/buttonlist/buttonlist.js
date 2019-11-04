@@ -1,6 +1,6 @@
-import * as utils from "../legacy/base/utils";
-import * as iconset from "../legacy/base/iconset";
-import BaseComponent from "../base-component";
+import * as utils from "../../legacy/base/utils";
+import * as iconset from "../../icons/iconset"
+import { BaseComponent } from "../base-component";
 import "./buttonlist.scss";
 
 /*!
@@ -17,12 +17,7 @@ const class_unavailable = "vzb-unavailable";
 const class_vzb_fullscreen = "vzb-force-fullscreen";
 const class_container_fullscreen = "vzb-container-fullscreen";
 
-
-class ButtonList extends BaseComponent {
-  static DEFAULT_UI = {
-    buttons: ["fullscreen"],
-    sidebarCollapse: false
-  }
+export class ButtonList extends BaseComponent {
 
   constructor(config) {
 
@@ -412,7 +407,7 @@ class ButtonList extends BaseComponent {
         details_btn.title = "buttons/" + btn;
       }
       details_btn.id = btn;
-      details_btn.icon = iconset[details_btn.icon];
+      details_btn.icon = iconset["ICON_" + details_btn.icon.toUpperCase()];
       details_btns.push(details_btn);
     }
 
@@ -566,7 +561,7 @@ class ButtonList extends BaseComponent {
     btn.classed(class_active_locked, locked);
 
     btn.select(".vzb-buttonlist-btn-icon")
-      .html(iconset[locked ? "lock" : "unlock"]);
+      .html(iconset[locked ? "ICON_LOCK" : "ICON_UNLOCK"]);
 
     btn.select(".vzb-buttonlist-btn-title>span").text(
       locked ? locked : this.localise("buttons/lock")
@@ -628,7 +623,7 @@ class ButtonList extends BaseComponent {
     this.ui.fullscreen = fs;
     btn.classed(class_active_locked, fs);
 
-    btn.select(".vzb-buttonlist-btn-icon").html(iconset[fs ? "unexpand" : "expand"]);
+    btn.select(".vzb-buttonlist-btn-icon").html(iconset[fs ? "ICON_UNEXPAND" : "ICON_EXPAND"]);
 
     btn.select(".vzb-buttonlist-btn-title").text(
       this.localise("buttons/" + (fs ? "unexpand" : "expand"))
@@ -649,6 +644,11 @@ class ButtonList extends BaseComponent {
     // });
   }
 
+}
+
+ButtonList.DEFAULT_UI = {
+  buttons: ["fullscreen"],
+  sidebarCollapse: false
 }
 
 function isFullscreen() {
@@ -726,4 +726,3 @@ function allowWebkitFullscreenAPI() {
     navigator.userAgent && !navigator.userAgent.match("CriOS"));
 }
 
-export default ButtonList;

@@ -1,5 +1,5 @@
 import { css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
-import * as utils from "../legacy/base/utils";
+import * as utils from "../../legacy/base/utils";
 
 export class Menu {
   constructor(parent, menu, options) {

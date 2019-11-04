@@ -1,5 +1,5 @@
-import { throttle, transform } from "../legacy/base/utils";
-import BaseComponent from "../base-component";
+import { throttle, transform } from "../../legacy/base/utils";
+import { BaseComponent } from "../base-component";
 import "./stepped-slider.scss";
 
 const CONFIG = {
@@ -11,7 +11,7 @@ const CONFIG = {
   range: [1200, 900, 450, 200, 150, 100]
 }
 
-export default class SteppedSlider extends BaseComponent {
+export class SteppedSlider extends BaseComponent {
 
   constructor(config) {
     config.template = `

@@ -1,4 +1,4 @@
-export default class BaseService {
+export class BaseService {
 
   isService() {return true;}
 

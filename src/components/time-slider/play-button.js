@@ -1,4 +1,4 @@
-import BaseComponent from "../base-component.js";
+import { BaseComponent } from "../base-component.js";
 
 const HTML_ICON_PLAY = 
   `<svg class="vzb-icon vzb-icon-play" viewBox="3 3 42 42"
@@ -13,7 +13,7 @@ const HTML_ICON_PAUSE =
 const HTML_ICON_LOADING =
   `<div class='vzb-loader'></div>`
 
-export default class PlayButton extends BaseComponent {
+export class PlayButton extends BaseComponent {
 
   constructor(config) {
     config.template = 

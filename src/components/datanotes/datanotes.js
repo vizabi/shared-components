@@ -1,8 +1,8 @@
-import * as utils from "../legacy/base/utils.js";
-import BaseComponent from "../base-component.js";
+import * as utils from "../../legacy/base/utils.js";
+import { BaseComponent } from "../base-component.js";
 import "./datanotes.scss";
 
-import {ICON_CLOSE} from "../../assets/icons/iconset.js";
+import { ICON_CLOSE } from "../../icons/iconset.js";
 
 
 
@@ -27,7 +27,7 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   }
 };
 
-export default class DataNotes extends BaseComponent {
+export class DataNotes extends BaseComponent {
 
   constructor(config) {
     super(config);

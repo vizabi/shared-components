@@ -1,8 +1,8 @@
-import BaseComponent from "../base-component.js";
+import { BaseComponent } from "../base-component.js";
 import { Menu } from "./menu";
 import { OPTIONS, css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
-import * as utils from "../legacy/base/utils";
-import { ICON_CLOSE as iconClose } from "../../assets/icons/iconset";
+import * as utils from "../../legacy/base/utils";
+import { ICON_CLOSE as iconClose } from "../../icons/iconset";
 import "./treemenu.scss";
 
 const PROFILE_CONSTANTS = {
@@ -31,7 +31,7 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
  * Treemenu component
  */
 
-export default class TreeMenu extends BaseComponent {
+export class TreeMenu extends BaseComponent {
 
   constructor(config) {
     //contructor is the same as any component

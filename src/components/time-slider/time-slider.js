@@ -1,7 +1,7 @@
-import BaseComponent from "../base-component.js";
-import PlayButton from "./play-button.js";
-import axisSmart from "../legacy/helpers/d3.axisWithLabelPicker";
-import * as utils from "../legacy/base/utils";
+import { BaseComponent } from "../base-component.js";
+import { PlayButton } from "./play-button.js";
+import axisSmart from "../../legacy/helpers/d3.axisWithLabelPicker";
+import * as utils from "../../legacy/base/utils";
 import "./time-slider.scss";
 
 const PROFILE_CONSTANTS = {
@@ -68,16 +68,8 @@ const class_axis_aligned = "vzb-ts-axis-aligned";
 const class_show_value = "vzb-ts-show-value";
 const class_show_value_when_drag_play = "vzb-ts-show-value-when-drag-play";
 
-export default class TimeSlider extends BaseComponent {
-  
-  static DEFAULT_UI = {
-    show_ticks: false,
-    show_value: false,
-    show_value_when_drag_play: true,
-    axis_aligned: false,
-    show_button: true
-  }
-  
+export class TimeSlider extends BaseComponent {
+
   constructor(config){
     config.subcomponents = [{
       type: PlayButton,
@@ -474,8 +466,12 @@ export default class TimeSlider extends BaseComponent {
     this.element.classed(class_show_value_when_drag_play, show_value_when_drag_play);
     this.element.classed(class_axis_aligned, axis_aligned);
   }
-  
-}  
+}
 
-
-
+TimeSlider.DEFAULT_UI = {
+  show_ticks: false,
+  show_value: false,
+  show_value_when_drag_play: true,
+  axis_aligned: false,
+  show_button: true
+}

@@ -1,4 +1,4 @@
-import BaseService from "./base-service.js";
+import { BaseService } from "./base-service.js";
 import { observable, action, decorate } from "mobx";
 import { STATUS } from "../utils.js";
 
@@ -26,7 +26,7 @@ const CSS_LANDSCAPE_CLASS = "vzb-landscape";
 const CSS_PORTRAIT_CLASS = "vzb-portrait";
 const CSS_PROJECTOR_CLASS = "vzb-presentation";
 
-class LayoutService extends BaseService {
+class _LayoutService extends BaseService {
 
   setup(){
     this.name = "layout";
@@ -86,7 +86,7 @@ class LayoutService extends BaseService {
   }
 }
 
-export default decorate(LayoutService, {
+export const LayoutService = decorate(_LayoutService, {
   "setProjector": action.bound,
   "size": observable.ref,
   "projector": observable,

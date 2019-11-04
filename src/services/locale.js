@@ -1,11 +1,11 @@
-import BaseService from "./base-service.js";
+import { BaseService } from "./base-service.js";
 import { observable, decorate, autorun } from "mobx";
 import { STATUS } from "../utils.js";
 
 const PATH_TO_FILE = "../assets/locale/";
 const FALLBACK_ID = "en";
 
-class LocaleService extends BaseService {
+class _LocaleService extends BaseService {
 
   setup(){
     this.status = STATUS.INIT;
@@ -130,7 +130,7 @@ class LocaleService extends BaseService {
   }
 }
 
-export default decorate(LocaleService, {
+export const LocaleService = decorate(_LocaleService, {
   "id": observable,
   "status": observable
 });
