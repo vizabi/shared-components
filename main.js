@@ -61,15 +61,6 @@ var frame2 = {
 };
 
 var config = {
-  encodings: {
-    frame: {
-      modelType: "frame",
-      speed: 200,
-      data: {
-        concept: "time"
-      }
-    }
-  },
   markers: {
     marker_destination: {
       data: {
@@ -96,7 +87,7 @@ var config = {
         },
         "color": color1,
         "label": label1,
-        "frame": "frame"
+        "frame": frame1
       }
     },
     marker_origin: {
@@ -119,12 +110,12 @@ var config = {
         },
         "y": {
           data: {
-            concept: "asylum_residence"
+            concept: "origin"
           }
         },
         "color": color2,
         "label": label2,
-        "frame": "frame"
+        "frame": {ref: "markers.marker_destination.encoding.frame"}
       }
     }
   }
