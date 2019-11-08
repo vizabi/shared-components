@@ -404,12 +404,17 @@ export default class VizabiBarrankchart extends BaseComponent {
     return label;
   }
 
+  getValue(d){
+    return d;
+  }
+
   _processFrameData() {
     this.nullValuesCount = 0;
 
     return this.__dataProcessed = this.model.dataArray
       //copy array in order to not sort in place
       .concat()
+      .map(this.getValue)
       //sort array by x value
       .sort((a, b) => d3.descending(a.x, b.x))
       //reduce allows looking at the previous value to calcaulte the rank, as we go

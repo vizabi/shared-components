@@ -7,59 +7,6 @@ const data = {
   path: "./data/ddf--unhcr--population_statistics/"
 };
 
-var color1 = {
-  data: {
-    space: ["asylum_residence"],
-    concept: "world_4region"
-  },
-  scale: {
-    type: "ordinal"
-  }
-};
-
-
-var label1 = {
-  data: {
-    space: ["asylum_residence"],
-    concept: "name"
-  }
-};
-
-var frame1 = {
-  modelType: "frame",
-  speed: 200,
-  data: {
-    concept: "time"
-  }
-};
-
-
-var color2 = {
-  data: {
-    space: ["origin"],
-    concept: "world_4region"
-  },
-  scale: {
-    type: "ordinal"
-  }
-};
-
-
-var label2 = {
-  data: {
-    space: ["origin"],
-    concept: "name"
-  }
-};
-
-var frame2 = {
-  modelType: "frame",
-  speed: 200,
-  data: {
-    concept: "time"
-  }
-};
-
 var config = {
   markers: {
     marker_destination: {
@@ -80,14 +27,29 @@ var config = {
             concept: "displaced_population"
           }
         },
-        "y": {
+        "color": {
           data: {
-            concept: "asylum_residence"
+            space: ["asylum_residence"],
+            concept: "world_4region"
+          },
+          scale: {
+            type: "ordinal"
           }
         },
-        "color": color1,
-        "label": label1,
-        "frame": frame1
+        "label": {
+          data: {
+            space: ["asylum_residence"],
+            concept: "name"
+          }
+        },
+        "frame": {
+          modelType: "frame",
+          speed: 200,
+          value: 2005,
+          data: {
+            concept: "time"
+          }
+        }
       }
     },
     marker_origin: {
@@ -108,14 +70,50 @@ var config = {
             concept: "displaced_population"
           }
         },
-        "y": {
+        "color": {
           data: {
-            concept: "origin"
+            space: ["origin"],
+            concept: "world_4region"
+          },
+          scale: {
+            type: "ordinal"
           }
         },
-        "color": color2,
-        "label": label2,
-        "frame": {ref: "markers.marker_destination.encoding.frame"}
+        "label": {
+          data: {
+            space: ["origin"],
+            concept: "name"
+          }
+        },
+        "frame": {
+          modelType: "frame",
+          speed: 200,
+          value: 2005,
+          data: {
+            concept: "time"
+          }
+        }
+      }
+    },
+    marker_cross: {
+      data: {
+        locale: "en",
+        source: data,
+        space: ["origin", "asylum_residence", "time"]
+      },
+      encoding: {
+        "x": {
+          data: {
+            concept: "displaced_population"
+          }
+        },
+        // "frame": {
+        //   modelType: "frame",
+        //   speed: 200,
+        //   data: {
+        //     concept: "time"
+        //   }
+        // }
       }
     }
   }
