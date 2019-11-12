@@ -21,11 +21,11 @@ export default class Barrankchart extends BaseComponent {
       type: VizabiBarrankchart,
       placeholder: ".vzb-chart-2",
       model: marker_destination
-    // },{
-    //   type: TimeSlider,
-    //   placeholder: ".vzb-timeslider",
-    //   model: marker_destination
-    // },{
+    },{
+      type: TimeSlider,
+      placeholder: ".vzb-timeslider",
+      model: marker_destination
+    //},{
     //   type: TreeMenu,
     //   placeholder: ".vzb-treemenu",
     //   //model: this.model
@@ -59,8 +59,14 @@ export default class Barrankchart extends BaseComponent {
 
     this.addReaction(this.selectSingle);
     this.addReaction(this.crossFilter);
+    this.addReaction(this.syncFrameModels);
 
     this.crossFilteredData = [];
+  }
+
+  syncFrameModels(){
+    this.model.stores.markers.get("marker_origin").encoding.get("frame").config.value = 
+    this.model.stores.markers.get("marker_destination").encoding.get("frame").config.value;
   }
 
   getValue(direction, d){
@@ -70,17 +76,16 @@ export default class Barrankchart extends BaseComponent {
     let destination = this.model.stores.markers.get("marker_destination")
       .encoding.get("selected").data.filter.markers.keys().next().value;
 
+    // for the case when nothing is selected
     if((this.crossFilteredData|| []).length === 0) return d;
-    if (!d[direction]) return d;
+      
+    // if the selection happened in only one pannel, then show it unchanged
     if (origin && !destination && direction === "origin") return d;
-    if (!origin && destination && direction === "destination") return d;
+    if (!origin && destination && direction === "asylum_residence") return d;
 
-    let find = this.crossFilteredData.find(f =>
-      d[direction] == f[direction] && f.time - d.time == 0 
-    ) || {};
-    d.x = find.x;
+    let find = this.crossFilteredData.find(f => d[direction] == f[direction] && f.time - d.time == 0 ) || {};
 
-    return d;
+    return Object.assign({}, d, {x: find.x || null});
   }
 
   selectSingle(){
