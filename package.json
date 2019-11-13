@@ -22,7 +22,9 @@
     "@babel/preset-env": "^7.4.3",
     "babel-eslint": "^10.0.1",
     "bourbon": "^5.1.0",
+    "d3": "^5.12.0",
     "eslint": "^5.16.0",
+    "mobx": "^5.9.0",
     "rollup": "^1.10.1",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",
@@ -37,9 +39,9 @@
     "rollup-plugin-serve": "^1.0.1",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-visualizer": "^1.1.1",
-    "rollup-watch": "^4.3.1",
-    "mobx": "^5.9.0",
-    "d3": "^5.12.0",
-    "vizabi-reactive": "^1.0.0"
+    "rollup-watch": "^4.3.1"
+  },
+  "dependencies": {
+    "vizabi-reactive": "file:../vizabi-reactive"
   }
 }
