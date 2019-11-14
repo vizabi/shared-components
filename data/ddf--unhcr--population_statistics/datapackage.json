@@ -306,8 +306,7 @@
         ],
         "value": "displaced_population",
         "resources": [
-          "displaced_population--by--asylum_residence--displacement_type--time",
-          "displaced_population--by--asylum_residence--origin--displacement_type--time"
+          "displaced_population--by--asylum_residence--displacement_type--time"
         ]
       },
       {
@@ -328,8 +327,7 @@
         ],
         "value": "displaced_population",
         "resources": [
-          "displaced_population--by--asylum_residence--time",
-          "displaced_population--by--origin--asylum_residence--time"
+          "displaced_population--by--asylum_residence--time"
         ]
       },
       {
@@ -340,19 +338,6 @@
         ],
         "value": "displaced_population",
         "resources": [
-          "displaced_population--by--asylum_residence--origin--displacement_type--time",
-          "displaced_population--by--origin--displacement_type--time"
-        ]
-      },
-      {
-        "primaryKey": [
-          "displacement_type",
-          "time"
-        ],
-        "value": "displaced_population",
-        "resources": [
-          "displaced_population--by--asylum_residence--displacement_type--time",
-          "displaced_population--by--asylum_residence--origin--displacement_type--time",
           "displaced_population--by--origin--displacement_type--time"
         ]
       },
@@ -363,7 +348,6 @@
         ],
         "value": "displaced_population",
         "resources": [
-          "displaced_population--by--origin--asylum_residence--time",
           "displaced_population--by--origin--time"
         ]
       }
@@ -448,17 +432,6 @@
         "value": "world_4region",
         "resources": [
           "origin"
-        ]
-      },
-      {
-        "primaryKey": [
-          "time"
-        ],
-        "value": "displaced_population",
-        "resources": [
-          "displaced_population--by--asylum_residence--time",
-          "displaced_population--by--origin--asylum_residence--time",
-          "displaced_population--by--origin--time"
         ]
       },
       {

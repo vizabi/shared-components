@@ -1,10 +1,10 @@
-var ddfcsv = new DDFCsvReader.getDDFCsvReaderObject();
-Vizabi.stores.dataSources.createAndAddType("ddfcsv", ddfcsv);
-
+var ddfReader = DDFServiceReader.getReader(); //reader config that's not dataset specific goes here
+Vizabi.stores.dataSources.createAndAddType("ddfBW", ddfReader);
 
 const data = {
-  modelType: "ddfcsv",
-  path: "./data/ddf--unhcr--population_statistics/"
+  modelType: "ddfBW",
+  service: "https://big-waffle-noproxy.gapminder.org",
+  name: "unhcrTEST" // e.g. version could also be in here, parsers: {time: yearAsInt => new Date(Date.UTC(+yearAsInt, 0))}
 };
 
 // var config = {
