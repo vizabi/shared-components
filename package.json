@@ -42,6 +42,7 @@
     "rollup-watch": "^4.3.1"
   },
   "dependencies": {
+    "vizabi-ddfservice-reader": "^2.0.1",
     "vizabi-reactive": "file:../vizabi-reactive"
   }
 }

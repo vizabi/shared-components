@@ -1,10 +1,10 @@
-var ddfReader = DDFServiceReader.getReader({service: 'http://localhost:3001'}); //reader config that's not dataset specific goes here
+var ddfReader = DDFServiceReader.getReader(); //reader config that's not dataset specific goes here
 Vizabi.stores.dataSources.createAndAddType("ddfBW", ddfReader);
-
 
 const data = {
   modelType: "ddfBW",
-  dataset: {name: "unhcr"} // e.g. version could also be in here, parsers: {time: yearAsInt => new Date(Date.UTC(+yearAsInt, 0))}
+  service: "https://big-waffle-noproxy.gapminder.org",
+  name: "unhcrTEST" // e.g. version could also be in here, parsers: {time: yearAsInt => new Date(Date.UTC(+yearAsInt, 0))}
 };
 
 var config = {
