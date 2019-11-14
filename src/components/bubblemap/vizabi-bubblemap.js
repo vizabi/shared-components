@@ -215,7 +215,8 @@ export default class VizabiBubblemap extends BaseComponent {
       //this.addReaction(this._scroll);
       //this.addReaction(this._drawColors);
 
-      //this.addReaction(this._updateDataWarning);
+      this.addReaction(this._updateDataWarning);
+      this.addReaction(this._unselectBubblesWithNoData);
       //this.addReaction(this._updateMissedPositionWarning);
     });
   }
@@ -227,6 +228,13 @@ export default class VizabiBubblemap extends BaseComponent {
     this.frameValue_1 = this.frameValue;
     this.frameValue = this.MDL.frame.value;
     return this.__duration = this.MDL.frame.playing && (this.frameValue - this.frameValue_1 > 0) ? this.MDL.frame.speed : 0;
+
+    //this.year.setText(this.model.time.formatDate(this.time), this.duration);
+    //this._updateForecastOverlay();
+
+    //possibly update the exact value in size title
+    //this.updateTitleNumbers();
+
   }
 
   _drawForecastOverlay() {
@@ -241,14 +249,9 @@ export default class VizabiBubblemap extends BaseComponent {
     this.services.layout.width + this.services.layout.height;
 
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
-    const margin = this.profileConstants.margin;
     this.height = (this.element.node().clientHeight) || 0;
     this.width = (this.element.node().clientWidth) || 0;
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
-  
-  
-    //this.height = (parseInt(this.element.style("height"), 10) - margin.top - margin.bottom) || 0;
-    //this.width = (parseInt(this.element.style("width"), 10) - margin.left - margin.right) || 0;
 
   }
 
@@ -421,6 +424,9 @@ export default class VizabiBubblemap extends BaseComponent {
     this.DOM.mapGraph
       .attr("transform", "translate(" + mapLeftOffset + "," + mapTopOffset + ")");
 
+    this.DOM.graph
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
     // resize and put in center
     this.DOM.mapSvg
       .style("transform", "translate3d(" + (margin.left + (this.width - viewPortWidth) / 2) + "px," + (margin.top + (this.height - viewPortHeight) / 2) + "px,0)")
@@ -456,41 +462,10 @@ export default class VizabiBubblemap extends BaseComponent {
   }
 
   _createAndDeleteBubbles() {
-    // const KEYS = this.KEYS;
-    // const KEY = this.KEY;
-    // const TIMEDIM = this.TIMEDIM;
-
-    // const getKeys = function(prefix) {
-    //   prefix = prefix || "";
-    //   return _this.model.marker.getKeys()
-    //     .map(d => {
-    //       const pointer = Object.assign({}, d);
-    //       //pointer[KEY] = d[KEY];
-    //       pointer[TIMEDIM] = endTime;
-    //       pointer.sortValue = _this.values.size[utils.getKey(d, _this.dataKeys.size)] || 0;
-    //       pointer[KEY] = prefix + utils.getKey(d, KEYS);
-    //       return pointer;
-    //     })
-    //     .sort((a, b) => b.sortValue - a.sortValue);
-    // };
-
-    // // get array of GEOs, sorted by the size hook
-    // // that makes larger bubbles go behind the smaller ones
-    // const endTime = this.model.time.end;
-    // this.model.marker.setVisible(getKeys.call(this));
-
-    // //unselecting bubbles with no data is used for the scenario when
-    // //some bubbles are selected and user would switch indicator.
-    // //bubbles would disappear but selection would stay
-    // if (!this.model.time.splash) {
-    //   this.unselectBubblesWithNoData();
-    // }
-
 
     this.bubbles = this.DOM.bubbleContainer.selectAll(".vzb-bmc-bubble")
       .data(this.__dataProcessed, d => d[Symbol.for("key")])
       .order();
-
 
     //exit selection
     this.bubbles.exit().remove();
@@ -500,30 +475,20 @@ export default class VizabiBubblemap extends BaseComponent {
       .attr("class", "vzb-bmc-bubble")
       .attr("id", (d) => `vzb-br-bar-${d[Symbol.for("key")]}-${this.id}`)
       .classed("vzb-selected", (d) => this.MDL.selected.has(d))
-      .on("mousemove", (d) => this.MDL.highlighted.set(d))
-      .on("mouseout", (d) => this.MDL.highlighted.delete(d))
-      .on("click", (d) => this.MDL.selected.toggle(d))
       .merge(this.bubbles);
-    // .on("mouseover", (d, i) => {
-    //   if (utils.isTouchDevice()) return;
-    //   _this._interact()._mouseover(d, i);
-    // })
-    // .on("mouseout", (d, i) => {
-    //   if (utils.isTouchDevice()) return;
-    //   _this._interact()._mouseout(d, i);
-    // })
-    // .on("click", (d, i) => {
-    //   if (utils.isTouchDevice()) return;
-    //   _this._interact()._click(d, i);
-    //   _this.highlightMarkers();
-    // })
-    // .onTap((d, i) => {
-    //   _this._interact()._click(d, i);
-    //   d3.event.stopPropagation();
-    // })
-    // .onLongTap((d, i) => {
-    // })
 
+    if(!utils.isTouchDevice()){
+      this.bubbles
+        .on("mouseover", (d) => this.MDL.highlighted.set(d))
+        .on("mouseout", (d) => this.MDL.highlighted.delete(d))
+        .on("click", (d) => this.MDL.selected.toggle(d));
+    } else {
+      this.bubbles
+        .on("tap", (d) => {
+          this.MDL.selected.toggle(d);
+          d3.event.stopPropagation();
+        });
+    }
   }
 
   _drawData(duration, reposition) {
@@ -578,7 +543,7 @@ export default class VizabiBubblemap extends BaseComponent {
           d.cLoc = _this.skew(_this.projection([valueX || 0, valueY || 0]));
 
           view.attr("cx", d.cLoc[0])
-            .attr("cy", d.cLoc[1]);
+            .attr("cy", d.cLoc[1]); 
         }
 
         if (duration) {
@@ -669,6 +634,28 @@ export default class VizabiBubblemap extends BaseComponent {
         return opacityRegular;
       });
   }
+
+  _unselectBubblesWithNoData() {
+    //unselecting bubbles with no data is used for the scenario when
+    //some bubbles are selected and user would switch indicator.
+    //bubbles would disappear but selection would stay
+    const _this = this;
+    if (this.MDL.selected.markers.size > 0)
+      this.bubbles.each((d)=>{
+        if (!d.size && d.size !== 0) _this.MDL.selected.delete(d);
+      });
+  }
+
+  _updateDataWarning(opacity) {
+    this.DOM.dataWarning.style("opacity",
+      1 || opacity || (
+        !this.MDL.selected.markers.size ?
+          this.wScale(this.MDL.frame.value.getUTCFullYear()) :
+          1
+      )
+    );
+  }
+
 }
 
 
@@ -726,11 +713,6 @@ export default class VizabiBubblemap extends BaseComponent {
 
    class Old {
 
-
-
-  /**
-   * DOM is ready
-   */
   readyOnce() {
 
 
@@ -769,9 +751,6 @@ export default class VizabiBubblemap extends BaseComponent {
     this._labels.readyOnce();
   }
 
-  /*
-   * Both model and DOM are ready
-   */
   ready() {
     const _this = this;
     this.KEYS = utils.unique(this.model.marker._getAllDimensions({ exceptType: "time" }));
@@ -804,17 +783,6 @@ export default class VizabiBubblemap extends BaseComponent {
       _this.updateDoubtOpacity();
       _this.updateOpacity();
     });
-
-  }
-
-  frameChanged(frame, time) {
-    if (time.toString() != this.model.time.value.toString()) return; // frame is outdated
-    if (!frame) return;
-
-    this.values = frame;
-    this.updateTime();
-    this.updateDoubtOpacity();
-    this.redrawDataPoints(null, false);
 
   }
 
@@ -913,7 +881,6 @@ export default class VizabiBubblemap extends BaseComponent {
     });
   }
 
-  // show size number on title when hovered on a bubble
   updateTitleNumbers() {
     const _this = this;
 
@@ -961,106 +928,6 @@ export default class VizabiBubblemap extends BaseComponent {
     }
   }
 
-  updateDoubtOpacity(opacity) {
-    if (opacity == null) opacity = this.wScale(+this.time.getUTCFullYear().toString());
-    if (this.someSelected) opacity = 1;
-    this.dataWarningEl.style("opacity", opacity);
-  }
-
-  updateOpacity() {
-    const _this = this;
-    /*
-     this.entityBubbles.classed("vzb-selected", function (d) {
-     return _this.model.marker.isSelected(d);
-     });
-     */
-
-    const OPACITY_HIGHLT = 1.0;
-    const OPACITY_HIGHLT_DIM = 0.3;
-    const OPACITY_SELECT = 1.0;
-    const OPACITY_REGULAR = this.model.marker.opacityRegular;
-    const OPACITY_SELECT_DIM = this.model.marker.opacitySelectDim;
-
-    this.entityBubbles.style("opacity", d => {
-
-      if (_this.someHighlighted) {
-        //highlight or non-highlight
-        if (_this.model.marker.isHighlighted(d)) return OPACITY_HIGHLT;
-      }
-
-      if (_this.someSelected) {
-        //selected or non-selected
-        return _this.model.marker.isSelected(d) ? OPACITY_SELECT : OPACITY_SELECT_DIM;
-      }
-
-      if (_this.someHighlighted) return OPACITY_HIGHLT_DIM;
-
-      return OPACITY_REGULAR;
-
-    });
-
-    this.entityBubbles.classed("vzb-selected", d => _this.model.marker.isSelected(d));
-
-    const nonSelectedOpacityZero = _this.model.marker.opacitySelectDim < 0.01;
-
-    // when pointer events need update...
-    if (nonSelectedOpacityZero !== this.nonSelectedOpacityZero) {
-      this.entityBubbles.style("pointer-events", d => (!_this.someSelected || !nonSelectedOpacityZero || _this.model.marker.isSelected(d)) ?
-        "visible" : "none");
-    }
-
-    this.nonSelectedOpacityZero = _this.model.marker.opacitySelectDim < 0.01;
-  }
-
-  /**
-   * Changes labels for indicators
-   */
-  updateIndicators() {
-    this.sScale = this.model.marker.size.getScale();
-    this.cScale = this.model.marker.color.getScale();
-  }
-
-  /**
-   * Updates entities
-   */
-
-
-  unselectBubblesWithNoData(frame) {
-    const _this = this;
-    if (!frame) frame = this.values;
-
-    if (!frame || !frame.size) return;
-
-    this.model.marker.select.forEach(d => {
-      const valueS = frame.size[utils.getKey(d, _this.dataKeys.size)];
-      if (!valueS && valueS !== 0)
-        _this.model.marker.selectMarker(d);
-    });
-  }
-
-
-
-  /*
-   * UPDATE TIME:
-   * Ideally should only update when time or data changes
-   */
-  updateTime() {
-    const _this = this;
-
-    this.time_1 = this.time == null ? this.model.time.value : this.time;
-    this.time = this.model.time.value;
-    this.duration = this.model.time.playing && (this.time - this.time_1 > 0) ? this.model.time.delayAnimations : 0;
-    this.year.setText(this.model.time.formatDate(this.time), this.duration);
-    this._updateForecastOverlay();
-
-    //possibly update the exact value in size title
-    this.updateTitleNumbers();
-  }
-
-  _updateForecastOverlay() {
-    this.forecastOverlay.classed("vzb-hidden", (this.model.time.value <= this.model.time.endBeforeForecast) || !this.model.time.endBeforeForecast || !this.model.ui.chart.showForecastOverlay);
-  }
-
   fitSizeOfTitles() {
     // reset font sizes first to make the measurement consistent
     const yTitleText = this.yTitleEl.select("text");
@@ -1088,24 +955,13 @@ export default class VizabiBubblemap extends BaseComponent {
 
   }
 
-
-
-
-
-  /**
-   * Executes everytime the container or vizabi is resized
-   * Ideally,it contains only operations related to size
-   */
- 
-
   repositionElements() {
 
     const margin = this.activeProfile.margin;
     const infoElHeight = this.activeProfile.infoElHeight;
     const isRTL = this.model.locale.isRTL();
 
-    this.graph
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
 
     this.year.setConditions({
       widthRatio: 2 / 10
@@ -1161,9 +1017,6 @@ export default class VizabiBubblemap extends BaseComponent {
         + (t.translateY - infoElHeight * 0.8) + ")");
     }
   }
-
-
-
 
   _interact() {
     const _this = this;
@@ -1308,8 +1161,6 @@ export default class VizabiBubblemap extends BaseComponent {
       this._labels.setTooltip();
     }
   }
-
-
 
 
 }

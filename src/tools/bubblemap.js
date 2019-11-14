@@ -141,7 +141,7 @@ export default class BubbleMap extends BaseComponent {
           origin: d.origin,
           asylum_residence: d.asylum_residence,
           time: d.time,
-          x: d.x
+          size: d.size
         });
       }
     });
