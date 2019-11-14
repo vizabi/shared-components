@@ -15,6 +15,13 @@ class BaseComponent {
 
     const scope = this.parent && this.parent.element ? this.parent.element : d3; //d3 would search global scope
     this.element = scope.select(placeholder).html(this.template);
+    if(!this.element.node()) console.warn(`
+      Vizabi component ${this.constructor.name} id: ${this.id} name: ${this.name} 
+      can't find placeholder to render: 
+      ${placeholder} 
+      Please check that placeholder exists and is correctly specified in the component initialisation.
+    `, this);
+
     this.children = [];
     this.parent = parent || null;
     this.root = root || this;
