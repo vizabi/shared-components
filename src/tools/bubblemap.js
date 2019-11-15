@@ -7,6 +7,7 @@ import LayoutService from "../services/layout.js";
 import TreeMenu from "../components/treemenu/treemenu.js";
 import { autorun } from 'mobx';
 
+
 export default class BubbleMap extends BaseComponent {
 
   constructor(config){
@@ -25,8 +26,8 @@ export default class BubbleMap extends BaseComponent {
     },{
       type: TimeSlider,
       placeholder: ".vzb-timeslider",
-      name: "time-slider"
-      //model: this.model
+      name: "time-slider",
+      model: marker_destination
     // },{
     //   type: TreeMenu,
     //   placeholder: ".vzb-treemenu",
@@ -68,8 +69,16 @@ export default class BubbleMap extends BaseComponent {
 
     super(config);
 
-    this.children[0].getValue = d => this.getValue("origin", d);
-    this.children[1].getValue = d => this.getValue("asylum_residence", d);
+    this.concepts = {
+      FRAME: marker_origin.config.encoding.frame.data.concept,
+      KEY: marker_origin.config.data.space[0],
+      ORIGIN: "origin",
+      DESTINATION: "destination",
+      ENCODING: "size"
+    };
+
+    this.children[0].getValue = d => this.getValue(this.concepts.ORIGIN, d);
+    this.children[1].getValue = d => this.getValue(this.concepts.DESTINATION, d);
 
     this.addReaction(this.selectSingle);
     this.addReaction(this.crossFilter);
@@ -95,12 +104,15 @@ export default class BubbleMap extends BaseComponent {
     if((this.crossFilteredData|| []).length === 0) return d;
       
     // if the selection happened in only one pannel, then show it unchanged
-    if (origin && !destination && direction === "origin") return d;
-    if (!origin && destination && direction === "asylum_residence") return d;
+    if (origin && !destination && direction === this.concepts.ORIGIN) return d;
+    if (!origin && destination && direction === this.concepts.DESTINATION) return d;
 
-    let find = this.crossFilteredData.find(f => d[direction] == f[direction] && f.time - d.time == 0 ) || {};
+    let find = this.crossFilteredData.find(f => d[this.concepts.KEY] == f[direction] && f[this.concepts.FRAME] - d[this.concepts.FRAME] == 0 ) || {};
 
-    return Object.assign({}, d, {size: find.size || null});
+    let result = {};
+    result[this.concepts.ENCODING] = find[this.concepts.ENCODING] || null;
+
+    return Object.assign({}, d, result);
   }
 
   selectSingle(){
@@ -122,27 +134,27 @@ export default class BubbleMap extends BaseComponent {
   }
   
   crossFilter() {
+    this.crossFilteredData = [];
+
     let origin = this.model.stores.markers.get("marker_origin")
       .encoding.get("selected").data.filter.markers.keys().next().value;
 
     let destination = this.model.stores.markers.get("marker_destination")
       .encoding.get("selected").data.filter.markers.keys().next().value;
-
+      
     let data = this.model.stores.markers.get("marker_cross").dataArray;
-
-    this.crossFilteredData = [];
-
+    
     if(!origin && !destination) return;
 
     data.forEach(d => {
-      if ((!origin || origin.replace("origin-","") === d.origin) 
-      && (!destination || destination.replace("asylum_residence-","") === d.asylum_residence )) {
-        this.crossFilteredData.push({
-          origin: d.origin,
-          asylum_residence: d.asylum_residence,
-          time: d.time,
-          size: d.size
-        });
+      if ((!origin || origin.replace(this.concepts.KEY + "-","") === d[this.concepts.ORIGIN]) 
+      && (!destination || destination.replace(this.concepts.KEY + "-","") === d[this.concepts.DESTINATION] )) {
+        let result = {};
+        result[this.concepts.DESTINATION] = d[this.concepts.DESTINATION];
+        result[this.concepts.ORIGIN] = d[this.concepts.ORIGIN];
+        result[this.concepts.FRAME] = d[this.concepts.FRAME];
+        result[this.concepts.ENCODING] = d[this.concepts.ENCODING];
+        this.crossFilteredData.push(result);
       }
     });
 

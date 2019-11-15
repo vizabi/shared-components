@@ -2,7 +2,7 @@ import BaseService from "./base-service.js";
 import { observable, decorate, autorun } from "mobx";
 import { STATUS } from "../utils.js";
 
-const PATH_TO_FILE = "../assets/locale/";
+const PATH_TO_FILE = "./assets/locale/";
 const FALLBACK_ID = "en";
 
 class LocaleService extends BaseService {

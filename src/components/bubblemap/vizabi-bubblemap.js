@@ -126,7 +126,7 @@ export default class VizabiBubblemap extends BaseComponent {
           bottom: -0.12,
           left: 0
         },
-        projection: "robinson",
+        projection: "geoAzimuthalEqualArea",
         topology: {
           path: null,
           objects: {
@@ -216,7 +216,7 @@ export default class VizabiBubblemap extends BaseComponent {
       //this.addReaction(this._drawColors);
 
       this.addReaction(this._updateDataWarning);
-      this.addReaction(this._unselectBubblesWithNoData);
+      //this.addReaction(this._unselectBubblesWithNoData);
       //this.addReaction(this._updateMissedPositionWarning);
     });
   }
@@ -329,9 +329,10 @@ export default class VizabiBubblemap extends BaseComponent {
     // http://bl.ocks.org/mbostock/3710566 robinson
     // map background
 
-    
+    if(!d3[this.state.map.projection]) return utils.warn(`Projection ${this.state.map.projection} is not available in d3`);
+
     // project to bounding box https://bl.ocks.org/mbostock/4707858
-    this.projection = d3["geo" + utils.capitalize(this.state.map.projection)]()
+    this.projection = d3[this.state.map.projection]()
       .scale(1)
       .translate([0, 0]);
 
@@ -499,12 +500,8 @@ export default class VizabiBubblemap extends BaseComponent {
     if (!duration) duration = this.__duration;
     if (!reposition) reposition = true;
     if (!this.bubbles) return utils.warn("redrawDataPoints(): no entityBubbles defined. likely a premature call, fix it!");
-    const dataKeys = this.dataKeys;
-    const values = this.values;
-    
-    
 
-    this.bubbles.each(function(d, index) {
+    this.bubbles.each(function(d) {
       const view = d3.select(this);
       const geo = d3.select("#" + d[_this.KEY]);
 
@@ -514,62 +511,74 @@ export default class VizabiBubblemap extends BaseComponent {
       const valueC = d.color;
       const valueL = d.label;
 
-      d.hidden_1 = d.hidden;
       d.hidden = (!valueS && valueS !== 0) || valueX == null || valueY == null;
-      const showhide = d.hidden !== d.hidden_1;
 
-      if (d.hidden) {
-        if (showhide) {
-          if (duration) {
-            view.transition().duration(duration).ease(d3.easeLinear)
-              .style("opacity", 0)
-              .on("end", () => view.classed("vzb-hidden", d.hidden).style("opacity", _this.state.opacityRegular));
-          } else {
-            view.classed("vzb-hidden", d.hidden);
-          }
-        }
-        //_this._updateLabel(d, index, 0, 0, valueS, valueC, valueL, duration);
-      } else {
+      view.classed("vzb-hidden", d.hidden);
+      d.r = utils.areaToRadius(_this.sScale(valueS || 0));
+      d.cLoc = _this.skew(_this.projection([valueX || 0, valueY || 0]));
+      view
+        .attr("r", d.r)
+        .attr("fill", valueC != null ? _this.cScale(valueC) : _this.COLOR_WHITEISH)
+        .attr("cx", d.cLoc[0])
+        .attr("cy", d.cLoc[1]); 
 
-        d.r = utils.areaToRadius(_this.sScale(valueS || 0));
-        d.label = valueL;
+      // d.hidden_1 = d.hidden;
+      // d.hidden = (!valueS && valueS !== 0) || valueX == null || valueY == null;
+      // if(d.hidden) nulls++;
+      // const showhide = d.hidden !== d.hidden_1;
 
-        view.attr("fill", valueC != null ? _this.cScale(valueC) : _this.COLOR_WHITEISH);
+      // if (d.hidden) {
+      //   if (showhide) {
+      //     if (duration) {
+      //       view.transition().duration(duration).ease(d3.easeLinear)
+      //         .style("opacity", 0)
+      //         .on("end", () => view.classed("vzb-hidden", d.hidden).style("opacity", _this.state.opacityRegular));
+      //     } else {
+      //       view.classed("vzb-hidden", d.hidden);
+      //     }
+      //   }
+      //   //_this._updateLabel(d, index, 0, 0, valueS, valueC, valueL, duration);
+      // } else {
 
-        if (_this.state.map.colorGeo)
-          geo.style("fill", valueC != null ? _this.cScale(valueC) : "#999");
+      //   d.r = utils.areaToRadius(_this.sScale(valueS || 0));
 
-        if (reposition) {
-          d.cLoc = _this.skew(_this.projection([valueX || 0, valueY || 0]));
+      //   view.attr("fill", valueC != null ? _this.cScale(valueC) : _this.COLOR_WHITEISH);
 
-          view.attr("cx", d.cLoc[0])
-            .attr("cy", d.cLoc[1]); 
-        }
+      //   if (_this.state.map.colorGeo)
+      //     geo.style("fill", valueC != null ? _this.cScale(valueC) : "#999");
 
-        if (duration) {
-          if (showhide) {
-            const opacity = view.style("opacity");
-            view.classed("vzb-hidden", d.hidden);
-            view.style("opacity", 0)
-              .attr("r", d.r)
-              .transition().duration(duration).ease(d3.easeExp)
-              .style("opacity", opacity);
+      //   if (reposition) {
+      //     d.cLoc = _this.skew(_this.projection([valueX || 0, valueY || 0]));
+
+      //     view.attr("cx", d.cLoc[0])
+      //       .attr("cy", d.cLoc[1]); 
+      //   }
+
+      //   if (duration) {
+      //     if (showhide) {
+      //       const opacity = view.style("opacity");
+      //       view.classed("vzb-hidden", d.hidden);
+      //       view.style("opacity", 0)
+      //         .attr("r", d.r)
+      //         .transition().duration(duration).ease(d3.easeExp)
+      //         .style("opacity", opacity);
             
-          } else {
-            view.transition().duration(duration).ease(d3.easeLinear)
-              .attr("r", d.r);
-          }
-        } else {
-          view.interrupt()
-            .attr("r", d.r)
-            .transition();
+      //     } else {
+      //       view.transition().duration(duration).ease(d3.easeLinear)
+      //         .attr("r", d.r);
+      //     }
+      //   } else {
+      //     view.interrupt()
+      //       .attr("r", d.r)
+      //       .transition();
 
-          if (showhide) view.classed("vzb-hidden", d.hidden);
-        }
+      //     if (showhide) view.classed("vzb-hidden", d.hidden);
+      //   }
 
-        //_this._updateLabel(d, index, d.cLoc[0], d.cLoc[1], valueS, valueC, d.label, duration);
-      }
+      //   //_this._updateLabel(d, index, d.cLoc[0], d.cLoc[1], valueS, valueC, d.label, duration);
+      // }
     });
+
   }
 
   updateSize() {
