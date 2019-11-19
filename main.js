@@ -12,7 +12,7 @@ var config = {
       data: {
         locale: "en",
         source: data,
-        space: ["geo", "year"]
+        space: ["destination", "origin", "year"]
       },
       encoding: {
         "selected": {
@@ -23,24 +23,24 @@ var config = {
         },
         "size": {
           data: {
-            concept: "immigrant_stock"
+            concept: "migration_stock"
           }
         },
         "lat": {
           data: {
-            space: ["geo"],
+            space: ["destination"],
             concept: "latitude"
           }
         },
         "lon": {
           data: {
-            space: ["geo"],
+            space: ["destination"],
             concept: "longitude"
           }
         },
         "color": {
           data: {
-            space: ["geo"],
+            space: ["destination"],
             concept: "world_4region"
           },
           scale: {
@@ -49,7 +49,7 @@ var config = {
         },
         "label": {
           data: {
-            space: ["geo"],
+            space: ["destination"],
             concept: "name"
           }
         },
@@ -67,7 +67,7 @@ var config = {
       data: {
         locale: "en",
         source: data,
-        space: ["geo", "year"]
+        space: ["destination", "origin", "year"]
       },
       encoding: {
         "selected": {
@@ -78,24 +78,24 @@ var config = {
         },
         "size": {
           data: {
-            concept: "emigrant_stock"
+            concept: "migration_stock"
           }
         },
         "lat": {
           data: {
-            space: ["geo"],
+            space: ["origin"],
             concept: "latitude"
           }
         },
         "lon": {
           data: {
-            space: ["geo"],
+            space: ["origin"],
             concept: "longitude"
           }
         },
         "color": {
           data: {
-            space: ["geo"],
+            space: ["origin"],
             concept: "world_4region"
           },
           scale: {
@@ -104,7 +104,7 @@ var config = {
         },
         "label": {
           data: {
-            space: ["geo"],
+            space: ["origin"],
             concept: "name"
           }
         },
@@ -114,20 +114,6 @@ var config = {
           value: 2005,
           data: {
             concept: "year"
-          }
-        }
-      }
-    },
-    marker_cross: {
-      data: {
-        locale: "en",
-        source: data,
-        space: ["destination", "origin", "year"]
-      },
-      encoding: {
-        "size": {
-          data: {
-            concept: "migration_stock"
           }
         }
       }
