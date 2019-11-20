@@ -80,12 +80,14 @@ export default class BubbleMap extends BaseComponent {
     this.children[0]._processFrameData = () => this._processFrameData(this.children[0], this.concepts.ORIGIN, this.concepts.ENCODING);
     this.children[1]._processFrameData = () => this._processFrameData(this.children[1], this.concepts.DESTINATION, this.concepts.ENCODING);
 
+    this.crossFilteredData = [];   
+  }
+
+  draw(){
     this.addReaction(this.selectSingle);
     this.addReaction(this.filterOriginsByDestination);
     this.addReaction(this.filterDestinationsByOrigin);
-    this.addReaction(this.syncFrameModels);
-
-    this.crossFilteredData = [];   
+    this.addReaction(this.syncFrameModels);   
   }
 
   syncFrameModels(){
@@ -129,19 +131,27 @@ export default class BubbleMap extends BaseComponent {
   }
 
   filterOriginsByDestination(){
-    let destination = this.model.stores.markers.get("marker_destination")
-      .encoding.get("selected").data.filter.markers.keys().next().value;
-      
-    if (destination) this.model.stores.markers.get("marker_origin").data.filter.config.dimensions = 
-      {destination: {destination: {"$in": [destination]}}};
+    let marker_destination = this.model.stores.markers.get("marker_destination");
+    let marker_origin = this.model.stores.markers.get("marker_origin");
+
+    const selection = marker_destination.encoding.get("selected").data.filter.markers.keys().next().value;
+    const newFilter = selection ? {destination: {destination: {"$in": [selection]}}} : {};
+    const currentFilter = Vizabi.mobx.toJS(marker_origin.data.filter.config.dimensions);
+
+    if (JSON.stringify(currentFilter) !== JSON.stringify(newFilter)) 
+      marker_origin.data.filter.config.dimensions = newFilter;
   }
 
 
   filterDestinationsByOrigin(){
-    let origin = this.model.stores.markers.get("marker_origin")
-      .encoding.get("selected").data.filter.markers.keys().next().value;
-      
-    if (origin) this.model.stores.markers.get("marker_destination").data.filter.config.dimensions = 
-      {origin: {origin: {"$in": [origin]}}};
+    let marker_destination = this.model.stores.markers.get("marker_destination");
+    let marker_origin = this.model.stores.markers.get("marker_origin");
+
+    const selection = marker_origin.encoding.get("selected").data.filter.markers.keys().next().value;
+    const newFilter = selection ? {origin: {origin: {"$in": [selection]}}} : {};
+    const currentFilter = Vizabi.mobx.toJS(marker_destination.data.filter.config.dimensions);
+
+    if (JSON.stringify(currentFilter) !== JSON.stringify(newFilter)) 
+      marker_destination.data.filter.config.dimensions = newFilter;
   }
 }

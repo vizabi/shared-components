@@ -50,7 +50,9 @@ class BaseComponent {
 
   addReaction(method){
     if(!this.reactions.has(method)){
-      this.reactions.set(method, autorun(method.bind(this)));
+      this.reactions.set(method, autorun(() => {        
+        if(this.status === STATUS.READY) method.bind(this)();
+      }));
     }
   }
   removeReaction(method){
@@ -73,7 +75,7 @@ class BaseComponent {
       .concat(this.children.map((m)=>m.status))
       .concat(this.model.state);
 
-    if (dependencies.every(dep => dep === STATUS.READY))
+    if (dependencies.every(dep => dep === STATUS.READY || dep == undefined))
       this.status = STATUS.READY;
     else if (dependencies.some(dep => dep === STATUS.ERROR))
       this.status = STATUS.ERROR;
