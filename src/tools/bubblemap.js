@@ -74,11 +74,15 @@ export default class BubbleMap extends BaseComponent {
       KEY: marker_origin.config.data.space[0],
       ORIGIN: "origin",
       DESTINATION: "destination",
-      ENCODING: "size"
+      ENCODING: "size",
+      GEO: "geo",
+      ORIGIN_MEASURE: "emigrant_stock",
+      DESTINATION_MEASURE: "immigrant_stock",
+      GEO_MEASURE: "migration_stock"
     };
 
-    this.children[0]._processFrameData = () => this._processFrameData(this.children[0], this.concepts.ORIGIN, this.concepts.ENCODING);
-    this.children[1]._processFrameData = () => this._processFrameData(this.children[1], this.concepts.DESTINATION, this.concepts.ENCODING);
+    this.children[0]._processFrameData = () => this._processFrameData(this.children[0], this.concepts.ORIGIN);
+    this.children[1]._processFrameData = () => this._processFrameData(this.children[1], this.concepts.DESTINATION);
 
     this.crossFilteredData = [];   
   }
@@ -95,21 +99,34 @@ export default class BubbleMap extends BaseComponent {
       this.model.stores.markers.get("marker_destination").encoding.get("frame").config.value;
   }
 
-  _processFrameData(_this, DIRECTION, ENCODING) {
-       
-    const rollup = d3.nest()
-      .key(d => d[DIRECTION])
-      .rollup(v => {
-        const result = Object.assign({}, v[0]);
-        result[Symbol.for("key")] = v[0][DIRECTION]
-        result[ENCODING] = d3.sum(v, d => d[ENCODING]);
-        return result;
-      })
-      .entries(_this.model.dataArray)
-      .map(m => m.value)
-      .sort((a, b) => b[ENCODING] - a[ENCODING]);
+  _processFrameData(_this, DIRECTION) {
+    const {
+      ENCODING,
+      GEO
+    } = this.concepts;
+
+    let rollup = [];
+
+    if (_this.model.data.config.space.includes(GEO)){
+      rollup = _this.model.dataArray.map((m) =>
+        Object.assign({}, m, {
+          [Symbol.for("key")]: m[GEO]
+        })
+      );
+    } else {   
+      rollup = d3.nest()
+        .key(d => d[DIRECTION])
+        .rollup(v => 
+          Object.assign({}, v[0], {
+            [Symbol.for("key")]: v[0][DIRECTION],
+            [ENCODING]: d3.sum(v, d => d[ENCODING])
+          })
+        )
+        .entries(_this.model.dataArray)
+        .map(m => m.value);
+    }
       
-    return _this.__dataProcessed = rollup;
+    return _this.__dataProcessed = rollup.sort((a, b) => b[ENCODING] - a[ENCODING]);
   }
 
   selectSingle(){
@@ -130,28 +147,58 @@ export default class BubbleMap extends BaseComponent {
     }
   }
 
-  filterOriginsByDestination(){
-    let marker_destination = this.model.stores.markers.get("marker_destination");
-    let marker_origin = this.model.stores.markers.get("marker_origin");
+  crossFilter(initiator){
+    const {
+      GEO, 
+      ORIGIN,
+      DESTINATION, 
+      FRAME, 
+      GEO_MEASURE, 
+      ORIGIN_MEASURE, 
+      DESTINATION_MEASURE
+    } = this.concepts;
+    
+    const marker_destination = this.model.stores.markers.get("marker_destination");
+    const marker_origin = this.model.stores.markers.get("marker_origin");
 
-    const selection = marker_destination.encoding.get("selected").data.filter.markers.keys().next().value;
-    const newFilter = selection ? {destination: {destination: {"$in": [selection]}}} : {};
-    const currentFilter = Vizabi.mobx.toJS(marker_origin.data.filter.config.dimensions);
+    const initiator_model = initiator == DESTINATION ? marker_destination : marker_origin;
+    const receiver_model = initiator == DESTINATION ? marker_origin : marker_destination;
+    const receiver = initiator == DESTINATION ? ORIGIN : DESTINATION; 
+    const measure = initiator == DESTINATION ? ORIGIN_MEASURE : DESTINATION_MEASURE;
+    
+    const selection = initiator_model.encoding.get("selected").data.filter.markers.keys().next().value;
+    const newFilter = selection ? {[initiator]: {[initiator]: {"$in": [selection]}}} : {};
+    const currentFilter = Vizabi.mobx.toJS(receiver_model.data.filter.config.dimensions);
 
-    if (JSON.stringify(currentFilter) !== JSON.stringify(newFilter)) 
-      marker_origin.data.filter.config.dimensions = newFilter;
+    if (JSON.stringify(currentFilter) !== JSON.stringify(newFilter)) {
+      let action = Vizabi.mobx.action(() => {
+        receiver_model.data.filter.config.dimensions = newFilter;
+
+        if (selection) {
+          receiver_model.data.config.space = [ORIGIN, DESTINATION, FRAME];
+          receiver_model.encoding.get("size").data.config.concept = GEO_MEASURE;
+          receiver_model.encoding.get("label").data.config.space = [receiver];
+          receiver_model.encoding.get("lat").data.config.space = [receiver];
+          receiver_model.encoding.get("lon").data.config.space = [receiver];
+          receiver_model.encoding.get("color").data.config.space = [receiver];
+        } else {
+          receiver_model.data.config.space = [GEO, FRAME];
+          receiver_model.encoding.get("size").data.config.concept = measure;
+          receiver_model.encoding.get("label").data.config.space = [GEO];
+          receiver_model.encoding.get("lat").data.config.space = [GEO];
+          receiver_model.encoding.get("lon").data.config.space = [GEO];
+          receiver_model.encoding.get("color").data.config.space = [GEO];
+
+        }
+      });
+      action();
+    }
   }
 
-
+  filterOriginsByDestination(){
+    this.crossFilter(this.concepts.DESTINATION);
+  }
   filterDestinationsByOrigin(){
-    let marker_destination = this.model.stores.markers.get("marker_destination");
-    let marker_origin = this.model.stores.markers.get("marker_origin");
-
-    const selection = marker_origin.encoding.get("selected").data.filter.markers.keys().next().value;
-    const newFilter = selection ? {origin: {origin: {"$in": [selection]}}} : {};
-    const currentFilter = Vizabi.mobx.toJS(marker_destination.data.filter.config.dimensions);
-
-    if (JSON.stringify(currentFilter) !== JSON.stringify(newFilter)) 
-      marker_destination.data.filter.config.dimensions = newFilter;
+    this.crossFilter(this.concepts.ORIGIN);
   }
 }

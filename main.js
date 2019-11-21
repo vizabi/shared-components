@@ -12,7 +12,7 @@ var config = {
       data: {
         locale: "en",
         source: data,
-        space: ["destination", "origin", "year"]
+        space: ["geo", "year"]
       },
       encoding: {
         "selected": {
@@ -23,24 +23,24 @@ var config = {
         },
         "size": {
           data: {
-            concept: "migration_stock"
+            concept: "immigrant_stock"
           }
         },
         "lat": {
           data: {
-            space: ["destination"],
+            space: ["geo"],
             concept: "latitude"
           }
         },
         "lon": {
           data: {
-            space: ["destination"],
+            space: ["geo"],
             concept: "longitude"
           }
         },
         "color": {
           data: {
-            space: ["destination"],
+            space: ["geo"],
             concept: "world_4region"
           },
           scale: {
@@ -49,7 +49,7 @@ var config = {
         },
         "label": {
           data: {
-            space: ["destination"],
+            space: ["geo"],
             concept: "name"
           }
         },
@@ -67,7 +67,7 @@ var config = {
       data: {
         locale: "en",
         source: data,
-        space: ["destination", "origin", "year"]
+        space: ["geo", "year"]
       },
       encoding: {
         "selected": {
@@ -78,24 +78,24 @@ var config = {
         },
         "size": {
           data: {
-            concept: "migration_stock"
+            concept: "emigrant_stock"
           }
         },
         "lat": {
           data: {
-            space: ["origin"],
+            space: ["geo"],
             concept: "latitude"
           }
         },
         "lon": {
           data: {
-            space: ["origin"],
+            space: ["geo"],
             concept: "longitude"
           }
         },
         "color": {
           data: {
-            space: ["origin"],
+            space: ["geo"],
             concept: "world_4region"
           },
           scale: {
@@ -104,7 +104,7 @@ var config = {
         },
         "label": {
           data: {
-            space: ["origin"],
+            space: ["geo"],
             concept: "name"
           }
         },

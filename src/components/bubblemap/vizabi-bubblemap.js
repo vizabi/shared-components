@@ -259,6 +259,8 @@ export default class VizabiBubblemap extends BaseComponent {
   preload() {
     const _this = this;
 
+    if (this.topology) return Promise.resolve();
+
     const reader = this.model.data.source.reader;
 
     //this component shall fetch the preload geoshape information from a file
