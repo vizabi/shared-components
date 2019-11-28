@@ -51,6 +51,7 @@ export class DataNotes extends BaseComponent {
     this.encoding = null;
 
 
+    this.element.classed("vzb-hidden", this.hidden);
     this.element.append("div")
       .html(ICON_CLOSE)
       .on("click", () => {

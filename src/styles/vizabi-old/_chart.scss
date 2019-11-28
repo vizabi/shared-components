@@ -9,7 +9,7 @@
 }
 
 %vzb-chart-svg {
-  @include position(absolute, 0);
+  //@include position(absolute, 0);
   color: $vzb-color-grey-dark;
   height: 100%;
   margin: 0;
