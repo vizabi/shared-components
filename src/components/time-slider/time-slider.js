@@ -225,8 +225,10 @@ export class TimeSlider extends BaseComponent {
     // const slider_h = parseInt(this.slider_outer.style("height"), 10) || 0;
 
     // if (!slider_h || !slider_w) return utils.warn("time slider resize() aborted because element is too small or has display:none");
-
-    this.sliderWidth = this.width - margin.left - margin.right;
+    const marginRight = this.services.layout.hGrid.length ? 
+      this.width - this.services.layout.hGrid[0]
+      : margin.right;
+    this.sliderWidth = this.width - margin.left - marginRight;
     this.sliderHeight = this.height - margin.bottom - margin.top;
     const _this = this;
 

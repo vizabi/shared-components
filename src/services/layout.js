@@ -36,6 +36,7 @@ class _LayoutService extends BaseService {
     this.size = this.getSize();
     this.profile = "SMALL";
     this.projector = false;
+    this.hGrid = [];
     this.element = d3.select(this.model.placeholder || "body")
       .classed(CSS_PLACEHOLDER_CLASS, true);
     this._resizeHandler();
@@ -81,14 +82,24 @@ class _LayoutService extends BaseService {
   }
 
   setProjector(value) {
-    this.projector = value;
-    this.element.classed(CSS_PROJECTOR_CLASS, this.projector);
+    action(() => {
+      this.projector = value;
+      this.element.classed(CSS_PROJECTOR_CLASS, this.projector);
+      this.size = this.getSize();
+    })();
+  }
+
+  setHGrid(value) {
+    action(() => {
+      this.hGrid = value;
+    })();
   }
 }
 
 export const LayoutService = decorate(_LayoutService, {
   "setProjector": action.bound,
   "size": observable.ref,
+  "hGrid": observable,
   "projector": observable,
   "width": observable,
   "height": observable,
