@@ -15,6 +15,13 @@ class _BaseComponent {
 
     const scope = this.parent && this.parent.element ? this.parent.element : d3; //d3 would search global scope
     this.element = scope.select(placeholder).html(this.template);
+    if(!this.element.node()) console.warn(`
+      Vizabi component ${this.constructor.name} id: ${this.id} name: ${this.name} 
+      can't find placeholder to render: 
+      ${placeholder} 
+      Please check that placeholder exists and is correctly specified in the component initialisation.
+    `, this);
+
     this.children = [];
     this.parent = parent || null;
     this.root = root || this;
@@ -51,7 +58,9 @@ class _BaseComponent {
 
   addReaction(method){
     if(!this.reactions.has(method)){
-      this.reactions.set(method, autorun(method.bind(this)));
+      this.reactions.set(method, autorun(() => {        
+        if(this.status === STATUS.READY) method.bind(this)();
+      }));
     }
   }
   removeReaction(method){
@@ -74,7 +83,7 @@ class _BaseComponent {
       .concat(this.children.map((m)=>m.status))
       .concat(this.model.state);
 
-    if (dependencies.every(dep => dep === STATUS.READY))
+    if (dependencies.every(dep => dep === STATUS.READY || dep == undefined))
       this.status = STATUS.READY;
     else if (dependencies.some(dep => dep === STATUS.ERROR))
       this.status = STATUS.ERROR;
