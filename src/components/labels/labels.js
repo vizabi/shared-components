@@ -93,9 +93,9 @@ export class Labels extends BaseComponent{
 
     //this._clearInitialFontSize();
     this.addReaction(this.selectDataPoints);
-    this.addReaction(this.updateLabelSizeLimits);
-    this.addReaction(this.updateLabelsOnlyTextSize);
-    this.addReaction(this.updateIndicators);
+   // this.addReaction(this.updateLabelSizeLimits);
+   // this.addReaction(this.updateLabelsOnlyTextSize);
+   // this.addReaction(this.updateIndicators);
   }
 
   readyOnce() {
@@ -214,7 +214,7 @@ export class Labels extends BaseComponent{
 
     this.entityLines = this.entityLines
       .enter().insert("g", function(d) {
-        return this.querySelector("." + _this.options.LINES_CONTAINER_SELECTOR_PREFIX + cssEscape(key(d)));
+        return this.querySelector("." + _this.options.LINES_CONTAINER_SELECTOR_PREFIX + CSS.escape(key(d)));
       })
       .attr("class", (d) => _cssPrefix + "-entity entity-line line-" + key(d))
       .each(function() {
@@ -239,7 +239,7 @@ export class Labels extends BaseComponent{
     this.entityLabels
       .filter(f => d ? key(f) == key(d) : true)
       .select("." + this.options.CSS_PREFIX + "-label-x")
-      .classed("vzb-transparent", !show);
+      .classed("vzb-invisible", !show || utils.isTouchDevice());
   }
 
   highlight(d, highlight) {
@@ -250,7 +250,7 @@ export class Labels extends BaseComponent{
     labels.classed("vzb-highlighted", highlight);
   }
 
-  updateLabel(d, index, cache, valueX, valueY, valueS, valueC, valueL, valueLST, duration, showhide) {
+  updateLabel(d, cache, valueX, valueY, valueS, valueC, valueL, valueLST, duration, showhide) {
     const _this = this;
     if (key(d) == this.dragging) return;
 
@@ -290,9 +290,9 @@ export class Labels extends BaseComponent{
           const text = labelGroup.selectAll("." + _cssPrefix + "-label-content")
             .text(valueL);
 
-          _this._updateLabelSize(d, index, null, labelGroup, valueLST, text);
+          _this._updateLabelSize(d, null, labelGroup, valueLST, text);
 
-          _this.positionLabel(d, index, null, this, duration, showhide, lineGroup);
+          _this.positionLabel(d, null, this, duration, showhide, lineGroup);
         });
     }
   }
@@ -321,16 +321,16 @@ export class Labels extends BaseComponent{
           .classed(this.options.CSS_PREFIX + "-entity", true)
           .selectAll("." + _cssPrefix + "-label-content")
           .text(labelValues.labelText);
-        this._updateLabelSize(d, null, cache, this.tooltipEl, labelValues.valueLST);
-        position = this.positionLabel(d, null, cache, this.tooltipEl.node(), 0, null, this.tooltipEl.select(".lineemptygroup"));
+        this._updateLabelSize(d, cache, this.tooltipEl, labelValues.valueLST);
+        position = this.positionLabel(d, cache, this.tooltipEl.node(), 0, null, this.tooltipEl.select(".lineemptygroup"));
       }
       this.tooltipEl
         .classed(this.options.CSS_PREFIX + "-entity", false)
         .classed(this.options.CSS_PREFIX + "-tooltip", true)
         .selectAll("." + _cssPrefix + "-label-content")
         .text(tooltipText);
-      this._updateLabelSize(d, null, tooltipCache, this.tooltipEl, null);
-      this.positionLabel(d, null, tooltipCache, this.tooltipEl.node(), 0, null, this.tooltipEl.select(".lineemptygroup"), position);
+      this._updateLabelSize(d, tooltipCache, this.tooltipEl, null);
+      this.positionLabel(d, tooltipCache, this.tooltipEl.node(), 0, null, this.tooltipEl.select(".lineemptygroup"), position);
     } else {
       this.tooltipEl.text(null);
     }
@@ -340,7 +340,7 @@ export class Labels extends BaseComponent{
     this.tooltipEl.style("font-size", fontSize);
   }
 
-  _updateLabelSize(d, index, cache, labelGroup, valueLST, text) {
+  _updateLabelSize(d, cache, labelGroup, valueLST, text) {
     const _this = this;
     const cached = cache || _this.cached[key(d)];
 
@@ -450,9 +450,9 @@ export class Labels extends BaseComponent{
     const _this = this;
 
     this.entityLabels.each(function(d, index) {
-      _this._updateLabelSize(d, index, null, d3.select(this), d.size_label);
+      _this._updateLabelSize(d, null, d3.select(this), d.size_label);
       const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
-      _this.positionLabel(d, index, null, this, 0, null, lineGroup);
+      _this.positionLabel(d, null, this, 0, null, lineGroup);
     });
   }
 
@@ -465,7 +465,7 @@ export class Labels extends BaseComponent{
 
     this.entityLabels.filter(f => key(f) == key(d))
       .each(function() {
-        _this.positionLabel(d, index, null, this, 0, null, lineGroup);
+        _this.positionLabel(d, null, this, 0, null, lineGroup);
       });
   }
 
@@ -476,11 +476,11 @@ export class Labels extends BaseComponent{
 
     const labelGroup = _this.entityLabels.filter(f => key(f) == key(d));
 
-    _this._updateLabelSize(d, index, null, labelGroup, null);
+    _this._updateLabelSize(d, null, labelGroup, null);
 
   }
 
-  positionLabel(d, index, cache, context, duration, showhide, lineGroup, position) {
+  positionLabel(d, cache, context, duration, showhide, lineGroup, position) {
     const cached = cache || this.cached[key(d)];
 
     const lockPosition = (position || position === 0);
@@ -569,7 +569,7 @@ export class Labels extends BaseComponent{
       }
     }
 
-    this.label._repositionLabels(d, index, cache, context, resolvedX, resolvedY, resolvedX0, resolvedY0, duration, showhide, lineGroup);
+    this.label._repositionLabels(d, cache, context, resolvedX, resolvedY, resolvedX0, resolvedY0, duration, showhide, lineGroup);
 
     return vPosNew * 2 + hPosNew;
   }
@@ -623,7 +623,7 @@ export class Labels extends BaseComponent{
 
           const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
 
-          label._repositionLabels(d, i, null, this, resolvedX, resolvedY, resolvedX0, resolvedY0, 0, null, lineGroup);
+          label._repositionLabels(d, null, this, resolvedX, resolvedY, resolvedX0, resolvedY0, 0, null, lineGroup);
         })
         .on("end", (d) => {
           if (_this.dragging) {
@@ -740,7 +740,7 @@ export class Labels extends BaseComponent{
 
 
       label._repositionLabels = _repositionLabels;
-      function _repositionLabels(d, i, _cache, labelContext, _X, _Y, _X0, _Y0, duration, showhide, lineGroup) {
+      function _repositionLabels(d, _cache, labelContext, _X, _Y, _X0, _Y0, duration, showhide, lineGroup) {
 
         const cache = _cache || _this.cached[key(d)];
 
