@@ -1,10 +1,11 @@
 import { autorun, decorate, observable } from "mobx";
 import { STATUS } from "../utils.js";
 import { ui as _ui} from "../ui.js";
+import { cpus } from "os";
 
 class _BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options}){
     this.id = id || "c0";
     this.status = STATUS.INIT;
     this.template = this.template || template || "";
@@ -12,7 +13,14 @@ class _BaseComponent {
     this.services = this.services || services || {};
     this.model = this.model || model;
     this.state = state || {};
+    this.parent = parent || null;
+    this.children = [];
+    this.root = root || this;
+    this.name = name || "";
 
+    this.reactions = new Map();
+
+    //append the template to placeholder
     const scope = this.parent && this.parent.element ? this.parent.element : d3; //d3 would search global scope
     this.element = scope.select(placeholder).html(this.template);
     if(!this.element.node()) console.warn(`
@@ -21,12 +29,6 @@ class _BaseComponent {
       ${placeholder} 
       Please check that placeholder exists and is correctly specified in the component initialisation.
     `, this);
-
-    this.children = [];
-    this.parent = parent || null;
-    this.root = root || this;
-    this.name = name || "";
-    this.reactions = new Map();
 
     this.ui = this.setupUI(ui);
 
@@ -39,12 +41,15 @@ class _BaseComponent {
         parent: this,
         root: this.root,
         ui: comp.name ? (ui[comp.name] ? ui[comp.name] : (ui[comp.name] = {})) : ui,
-        state: comp.state
+        state: comp.state,
+        name: comp.name,
+        template: comp.template,
+        options: comp.options
       });
       this.children.push(subcomponent);
     });
 
-    this.setup();
+    this.setup(options);
     autorun(this.render.bind(this));
     autorun(this.updateStatus.bind(this));
     autorun(this.resize.bind(this));
