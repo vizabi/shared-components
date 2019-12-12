@@ -16,6 +16,9 @@
   },
   "homepage": "https://gapminder.org",
   "license": "BSD-3-Clause",
+  "dependencies": {
+    "css.escape": "^1.5.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
