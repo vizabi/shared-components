@@ -1,5 +1,4 @@
 import * as utils from "../../legacy/base/utils";
-import cssEscape from "css.escape";
 import {BaseComponent} from "../base-component.js";
 
 import { ICON_CLOSE as iconClose } from "../../icons/iconset.js";
@@ -449,7 +448,7 @@ export class Labels extends BaseComponent{
   updateLabelsOnlyTextSize() {
     const _this = this;
 
-    this.entityLabels.each(function(d, index) {
+    this.entityLabels.each(function(d) {
       _this._updateLabelSize(d, null, d3.select(this), d.size_label);
       const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
       _this.positionLabel(d, null, this, 0, null, lineGroup);
@@ -603,8 +602,8 @@ export class Labels extends BaseComponent{
         .on("start", () => {
           d3.event.sourceEvent.stopPropagation();
         })
-        .on("drag", function(d, i) {
-          if (! utils.getProp(_this.context.ui, ["chart", "labels", "dragging"]) ) return;
+        .on("drag", function(d) {
+          if (!_this.ui.dragging) return;
           if (!_this.dragging) _this.dragging = key(d);
           const cache = _this.cached[key(d)];
           cache.labelFixed = true;
@@ -631,7 +630,9 @@ export class Labels extends BaseComponent{
             _this.dragging = null;
             cache.labelOffset[0] = cache.labelX_;
             cache.labelOffset[1] = cache.labelY_;
-            _this.model.setLabelOffset(d, [cache.labelX_, cache.labelY_]);
+            //marker model is a wrong place to save those, maybe labels ui is a better place
+            //in form of this.ui.offset = {"geo-afg":[dx, dy]} 
+            //_this.model.setLabelOffset(d, [cache.labelX_, cache.labelY_]);
           }
         });
 
@@ -688,7 +689,7 @@ export class Labels extends BaseComponent{
                 if (d3.event.defaultPrevented) return;
                 d3.event.stopPropagation();
                 _this.MDL.highlighted.delete(d);
-                _this.MDL.selected.set(d);
+                _this.MDL.selected.delete(d);
               });
             }
 
