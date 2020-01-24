@@ -213,7 +213,7 @@ export class TreeMenu extends BaseComponent {
 
 
     const properties = this.model.data.space.length > 1;
-    this.model.availability.forEach(kvPair => {
+    this._filterAvailabilityBySpace(this.model.availability, this.model.data.space).forEach(kvPair => {
       const entry = kvPair.value;
       //if entry's tag are empty don't include it in the menu
       if (!entry || entry.tags == "_none") return;
@@ -642,6 +642,9 @@ export class TreeMenu extends BaseComponent {
 
       if (isEncoding) {
         allowedIDs = utils.keys(indicatorsDB).filter(f => {
+          //TODO filter entity_domain, entity_set
+          if (indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set") return false;
+          
           //check if indicator is denied to show with allow->names->!indicator
           if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
             if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
@@ -1016,6 +1019,13 @@ export class TreeMenu extends BaseComponent {
     return this._getSourceName(ds) + "://" + ds.config.path;
   }
 
+  _filterAvailabilityBySpace(availability, space) {
+    return availability.filter(({key}) => {
+      if (space.length > 1 && key.length < 2) return space.some(dim => dim == key);
+      if (space.length !== key.length) return false;
+      return space.every((dim, i) => key[i] == dim)
+    })
+  }
   // ready() {
   //   this.model.marker._root.dataManager.getTags(this.model.locale.id)
   //     .then(this._buildIndicatorsTree.bind(this))
