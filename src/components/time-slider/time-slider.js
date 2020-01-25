@@ -190,7 +190,6 @@ export class TimeSlider extends BaseComponent {
 
   _updateLayoutProfile(){
     this.services.layout.size;
-    this.services.layout.width + this.services.layout.height;
 
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = this.element.node().clientHeight || 0;
@@ -204,7 +203,6 @@ export class TimeSlider extends BaseComponent {
    */
   _updateSize() {
     this.services.layout.size;
-    this.services.layout.width + this.services.layout.height;
 
     const {
       margin,
@@ -251,7 +249,6 @@ export class TimeSlider extends BaseComponent {
       .tickSizeMinor(0, 0);
 
     axis.attr("transform", "translate(0," + this.sliderHeight / 2 + ")")
-      .classed("vzb-hidden", this.services.layout.projector)
       .call(this.xAxis);
 
     select.attr("transform", "translate(0," + this.sliderHeight / 2 + ")");
@@ -363,6 +360,8 @@ export class TimeSlider extends BaseComponent {
 
   _setHandle(transition) {
     this.services.layout.size;
+    this.services.layout.hGrid;
+
     const { value, speed, playing } = this.MDL.frame;
 
     if (this.dragging) return;
@@ -460,7 +459,9 @@ export class TimeSlider extends BaseComponent {
       },
       fitIntoScale: "optimistic"
     });
-    this.DOM.axis.call(this.xAxis);
+    this.DOM.axis
+      .classed("vzb-hidden", this.services.layout.projector)
+      .call(this.xAxis);
 
     this.element.classed(class_hide_play, !show_play);
     this.element.classed(class_playing, frame.playing);
