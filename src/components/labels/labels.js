@@ -50,7 +50,7 @@ const OPTIONS = {
   SUPPRESS_HIGHLIGHT_DURING_PLAY: true
 };
 
-export class Labels extends BaseComponent{
+export class Labels extends BaseComponent {
 
   setup(options){
     this.context = this.parent;
@@ -195,7 +195,9 @@ export class Labels extends BaseComponent{
     const _this = this;
     const _cssPrefix = this.options.CSS_PREFIX;
 
-    const select = _this.model.dataArray.filter(d => this.MDL.selected.has(d));
+    //const select = _this.model.dataArray.filter(d => this.MDL.selected.has(d));
+    const select = [...this.MDL.selected.markers.keys()]
+      .map(selectedKey => ({[Symbol.for("key")]: selectedKey}));
     this.entityLabels = this.labelsContainer.selectAll("." + _cssPrefix + "-entity")
       .data(select, key);
     this.entityLines = this.linesContainer.selectAll("g.entity-line." + _cssPrefix + "-entity")
@@ -220,7 +222,7 @@ export class Labels extends BaseComponent{
         _this.label.line(d3.select(this));
       })
       .merge(this.entityLines)
-      .classed("vzb-hidden", utils.getProp(_this.context.ui, ["chart", "labels", "enabled"]) === false);
+      .classed("vzb-hidden", !this.ui.enabled);
 
     this.entityLabels = this.entityLabels
       .enter().append("g")
@@ -230,7 +232,7 @@ export class Labels extends BaseComponent{
         _this.label(d3.select(this));
       })
       .merge(this.entityLabels)
-      .classed("vzb-hidden", utils.getProp(_this.context.ui, ["chart", "labels", "enabled"]) === false);
+      .classed("vzb-hidden", !this.ui.enabled);
   }
 
   showCloseCross(d, show) {
@@ -238,7 +240,7 @@ export class Labels extends BaseComponent{
     this.entityLabels
       .filter(f => d ? key(f) == key(d) : true)
       .select("." + this.options.CSS_PREFIX + "-label-x")
-      .classed("vzb-invisible", !show || utils.isTouchDevice());
+      .classed("vzb-transparent", !show || utils.isTouchDevice());
   }
 
   highlight(d, highlight) {
@@ -264,7 +266,7 @@ export class Labels extends BaseComponent{
 
 
       if (cached.scaledS0 == null || cached.labelX0 == null || cached.labelY0 == null) { //initialize label once
-        this._initNewCache(cached, valueX, valueY, valueS, valueC, valueLST);
+        this._initNewCache(cached, valueX, valueY, valueS, valueC, valueL, valueLST);
       }
 
       if (cached.labelX_ == null || cached.labelY_ == null){
@@ -287,7 +289,7 @@ export class Labels extends BaseComponent{
           }
 
           const text = labelGroup.selectAll("." + _cssPrefix + "-label-content")
-            .text(valueL);
+            .text(valueL || cached.labelText);
 
           _this._updateLabelSize(d, null, labelGroup, valueLST, text);
 
@@ -296,10 +298,12 @@ export class Labels extends BaseComponent{
     }
   }
 
-  _initNewCache(cached, valueX, valueY, valueS, valueC, valueLST) {
+  _initNewCache(cached, valueX, valueY, valueS, valueC, valueL, valueLST) {
     if (valueS || valueS === 0) cached.scaledS0 = utils.areaToRadius(this.context.sScale(valueS));
+    cached.valueS0 = valueS;
     cached.labelX0 = valueX;
     cached.labelY0 = valueY;
+    cached.labelText = valueL;
     cached.valueLST = valueLST;
     cached.scaledC0 = valueC != null ? this.context.cScale(valueC) : this.context.COLOR_WHITEISH;
   }
@@ -314,7 +318,7 @@ export class Labels extends BaseComponent{
       this.label(this.tooltipEl, true);
       if (d) {
         const cache = {};
-        this._initNewCache(cache, labelValues.valueX, labelValues.valueY, labelValues.valueS, labelValues.valueC, labelValues.valueLST);
+        this._initNewCache(cache, labelValues.valueX, labelValues.valueY, labelValues.valueS, labelValues.valueC, "", labelValues.valueLST);
         this.tooltipEl
           .classed(this.options.CSS_PREFIX + "-tooltip", false)
           .classed(this.options.CSS_PREFIX + "-entity", true)
@@ -346,7 +350,7 @@ export class Labels extends BaseComponent{
 
     const _cssPrefix = this.options.CSS_PREFIX;
 
-    const labels = utils.getProp(_this.context.ui, ["chart", "labels"]) || {};
+    const labels = this.ui;
     labelGroup.classed("vzb-label-boxremoved", labels.removeLabelBox);
 
     const _text = text || labelGroup.selectAll("." + _cssPrefix + "-label-content");
@@ -633,6 +637,7 @@ export class Labels extends BaseComponent{
             //marker model is a wrong place to save those, maybe labels ui is a better place
             //in form of this.ui.offset = {"geo-afg":[dx, dy]} 
             //_this.model.setLabelOffset(d, [cache.labelX_, cache.labelY_]);
+            _this.ui.offset = Object.assign(_this.ui.offset, {[key(d)]: [cache.labelX_, cache.labelY_]});
           }
         });
 
@@ -870,7 +875,7 @@ export class Labels extends BaseComponent{
         const textBBox = cache.textBBox;
         let diffX2 = -textBBox.width * 0.5;
         let diffY2 = -height * 0.2;
-        const labels = utils.getProp(_this.context.ui, ["chart", "labels"]) || {};
+        const labels = _this.ui;
 
         const bBox = labels.removeLabelBox ? textBBox : rectBBox;
 
@@ -942,7 +947,9 @@ export class Labels extends BaseComponent{
 
 
 Labels.DEFAULT_UI = {
+  offset: {},
   enabled: true,
-  dragging: true
+  dragging: true,
+  removeLabelBox: false
 };
 
