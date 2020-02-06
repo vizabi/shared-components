@@ -422,12 +422,12 @@ export class TimeSlider extends BaseComponent {
   _setTime(time, transaction) {
     //update state
     const _this = this;
-    //  frameRate = 50;
+    const frameRate = 50;
 
     //avoid updating more than once in "frameRate"
-    //var now = new Date();
-    //if (this._updTime != null && now - this._updTime < frameRate) return;
-    //this._updTime = now;
+    var now = new Date();
+    if (this._updTime != null && now - this._updTime < frameRate) return;
+    this._updTime = now;
     //const persistent = !this.model.time.dragging && !this.model.time.playing;
     //_this.model.time.getModelObject("value").set(time, false, persistent); // non persistent
     _this.MDL.frame.setValue(time, transaction);
