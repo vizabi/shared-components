@@ -1,5 +1,7 @@
 import { observable } from "mobx";
 
+//Extend default UI with UI from condig and make the result observable
+
 export function ui(defaults = {}, config) {
     const ui = {};
     const defaultKeys = Object.keys(defaults);

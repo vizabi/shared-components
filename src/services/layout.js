@@ -98,7 +98,7 @@ class _LayoutService extends BaseService {
 
 export const LayoutService = decorate(_LayoutService, {
   "setProjector": action.bound,
-  "size": observable.ref,
+  "size": observable.ref, //reference watches when new object is created
   "hGrid": observable,
   "projector": observable,
   "width": observable,
