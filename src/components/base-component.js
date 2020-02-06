@@ -1,11 +1,11 @@
-import { autorun, decorate, observable } from "mobx";
+import { autorun, decorate, observable, reaction, comparer, createAtom } from "mobx";
 import { STATUS } from "../utils.js";
 import { ui as _ui} from "../ui.js";
 import { cpus } from "os";
 
 class _BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, default_ui = {}}){
     this.id = id || "c0";
     this.status = STATUS.INIT;
     this.template = this.template || template || "";
@@ -31,6 +31,7 @@ class _BaseComponent {
       Please check that placeholder exists and is correctly specified in the component initialisation.
     `, this);
 
+    this.DEFAULT_UI = Object.assign({}, this.constructor.DEFAULT_UI, default_ui);
     this.ui = this.setupUI(ui);
 
     this.subcomponents.forEach( (comp, index) => {
@@ -41,11 +42,12 @@ class _BaseComponent {
         id: this.id + "-" + index,
         parent: this,
         root: this.root,
-        ui: comp.name ? (ui[comp.name] ? ui[comp.name] : (ui[comp.name] = {})) : ui,
+        ui: this.getUI(comp, ui),
         state: comp.state,
         name: comp.name,
         template: comp.template,
-        options: comp.options
+        options: comp.options,
+        default_ui: this.DEFAULT_UI[comp.name]
       });
       this.children.push(subcomponent);
     });
@@ -56,17 +58,26 @@ class _BaseComponent {
     autorun(this.resize.bind(this));
   }
 
+  getUI(comp, ui) {
+    const name = comp.name;
+    if (name && !ui[name]) ui[name] = {};
+    return name ? ui[name] : ui;
+  }
+
   setupUI(ui) {
-    return _ui(this.constructor.DEFAULT_UI, ui);
+    return _ui(this.DEFAULT_UI, ui);
   }
 
   setup() {}
 
-  addReaction(method){
+  addReaction(method, sideEffect, options = {}){
     if(!this.reactions.has(method)){
-      this.reactions.set(method, autorun(() => {        
-        if(this.status === STATUS.READY) method.bind(this)();
-      }));
+      this.reactions.set(method, sideEffect ? 
+        reaction(method.bind(this), sideEffect.bind(this), options)
+        : 
+        autorun(() => {        
+          if(this.status === STATUS.READY) method.bind(this)();
+        }));
     }
   }
   removeReaction(method){

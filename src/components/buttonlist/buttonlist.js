@@ -73,7 +73,7 @@ export class ButtonList extends BaseComponent {
         icon: "trails",
         func: this.toggleBubbleTrails.bind(this),
         required: false,
-        statebind: "root.ui.chart.trails",
+        statebind: "MDL.trail.show",
         statebindfunc: this.setBubbleTrails.bind(this)
       },
       "forecast": {
@@ -497,18 +497,22 @@ export class ButtonList extends BaseComponent {
   }
 
   toggleBubbleTrails() {
-    this.model.ui.chart.trails = !this.model.ui.chart.trails;
+    if (this.model.encoding) {
+      const trail = this.model.encoding.get("trail");
+      trail.setShow(!trail.show);
+    }
     this.setBubbleTrails();
   }
   setBubbleTrails() {
-    const trails = (this.model.ui.chart || {}).trails;
-    if (!trails && trails !== false) return;
+    if (!this.model.encoding) return;
+    const trail = this.model.encoding.get("trail");
+    if (!trail) return;
     const id = "trails";
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
     if (!btn.node()) return utils.warn("setBubbleTrails: no button '" + id + "' found in DOM. doing nothing");
-
-    btn.classed(class_active_locked, trails);
-    btn.classed(class_hidden, this.model.state.marker.select.length == 0);
+    btn.classed(class_active_locked, trail.show);
+    const anySelected = this.model.encoding.get("selected").data.filter.any();
+    btn.classed(class_hidden, !anySelected);
   }
   toggleTimeForecast() {
     this.model.state.time.showForecast = !this.model.state.time.showForecast;
