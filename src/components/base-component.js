@@ -17,6 +17,7 @@ class _BaseComponent {
     this.children = [];
     this.root = root || this;
     this.name = name || "";
+    this.options = options || {};
 
     this.reactions = new Map();
 
@@ -49,7 +50,7 @@ class _BaseComponent {
       this.children.push(subcomponent);
     });
 
-    this.setup(options);
+    this.setup(this.options);
     autorun(this.render.bind(this));
     autorun(this.updateStatus.bind(this));
     autorun(this.resize.bind(this));
