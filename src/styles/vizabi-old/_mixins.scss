@@ -11,7 +11,10 @@
 // ----------------------------------------------------------------------------
 //   Bourbon mixins: http://bourbon.io/docs/
 // ----------------------------------------------------------------------------
-@import "../../../node_modules/bourbon/core/bourbon";
+// to be imported from the same level where these mixins are imported too
+// the number of ../ levels below is not the same for building shared components repo
+// and the individual repos of components which share this functionality
+// @import "../../../node_modules/bourbon/core/bourbon";
 
 // ----------------------------------------------------------------------------
 //   Sizes, borders and margins
