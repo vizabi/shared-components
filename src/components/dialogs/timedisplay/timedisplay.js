@@ -1,3 +1,4 @@
+import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 import { DynamicBackground } from "../../dynamic-background/dynamic-background";
 
