@@ -181,7 +181,7 @@ export class ButtonList extends BaseComponent {
     // builds model
     //this._super(config, context);
 
-    this.validatePopupButtons(this.root.ui.buttons.buttons, this.root.ui.dialogs);
+    this.validatePopupButtons(this.root.ui.buttons.buttons, this.root.ui.dialogs.dialogs);
 
     this.element.selectAll("div").remove();
 
@@ -218,30 +218,38 @@ export class ButtonList extends BaseComponent {
     // this.setBubbleLock();
     // this.setInpercent();
     // this.setPresentationMode();
-
-
   }
 
   draw() {
-    this.localise = this.services.locale.auto();
-
     this.MDL = {
       frame: this.model.encoding.get("frame")
     }
+    this.localise = this.services.locale.auto();
 
-    const button_expand = (this.root.ui.dialogs || {}).sidebar || [];
-    const button_list = [].concat(this.ui.buttons);
+    this._dialogs = this.root.findChild({type: "Dialogs"});
+
+    const button_expand = (this.root.ui.dialogs.dialogs || {}).sidebar || [];
+    const button_list = [].concat(this.root.ui.buttons.buttons);
     this._addButtons(button_list, button_expand);
-    this._toggleButtons();
+    this.addReaction(this._toggleButtons);
 
-    this.ui.buttons.forEach(buttonId => {
+    this.root.ui.buttons.buttons.forEach(buttonId => {
       const button = this._available_buttons[buttonId];
-      if (button && button.statebind) {
-        this.addReaction(() => {
-          //_this.model_binds["change:" + button.statebind] = function(evt) {
-          //if (!_this._readyOnce) return;
-          button.statebindfunc(buttonId, utils.getProp(this, button.statebind.split(".")));
-        });
+      if (button) {
+        if (button.statebind) {
+          this.addReaction(() => {
+            //_this.model_binds["change:" + button.statebind] = function(evt) {
+            //if (!_this._readyOnce) return;
+            button.statebindfunc(buttonId, utils.getProp(this, button.statebind.split(".")));
+          });
+        } else {
+          this.addReaction(() => {
+            const dialog = this._dialogs.findChild({ name: buttonId});
+            if (!dialog) return;
+            const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + buttonId + "']");
+            btn.classed(class_active, dialog.getOpen());
+          });
+        }
       }
     });
 
@@ -256,13 +264,16 @@ export class ButtonList extends BaseComponent {
     if (btn_config && btn_config.func) {
       btn_config.func(id);
     } else {
-      const btn_active = classes.indexOf(class_active) === -1;
+      //trying open dialog be default
+      // const btn_active = classes.indexOf(class_active) === -1;
 
-      btn.classed(class_active, btn_active);
-      const evt = {};
-      evt["id"] = id;
-      evt["active"] = btn_active;
-      _this.trigger("click", evt);
+      // btn.classed(class_active, btn_active);
+
+      // const evt = {};
+      // evt["id"] = id;
+      // evt["active"] = btn_active;
+      // _this.trigger("click", evt);
+      this._dialogs.toggleDialogOpen(id);
     }
   }
 
@@ -296,11 +307,13 @@ export class ButtonList extends BaseComponent {
   * determine which buttons are shown on the buttonlist
   */
   _toggleButtons() {
+    this.services.layout.size;
+
     const _this = this;
-    const parent = this.parent.element.node ? this.parent.element : d3.select(this.parent.element);
+    const root = this.root.element;
 
     //HERE
-    const button_expand = (this.ui.dialogs || {}).sidebar || [];
+    const button_expand = (this.root.ui.dialogs.dialogs || {}).sidebar || [];
     _this._showAllButtons();
 
     const buttons = this.element.selectAll(".vzb-buttonlist-btn");
@@ -326,7 +339,7 @@ export class ButtonList extends BaseComponent {
       button_height = button.node().getBoundingClientRect().height + button_margin.top + button_margin.bottom;
 
       if (!button.classed(class_hidden)) {
-        if (!expandable || _this.getLayoutProfile() !== "large" || _this.model.ui.sidebarCollapse) {
+        if (!expandable || _this.services.layout.profile !== "LARGE" || _this.ui.sidebarCollapse) {
           buttons_width += button_width;
           buttons_height += button_height;
           //sort buttons between required and not required buttons.
@@ -347,8 +360,8 @@ export class ButtonList extends BaseComponent {
 
     //check if container is landscape or portrait
     // if portrait small or large with expand, use width
-    if (parent.classed("vzb-large") && parent.classed("vzb-dialog-expand-true")
-    || parent.classed("vzb-small") && parent.classed("vzb-portrait")) {
+    if (root.classed("vzb-large") && root.classed("vzb-dialog-expand-true")
+    || root.classed("vzb-small") && root.classed("vzb-portrait")) {
       //check if the width_diff is small. If it is, add to the container
       // width, to allow more buttons in a way that is still usable
       if (width_diff > 0 && width_diff <= 10) {
@@ -382,6 +395,8 @@ export class ButtonList extends BaseComponent {
     // const evt = {};
     // evt["hiddenButtons"] = hiddenButtons;
     // _this.trigger("toggle", evt);
+    this.element.dispatch("custom-togglebuttons", 
+      { detail: { hiddenButtons } });
 
   }
 
@@ -472,8 +487,6 @@ export class ButtonList extends BaseComponent {
     if (this.services.layout.profile === "SMALL" && this.services.layout.projector) {
       this.togglePresentationMode();
     }
-
-    this._toggleButtons();
   }
 
   setButtonActive(id, boolActive) {
