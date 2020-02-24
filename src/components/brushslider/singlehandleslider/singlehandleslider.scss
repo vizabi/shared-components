@@ -1,0 +1,13 @@
+@import "../../../styles/common.scss";
+//general styles
+.vzb-tool {
+  .vzb-slider-holder {
+
+    .vzb-slider-singlehandleslider {
+      .overlay {
+        fill: $vzb-color-primary;
+        fill-opacity: 0.3;
+      }
+    }
+  }
+}
