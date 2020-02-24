@@ -652,16 +652,16 @@ $vzb-dialog-content-height: 250px;
   }
 
   // @import 'about/about';
-  // @import 'colors/colors';
+  @import 'colors/colors';
   // @import 'axes/axes';
   // @import 'find/find';
   // @import 'side/side';
-  // @import 'size/size';
-  // @import 'speed/speed';
+  @import 'size/size';
+  @import 'speed/speed';
   // @import 'label/label';
-  // @import 'zoom/zoom';
+  @import 'zoom/zoom';
   // @import 'stack/stack';
-  // @import 'moreoptions/moreoptions';
+  @import 'moreoptions/moreoptions';
   @import 'timedisplay/timedisplay';
   // @import 'grouping/grouping';
 }

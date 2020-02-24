@@ -2,6 +2,7 @@ import { Dialog } from "./dialog";
 import * as utils from "../../legacy/base/utils";
 import * as iconset from "../../icons/iconset"
 import { BaseComponent } from "../base-component";
+import { runInAction } from "mobx";
 
 /*!
  * VIZABI DIALOGS
@@ -13,7 +14,7 @@ const class_active = "vzb-active";
 
 export class Dialogs extends BaseComponent {
   constructor(config) {
-    const { sidebar = [], popup = []} = config.ui;
+    const { sidebar = [], popup = []} = config.ui.dialogs;
     const subcomponents = [];
     const templateArray  = [];
 
@@ -41,6 +42,20 @@ export class Dialogs extends BaseComponent {
     this.DOM = {
 
     };
+
+    const _this = this;
+    this._curr_dialog_index = 20;
+    
+    this.element.selectAll(".vzb-top-dialog").data(this.children.map(c => ({ 
+      name: c.name
+    })))
+      .on("custom-dragstart", function(d) {
+        _this.bringForward(d.name);
+      })
+      .select(".vzb-top-dialog>.vzb-dialog-modal>.vzb-dialog-buttons>[data-click='closeDialog']")
+        .on("click", d => {
+          this.toggleDialogOpen(d.name, false);
+        });
   }
 
   resize() {
@@ -51,10 +66,10 @@ export class Dialogs extends BaseComponent {
       const dialogEl = childComp.element;
       let cls = dialogEl.attr("class").replace(" vzb-popup", "").replace(" vzb-sidebar", "");
 
-      if (profile === "LARGE" && _this.ui.sidebar.indexOf(childComp.name) > -1) {
-        cls += _this.ui.sidebarCollapse ? " vzb-popup" : " vzb-sidebar";
-        if (!_this.ui.sidebarCollapse) dialogEl.style("z-index", null);
-      } else if (_this.ui.popup.indexOf(childComp.name) > -1) {
+      if (profile === "LARGE" && _this.ui.dialogs.sidebar.indexOf(childComp.name) > -1) {
+        cls += _this.root.ui.buttons.sidebarCollapse ? " vzb-popup" : " vzb-sidebar";
+        if (!_this.root.ui.buttons.sidebarCollapse) dialogEl.style("z-index", null);
+      } else if (_this.ui.dialogs.popup.indexOf(childComp.name) > -1) {
         cls += " vzb-popup";
       }
 
@@ -63,6 +78,93 @@ export class Dialogs extends BaseComponent {
 
   }
 
+  toggleDialogOpen(name, forceState) {
+    runInAction(() => {
+      const dialog = this.findChild({ name });
+      if (!dialog) return;
+      const newState = forceState ? forceState : !dialog.getOpen();
+      dialog.setOpen(newState);
+
+      if(newState) {
+        this.openDialog(name);
+      } else {
+        this.closeDialog(name);
+      }
+    });
+  }
+
+  //TODO: make opening/closing a dialog via update and model
+  /*
+   * Activate a dialog
+   * @param {String} id dialog id
+   */
+  openDialog(name) {
+    //close pinned dialogs for small profile
+    const forceClose = this.services.layout.profile === "SMALL";
+    
+    //TODO
+    this.closeAllDialogs(forceClose);
+
+    const dialog = this.element.selectAll(".vzb-popup.vzb-dialogs-dialog[data-dlg='" + name + "']");
+
+    this._active_comp = this.findChild({ name });
+
+    this._active_comp.beforeOpen();
+    //add classes
+    dialog.classed(class_active, true);
+
+    this.bringForward(name);
+
+    //call component function
+    this._active_comp.open();
+  }
+
+  /*
+   * Closes a dialog
+   * @param {String} id dialog id
+   */
+  closeDialog(name) {
+    const dialog = this.element.selectAll(".vzb-popup.vzb-dialogs-dialog[data-dlg='" + name + "']");
+
+    this._active_comp = this.findChild({ name });
+
+    if (this._active_comp && !this._active_comp.isOpen) return;
+
+    if (this._active_comp.getPin())
+      this._active_comp.setPin(false);
+
+    if (this._active_comp) {
+      this._active_comp.beforeClose();
+    }
+    //remove classes
+    dialog.classed(class_active, false);
+
+    //call component close function
+    if (this._active_comp) {
+      this._active_comp.close();
+    }
+    this._active_comp = false;
+
+  }
+
+  /*
+  * Close all dialogs
+  */
+  closeAllDialogs(forceclose) {
+    const _this = this;
+    //remove classes
+    const dialogClass = forceclose ? ".vzb-popup.vzb-dialogs-dialog.vzb-active" : ".vzb-popup.vzb-dialogs-dialog.vzb-active:not(.pinned)";
+    const all_dialogs = this.element.selectAll(dialogClass);
+    all_dialogs.each(d => {
+      _this.toggleDialogOpen(d.name);
+    });
+  }
+
+  bringForward(name) {
+    const dialog = this.element.select(".vzb-popup.vzb-dialogs-dialog[data-dlg='" + name + "']");
+    dialog.style("z-index", this._curr_dialog_index);
+    this._curr_dialog_index += 10;
+  }
 }
 
 
