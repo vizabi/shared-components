@@ -9,7 +9,10 @@ import "./singlehandleslider.scss";
 
 const OPTIONS = {
   THUMB_HEIGHT: 17,
-  THUMB_STROKE_WIDTH: 3
+  THUMB_STROKE_WIDTH: 3,
+  domain: null,
+  suppressInput: null,
+  snapValue: null
 };
 
 const PROFILE_CONSTANTS = {
@@ -30,6 +33,12 @@ export class SingleHandleSlider extends BrushSlider {
     const options = utils.extend(utils.extend({}, OPTIONS), _options || {});
 
     super.setup(options);
+
+    if (this.options.domain) {
+      this.options.EXTENT_MIN = this.options.domain[0];
+      this.options.EXTENT_MAX = this.options.domain[1];
+      this.rescaler.domain(this.options.domain);
+    }
 
     this.DOM.slider.selectAll(".w").classed("vzb-hidden", true);
     this.DOM.slider.select(".selection").classed("vzb-hidden", true);
@@ -60,6 +69,39 @@ export class SingleHandleSlider extends BrushSlider {
       .attr("d", thumbArc);
   }
 
+  _getBrushEventListeners() {
+    const _this = this;
+    const _superListeners = super._getBrushEventListeners();
+
+    return {
+      start: _superListeners.start,
+      brush: (...args) => {
+        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
+        if (!_this.options.suppressInput) {
+          _superListeners.brush(...args);
+        } else {
+          _this._snap(d3.event.selection);
+        }
+      },
+      end: () => {
+        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
+        if (_this.options.snapValue) {
+          this._snap(d3.event.selection);
+        }
+        _this._setFromExtent(true, true); // force a persistent change
+      }
+    };
+  }
+
+  _snap(selection) {
+    let value = this.rescaler.invert(this._extentToValue(selection));
+    const domain = this.rescaler.domain();
+    const ascendingDomain = domain[domain.length - 1] > domain[0];
+    const next = d3.bisector(d3[ascendingDomain ? "ascending" : "descending"]).left(domain, value) || 1;
+    value = (ascendingDomain ? 1 : -1) * ((value - domain[next - 1]) - (domain[next] - value)) > 0 ? domain[next] : domain[next - 1];
+    this._moveBrush(this._valueToExtent(value));
+  }
+
   _getHandleSize() {
     return this.options.THUMB_HEIGHT + this.options.THUMB_STROKE_WIDTH;
   }
@@ -75,6 +117,13 @@ export class SingleHandleSlider extends BrushSlider {
     return padding;
   }
 
+  _updateSize() {
+    super._updateSize();
+
+    const componentWidth = this._getComponentWidth();
+    this.rescaler.range(d3.range(0, componentWidth || 1, (componentWidth / (this.rescaler.domain().length - 1)) || 1).concat([componentWidth]));
+  }
+
   _valueToExtent(value) {
     return [this.rescaler.domain()[0], value];
   }
@@ -82,6 +131,15 @@ export class SingleHandleSlider extends BrushSlider {
   _extentToValue(extent) {
     return extent[1];
   }
+
+  _setModel(value, force, persistent) {
+    if (this.options.suppressInput) {
+      const _value = this._extentToValue(value).toFixed(this.options.ROUND_DIGITS);
+      if (_value == this.MDL.model[this.value]) return;
+    }
+    super._setModel(value, force, persistent);
+  }
+
 }
 
 
@@ -225,7 +283,7 @@ const _SingleHandleSlider = {
   _setModel(value, force, persistent) {
     if (this.slider_properties.suppressInput) {
       const _value = this._extentToValue(value).toFixed(this.options.ROUND_DIGITS);
-      if (_value == this.model.submodel[this.arg]) return;
+      if (_value == this.model.submodel[this.value]) return;
     }
     this._super(value, force, persistent);
   }

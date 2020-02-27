@@ -16,24 +16,27 @@ const OPTIONS = {
   THUMB_STROKE_WIDTH: 4,
   INTRO_DURATION: 250,
   ROUND_DIGITS: 2,
-  arg: "extent"
-};
+  value: "extent",
+  setValueFunc: null,
+  submodel: null,
+  submodelFunc: null,
 
-const PROFILE_CONSTANTS = {
-  SMALL: {
+  PROFILE_CONSTANTS: {
+    SMALL: {
+    },
+    MEDIUM: {
+    },
+    LARGE: {
+    }
   },
-  MEDIUM: {
-  },
-  LARGE: {
-  }
-};
 
-const PROFILE_CONSTANTS_FOR_PROJECTOR = {
-  SMALL: {
-  },
-  MEDIUM: {
-  },
-  LARGE: {
+  PROFILE_CONSTANTS_FOR_PROJECTOR: {
+    SMALL: {
+    },
+    MEDIUM: {
+    },
+    LARGE: {
+    }
   }
 };
 
@@ -51,6 +54,8 @@ export class BrushSlider extends BaseComponent {
     `;
 
     super(config);
+
+    this._setModel = utils.throttle(this._setModel, 50);
   }
 
   setup(_options) {
@@ -61,22 +66,19 @@ export class BrushSlider extends BaseComponent {
       sliderWrap: this.element.select(".vzb-slider-wrap"),
       slider: this.element.select(".vzb-slider")
     }
-    this.DOM.slider.classed("vzb-slider-" + this.type, true);
+    this.DOM.slider.classed("vzb-slider-" + this.constructor.name.toLowerCase(), true);
   
-    const options = this.options = utils.extend(utils.extend({}, OPTIONS), _options || {});
+    const options = this.options = utils.deepExtend(utils.deepExtend({}, OPTIONS), _options || {});
 
-    this.arg = options.arg;
+    this.value = options.value;
     this.submodel = options.submodel;
     this.submodelFunc = options.submodelFunc;
+    this.setValueFunc = options.setValueFunc;
 
     this.padding = this._getPadding();
     
-    let componentWidth = this._getComponentWidth() || 0;
-    if (componentWidth < 0) componentWidth = 0;
-
     this.rescaler = d3.scaleLinear()
       .domain([options.EXTENT_MIN, options.EXTENT_MAX])
-      .range([0, componentWidth])
       .clamp(true);
 
     this.brushEventListeners = this._getBrushEventListeners();
@@ -108,10 +110,6 @@ export class BrushSlider extends BaseComponent {
       .attr("ry", barWidth * 0.25)
       .attr("transform", "translate(0," + (-barWidth * 0.5) + ")");
 
-    // this.on("resize", () => {
-    //   _this._resize();
-    //   _this._updateView();
-    // });
   }
 
   draw() {
@@ -130,7 +128,7 @@ export class BrushSlider extends BaseComponent {
   _updateLayoutProfile(){
     this.services.layout.size;
 
-    this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
+    this.profileConstants = this.services.layout.getProfileConstants(this.options.PROFILE_CONSTANTS, this.options.PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = (this.element.node().clientHeight) || 0;
     this.width = (this.element.node().clientWidth) || 0;
     if (!this.height || !this.width) return utils.warn("Slider _updateProfile() abort: container is too little or has display:none");
@@ -148,7 +146,7 @@ export class BrushSlider extends BaseComponent {
   }
   
   _getHandleSize() {
-    return this.options.THUMB_HEIGHT + this.options.BAR_WIDTH;
+    return this.options.THUMB_HEIGHT + this.options.BAR_WIDTH * 2;
   }
 
   _getComponentWidth() {
@@ -210,10 +208,13 @@ export class BrushSlider extends BaseComponent {
       .attr("transform", this.isRTL ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)" :
         "translate(" + this.padding.left + "," + this.padding.top + ")");
   
-    const componentWidth = this._getComponentWidth();
-    this.rescaler.range([0, componentWidth]);  
+    this._updateRescaler();
   }
 
+  _updateRescaler() {
+    const componentWidth = this._getComponentWidth();
+    this.rescaler.range([0, componentWidth]);
+  }
 
   _getModel() {
     if (!this.submodel && !this.submodelFunc) return this.model;
@@ -222,22 +223,9 @@ export class BrushSlider extends BaseComponent {
 
   _updateView() {
     this.DOM.slider.call(this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]));
-    const extent = this._valueToExtent(this.MDL.model[this.arg]) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
+    const extent = this._valueToExtent(this.MDL.model[this.value]) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
     this._moveBrush(extent);
-  }
-
-  // _updateView() {
-  //   const model = this.MDL.model;
-  //   const modelExists = model && (model[this.checkbox] || model[this.checkbox] === false);
-  //   this.labelEl.classed("vzb-hidden", !modelExists);
-  //   if (modelExists) {
-  //     this.labelEl.text(this.localise("check/" + (this.prefix ? this.prefix + "/" : "") + this.checkbox));
-  //     this.checkEl.property("checked", !!model[this.checkbox]);
-  //   }
-  // }
-
-  _setModel(value) {
-    this.MDL.model[this.checkbox] = value;
+    this._updateThumbs(extent);
   }
 
   _moveBrush(s) {
@@ -279,7 +267,11 @@ export class BrushSlider extends BaseComponent {
   _setModel(value, force, persistent) {
     const roundDigits = this.options.ROUND_DIGITS;
     value = [+value[0].toFixed(roundDigits), +value[1].toFixed(roundDigits)];
-    this.MDL.model[this.arg] = this._extentToValue(value);
+    if (this.setValueFunc) {
+      this.MDL.model[this.setValueFunc](this._extentToValue(value));
+    } else {
+      this.MDL.model[this.value] = this._extentToValue(value);
+    }
   }
 
 }
