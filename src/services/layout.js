@@ -52,7 +52,6 @@ class _LayoutService extends BaseService {
     action(()=>{
       this.width = this.element.node().clientWidth;
       this.height = this.element.node().clientHeight;
-      this.size = this.getSize();
       const profile = PROFILES.find(p => (this.width >= p.min_width && this.height >= p.min_height));
 
       if (!profile) {
@@ -71,6 +70,7 @@ class _LayoutService extends BaseService {
         
         this.status = STATUS.READY;
       }
+      this.size = this.getSize();
     })();
   }
 
