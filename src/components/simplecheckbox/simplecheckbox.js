@@ -3,6 +3,14 @@ import { BaseComponent } from "../base-component";
 
 import "./simplecheckbox.scss";
 
+const OPTIONS = {
+  checkbox: null,
+  setCheckboxFunc: null,
+  submodel: null,
+  submodelFunc: null,
+  prefix: "",
+}
+
 export class SimpleCheckbox extends BaseComponent {
   constructor(config) {
     config.template = `
@@ -11,16 +19,19 @@ export class SimpleCheckbox extends BaseComponent {
     super(config);
   }
 
-  setup(options) {
+  setup(_options) {
+    this.DOM = {
+      check: this.element.select("input"),
+      label: this.element.select("label")
+    }
+    
+    const options = this.options = utils.deepExtend(utils.deepExtend({}, OPTIONS), _options || {});
+
     const _this = this;
-    this.checkbox = options.checkbox;
-    this.submodel = options.submodel;
-    this.submodelFunc = options.submodelFunc;
-    this.prefix = options.prefix;
 
     const id = "-check-" + this.id;
-    this.labelEl = this.element.select("label").attr("for", id);
-    this.checkEl = this.element.select("input").attr("id", id)
+    this.DOM.label.attr("for", id);
+    this.DOM.check.attr("id", id)
       .on("change", function() {
         _this._setModel(d3.select(this).property("checked"));
       });
@@ -37,22 +48,36 @@ export class SimpleCheckbox extends BaseComponent {
   }
 
   _getModel() {
-    if (!this.submodel && !this.submodelFunc) return this.model;
-    return this.submodelFunc ? this.submodelFunc() : utils.getProp(this, this.submodel.split("."));
+    const {
+      submodel,
+      submodelFunc
+    } = this.options;
+    
+    if (!submodel && !submodelFunc) return this.model;
+    return submodelFunc ? submodelFunc() : utils.getProp(this, submodel.split("."));
   }
 
   _updateView() {
     const model = this.MDL.model;
-    const modelExists = model && (model[this.checkbox] || model[this.checkbox] === false);
-    this.labelEl.classed("vzb-hidden", !modelExists);
+    const {
+      checkbox,
+      prefix
+    } = this.options;
+    const modelExists = model && (model[checkbox] || model[checkbox] === false);
+
+    this.DOM.label.classed("vzb-hidden", !modelExists);
     if (modelExists) {
-      this.labelEl.text(this.localise("check/" + (this.prefix ? this.prefix + "/" : "") + this.checkbox));
-      this.checkEl.property("checked", !!model[this.checkbox]);
+      this.DOM.label.text(this.localise("check/" + (prefix ? prefix + "/" : "") + checkbox));
+      this.DOM.check.property("checked", !!model[checkbox]);
     }
   }
 
   _setModel(value) {
-    this.MDL.model[this.checkbox] = value;
+    if (this.options.setCheckboxFunc) {
+      this.MDL.model[this.options.setCheckboxFunc](value);
+    } else {
+      this.MDL.model[this.options.checkbox] = value;
+    }
   }
 
 }

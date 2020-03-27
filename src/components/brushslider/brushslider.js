@@ -222,6 +222,8 @@ export class BrushSlider extends BaseComponent {
   }
 
   _updateView() {
+    this.services.layout.size;
+
     this.DOM.slider.call(this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]));
     const extent = this._valueToExtent(this.MDL.model[this.value]) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
     this._moveBrush(extent);
