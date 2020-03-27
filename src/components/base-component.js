@@ -1,11 +1,11 @@
-import { autorun, decorate, observable, reaction, comparer, createAtom } from "mobx";
+import { autorun, decorate, observable, reaction, comparer, createAtom, trace } from "mobx";
 import { STATUS } from "../utils.js";
 import { ui as _ui} from "../ui.js";
-import { cpus } from "os";
+import * as utils from "../legacy/base/utils";
 
 class _BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, default_ui = {}}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, default_ui = {}, superUI}){
     this.id = id || "c0";
     this.status = STATUS.INIT;
     this.template = this.template || template || "";
@@ -31,8 +31,9 @@ class _BaseComponent {
       Please check that placeholder exists and is correctly specified in the component initialisation.
     `, this);
 
-    this.DEFAULT_UI = Object.assign({}, this.constructor.DEFAULT_UI, default_ui);
-    this.ui = this.setupUI(ui);
+    this.DEFAULT_UI = utils.deepExtend({}, this.constructor.DEFAULT_UI, default_ui);
+
+    this.ui = this.setupUI(ui, superUI);
 
     this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
@@ -47,7 +48,8 @@ class _BaseComponent {
         name: comp.name,
         template: comp.template,
         options: comp.options,
-        default_ui: this.DEFAULT_UI[comp.name]
+        superUI: comp.superUI,
+        default_ui: utils.deepExtend({}, comp.default_ui, this.DEFAULT_UI[comp.name])
       });
       this.children.push(subcomponent);
     });
@@ -64,8 +66,8 @@ class _BaseComponent {
     return name ? ui[name] : ui;
   }
 
-  setupUI(ui) {
-    return _ui(this.DEFAULT_UI, ui);
+  setupUI(ui, superUI) {
+    return _ui(this.DEFAULT_UI, ui, superUI);
   }
 
   setup() {}

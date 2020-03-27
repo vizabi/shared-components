@@ -1,20 +1,26 @@
 import { observable } from "mobx";
+import * as utils from "./legacy/base/utils";
 
-//Extend default UI with UI from condig and make the result observable
-
-export function ui(defaults = {}, config) {
-    const ui = {};
+export function ui(defaults = {}, config, parentConfig = {}) {
+    const _ui = {};
     const defaultKeys = Object.keys(defaults);
     const configKeys = Object.keys(config);
+    const parentConfigKeys = Object.keys(config);
 
-    for (let key of new Set([...defaultKeys, ...configKeys])) {
+    for (let key of new Set([...defaultKeys, ...configKeys, ...parentConfigKeys])) {
         const descriptor = {
-            get() { return config[key] || defaults[key]},
+            get() {
+                if (utils.isPlainObject(config[key]) || utils.isPlainObject(config[key])) {
+                    return ui(defaults[key], config[key] || (config[key] = {}), parentConfig[key]);
+                }
+                return (typeof config[key] !== "undefined") ? config[key] : 
+                    (typeof parentConfig[key] !== "undefined") ? parentConfig[key] : defaults[key];
+            },
             set(value) { config[key] = value },
             enumerable: true,
             configurable: true
         };
-        Object.defineProperty(ui, key, descriptor);
+        Object.defineProperty(_ui, key, descriptor);
     }
-    return observable(ui);
+    return observable(_ui);
 }
