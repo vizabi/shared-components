@@ -33,14 +33,14 @@ export class Opacity extends Dialog {
       type: SingleHandleSlider,
       placeholder: ".vzb-dialog-bubbleopacity-regular",
       options: {
-        arg: "opacityRegular",
+        value: "opacityRegular",
         submodel: "root.ui.chart"
       }
     },{
       type: SingleHandleSlider,
       placeholder: ".vzb-dialog-bubbleopacity-selectdim",
       options: {
-        arg: "opacitySelectDim",
+        value: "opacitySelectDim",
         submodel: "root.ui.chart"
       }
     }];
