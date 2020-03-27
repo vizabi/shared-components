@@ -168,7 +168,7 @@ export class TimeSlider extends BaseComponent {
     
     this.element.classed(class_loading, false);
     
-    this.xScale.domain(this.MDL.frame.data.domain);
+    this.xScale.domain(this.MDL.frame.scale.domain);
 
     if (this._updateLayoutProfile()) return; //return if exists with error
 
@@ -203,6 +203,7 @@ export class TimeSlider extends BaseComponent {
    */
   _updateSize() {
     this.services.layout.size;
+    this.MDL.frame.scale.domain;
 
     const {
       margin,
@@ -316,7 +317,7 @@ export class TimeSlider extends BaseComponent {
         let posX = utils.roundStep(Math.round(d3.mouse(this)[0]), precision);
         const maxPosX = _this.sliderWidth;
 
-        const forecastBoundaryIsOn = frame.data.domain[1] > frame.endBeforeForecast;
+        const forecastBoundaryIsOn = frame.scale.domain[1] > frame.endBeforeForecast;
         const forecastBoundaryPos = _this.xScale(frame.endBeforeForecast);
         const snappyMargin = 0.5 * handle.attr("r");
 
