@@ -147,6 +147,8 @@ export class Find extends Dialog {
     this.KEY = Symbol.for("key");
     this.KEYS = this.model.data.space.filter(dim => dim !== this.TIMEDIM);
 
+    this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
+
     this.addReaction(this._changePanelMode);
     this.addReaction(this._createFindList);
     this.addReaction(this._updateBrokenData);

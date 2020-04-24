@@ -214,8 +214,6 @@ export class Show extends BaseComponent {
 
     //_this.DOM.content.node().scrollTop = 0;
 
-    _this.DOM.input_search.attr("placeholder", _this.localise("placeholder/search") + "...");
-
   }
 
   _showHideSearch() {
