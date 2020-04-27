@@ -92,9 +92,9 @@ export class Labels extends BaseComponent {
 
     //this._clearInitialFontSize();
     this.addReaction(this.selectDataPoints);
-   // this.addReaction(this.updateLabelSizeLimits);
-   // this.addReaction(this.updateLabelsOnlyTextSize);
-   // this.addReaction(this.updateIndicators);
+    this.addReaction(this.updateSizeTextScale);
+    this.addReaction(this.updateLabelSizeLimits);
+    this.addReaction(this.updateLabelsOnlyTextSize);
   }
 
   readyOnce() {
@@ -135,9 +135,11 @@ export class Labels extends BaseComponent {
 
 
   updateLabelSizeLimits() {
-    const _this = this;
     if (!this.MDL.size_label) return;
-    const extent = this.MDL.size_label.extent || [0, 1];
+
+    this.services.layout.size;
+
+    const extent = this.MDL.size_label.scale.extent || [0, 1];
 
     const minLabelTextSize = this.profileConstants.minLabelTextSize;
     const maxLabelTextSize = this.profileConstants.maxLabelTextSize;
@@ -146,28 +148,27 @@ export class Labels extends BaseComponent {
     this.minLabelTextSize = Math.max(minLabelTextSize + minMaxDelta * extent[0], minLabelTextSize);
     this.maxLabelTextSize = Math.max(minLabelTextSize + minMaxDelta * extent[1], minLabelTextSize);
 
-    if (this.MDL.size_label.use == "constant") {
+    if (this.MDL.size_label.data.isConstant()) {
       // if(!this.MDL.size_label.which) {
       //   this.maxLabelTextSize = this.profileConstants.defaultLabelTextSize;
       //   this.MDL.size_label.set({'domainMax': (this.maxLabelTextSize - minLabelTextSize) / minMaxDelta, 'which': '_default'});
       //   return;
       // }
-      this.minLabelTextSize = this.maxLabelTextSize;
+      if (extent[1] === null) {
+        this.minLabelTextSize = this.maxLabelTextSize = this.profileConstants.defaultLabelTextSize;
+      } else {
+        this.minLabelTextSize = this.maxLabelTextSize;
+      }
     }
 
-    if (this.MDL.size_label.scaleType !== "ordinal" || this.MDL.size_label.use == "constant") {
-      this.labelSizeTextScale.range([_this.minLabelTextSize, _this.maxLabelTextSize]);
-    } else {
-      this.labelSizeTextScale.rangePoints([_this.minLabelTextSize, _this.maxLabelTextSize], 0).range();
-    }
-
+    this.labelSizeTextScale.range([this.minLabelTextSize, this.maxLabelTextSize]);
   }
 
-  updateIndicators() {
+  updateSizeTextScale() {
 
     //scales
     if (this.MDL.size_label) {
-      this.labelSizeTextScale = this.MDL.size_label.getScale();
+      this.labelSizeTextScale = this.MDL.size_label.scale.d3Scale;
     }
   }
 
@@ -350,7 +351,7 @@ export class Labels extends BaseComponent {
 
     const _cssPrefix = this.options.CSS_PREFIX;
 
-    const labels = this.ui;
+    const labels = this.parent.ui.labels;
     labelGroup.classed("vzb-label-boxremoved", labels.removeLabelBox);
 
     const _text = text || labelGroup.selectAll("." + _cssPrefix + "-label-content");
@@ -451,9 +452,11 @@ export class Labels extends BaseComponent {
 
   updateLabelsOnlyTextSize() {
     const _this = this;
+    this.MDL.size_label.scale.extent;
+    this.services.layout.size;
 
     this.entityLabels.each(function(d) {
-      _this._updateLabelSize(d, null, d3.select(this), d.size_label);
+      _this._updateLabelSize(d, null, d3.select(this), _this.model.dataMap.getByObjOrStr(null,d[Symbol.for("key")]).size_label);
       const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
       _this.positionLabel(d, null, this, 0, null, lineGroup);
     });
