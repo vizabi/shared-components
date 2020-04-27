@@ -1,6 +1,7 @@
 @import "../../styles/common.scss";
 
-.vzb-datanotes {
+.vzb-tool {
+  .vzb-datanotes {
     @include rtl {
       padding-left: 15px;
       padding-right: 25px;
@@ -98,8 +99,8 @@
     }
   }
   
-  .vzb-small {
-    .vzb-tool-datanotes {
+  &.vzb-small {
+    .vzb-datanotes {
       width: 300px;
       max-height: 150px;
       .vzb-data-notes-body {
@@ -122,8 +123,8 @@
     }
   }
   
-  .vzb-medium {
-    .vzb-tool-datanotes {
+  &.vzb-medium {
+    .vzb-datanotes {
       width: 350px;
       max-height: 175px;
       .vzb-data-notes-body {
@@ -145,8 +146,8 @@
     }
   }
   
-  .vzb-large {
-    .vzb-tool-datanotes {
+  &.vzb-large {
+    .vzb-datanotes {
       width: 400px;
       max-height: 200px;
       .vzb-data-notes-body {
@@ -167,4 +168,4 @@
       font-size: $vzb-font-size-regular;
     }
   }
-  
+}
