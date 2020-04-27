@@ -1,6 +1,8 @@
 import * as utils from "base/utils";
 import { Dialog } from "../dialog";
 import { IndicatorPicker } from "../../indicatorpicker/indicatorpicker";
+import { STATUS } from "../../../utils.js";
+import { ColorLegend } from "../../colorlegend/colorlegend";
 
 /*!
  * VIZABI COLOR DIALOG
@@ -44,6 +46,30 @@ export class Colors extends Dialog {
         showHoverValues: true
       },
       //model: config.root.model.stores.markers.get("legend")
+      state: {
+        get hoverKeyLabels() {
+          if (!config.root.model.stores) return null;
+          const legendMarker = config.root.model.stores.markers.get("legend");
+          if (!legendMarker) return null;
+          if (legendMarker.state === STATUS.READY) {
+            //TODO: fix on multi dimensions config
+            const labelKey = legendMarker.data.space[0];
+            return legendMarker.dataArray.reduce((labels, data) => {
+              labels[data[labelKey]] = data.name;
+              return labels;
+            }, {})
+          }
+          
+          return null;
+        }
+      }
+    }, {
+      type: ColorLegend,
+      placeholder: ".vzb-clegend-container",
+      options: {
+        colorModelName: "color",
+        legendModelName: "legend"
+      }
     }]
     
     super(config);

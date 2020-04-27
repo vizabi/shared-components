@@ -109,7 +109,7 @@ export class Dialog extends CollectionMixin(BaseComponent) {
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = this.element.node().clientHeight || 0;
     this.width = this.element.node().clientWidth || 0;
-    if (!this.height || !this.width) return utils.warn("Timeslider _updateProfile() abort: container is too little or has display:none");
+    if (!this.height || !this.width) return utils.warn("Dialog _updateProfile() abort: container is too little or has display:none");
   }
 
   _updateSize() {
