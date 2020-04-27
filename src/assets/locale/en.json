@@ -58,6 +58,10 @@
         "check/timeInTrails": "Time in trails label",
         "check/numberFormatSIPrefix": "SI suffix in numbers",
         "check/rbh/enabled": "Enable Robinhood plugin",
+        "dialogs/color/select-all": "Select all in that group",
+        "dialogs/color/remove-else": "Remove everything else",
+        "dialogs/color/edit-color": "Edit color",
+        "dialogs/color/edit-color-blocked-hint": "Dataset author made colors unchangeable for this indicator",
         "dialogs/find": "Select",
         "dialogs/presentation": "Look and feel",
         "dialogs/technical": "Technical",
@@ -74,8 +78,19 @@
         "hints/units": "Unit",
         "hints/nodescr": "No description",
         "hints/grandtotal": "Total by all dimensions",
+        "hints/color/more": "click for more options",
+        "colorpicker/default":"DEFAULT",
         "placeholder/search": "Search",
         "scaletype/linear": "linear",
-        "scaletype/log": "log"
+        "scaletype/log": "log",
+        "indicator/_default/axis": "Constant",
+        "indicator/_default/size": "One size",
+        "indicator/_default/color": "Single color",
+        "indicator/_default/side": "One side",
+        "description/_default/color": "All markers would have the same color",
+        "description/_default/size": "All markers would have the same size",
+        "description/_default/axis": "All markers would have the same position",
+        "description/_default/side": "",
+        "unit/pixels": "px"
     }
 }
