@@ -33,7 +33,7 @@ export class Show extends BaseComponent {
       this._applyShowChanges();
     });
 
-    this.tabsConfig = this.ui.showTabs || {};  
+    this.tabsConfig = this.ui.showTabs || {};
   }
 
   draw() {
@@ -47,6 +47,7 @@ export class Show extends BaseComponent {
 
     this.previewShow = {};
     const dimensionFilter = this.model.data.filter.dimensions;
+    if (!this.resetFilter) this.resetFilter = utils.deepClone(dimensionFilter);
     utils.forEach(this.model.data.space, dim => {
       if (dimensionFilter[dim]) {
         this.previewShow[dim] = utils.deepExtend({}, dimensionFilter[dim]);
@@ -243,13 +244,10 @@ export class Show extends BaseComponent {
   }
 
   _hideResetButton() {
-    return false;
-
-
     let showEquals = true;
-    const spaceModels = this.model.state.marker._space;
-    utils.forEach(this.KEYS, key => {
-      showEquals = utils.comparePlainObjects(this.resetFilter[key] || {}, utils.find(spaceModels, model => model.dim === key).show);
+    const space = this.model.data.space;
+    utils.forEach(space, key => {
+      showEquals = utils.comparePlainObjects(this.resetFilter[key] || {}, this.model.data.filter.dimensions[key]);
       return showEquals;
     });
 
@@ -257,7 +255,6 @@ export class Show extends BaseComponent {
   }
 
   _applyShowChanges() {
-    //this.model.state.marker.clearSelected();
     runInAction(() => {
       this.MDL.selected.data.filter.delete([...this.MDL.selected.data.filter.markers]);
 
@@ -287,13 +284,9 @@ export class Show extends BaseComponent {
   }
 
   _resetShow() {
-    const setProps = {};
-    const spaceModels = this.model.state.marker._space;
-    this.KEYS.forEach(key => {
-      const entities = utils.find(spaceModels, model => model.dim === key)._name;
-      setProps[entities] = { show: this.resetFilter[key] || {} };
+    runInAction(() => {
+      this.model.data.filter.config.dimensions = this.resetFilter;
     });
-    this.model.state.set(setProps);
   }
 
   _closeClick() {
