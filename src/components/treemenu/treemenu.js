@@ -211,6 +211,11 @@ export class TreeMenu extends BaseComponent {
       }
     });
 
+    //add constant entry
+    tags[ROOT].children.push({
+      id: "_default",
+      use: "constant"
+    })
 
     const properties = this.model.data.space.length > 1;
     this._filterAvailabilityBySpace(this.model.availability, this.model.data.space).forEach(kvPair => {
@@ -266,6 +271,8 @@ export class TreeMenu extends BaseComponent {
      */
     this.model.spaceAvailability.forEach(space => {
       //TODO: get concept for space
+      if (space.length < 2) return;
+      
       indicatorsTree.children.push({
         id: space.join(","),
         name: space.join(", "),
@@ -626,7 +633,7 @@ export class TreeMenu extends BaseComponent {
 
     let dataFiltered, allowedIDs;
 
-    const indicatorsDB = {};
+    const indicatorsDB = { _default:{} };
     utils.forEach(Vizabi.stores.dataSources.getAll(), m => {
       m.concepts.forEach(c => {
         indicatorsDB[c.concept] = c;
@@ -643,7 +650,7 @@ export class TreeMenu extends BaseComponent {
       if (isEncoding) {
         allowedIDs = utils.keys(indicatorsDB).filter(f => {
           //TODO filter entity_domain, entity_set
-          if (indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set") return false;
+          //if (indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set") return false;
           
           //check if indicator is denied to show with allow->names->!indicator
           if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
@@ -725,7 +732,7 @@ export class TreeMenu extends BaseComponent {
 
     if (!useDataFiltered) {
       let pointer = "_default";
-      if (allowedIDs.indexOf(utils.getProp(this._targetModel, this._targetProp) > -1)) pointer = utils.getProp(this._targetModel, this._targetProp);
+      if (allowedIDs.indexOf(utils.getProp(this._targetModel, this._targetProp)) > -1) pointer = utils.getProp(this._targetModel, this._targetProp);
       if (!indicatorsDB[pointer]) utils.error("Concept properties of " + pointer + " are missing from the set, or the set is empty. Put a breakpoint here and check what you have in indicatorsDB");
 
       if (!indicatorsDB[pointer].scales) {
@@ -899,7 +906,7 @@ export class TreeMenu extends BaseComponent {
   _setModel(what, value) {
     const mdl = this._targetModel;
     if (what == "scaleType") mdl.scale.config.type = value;
-    if (what[1] == "concept") mdl.setWhich({ key: value.key.slice(0), value });
+    if (what[1] == "concept") mdl.setWhich({ key: value.key && value.key.slice(0), value });
     if (what[1] == "space") mdl.data.config.space = value.concept.split(",");
   }
 
