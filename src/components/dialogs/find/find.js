@@ -87,14 +87,16 @@ export class Find extends Dialog {
     super.setup(options);
 
     this.DOM.findList = this.element.select(".vzb-find-list");
-    this.DOM.titleSwitch = this.element.select(".vzb-dialog-title-switch input");
+    this.DOM.titleSwitch = this.element.select(".vzb-dialog-title-switch");
+    this.DOM.titleSwitchSlider = this.DOM.titleSwitch.select(".vzb-switch-slider");
+    this.DOM.titleSwitchInput = this.DOM.titleSwitch.select("input");
     this.DOM.panels = this.DOM.content.selectAll(".vzb-dialog-content");
     this.DOM.input_search = this.element.select(".vzb-find-search");
     this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
 
-    this.DOM.titleSwitch.on("change", () => {
-      this.ui.panelMode = this.DOM.titleSwitch.property("checked") ? "show" : "find";
+    this.DOM.titleSwitchInput.on("change", () => {
+      this.ui.panelMode = this.DOM.titleSwitchInput.property("checked") ? "show" : "find";
     }).property("checked", this._getPanelMode() !== "find");
 
     this.DOM.input_search.on("keyup", () => {
@@ -149,6 +151,7 @@ export class Find extends Dialog {
 
     this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
 
+    this.addReaction(this._enablePanelModeSwitch);
     this.addReaction(this._changePanelMode);
     this.addReaction(this._createFindList);
     this.addReaction(this._updateBrokenData);
@@ -166,6 +169,11 @@ export class Find extends Dialog {
 
   _getPanelMode() {
     return this.ui.panelMode;
+  }
+
+  _enablePanelModeSwitch() {
+    this.DOM.titleSwitchSlider.classed("vzb-hidden", !this.ui.enableSelectShowSwitch);
+    this.DOM.titleSwitch.style("pointer-events", this.ui.enableSelectShowSwitch ? "auto" : "none");
   }
 
   _buttonAdjust() {
