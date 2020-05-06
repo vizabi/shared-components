@@ -46,12 +46,12 @@ export class IndicatorPicker extends BaseComponent {
 
       if (this._isEncoding()) {
         treemenuComp
-          .encoding(this.targetProp)
           .alignX("left")
           .alignY("top")
           .top(topPos)
           .left(leftPos)
-          .updateView()
+          .encoding(this.targetProp)
+          //.updateView()
           .toggle();
       }
     });
@@ -80,13 +80,19 @@ export class IndicatorPicker extends BaseComponent {
   }
 
   _updateView() {
+    this.state.hoverKeyLabels;
     let selectText;
 
     if (this._isEncoding()) {
-      if (this.showHoverValues && this.MDL.highlighted.data.filter.any()) {
+      if (this.MDL.model.data.isConstant()) {
+        const constant = this.MDL.model.data.constant;
+        const scaleModelType = this.MDL.model.scale.config.modelType;
+        selectText = this.localise("indicator/" + constant + (scaleModelType ? "/" + scaleModelType : ""));
+      } else if (this.showHoverValues && this.MDL.highlighted.data.filter.any()) {
         const highlightedMarkers = this.MDL.highlighted.data.filter.markers;
-        const key = highlightedMarkers.keys().next().value;
-        selectText = this.localise(this.model.dataMap.getByObjOrStr(null, key)[this.targetProp]);
+        const [key, payload] = highlightedMarkers.entries().next().value;
+        const hoverKey = (this.model.dataMap.getByObjOrStr(null, key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
+        selectText = this.state.hoverKeyLabels ? this.state.hoverKeyLabels[hoverKey] : this.localise(hoverKey);
       } else {
         selectText = this.MDL.model.data.conceptProps.name;
       }
