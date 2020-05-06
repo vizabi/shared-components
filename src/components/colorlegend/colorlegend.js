@@ -104,13 +104,14 @@ export class ColorLegend extends BaseComponent {
     this.localise = this.services.locale.auto();
     this.colorPicker.translate(this.localise);
 
+    this.legendHasOwnModel = !this.MDL.color.data.isConstant() && ["entity_set", "entity_domain"]
+      .includes(this.MDL.color.data.conceptProps.concept_type);
+    
     if (this.MDL.legend && !this._isLegendModelReady()) return;
 
     this.KEY = Symbol.for("key");
     this.canShowMap = this.MDL.legend && this._canShowMap();
     this.which = this.MDL.color.data.constant || this.MDL.color.data.concept;
-    this.legendHasOwnModel = !this.MDL.color.data.isConstant() && ["entity_set", "entity_domain"]
-      .includes(this.MDL.color.data.conceptProps.concept_type);
 
     this.addReaction(this._updateView);
     this.addReaction(this._translateSelectDialog);
@@ -128,6 +129,8 @@ export class ColorLegend extends BaseComponent {
   }
 
   _updateView() {
+    if (this.MDL.legend && this.legendHasOwnModel && !this._isLegendModelReady()) return;
+
     const individualColors = false;
     this._updateListLegend(this.MDL.color.scale.isDiscrete() && !this.canShowMap && !individualColors);
     this._updateMinimapLegend(this.MDL.color.scale.isDiscrete() && this.canShowMap);
@@ -144,7 +147,7 @@ export class ColorLegend extends BaseComponent {
 
     let colorOptionsArray = [];
 
-    if (this.MDL.legend) {
+    if (this.MDL.legend && !this.MDL.color.data.isConstant()) {
       colorOptionsArray = this.MDL.legend.dataArray;
       //this.which == KEY ? this.markerArray : this.colorlegendMarkerArray;
     } else {
@@ -304,8 +307,8 @@ export class ColorLegend extends BaseComponent {
         const view = d3.select(this);
         const target = !colorScaleModel.isDiscrete() ? d.paletteKey : d[which];
         _this.colorPicker
-          .colorOld(colorScaleModel.palette[target])
-          .colorDef(colorScaleModel.palette.getColor(defaultPalette, target))
+          .colorOld(colorScaleModel.palette.getColor(target))
+          .colorDef(colorScaleModel.palette.getColor(target, defaultPalette))
           .callback((value, isClick) => colorScaleModel.palette.setColor(value, "" + target, null, isClick, isClick))
           .fitToScreen([d3event.pageX, d3event.pageY])
           .show(true);
@@ -447,6 +450,7 @@ export class ColorLegend extends BaseComponent {
   }
 
   _highlight(values) {
+    if (!values.length) return;
     utils.getProp(this, ["root", "ui", "chart", "superhighlightOnMinimapHover"]) ?
       this.MDL.superHighlighted.data.filter.set(values) :
       this.MDL.highlighted.data.filter.set(values);
@@ -469,7 +473,7 @@ export class ColorLegend extends BaseComponent {
     if (!isVisible) return;
 
     const gradientWidth = this.DOM.rainbow.node().getBoundingClientRect().width;
-    const paletteKeys = Object.keys(colorModel.palette.palette).sort((a, b) => a - b).map(parseFloat);
+    const paletteKeys = colorModel.palette.paletteDomain.map(parseFloat);
     const cScale = colorModel.d3Scale.copy();
     const circleRadius = 6;
 
