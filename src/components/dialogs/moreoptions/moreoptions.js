@@ -64,6 +64,10 @@ export class MoreOptions extends Dialog {
   setup(options) {
     super.setup(options);
 
+    this.element.on("custom-dragend", () => {
+      this._setMaxHeight();
+    });
+
     const _this = this;
     this.DOM.accordion = this.DOM.content.select(".vzb-accordion");
 

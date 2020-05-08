@@ -41,6 +41,7 @@ export class Dialog extends CollectionMixin(BaseComponent) {
 
   setup() {
     this.DOM = {
+      dialog: this.element.select(".vzb-dialog-modal"),
       title: this.element.select(".vzb-dialog-modal>.vzb-dialog-title"),
       buttons: d3.select(this.element.selectAll(".vzb-dialog-modal>.vzb-dialog-buttons").nodes().pop()),
       content: this.element.select(".vzb-dialog-modal > .vzb-dialog-content"),
@@ -160,14 +161,14 @@ export class Dialog extends CollectionMixin(BaseComponent) {
           // }
         }
         //this.element.style('top', this.topPos);
-        this.element.style("max-height", "");
+        this.DOM.dialog.style("max-height", "");
       } else {
         this.rightPos = "";
         this.topPos = "";
         this.element.attr("style", "");
         // var totalHeight = this.root.element.offsetHeight;
         // if(this.root.element.classed('vzb-portrait')) totalHeight = totalHeight - 50;
-        // this.element.style('max-height', (totalHeight - 10) + 'px');
+        // this.DOM.dialog.style('max-height', (totalHeight - 10) + 'px');
       }
 
       this.DOM.dragHandler.classed("vzb-hidden", profile === "SMALL");
@@ -192,7 +193,7 @@ export class Dialog extends CollectionMixin(BaseComponent) {
       totalHeight = this.root.element.classed("vzb-portrait") ? totalHeight - 50 : totalHeight - 10;
     }
 
-    this.element.style("max-height", totalHeight + "px");
+    this.DOM.dialog.style("max-height", totalHeight + "px");
 
     //set 'max-height' to content for IE11
     const contentHeight = totalHeight - this.DOM.title.node().offsetHeight - ((this.DOM.buttons.node() || {}).offsetHeight || 0);
@@ -419,21 +420,21 @@ const _Dialog = {
 
   ready() {
     const _this = this;
-    this.element = d3.select(this.placeholder);
-    this.root.element = this.root.element instanceof Array ? this.root.element : d3.select(this.root.element);
-    this.dragHandler = this.element.select("[data-click='dragDialog']");
+    this.placeholderEl = d3.select(this.placeholder);
+    this.rootEl = this.root.element instanceof Array ? this.root.element : d3.select(this.root.element);
+    this.dragHandler = this.placeholderEl.select("[data-click='dragDialog']");
     this.dragHandler.html(iconDrag);
-    this.pinIcon = this.element.select("[data-click='pinDialog']");
+    this.pinIcon = this.placeholderEl.select("[data-click='pinDialog']");
     this.pinIcon.html(iconPin);
     this.topPos = "";
     const profile = this.getLayoutProfile();
 
-    const dg = dialogDrag(this.element, this.root.element, 10);
+    const dg = dialogDrag(this.placeholderEl, this.rootEl, 10);
     const dragBehavior = d3.drag()
       .on("start", () => {
-        const topPos = _this.element.node().offsetTop;
-        _this.element.style("top", topPos + "px");
-        _this.element.style("bottom", "auto");
+        const topPos = _this.placeholderEl.node().offsetTop;
+        _this.placeholderEl.style("top", topPos + "px");
+        _this.placeholderEl.style("bottom", "auto");
         _this.trigger("dragstart");
         dg.dragStart(d3.event);
       })
@@ -442,75 +443,75 @@ const _Dialog = {
         dg.drag(d3.event);
       })
       .on("end", () => {
-        _this.rightPos = _this.element.style("right");
-        _this.topPos = _this.element.style("top");
+        _this.rightPos = _this.placeholderEl.style("right");
+        _this.topPos = _this.placeholderEl.style("top");
         _this.trigger("dragend");
       });
     this.dragHandler.call(dragBehavior);
 
-    this.dragHandler.classed("vzb-hidden", profile === "SMALL");
-    this.pinIcon.classed("vzb-hidden", profile === "SMALL");
+    this.dragHandler.classed("vzb-hidden", profile === "small");
+    this.pinIcon.classed("vzb-hidden", profile === "small");
     this.resize();
   },
 
   resize() {
-    if (this.element && this.root.element && this.element.classed("vzb-top-dialog")) {
-      this.element.classed("notransition", true);
+    if (this.placeholderEl && this.rootEl && this.placeholderEl.classed("vzb-top-dialog")) {
+      this.placeholderEl.classed("notransition", true);
 
       const profile = this.getLayoutProfile();
 
-      if (profile !== "SMALL") {
-        const chartWidth = parseInt(this.root.element.style("width"), 10) || 0;
-        const chartHeight = parseInt(this.root.element.style("height"), 10) || 0;
-        const dialogWidth = parseInt(this.element.style("width"), 10) || 0;
-        const dialogHeight = parseInt(this.element.style("height"), 10) || 0;
+      if (profile !== "small") {
+        const chartWidth = parseInt(this.rootEl.style("width"), 10) || 0;
+        const chartHeight = parseInt(this.rootEl.style("height"), 10) || 0;
+        const dialogWidth = parseInt(this.placeholderEl.style("width"), 10) || 0;
+        const dialogHeight = parseInt(this.placeholderEl.style("height"), 10) || 0;
 
         const dialogRight = parseInt(this.rightPos, 10);
         const dialogTop = parseInt(this.topPos, 10);
-        const dialogRightMargin = parseInt(this.element.style("margin-right"), 10) || 0;
+        const dialogRightMargin = parseInt(this.placeholderEl.style("margin-right"), 10) || 0;
         if (utils.isNumber(dialogRight) && dialogRight > chartWidth - dialogWidth - dialogRightMargin) {
           if (this.rightPos) {
             this.rightPos = (chartWidth - dialogWidth - dialogRightMargin) + "px";
-            if (this.isOpen) this.element.style("right", this.rightPos);
+            if (this.isOpen) this.placeholderEl.style("right", this.rightPos);
           }
         }
         if (utils.isNumber(dialogTop) && utils.isNumber(dialogHeight) && dialogTop >= 0 && dialogTop > chartHeight - dialogHeight) {
           if (this.topPos) {
             this.topPos = ((chartHeight - dialogHeight) > 0 ? (chartHeight - dialogHeight) : 0)  + "px";
-            if (this.isOpen) this.element.style("top", this.topPos);
+            if (this.isOpen) this.placeholderEl.style("top", this.topPos);
           }
         }
 
-        if (this.topPos && (this.getLayoutProfile() === "LARGE" && this.root.element.classed("vzb-dialog-expand-true"))) {
-          this.element.style("bottom", "auto");
+        if (this.topPos && (this.getLayoutProfile() === "large" && this.rootEl.classed("vzb-dialog-expand-true"))) {
+          this.placeholderEl.style("bottom", "auto");
         }
 
-        if (this.root.element.classed("vzb-landscape")) {
-          // var contentHeight = parseInt(this.root.element.style('height'));
-          // var placeholderHeight = parseInt(this.element.style('height'));
+        if (this.rootEl.classed("vzb-landscape")) {
+          // var contentHeight = parseInt(this.rootEl.style('height'));
+          // var placeholderHeight = parseInt(this.placeholderEl.style('height'));
           // if (contentHeight < placeholderHeight) {
           //   this.topPos = (-contentHeight + 50) + 'px';
           //   this.rightPos = '';
-          //   this.element.style('right', this.rightPos);
-          //   this.element.style('bottom', 'auto');
+          //   this.placeholderEl.style('right', this.rightPos);
+          //   this.placeholderEl.style('bottom', 'auto');
           // } else {
           //   //this.topPos = '';
-          //   this.element.style('bottom', '');
+          //   this.placeholderEl.style('bottom', '');
           // }
         }
-        //this.element.style('top', this.topPos);
+        //this.placeholderEl.style('top', this.topPos);
         this.element.style("max-height", "");
       } else {
         this.rightPos = "";
         this.topPos = "";
-        this.element.attr("style", "");
+        this.placeholderEl.attr("style", "");
         // var totalHeight = this.root.element.offsetHeight;
-        // if(this.root.element.classed('vzb-portrait')) totalHeight = totalHeight - 50;
+        // if(this.rootEl.classed('vzb-portrait')) totalHeight = totalHeight - 50;
         // this.element.style('max-height', (totalHeight - 10) + 'px');
       }
 
-      this.dragHandler.classed("vzb-hidden", profile === "SMALL");
-      this.pinIcon.classed("vzb-hidden", profile === "SMALL");
+      this.dragHandler.classed("vzb-hidden", profile === "small");
+      this.pinIcon.classed("vzb-hidden", profile === "small");
 
       this._setMaxHeight();
     }
@@ -518,22 +519,22 @@ const _Dialog = {
 
   _setMaxHeight() {
     let totalHeight = this.root.element.offsetHeight;
-    if (this.getLayoutProfile() !== "SMALL") {
-      if (!this.topPos && (this.getLayoutProfile() === "LARGE" && this.root.element.classed("vzb-dialog-expand-true"))) {
-        const dialogBottom = parseInt(this.element.style("bottom"), 10);
+    if (this.getLayoutProfile() !== "small") {
+      if (!this.topPos && (this.getLayoutProfile() === "large" && this.rootEl.classed("vzb-dialog-expand-true"))) {
+        const dialogBottom = parseInt(this.placeholderEl.style("bottom"), 10);
         totalHeight -= dialogBottom;
       } else {
-        const topPos = this.topPos ? parseInt(this.topPos, 10) : this.element.node().offsetTop;
+        const topPos = this.topPos ? parseInt(this.topPos, 10) : this.placeholderEl.node().offsetTop;
         totalHeight -= topPos;
       }
     } else {
-      totalHeight = this.root.element.classed("vzb-portrait") ? totalHeight - 50 : totalHeight - 10;
+      totalHeight = this.rootEl.classed("vzb-portrait") ? totalHeight - 50 : totalHeight - 10;
     }
 
     this.element.style("max-height", totalHeight + "px");
 
     //set 'max-height' to content for IE11
-    const contentHeight = totalHeight - this.titleEl.node().offsetHeight - ((this.buttonsEl.node() || {}).offsetHeight || 0);
+    const contentHeight = totalHeight - this.titleEl.node().offsetHeight - this.buttonsEl.node().offsetHeight;
     this.contentEl.style("max-height", contentHeight + "px");
   },
 
@@ -541,40 +542,40 @@ const _Dialog = {
     const _this = this;
 
     this.transitionEvents.forEach(event => {
-      _this.element.on(event, _this.transitionEnd.bind(_this, event));
+      _this.placeholderEl.on(event, _this.transitionEnd.bind(_this, event));
     });
 
-    this.element.classed("notransition", true);
+    this.placeholderEl.classed("notransition", true);
 
-    this.element.style("top", ""); // issues: 369 & 442
-    this.element.style("bottom", ""); // issues: 369 & 442
+    this.placeholderEl.style("top", ""); // issues: 369 & 442
+    this.placeholderEl.style("bottom", ""); // issues: 369 & 442
 
-    if (this.topPos && this.getLayoutProfile() === "LARGE" && this.root.element.classed("vzb-dialog-expand-true")) {
-      const topPos = this.element.node().offsetTop;
-      this.element.style("top", topPos + "px"); // issues: 369 & 442
-      this.element.style("bottom", "auto"); // issues: 369 & 442
-    } else if (this.getLayoutProfile() !== "SMALL") {
-      //if(this.rightPos) this.element.style('right', this.rightPos);
+    if (this.topPos && this.getLayoutProfile() === "large" && this.rootEl.classed("vzb-dialog-expand-true")) {
+      const topPos = this.placeholderEl.node().offsetTop;
+      this.placeholderEl.style("top", topPos + "px"); // issues: 369 & 442
+      this.placeholderEl.style("bottom", "auto"); // issues: 369 & 442
+    } else if (this.getLayoutProfile() !== "small") {
+      //if(this.rightPos) this.placeholderEl.style('right', this.rightPos);
     }
 
-    this.element.node().offsetTop;
-    this.element.classed("notransition", false);
+    this.placeholderEl.node().offsetTop;
+    this.placeholderEl.classed("notransition", false);
 
-    if (this.getLayoutProfile() === "SMALL") {
-      this.element.style("top", ""); // issues: 369 & 442
-    } else if (this.root.element.classed("vzb-landscape")) { // need to recalculate popup position (Safari 8 bug)
-      // var contentHeight = parseInt(this.root.element.style('height'));
-      // var placeholderHeight = parseInt(this.element.style('height'));
+    if (this.getLayoutProfile() === "small") {
+      this.placeholderEl.style("top", ""); // issues: 369 & 442
+    } else if (this.rootEl.classed("vzb-landscape")) { // need to recalculate popup position (Safari 8 bug)
+      // var contentHeight = parseInt(this.rootEl.style('height'));
+      // var placeholderHeight = parseInt(this.placeholderEl.style('height'));
       // if (contentHeight < placeholderHeight) {
       //   this.topPos = (-contentHeight + 50) + 'px';
       //   this.rightPos = '';
-      //   this.element.style('right', this.rightPos);
-      //   this.element.style('bottom', 'auto');
+      //   this.placeholderEl.style('right', this.rightPos);
+      //   this.placeholderEl.style('bottom', 'auto');
       // } else {
       //   this.topPos = '';
-      //   this.element.style('bottom', '');
+      //   this.placeholderEl.style('bottom', '');
       // }
-      //this.element.style('top', this.topPos);
+      //this.placeholderEl.style('top', this.topPos);
     }
 
   },
@@ -584,24 +585,24 @@ const _Dialog = {
    */
   open() {
     this.isOpen = true;
-    if (this.getLayoutProfile() !== "SMALL") {
+    if (this.getLayoutProfile() !== "small") {
       if (this.topPos) {
-        this.element.style("top", this.topPos);
-        this.element.style("right", this.rightPos);
+        this.placeholderEl.style("top", this.topPos);
+        this.placeholderEl.style("right", this.rightPos);
       }
     }
   },
 
   beforeClose() {
     //issues: 369 & 442
-    if (this.root.element.classed("vzb-portrait") && this.getLayoutProfile() === "SMALL") {
-      this.element.style("top", "auto"); // issues: 369 & 442
+    if (this.rootEl.classed("vzb-portrait") && this.getLayoutProfile() === "small") {
+      this.placeholderEl.style("top", "auto"); // issues: 369 & 442
     }
-    if (this.getLayoutProfile() === "LARGE" && this.root.element.classed("vzb-dialog-expand-true")) {
-      this.topPos0 = this.topPos ? (this.element.node().parentNode.offsetHeight - this.element.node().offsetHeight) + "px" : "";
+    if (this.getLayoutProfile() === "large" && this.rootEl.classed("vzb-dialog-expand-true")) {
+      this.topPos0 = this.topPos ? (this.placeholderEl.node().parentNode.offsetHeight - this.placeholderEl.node().offsetHeight) + "px" : "";
     }
-    this.element.classed("notransition", false);
-    this.element.node().offsetHeight; // trigger a reflow (flushing the css changes)
+    this.placeholderEl.classed("notransition", false);
+    this.placeholderEl.node().offsetHeight; // trigger a reflow (flushing the css changes)
   },
 
   /**
@@ -609,14 +610,14 @@ const _Dialog = {
    */
   close() {
     //issues: 369 & 442
-    if (!(this.root.element.classed("vzb-portrait") && this.getLayoutProfile() === "SMALL")) {
-      this.element.style("top", ""); // issues: 369 & 442
-      this.element.style("right", ""); // issues: 369 & 442
+    if (!(this.rootEl.classed("vzb-portrait") && this.getLayoutProfile() === "small")) {
+      this.placeholderEl.style("top", ""); // issues: 369 & 442
+      this.placeholderEl.style("right", ""); // issues: 369 & 442
     }
 
-    if (this.getLayoutProfile() === "LARGE" && this.root.element.classed("vzb-dialog-expand-true")) {
-      this.element.style("top", this.topPos0);
-      this.element.style("right", "");
+    if (this.getLayoutProfile() === "large" && this.rootEl.classed("vzb-dialog-expand-true")) {
+      this.placeholderEl.style("top", this.topPos0);
+      this.placeholderEl.style("right", "");
     }
     this.isOpen = false;
     this.trigger("close");
@@ -627,13 +628,11 @@ const _Dialog = {
     const _this = this;
 
     this.transitionEvents.forEach(event => {
-      _this.element.on(event, null);
+      _this.placeholderEl.on(event, null);
     });
     if (this.isOpen) {
-      this.element.classed("notransition", true);
+      this.placeholderEl.classed("notransition", true);
     }
   }
 
-};
-
-
+}
