@@ -180,7 +180,7 @@ export class ZoomButtonList extends BaseComponent {
   }
 
   toggleHundredPercent(id) {
-    this.root.trigger("resetZoom");
+    this.root.element.dispatch("custom-resetZoom");
   }
 
 }

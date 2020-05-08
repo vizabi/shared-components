@@ -113,7 +113,7 @@ export class DataNotes extends BaseComponent {
     this.left = _left;
     this.top = _top;
     if (this.pinned && !force) return this;
-    const parentHeight = this.parent.element.offsetHeight;
+    const parentHeight = this.parent.element.node().offsetHeight;
     const width = this.element.node().offsetWidth;
     const height = this.element.node().offsetHeight;
     let leftMove;
