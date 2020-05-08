@@ -1,7 +1,9 @@
 /* eslint-disable no-undef */
 const path = require('path');
 const meta = require("./package.json");
+const fs = require('fs');
 
+const postcss = require("postcss");
 const babel = require("rollup-plugin-babel");
 const {eslint} = require("rollup-plugin-eslint");
 const resolve = require("rollup-plugin-node-resolve");
@@ -51,7 +53,14 @@ module.exports = dir => ({
     commonjs(),
     sass({
       include: path.resolve(__dirname,"src/**/*.scss"),
-      output: (dir || "build") + "/VizabiSharedComponents.css",
+      //output: (dir || "build") + "/VizabiSharedComponents.css",
+      output(styles, styleNodes) {
+        //console.log(styles);
+        postcss([require("cssnano")]).process(styles)
+          .then(result => {
+            fs.writeFileSync((dir || "build") + "/VizabiSharedComponents.css", result.css);
+          })
+      }
     }),
     json(),
     replace({

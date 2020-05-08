@@ -40,6 +40,8 @@
     "rollup-plugin-terser": "^5.1.2",
     "mobx": "^5.14.2",
     "d3": "^5.12.0",
-    "vizabi-reactive": "^1.0.1"
+    "vizabi-reactive": "^1.0.1",
+    "postcss": "7.0.27",
+    "cssnano": "4.1.10"
   }
 }
