@@ -1,4 +1,4 @@
-import { autorun, decorate, observable, reaction, comparer, createAtom, trace } from "mobx";
+import { autorun, decorate, observable, reaction, comparer, createAtom, trace, computed } from "mobx";
 import { STATUS } from "../utils.js";
 import { ui as _ui} from "../ui.js";
 import * as utils from "../legacy/base/utils";
@@ -7,7 +7,7 @@ class _BaseComponent {
 
   constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, default_ui = {}, superUI}){
     this.id = id || "c0";
-    this.status = STATUS.INIT;
+    //this.status = STATUS.INIT;
     this.template = this.template || template || "";
     this.subcomponents = this.subcomponents || subcomponents || [];
     this.services = this.services || services || {};
@@ -49,14 +49,14 @@ class _BaseComponent {
         template: comp.template,
         options: comp.options,
         superUI: comp.superUI,
-        default_ui: utils.deepExtend({}, comp.default_ui, this.DEFAULT_UI[comp.name])
+        default_ui: utils.deepExtend({}, comp.default_ui || {}, this.DEFAULT_UI[comp.name] || {})
       });
       this.children.push(subcomponent);
     });
 
     this.setup(this.options);
+    //autorun(this.updateStatus.bind(this));
     autorun(this.render.bind(this));
-    autorun(this.updateStatus.bind(this));
     autorun(this.resize.bind(this));
   }
 
@@ -78,6 +78,7 @@ class _BaseComponent {
         reaction(method.bind(this), sideEffect.bind(this), options)
         : 
         autorun(() => {        
+          //trace();
           if(this.status === STATUS.READY) method.bind(this)();
         }));
     }
@@ -97,17 +98,22 @@ class _BaseComponent {
     return this.children.find(c => c.findChild({name, id, type}));
   }
 
-  updateStatus(){
+  //updateStatus(){
+  get status() {
+    //trace();
     const dependencies = Object.values(this.services).map((m)=>m.status)
       .concat(this.children.map((m)=>m.status))
       .concat(this.model.state);
 
     if (dependencies.every(dep => dep === STATUS.READY || dep == undefined))
-      this.status = STATUS.READY;
+    //this.status = STATUS.READY;
+    return STATUS.READY;
     else if (dependencies.some(dep => dep === STATUS.ERROR))
-      this.status = STATUS.ERROR;
+    //this.status = STATUS.ERROR;
+    return STATUS.ERROR;
     else
-      this.status = STATUS.PENDING;
+    //this.status = STATUS.PENDING;
+    return STATUS.PENDING;
   }
 
   render() {
@@ -128,6 +134,7 @@ class _BaseComponent {
 _BaseComponent.DEFAULT_UI = {};
 
 export const BaseComponent = decorate(_BaseComponent, {
-  "status": observable,
+  //"status": observable,
+  "status": computed,
   "state": observable
 });
