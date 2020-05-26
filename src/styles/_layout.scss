@@ -36,6 +36,14 @@
 
     background-color: $vzb-color-primary-lightest;
 
+    .vzb-dialogs {
+      flex: 1 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: static;
+    }
+
     .vzb-buttonlist {
       display: flex;
       flex-direction: column;

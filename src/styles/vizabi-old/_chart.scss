@@ -11,10 +11,10 @@
 %vzb-chart-svg {
   //@include position(absolute, 0);
   color: $vzb-color-grey-dark;
-  height: 100%;
+  height: 100vh;//100%;
   margin: 0;
   overflow: hidden;
-  width: 100%;
+  width: 100vw;//100%;
 }
 
 %vzb-chart-ticks-small {
