@@ -234,6 +234,12 @@ export class Labels extends BaseComponent {
       })
       .merge(this.entityLabels)
       .classed("vzb-hidden", !this.ui.enabled);
+  
+    Object.keys(this.ui.offset).forEach(key => {
+      if (!this.MDL.selected.has(key)) {
+        delete this.ui.offset[key];
+      }
+    });
   }
 
   showCloseCross(d, show) {
@@ -270,8 +276,9 @@ export class Labels extends BaseComponent {
         this._initNewCache(cached, valueX, valueY, valueS, valueC, valueL, valueLST);
       }
 
-      if (cached.labelX_ == null || cached.labelY_ == null){
-        cached.labelOffset = d.labelOffset || [0, 0];
+      if (cached.labelX_ == null || cached.labelY_ == null) {
+        const labelOffset = this.ui.offset[key(d)];
+        cached.labelOffset = (labelOffset && labelOffset.slice(0)) || [0, 0];
       }
 
       const brokenInputs = !cached.labelX0 && cached.labelX0 !== 0 || !cached.labelY0 && cached.labelY0 !== 0 || !cached.scaledS0 && cached.scaledS0 !== 0;
@@ -351,7 +358,7 @@ export class Labels extends BaseComponent {
 
     const _cssPrefix = this.options.CSS_PREFIX;
 
-    const labels = this.parent.ui.labels;
+    const labels = this.root.ui.chart.labels;
     labelGroup.classed("vzb-label-boxremoved", labels.removeLabelBox);
 
     const _text = text || labelGroup.selectAll("." + _cssPrefix + "-label-content");
@@ -457,6 +464,7 @@ export class Labels extends BaseComponent {
 
     this.entityLabels.each(function(d) {
       _this._updateLabelSize(d, null, d3.select(this), _this.model.dataMap.getByObjOrStr(null,d[Symbol.for("key")]).size_label);
+      if (_this.cached[key(d)]._new) return;
       const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
       _this.positionLabel(d, null, this, 0, null, lineGroup);
     });
@@ -487,6 +495,8 @@ export class Labels extends BaseComponent {
   }
 
   positionLabel(d, cache, context, duration, showhide, lineGroup, position) {
+    if (key(d) == this.dragging) return;
+    
     const cached = cache || this.cached[key(d)];
 
     const lockPosition = (position || position === 0);
@@ -641,6 +651,8 @@ export class Labels extends BaseComponent {
             //in form of this.ui.offset = {"geo-afg":[dx, dy]} 
             //_this.model.setLabelOffset(d, [cache.labelX_, cache.labelY_]);
             _this.ui.offset = Object.assign(_this.ui.offset, {[key(d)]: [cache.labelX_, cache.labelY_]});
+            //_this.ui.offset[key(d)] = [cache.labelX_, cache.labelY_];
+            //_this.ui.offset = {[key(d)]: [cache.labelX_, cache.labelY_]};
           }
         });
 
@@ -878,7 +890,7 @@ export class Labels extends BaseComponent {
         const textBBox = cache.textBBox;
         let diffX2 = -textBBox.width * 0.5;
         let diffY2 = -height * 0.2;
-        const labels = _this.ui;
+        const labels = _this.root.ui.chart.labels;
 
         const bBox = labels.removeLabelBox ? textBBox : rectBBox;
 
@@ -950,7 +962,7 @@ export class Labels extends BaseComponent {
 
 
 Labels.DEFAULT_UI = {
-  offset: {},
+  offset: () => ({}),
   enabled: true,
   dragging: true,
   removeLabelBox: false
