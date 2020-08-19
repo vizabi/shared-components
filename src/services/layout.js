@@ -36,8 +36,9 @@ class _LayoutService extends BaseService {
     this.size = this.getSize();
     this.profile = "SMALL";
     this.projector = false;
+    this.placeholder = this.config.placeholder || "body";
     this.hGrid = [];
-    this.element = d3.select(this.model.placeholder || "body")
+    this.element = d3.select(this.placeholder)
       .classed(CSS_PLACEHOLDER_CLASS, true);
     this._resizeHandler();
     window.addEventListener("resize", this._resizeHandler.bind(this));
@@ -59,7 +60,7 @@ class _LayoutService extends BaseService {
         this.status = STATUS.ERROR;
         console.warn(`
           Layout service: nothing should be rendered, because
-          placeholder ${this.model.placeholder || "body"} has display:none or is too little: ${this.width} x ${this.height} px
+          placeholder ${this.placeholder} has display:none or is too little: ${this.width} x ${this.height} px
         `);
       } else {
         this.element.classed(CSS_CLASS_PREFIX + this.profile.toLowerCase(), false);

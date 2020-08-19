@@ -2,8 +2,8 @@ export class BaseService {
 
   isService() {return true;}
 
-  constructor(model = {}){
-    this.model = model;
+  constructor(config = {}){
+    this.config = config;
     this.setup();
   }
 

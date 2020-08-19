@@ -2,21 +2,22 @@ import { BaseService } from "./base-service.js";
 import { observable, decorate, autorun } from "mobx";
 import { STATUS } from "../utils.js";
 
-const PATH_TO_FILE = "./assets/locale/";
+const FALLBACK_PATH = "./assets/locale/";
 const FALLBACK_ID = "en";
 
 class _LocaleService extends BaseService {
 
   setup(){
     this.status = STATUS.INIT;
-    this.id = FALLBACK_ID;
+    this.id = this.config.id || FALLBACK_ID;
+    this.path = this.config.path || FALLBACK_PATH;
     this.content = {};
     autorun(this._loadFile.bind(this));
   }
 
   _loadFile(){
     this.status = STATUS.PENDING;
-    d3.json(PATH_TO_FILE + this.id + ".json")
+    d3.json(this.path + this.id + ".json")
       .then((content) => {
         this.content[this.id] = content;
         this._initFormatters();
