@@ -5,7 +5,7 @@ import * as utils from "../legacy/base/utils";
 
 class _BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, default_ui = {}, superUI}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, baseUI = {}}){
     this.id = id || "c0";
     //this.status = STATUS.INIT;
     this.template = this.template || template || "";
@@ -31,9 +31,9 @@ class _BaseComponent {
       Please check that placeholder exists and is correctly specified in the component initialisation.
     `, this);
 
-    this.DEFAULT_UI = utils.deepExtend({}, this.constructor.DEFAULT_UI, default_ui);
+    this.DEFAULT_UI = utils.deepExtend({}, this.constructor.DEFAULT_UI);
 
-    this.ui = this.setupUI(ui, superUI);
+    this.ui = this.setupUI(this.DEFAULT_UI, ui, baseUI);
 
     this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
@@ -48,8 +48,7 @@ class _BaseComponent {
         name: comp.name,
         template: comp.template,
         options: comp.options,
-        superUI: comp.superUI,
-        default_ui: utils.deepExtend({}, comp.default_ui || {}, this.DEFAULT_UI[comp.name] || {})
+        baseUI: this.ui[comp.name],
       });
       this.children.push(subcomponent);
     });
@@ -66,8 +65,8 @@ class _BaseComponent {
     return name ? ui[name] : ui;
   }
 
-  setupUI(ui, superUI) {
-    return _ui(this.DEFAULT_UI, ui, superUI);
+  setupUI(defaults, ui, baseUI) {
+    return _ui(defaults, ui, baseUI);
   }
 
   setup() {}

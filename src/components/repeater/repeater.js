@@ -12,12 +12,18 @@ export class Repeater extends BaseComponent {
     } = config.options;
     const templateArray  = [];
     const subcomponents = [];
-    const default_ui = utils.deepExtend({}, config.default_ui);
+    const baseUI = config.baseUI;
+    config.baseUI = {};
 
+    const lastRowIndex = repeat.row.length - 1;
+    const lastColumnIndex = repeat.column.length - 1;
     repeat.row.forEach((row, i) => {
       repeat.column.forEach((column, j) => {
+        const classed = (i !== lastRowIndex ? "vzb-sm-axis-x-elements-hidden " : "") +
+          (j !== 0 ? "vzb-sm-axis-y-elements-hidden " : "") +
+          ((j === lastColumnIndex && i === lastRowIndex) ? "vzb-sm-last-chart" : "");
         templateArray.push(
-          '<div class="' + COMP_CSSNAME + ' ' + COMP_CSSNAME + subcomponents.length + '"></div>'
+          '<div class="' + COMP_CSSNAME + ' ' + COMP_CSSNAME + subcomponents.length + ' vzb-sm-chart ' + classed + '"></div>'
         )
         subcomponents.push({
           type: COMP_TYPE,
@@ -30,15 +36,14 @@ export class Repeater extends BaseComponent {
               y: row
             }
           },
-          superUI: config.ui
+          ui: config.ui,
         });
-        config.default_ui["chart"+i+"_"+j] = default_ui;
+        config.baseUI["chart"+i+"_"+j] = baseUI;
       });
     });
 
     config.subcomponents = subcomponents;
     config.template = templateArray.join("\n");
-    //config.default_ui = default_ui;
 
     super(config);
   }
@@ -56,14 +61,19 @@ export class Repeater extends BaseComponent {
     this.elementHeight = (this.element.node().clientHeight) || 0;
     this.elementWidth = (this.element.node().clientWidth) || 0;
 
-    this.ui.viewWH = { 
-      width: this.elementWidth / repeat.column.length,
-      height: this.elementHeight / repeat.row.length
-    };
+    // this.ui.viewWH = { 
+    //   width: this.elementWidth / repeat.column.length,
+    //   height: this.elementHeight / repeat.row.length
+    // };
+    this.ui.viewWH.width = this.elementWidth / repeat.column.length,
+    this.ui.viewWH.height = this.elementHeight / repeat.row.length
 
   }
 }
 
 Repeater.DEFAULT_UI = {
-  viewWH: {}
+  viewWH: {
+    width: 0,
+    height: 0
+  }
 }
