@@ -12,7 +12,14 @@ class _LocaleService extends BaseService {
     this.id = this.config.id || FALLBACK_ID;
     this.path = this.config.path || FALLBACK_PATH;
     this.content = {};
-    autorun(this._loadFile.bind(this));
+    
+    this.removeLoadFileAutorun = autorun(this._loadFile.bind(this));
+  }
+
+  
+  deconstruct(){
+    this.removeLoadFileAutorun();
+    super.deconstruct();
   }
 
   _loadFile(){

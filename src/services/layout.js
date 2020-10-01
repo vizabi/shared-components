@@ -41,7 +41,17 @@ class _LayoutService extends BaseService {
     this.element = d3.select(this.placeholder)
       .classed(CSS_PLACEHOLDER_CLASS, true);
     this._resizeHandler();
-    window.addEventListener("resize", this._resizeHandler.bind(this));
+
+    const resizeHandler = this._resizeHandler.bind(this);
+    window.addEventListener("resize", resizeHandler);
+    this.removeListener = function() {
+      window.removeEventListener("resize", resizeHandler);
+    };
+  }
+
+  deconstruct(){
+    this.removeListener();
+    super.deconstruct();
   }
 
   getSize() {

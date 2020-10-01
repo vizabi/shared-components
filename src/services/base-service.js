@@ -7,5 +7,6 @@ export class BaseService {
     this.setup();
   }
 
+  deconstruct() {}
   setup() {}
 }

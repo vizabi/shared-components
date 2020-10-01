@@ -56,8 +56,8 @@ class _BaseComponent {
 
     this.setup(this.options);
     //autorun(this.updateStatus.bind(this));
-    autorun(this.render.bind(this));
-    autorun(this.resize.bind(this));
+    this.addReaction(this.render);
+    this.addReaction(this.resize);
   }
 
   getUI(comp, ui) {
@@ -85,6 +85,7 @@ class _BaseComponent {
   }
   removeReaction(method){
     if(this.reactions.has(method)){
+      //kill mobx autoruns and reactions
       this.reactions.get(method)();
       this.reactions.delete(method);
     }
@@ -98,6 +99,25 @@ class _BaseComponent {
     return this.children.find(c => c.findChild({name, id, type}));
   }
 
+  deconstruct(){
+    // deconstruct and remove subcomponents
+    if (this.children.length) {
+      this.children.forEach(c => {
+        c.deconstruct(); 
+        c = void 0;
+      });
+    } else {
+      this.removeAllReactions();
+    }
+    // deconstruct and remove services
+    if (this.root == this){
+      d3.values(this.services).forEach(s => {
+        s.deconstruct();
+        s = void 0;
+      });
+    }
+  }
+
   //updateStatus(){
   get status() {
     //trace();
@@ -106,14 +126,14 @@ class _BaseComponent {
       .concat(this.model.state);
 
     if (dependencies.every(dep => dep === STATUS.READY || dep == undefined))
-    //this.status = STATUS.READY;
-    return STATUS.READY;
+      //this.status = STATUS.READY;
+      return STATUS.READY;
     else if (dependencies.some(dep => dep === STATUS.ERROR))
-    //this.status = STATUS.ERROR;
-    return STATUS.ERROR;
+      //this.status = STATUS.ERROR;
+      return STATUS.ERROR;
     else
-    //this.status = STATUS.PENDING;
-    return STATUS.PENDING;
+      //this.status = STATUS.PENDING;
+      return STATUS.PENDING;
   }
 
   render() {

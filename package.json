@@ -1,8 +1,12 @@
 {
   "name": "vizabi-shared-components",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "main": "index.js",
+  "files": [
+    "src",
+    "build"
+  ],
   "scripts": {
     "build": "rollup -c",
     "build:prod": "NODE_ENV=production rollup -c",
