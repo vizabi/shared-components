@@ -227,6 +227,7 @@ export class ButtonList extends BaseComponent {
     this.localise = this.services.locale.auto();
 
     this._dialogs = this.root.findChild({type: "Dialogs"});
+    if(!this._dialogs) console.warn("Buttonlist was unable to find a subcomponent of type 'Dialogs' in root component. Could be that index.js of a tool is lacking a configuration.");
 
     const button_expand = (this.root.ui.dialogs.dialogs || {}).sidebar || [];
     const button_list = [].concat(this.root.ui.buttons.buttons);
