@@ -5,7 +5,7 @@ import * as utils from "../legacy/base/utils";
 
 class _BaseComponent {
 
-  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, state, options, baseUI = {}}){
+  constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, default_ui = {}, state, options }){
     this.id = id || "c0";
     //this.status = STATUS.INIT;
     this.template = this.template || template || "";
@@ -31,9 +31,9 @@ class _BaseComponent {
       Please check that placeholder exists and is correctly specified in the component initialisation.
     `, this);
 
-    this.DEFAULT_UI = utils.deepExtend({}, this.constructor.DEFAULT_UI);
+    this.DEFAULT_UI = utils.deepExtend(default_ui, utils.deepExtend(utils.deepExtend({}, this.constructor.DEFAULT_UI), default_ui));
 
-    this.ui = this.setupUI(this.DEFAULT_UI, ui, baseUI);
+    this.ui = this.setupUI(this.DEFAULT_UI, ui);
 
     this.subcomponents.forEach( (comp, index) => {
       const subcomponent = new comp.type({
@@ -44,11 +44,11 @@ class _BaseComponent {
         parent: this,
         root: this.root,
         ui: this.getUI(comp, ui),
+        default_ui: comp.default_ui || this.getUI(comp, default_ui),
         state: comp.state,
         name: comp.name,
         template: comp.template,
         options: comp.options,
-        baseUI: this.ui[comp.name],
       });
       this.children.push(subcomponent);
     });

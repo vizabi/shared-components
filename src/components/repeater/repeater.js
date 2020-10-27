@@ -1,4 +1,5 @@
 import * as utils from "../../legacy/base/utils";
+import { ui } from "../../ui";
 import {BaseComponent} from "../base-component.js";
 import "./repeater.scss";
 
@@ -12,8 +13,6 @@ export class Repeater extends BaseComponent {
     } = config.options;
     const templateArray  = [];
     const subcomponents = [];
-    const baseUI = config.baseUI;
-    config.baseUI = {};
 
     const lastRowIndex = repeat.row.length - 1;
     const lastColumnIndex = repeat.column.length - 1;
@@ -25,20 +24,24 @@ export class Repeater extends BaseComponent {
         templateArray.push(
           '<div class="' + COMP_CSSNAME + ' ' + COMP_CSSNAME + subcomponents.length + ' vzb-sm-chart ' + classed + '"></div>'
         )
+
+        const subcompName = config.name+i+"_"+j;
+        const default_ui = ui(config.default_ui, config.ui);
+        delete default_ui[subcompName];
+
         subcomponents.push({
           type: COMP_TYPE,
           placeholder: "." + COMP_CSSNAME + subcomponents.length,
           model: config.model,
-          name: "chart"+i+"_"+j,
+          name: subcompName,
           state: {
             alias: {
               x: column,
               y: row
             }
           },
-          ui: config.ui,
+          default_ui: default_ui
         });
-        config.baseUI["chart"+i+"_"+j] = baseUI;
       });
     });
 

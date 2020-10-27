@@ -50,4 +50,35 @@ export function clearEmpties(obj) {
       delete obj[key]; // The object had no properties, so delete that property
     }
   }
+  return obj;
+}
+
+export function mergeInTarget(target, source) {
+  for (const key in source) {
+    if (typeof source[key] === "object" && source[key] !== null) {
+      if (target[key]) {
+        mergeInTarget(target[key], source[key]);
+      } else {
+        target[key] = deepExtend({}, source[key]);
+      }
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+export function replaceProps(target, source) {
+  for (const key in target) {
+    if (typeof target[key] === "object" && target[key] !== null) {
+      replaceProps(target[key], source[key] || {});
+    } else {
+      if (typeof source[key] !== "undefined") {
+        target[key] = source[key];
+      } else {
+        delete target[key];
+      }
+    }
+  }
+  return target;
 }

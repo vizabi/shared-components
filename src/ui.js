@@ -20,7 +20,13 @@ export function ui(defaults = {}, config = {}, baseConfig = {}) {
                             (typeof baseConfig[key] !== "undefined") ? baseConfig[key] : 
                             typeof defaults[key] === "function" ? utils.deepClone(defaults[key]()) : defaults[key];
                     },
-                    set(value) { config[key] = value },
+                    set(value) {
+                        if (typeof config[key] !== "undefined" && value == defaults[key]) {
+                            delete config[key]
+                        } else {
+                            config[key] = value
+                        }
+                    },
                     enumerable: true,
                     configurable: true
                 };

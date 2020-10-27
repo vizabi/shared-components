@@ -14,7 +14,7 @@ const class_active = "vzb-active";
 
 export class Dialogs extends BaseComponent {
   constructor(config) {
-    const { sidebar = [], popup = []} = config.ui.dialogs;
+    const { sidebar = [], popup = []} = utils.deepExtend(utils.deepExtend({}, config.ui.dialogs), config.default_ui.dialogs);
     const subcomponents = [];
     const templateArray  = [];
 
