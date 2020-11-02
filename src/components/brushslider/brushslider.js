@@ -217,15 +217,26 @@ export class BrushSlider extends BaseComponent {
   }
 
   _getModel() {
-    if (!this.submodel && !this.submodelFunc) return this.model;
-    return this.submodelFunc ? this.submodelFunc() : utils.getProp(this, this.submodel.split("."));
+    if (this.submodelFunc) {
+      return this.submodelFunc();
+    } else if (this.submodel) {
+      const model = utils.getProp(this, this.submodel.split("."));
+      if (!model) console.error(`Slider inside ${this.parent.name || this.parent.constructor.name} was not able to access part of model ${this.submodel}`);
+      return model;
+    } else {
+      return this.model;
+    }
   }
 
   _updateView() {
     this.services.layout.size;
+    const value = this.MDL.model[this.value];
+
+    if (!value && value!==0) 
+      console.error(`Slider inside ${this.parent.name || this.parent.constructor.name} was unable to access value ${this.value} in its model`);
 
     this.DOM.slider.call(this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]));
-    const extent = this._valueToExtent(this.MDL.model[this.value]) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
+    const extent = this._valueToExtent(value) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
     this._moveBrush(extent);
     this._updateThumbs(extent);
   }
