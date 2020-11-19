@@ -40,7 +40,7 @@ export function getChildrenDefaultState(parent, children) {
 
 export function clearEmpties(obj) {
   for (const key in obj) {
-    if (!obj[key] || typeof obj[key] !== "object") {
+    if (!obj[key] || typeof obj[key] !== "object" || obj[key] instanceof Date) {
       continue // If null or not an object, skip to the next iteration
     }
 
@@ -55,7 +55,7 @@ export function clearEmpties(obj) {
 
 export function mergeInTarget(target, source) {
   for (const key in source) {
-    if (typeof source[key] === "object" && source[key] !== null) {
+    if (typeof source[key] === "object" && !Array.isArray(source[key]) && source[key] !== null) {
       if (target[key]) {
         mergeInTarget(target[key], source[key]);
       } else {
@@ -70,7 +70,7 @@ export function mergeInTarget(target, source) {
 
 export function replaceProps(target, source) {
   for (const key in target) {
-    if (typeof target[key] === "object" && target[key] !== null) {
+    if (typeof target[key] === "object" && !Array.isArray(target[key]) && target[key] !== null) {
       replaceProps(target[key], source[key] || {});
     } else {
       if (typeof source[key] !== "undefined") {
