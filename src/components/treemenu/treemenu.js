@@ -165,7 +165,7 @@ export class TreeMenu extends BaseComponent {
       const mName = this._getSourceName(m);// + mIndex; TODO
 
       //figure out the folder strategy
-      let strategy = utils.getProp(this.state, ["treemenu", "folderStrategyByDataset", mName]);
+      let strategy = utils.getProp(this.ui, ["folderStrategyByDataset", mName]);
       let folder = null;
       if (!strategy) strategy = FOLDER_STRATEGY_DEFAULT;
 
@@ -992,11 +992,14 @@ export class TreeMenu extends BaseComponent {
   draw() {
     this.localise = this.services.locale.auto();
     this.addReaction(() => {
-      if (Vizabi.stores.dataSources.getAll().every(ds => ds.state === "fulfilled")) {
-        this._buildIndicatorsTree({
-          dataModels: Vizabi.stores.dataSources.getAll()
-        });
-        this.updateView();
+      if (this._getDataSources(this.root.model.config.dataSources).every(ds => ds.state === "fulfilled")) {
+        this.getTags(this.services.locale.id)
+        .then(tags =>
+          this._buildIndicatorsTree({
+            tagsArray: tags,
+            dataModels: this._getDataSources(this.root.model.config.dataSources)
+          }))
+        .then(this.updateView.bind(this))
       }
     })
 
@@ -1015,7 +1018,9 @@ export class TreeMenu extends BaseComponent {
   }
 
   _getSourceName(ds) {
-    return ds.config.modelType;
+    const nameDs = [...Vizabi.stores.dataSources.named]
+      .filter(([dsName, dsModel]) => dsModel == ds);
+    return nameDs.length ? nameDs[0][0] : ("dataSource" + Vizabi.stores.dataSources.getAll().indexOf(ds));
   }
 
   _getDatasetName(ds) {
@@ -1023,7 +1028,11 @@ export class TreeMenu extends BaseComponent {
       const meta = ds.reader.getDatasetInfo();
       return meta.name + (meta.version ? " " + meta.version : "");
     }
-    return this._getSourceName(ds) + "://" + ds.config.path;
+    return this._getSourceName(ds);
+  }
+
+  _getDataSources(dsConfig) {
+    return Object.keys(dsConfig).map(dsName => Vizabi.stores.dataSources.getByDefinition(dsName))
   }
 
   _filterAvailabilityBySpace(availability, space) {
@@ -1038,5 +1047,63 @@ export class TreeMenu extends BaseComponent {
   //     .then(this._buildIndicatorsTree.bind(this))
   //     .then(this.updateView.bind(this));
   // }
+
+
+    /**
+   * Return tag entities with name and parents from all data sources
+   * @return {array} Array of tag objects
+   */
+  getTags(locale) {
+    const TAG_KEY = ["tag"];
+    const query = {
+      select: {
+          key: TAG_KEY,
+          value: []
+      },
+      language: locale,
+      from: "entities"
+    };
+
+    const dataSources = Vizabi.stores.dataSources.getAll().reduce((res, ds) => {
+      res.set(ds, utils.deepClone(query));
+      return res;
+    }, new Map());
+
+    this._filterAvailabilityBySpace(this.model.availability, TAG_KEY).forEach(av => {
+      dataSources.get(av.source).select.value.push(av.value.concept);
+    });
+
+    return Promise.all([...dataSources].filter(([ds, query]) => query.select.value.length)
+      .map(([ds, query]) => ds.query(query).then(result => {
+        const dataSourceName = this._getSourceName(ds);
+        return result.map(r => {
+          r.dataSourceName = dataSourceName;
+          return r;
+        })
+      })))
+      .then(results => this.mergeResults(results, ["tag"])); // using merge because key-duplicates terribly slow down treemenu
+  }
+
+  /**
+   * Merges query results. The first result is base, subsequent results are only added if key is not yet in end result.
+   * @param  {array of arrays} results Array where each element is a result, each result is an array where each element is a row
+   * @param  {array} key     primary key to each result
+   * @return {array}         merged results
+   */
+   mergeResults(results, key) {
+    const keys = new Map();
+    results.forEach(result => {
+      result.forEach(row => {
+        const keyString = this.createKeyString(key, row);
+        if (!keys.has(keyString))
+          keys.set(keyString, row);
+      });
+    });
+    return Array.from(keys.values());
+  }
+
+  createKeyString(key, row) {
+    return key.map(concept => row[concept]).join(",");
+  }
 
 }
