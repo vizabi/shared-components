@@ -105,9 +105,8 @@ class _BaseComponent {
         c.deconstruct(); 
         c = void 0;
       });
-    } else {
-      this.removeAllReactions();
     }
+    this.removeAllReactions();
     // deconstruct and remove services
     if (this.root == this){
       d3.values(this.services).forEach(s => {
