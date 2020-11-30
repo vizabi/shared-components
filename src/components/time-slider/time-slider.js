@@ -97,8 +97,6 @@ export class TimeSlider extends BaseComponent {
   }
 
   setup() {
-    this.dragging = false;
-
     this.DOM = {
       //slider: this.element.select(".vzb-ts-slider")
       slider_outer: this.element.select(".vzb-ts-slider-svg"),
@@ -150,7 +148,7 @@ export class TimeSlider extends BaseComponent {
 
     slider_outer.on("mousewheel", () => {
       //do nothing and dont pass the event on if we are currently dragging the slider
-      if (this.dragging) {
+      if (this.ui.dragging) {
         d3.event.stopPropagation();
         d3.event.preventDefault();
         d3.event.returnValue = false;
@@ -299,8 +297,8 @@ export class TimeSlider extends BaseComponent {
         frame.stopPlaying();
       }
 
-      _this.dragging = true;
-      _this.element.classed(class_dragging, _this.dragging);
+      _this.ui.dragging = true;
+      _this.element.classed(class_dragging, _this.ui.dragging);
 
       let value;// = _this.brush.extent()[0];
       //var value = d3.brushSelection(_this.slide.node());
@@ -351,8 +349,8 @@ export class TimeSlider extends BaseComponent {
     const _this = this;
     return function() {
       //_this._setTime.recallLast();
-      _this.dragging = false;
-      _this.element.classed(class_dragging, _this.dragging);
+      _this.ui.dragging = false;
+      _this.element.classed(class_dragging, _this.ui.dragging);
       //_this.model.time.dragStop();
       //_this.model.time.snap();
       _this.MDL.frame.snap();
@@ -365,7 +363,7 @@ export class TimeSlider extends BaseComponent {
 
     const { value, speed, playing } = this.MDL.frame;
 
-    if (this.dragging) return;
+    if (this.ui.dragging) return;
     const { handle, valueText } = this.DOM; 
   
     //this.slide.call(this.brush.extent([value, value]));
@@ -477,5 +475,7 @@ TimeSlider.DEFAULT_UI = {
   show_value: false,
   show_value_when_drag_play: true,
   axis_aligned: false,
-  show_button: true
-}
+  show_button: true,
+  dragging: false
+};
+
