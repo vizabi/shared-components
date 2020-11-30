@@ -93,7 +93,7 @@ export class DataNotes extends BaseComponent {
 
   setValues() {
     if (!this.encoding) return;
-    const { description, sourceLink, sourceName } = this.encoding.data.conceptProps;
+    const { description, source_url, source } = this.encoding.data.conceptProps;
 
     this.element.select(".vzb-data-notes-body")
       .classed("vzb-hidden", !description)
@@ -101,12 +101,12 @@ export class DataNotes extends BaseComponent {
 
     const label = this.localise("hints/source");
     this.element.select(".vzb-data-notes-link")
-      .classed("vzb-hidden", !sourceLink)
-      .html("<span>" + (sourceName ? (label + ": ") : "") 
-        + '<a href="' + utils.normaliseLink(sourceLink) + '" target="_blank">' + (sourceName ? sourceName : label) 
+      .classed("vzb-hidden", !source_url)
+      .html("<span>" + (source ? (label + ": ") : "") 
+        + '<a href="' + utils.normaliseLink(source_url) + '" target="_blank">' + (source ? source : label) 
         + "</a></span>");
 
-    this.showNotes = sourceLink || description;
+    this.showNotes = source_url || description;
   }
 
   setPos(_left, _top, force) {

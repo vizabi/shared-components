@@ -97,9 +97,10 @@ export class Speed extends Dialog {
         }
       })
       .on("change", function() {
-        const parsed = _model.state.time.parse(this.value);
+        //TODO: where is time parser nowdays
+        const parsed = new Date(this.value);
         if (utils.isDate(parsed)) {
-          _this.model.state.time.endBeforeForecast = parsed;
+          _this.MDL.frame.config.endBeforeForecast = parsed;
         }
       });
 
@@ -117,7 +118,7 @@ export class Speed extends Dialog {
 
   _updateView() {
     this.DOM.forecastField.property("value",
-      this.localise(this.MDL.frame.endBeforeForecast)
+      this.localise(this.MDL.frame.config.endBeforeForecast)
     );
     this.DOM.timeFormatExample.text(this.localise(new Date()));
   }
