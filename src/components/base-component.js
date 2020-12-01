@@ -36,21 +36,30 @@ class _BaseComponent {
     this.ui = this.setupUI(this.DEFAULT_UI, ui);
 
     this.subcomponents.forEach( (comp, index) => {
-      const subcomponent = new comp.type({
-        placeholder: comp.placeholder,
-        model: comp.model || this.model,
-        services: this.services,
-        id: this.id + "-" + index,
-        parent: this,
-        root: this.root,
-        ui: this.getUI(comp, ui),
-        default_ui: comp.default_ui || this.getUI(comp, default_ui),
-        state: comp.state,
-        name: comp.name,
-        template: comp.template,
-        options: comp.options,
-      });
-      this.children.push(subcomponent);
+      if(!comp.type) {
+        console.error(`
+          Was unable to find a subcomponent "${comp.name}"
+          while building a component tree in parent "${this.name}".
+          This can be due to a misconfiguration, error in parent "subcomponents" definitions
+          or that subcomponent in question isn't registered or available to code. Hard to tell...
+        `, comp);
+      } else {
+        const subcomponent = new comp.type({
+          placeholder: comp.placeholder,
+          model: comp.model || this.model,
+          services: this.services,
+          id: this.id + "-" + index,
+          parent: this,
+          root: this.root,
+          ui: this.getUI(comp, ui),
+          default_ui: comp.default_ui || this.getUI(comp, default_ui),
+          state: comp.state,
+          name: comp.name,
+          template: comp.template,
+          options: comp.options,
+        });
+        this.children.push(subcomponent);
+      }
     });
 
     this.setup(this.options);
