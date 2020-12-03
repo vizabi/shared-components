@@ -64,7 +64,7 @@ class _BaseComponent {
 
     this.setup(this.options);
     //autorun(this.updateStatus.bind(this));
-    this.addReaction(this.render);
+    this.addReaction(this.render, ()=>{});
     this.addReaction(this.resize);
   }
 
@@ -78,7 +78,13 @@ class _BaseComponent {
     return _ui(defaults, ui, baseUI);
   }
 
-  setup() {}
+  setup(options) {
+    if (options.showLoading) {
+      this.addReaction(() => this.status,
+        status => this.element.classed("vzb-loading-data", status == STATUS.PENDING),
+        { fireImmediately: true })
+    }
+  }
 
   addReaction(method, sideEffect, options = {}){
     if(!this.reactions.has(method)){
