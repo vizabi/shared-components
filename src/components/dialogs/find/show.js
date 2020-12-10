@@ -210,7 +210,7 @@ export class Show extends BaseComponent {
       }
 
       section.classed("vzb-filtered", !!lastCheckedNode);
-      section.classed("vzb-fullexpand", !!lastCheckedNode && this.tabsConfig[key] === "open");
+      section.classed("vzb-fullexpand", !!lastCheckedNode && this.tabsConfig[key] === "open fully");
     });
 
     //_this.DOM.content.node().scrollTop = 0;
