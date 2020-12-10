@@ -598,7 +598,7 @@ export class ButtonList extends BaseComponent {
     btn.classed(class_active_locked, this.model.ui.chart.inpercent);
   }
   togglePresentationMode() {
-    this.services.layout.setProjector(!this.services.layout.projector);
+    this.services.layout.projector = !this.services.layout.projector;
     this.setPresentationMode();
   }
   setPresentationMode() {

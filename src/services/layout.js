@@ -1,5 +1,5 @@
 import { BaseService } from "./base-service.js";
-import { observable, action, decorate } from "mobx";
+import { observable, action, decorate, autorun } from "mobx";
 import { STATUS } from "../utils.js";
 
 const PROFILES = [
@@ -35,7 +35,7 @@ class _LayoutService extends BaseService {
     this.height = 1;
     this.size = this.getSize();
     this.profile = "SMALL";
-    this.projector = false;
+    this.projector = this.config.projector || false;
     this.placeholder = this.config.placeholder || "body";
     this.hGrid = [];
     this.element = d3.select(this.placeholder)
@@ -47,9 +47,14 @@ class _LayoutService extends BaseService {
     this.removeListener = function() {
       window.removeEventListener("resize", resizeHandler);
     };
+
+    this.removeProjectorListener = autorun(() => {
+      this.setProjector.bind(this)();
+    });
   }
 
   deconstruct(){
+    this.removeProjectorListener();
     this.removeListener();
     super.deconstruct();
   }
@@ -92,12 +97,9 @@ class _LayoutService extends BaseService {
       return Object.assign({}, normalConstants[this.profile] || {}, forProjector[this.profile] || {});
   }
 
-  setProjector(value) {
-    action(() => {
-      this.projector = value;
-      this.element.classed(CSS_PROJECTOR_CLASS, this.projector);
-      this.size = this.getSize();
-    })();
+  setProjector() {
+    this.element.classed(CSS_PROJECTOR_CLASS, this.projector);
+    this.size = this.getSize();
   }
 
   setHGrid(value) {
@@ -108,7 +110,6 @@ class _LayoutService extends BaseService {
 }
 
 export const LayoutService = decorate(_LayoutService, {
-  "setProjector": action.bound,
   "size": observable.ref, //reference watches when new object is created
   "hGrid": observable,
   "projector": observable,

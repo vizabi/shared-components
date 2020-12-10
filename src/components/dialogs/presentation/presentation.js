@@ -28,7 +28,6 @@ export class Presentation extends Dialog {
       placeholder: ".vzb-presentationmode-switch",
       options: {
         checkbox: "projector",
-        setCheckboxFunc: "setProjector",
         submodel: "services.layout"
       }
     }, {
