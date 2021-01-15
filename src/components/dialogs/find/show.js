@@ -269,12 +269,10 @@ export class Show extends BaseComponent {
           }
         });
 
-        utils.forEach(this.model.data.filter.dimensions, show$and => {
-          utils.forEach(show$and, (filter, key) => {
-            if (!$andKeys.includes(key)) {
-              $and[key] = utils.deepClone(filter);
-            }
-          });
+        utils.forEach(this.model.data.filter.dimensions[entities], (filter, key) => {
+          if (!$andKeys.includes(key)) {
+            $and[key] = utils.deepClone(filter);
+          }
         });
 
         setObj[entities] = $and;
