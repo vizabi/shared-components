@@ -3,6 +3,7 @@ import { PlayButton } from "./play-button.js";
 import axisSmart from "../../legacy/helpers/d3.axisWithLabelPicker";
 import * as utils from "../../legacy/base/utils";
 import "./time-slider.scss";
+import {decorate, computed} from "mobx";
 
 const PROFILE_CONSTANTS = {
   SMALL: {
@@ -68,7 +69,7 @@ const class_axis_aligned = "vzb-ts-axis-aligned";
 const class_show_value = "vzb-ts-show-value";
 const class_show_value_when_drag_play = "vzb-ts-show-value-when-drag-play";
 
-export class TimeSlider extends BaseComponent {
+class _TimeSlider extends BaseComponent {
 
   constructor(config){
     config.subcomponents = [{
@@ -158,10 +159,13 @@ export class TimeSlider extends BaseComponent {
 
   }
 
-  draw() {
-    this.MDL = {
+  get MDL() {
+    return {
       frame: this.model.encoding.get("frame")
-    }
+    };
+  }
+
+  draw() {
     this.localise = this.services.locale.auto();
     
     this.element.classed(class_loading, false);
@@ -470,7 +474,7 @@ export class TimeSlider extends BaseComponent {
   }
 }
 
-TimeSlider.DEFAULT_UI = {
+_TimeSlider.DEFAULT_UI = {
   show_ticks: false,
   show_value: false,
   show_value_when_drag_play: true,
@@ -479,3 +483,6 @@ TimeSlider.DEFAULT_UI = {
   dragging: false
 };
 
+export const TimeSlider = decorate(_TimeSlider, {
+  "MDL": computed
+});
