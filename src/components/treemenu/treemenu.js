@@ -991,17 +991,20 @@ export class TreeMenu extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-    this.addReaction(() => {
-      if (this._getDataSources(this.root.model.config.dataSources).every(ds => ds.state === "fulfilled")) {
-        this.getTags(this.services.locale.id)
-        .then(tags =>
-          this._buildIndicatorsTree({
-            tagsArray: tags,
-            dataModels: this._getDataSources(this.root.model.config.dataSources)
-          }))
-        .then(this.updateView.bind(this))
-      }
-    })
+    this.addReaction(this.__getDataSourceConfigReaction, () => {
+      Promise.all(this._getDataSources(this.root.model.config.dataSources).map(ds => ds.metaDataPromise))
+        .then(promises => utils.defer(() => 
+          this.getTags(this.services.locale.id, promises)
+            .then(tags =>
+              this._buildIndicatorsTree({
+                tagsArray: tags,
+                dataModels: this._getDataSources(this.root.model.config.dataSources)
+              }))
+            .then(this.updateView.bind(this))
+          )
+        )
+
+    }, { fireImmediately: true })
 
     if (this._updateLayoutProfile()) return; //return if exists with error
     this._enableSearch();
@@ -1048,6 +1051,9 @@ export class TreeMenu extends BaseComponent {
   //     .then(this.updateView.bind(this));
   // }
 
+  __getDataSourceConfigReaction() {
+    return this._getDataSources(this.root.model.config.dataSources).map(ds => ds.config)
+  }
 
     /**
    * Return tag entities with name and parents from all data sources
@@ -1064,7 +1070,7 @@ export class TreeMenu extends BaseComponent {
       from: "entities"
     };
 
-    const dataSources = Vizabi.stores.dataSources.getAll().reduce((res, ds) => {
+    const dataSources = this._getDataSources(this.root.model.config.dataSources).reduce((res, ds) => {
       res.set(ds, utils.deepClone(query));
       return res;
     }, new Map());
