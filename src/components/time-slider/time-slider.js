@@ -374,7 +374,6 @@ class _TimeSlider extends BaseComponent {
     const newPos = this.xScale(value);
     //this.brush.move(this.slide, [newPos, newPos])
 
-    //this.element.classed("vzb-ts-disabled", this.model.time.end <= this.model.time.start);
     //    this.valueText.text(this.model.time.formatDate(value));
 
     //    var old_pos = this.handle.attr("cx");
@@ -466,12 +465,21 @@ class _TimeSlider extends BaseComponent {
       .classed("vzb-hidden", this.services.layout.projector)
       .call(this.xAxis);
 
+    this.element.classed("vzb-ts-disabled", isOneFrameOnly(this.xScale.domain()));
     this.element.classed(class_hide_play, !show_play);
     this.element.classed(class_playing, frame.playing);
     this.element.classed(class_show_value, show_value);
     this.element.classed(class_show_value_when_drag_play, show_value_when_drag_play);
     this.element.classed(class_axis_aligned, axis_aligned);
   }
+}
+
+function isOneFrameOnly(domain){
+  //domain not available
+  if(!domain || domain.length !== 2) return true;
+  //domain inverted or shrunk to one point
+  if(domain[1] - domain[0] <= 0) return true;
+  return false;
 }
 
 _TimeSlider.DEFAULT_UI = {
