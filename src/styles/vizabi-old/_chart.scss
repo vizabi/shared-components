@@ -58,14 +58,14 @@
 }
 
 %vzb-chart-axis {
-  color: $vzb-color-grey;
+  color: $vzb-color-primary-black;
   fill: none;
-  stroke: $vzb-color-grey;
+  stroke: $vzb-color-primary-black;
   path,
   line {
     fill: none;
     shape-rendering: crispEdges;
-    stroke: $vzb-color-grey;
+    stroke: $vzb-color-primary-black;
   }
   .tick line,
   .tick-minor {
@@ -78,7 +78,7 @@
 %vzb-chart-axis-medium {
   .tick line,
   .tick-minor {
-    stroke: $vzb-color-grey;
+    stroke: $vzb-color-primary-black;
     stroke-dasharray: 1 6;
   }
 }
