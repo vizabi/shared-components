@@ -122,8 +122,8 @@ export class Dialog extends CollectionMixin(BaseComponent) {
       const profile = this.services.layout.profile;
 
       if (profile !== "SMALL") {
-        const chartWidth = parseInt(this.root.element.style("width"), 10) || 0;
-        const chartHeight = parseInt(this.root.element.style("height"), 10) || 0;
+        const chartWidth = this.root.element.node().offsetWidth || 0;
+        const chartHeight = this.root.element.node().offsetHeight || 0;
         const dialogWidth = parseInt(this.element.style("width"), 10) || 0;
         const dialogHeight = parseInt(this.element.style("height"), 10) || 0;
 
@@ -348,8 +348,8 @@ function dialogDrag(element, container, xOffset) {
       xOffsetRight = Math.min(xOffset, marginRight);
       eWi = (parseInt(element.style("width"), 10) + marginLeft - xOffsetLeft) || 0;
       eHe = parseInt(element.style("height"), 10) || 0;
-      cWi = (parseInt(container.style("width"), 10) - marginRight) || 0;
-      cHe = parseInt(container.style("height"), 10) || 0;
+      cWi = (container.node().offsetWidth - marginRight) || 0;
+      cHe = container.node().offsetHeight || 0;
       diffX = posX + divRight;
       diffY = posY - divTop;
     },
