@@ -69,7 +69,7 @@ const class_axis_aligned = "vzb-ts-axis-aligned";
 const class_show_value = "vzb-ts-show-value";
 const class_show_value_when_drag_play = "vzb-ts-show-value-when-drag-play";
 
-class _TimeSlider extends BaseComponent {
+class TimeSlider extends BaseComponent {
 
   constructor(config){
     config.subcomponents = [{
@@ -353,11 +353,10 @@ class _TimeSlider extends BaseComponent {
     const _this = this;
     return function() {
       //_this._setTime.recallLast();
-      _this.ui.dragging = false;
       _this.element.classed(class_dragging, _this.ui.dragging);
       //_this.model.time.dragStop();
-      //_this.model.time.snap();
       _this.MDL.frame.snap();
+      _this.ui.dragging = false;
     };
   }
 
@@ -482,7 +481,7 @@ function isOneFrameOnly(domain){
   return false;
 }
 
-_TimeSlider.DEFAULT_UI = {
+TimeSlider.DEFAULT_UI = {
   show_ticks: false,
   show_value: false,
   show_value_when_drag_play: true,
@@ -491,6 +490,7 @@ _TimeSlider.DEFAULT_UI = {
   dragging: false
 };
 
-export const TimeSlider = decorate(_TimeSlider, {
+const decorated = decorate(TimeSlider, {
   "MDL": computed
 });
+export { decorated as TimeSlider };
