@@ -91,10 +91,10 @@ class _BaseComponent {
       this.reactions.set(method, sideEffect ? 
         reaction(method.bind(this), sideEffect.bind(this), options)
         : 
-        autorun(() => {        
-          //trace();
+        autorun(() => {
           if(this.status === STATUS.READY) method.bind(this)();
-        }));
+        }, {name: method.name})
+      );
     }
   }
   removeReaction(method){

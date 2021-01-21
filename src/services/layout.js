@@ -50,7 +50,7 @@ class _LayoutService extends BaseService {
 
     this.removeProjectorListener = autorun(() => {
       this.setProjector.bind(this)();
-    });
+    }, {name: "Layout.js: setProjector()"});
   }
 
   deconstruct(){
@@ -65,7 +65,7 @@ class _LayoutService extends BaseService {
   }
 
   _resizeHandler(){
-    action(()=>{
+    action("Layout.js: _resizeHandler()", ()=>{
       this.width = this.element.node().clientWidth;
       this.height = this.element.node().clientHeight;
       const profile = PROFILES.find(p => (this.width >= p.min_width && this.height >= p.min_height));

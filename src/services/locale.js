@@ -13,7 +13,7 @@ class _LocaleService extends BaseService {
     this.path = this.config.path || FALLBACK_PATH;
     this.content = {};
     
-    this.removeLoadFileAutorun = autorun(this._loadFile.bind(this));
+    this.removeLoadFileAutorun = autorun(this._loadFile.bind(this), {name: "Locale.js: _loadFile()"});
   }
 
   
