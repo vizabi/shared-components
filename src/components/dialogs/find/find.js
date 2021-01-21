@@ -91,6 +91,7 @@ class Find extends Dialog {
     this.DOM.titleSwitchSlider = this.DOM.titleSwitch.select(".vzb-switch-slider");
     this.DOM.titleSwitchInput = this.DOM.titleSwitch.select("input");
     this.DOM.panels = this.DOM.content.selectAll(".vzb-dialog-content");
+    this.DOM.panelFind = this.DOM.content.select(".vzb-dialog-panel-find");
     this.DOM.input_search = this.element.select(".vzb-find-search");
     this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
@@ -225,6 +226,7 @@ class Find extends Dialog {
         //clear highlight so it doesn't get in the way when selecting an entity
         if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
         this.MDL.selected.data.filter.toggle(d);
+        this.DOM.panelFind.node().scrollTop = 0;
         //return to highlighted state
         if (!utils.isTouchDevice() && !d.brokenData) this.MDL.highlighted.data.filter.set(d);
       });
@@ -279,12 +281,11 @@ class Find extends Dialog {
         d3.select(this.parentNode).classed("vzb-checked", isSelected);
         return isSelected;
       });
-    const lastCheckedNode = this.DOM.findList.selectAll(".vzb-checked")
-      .classed("vzb-separator", false)
+    
+    const checkedItems = this.DOM.findList.selectAll(".vzb-checked");
+    checkedItems
       .lower()
-      .nodes()[0];
-    d3.select(lastCheckedNode).classed("vzb-separator", true);
-    this.DOM.content.node().scrollTop = 0;
+      .classed("vzb-separator", (d, i) => !i);    
   }
 
   _showHideSearch() {
