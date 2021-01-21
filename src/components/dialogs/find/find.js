@@ -3,13 +3,13 @@ import { Dialog } from "../dialog";
 import { Show } from "./show";
 import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singlehandleslider";
 import { runInAction } from "mobx";
-
+import {decorate, computed} from "mobx";
 /*!
  * VIZABI FIND CONTROL
  * Reusable find dialog
  */
 
-export class Find extends Dialog {
+class Find extends Dialog {
   constructor(config) {
     config.template = `
       <div class='vzb-dialog-modal'>
@@ -138,12 +138,16 @@ export class Find extends Dialog {
     this.panelComps = { find: this, show: this.findChild({ type: "Show" }) };
   }
 
+  get MDL() {
+    return {
+      frame: this.model.encoding.get("frame"),
+      selected: this.model.encoding.get("selected"),
+      highlighted: this.model.encoding.get("highlighted")
+    };
+  }
+
   draw() {
     super.draw();
-
-    this.MDL.frame = this.model.encoding.get("frame");
-    this.MDL.selected = this.model.encoding.get("selected");
-    this.MDL.highlighted = this.model.encoding.get("highlighted");
 
     this.TIMEDIM = this.MDL.frame.data.concept;
     this.KEY = Symbol.for("key");
@@ -321,10 +325,14 @@ Find.DEFAULT_UI = {
   enableSelectShowSwitch: false,
   panelMode: "find",
   enablePicker: false
-}
+};
 
+const decorated = decorate(Find, {
+  "MDL": computed
+});
 
-Dialog.add("find", Find);
+Dialog.add("find", decorated);
+export { decorated as Find};
 
 
 

@@ -1,5 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
+import {decorate, computed} from "mobx";
 import { ICON_DRAG as iconDrag, ICON_PIN as iconPin } from "../../icons/iconset"
 //import requireAll from "helpers/requireAll";
 //const dialogTemplates = requireAll(require.context("components/dialogs/", true, /\.html$/));
@@ -33,7 +34,7 @@ const CollectionMixin = superClass => class extends superClass {
 
 CollectionMixin._collection = {};
 
-export class Dialog extends CollectionMixin(BaseComponent) {
+class Dialog extends CollectionMixin(BaseComponent) {
   constructor(config) {
 
     super(config)
@@ -81,8 +82,16 @@ export class Dialog extends CollectionMixin(BaseComponent) {
   this.DOM.dragHandler.call(dragBehavior);
   }
 
+  get MDL() {
+    return {
+      frame: this.model.encoding.get("frame"),
+      selected: this.model.encoding.get("selected"),
+      highlighted: this.model.encoding.get("highlighted")
+    };
+  }
+
+
   draw() {
-    this.MDL = {};
     this.localise = this.services.locale.auto();
 
     this._localiseDialogTexts();
@@ -321,6 +330,11 @@ Dialog.DEFAULT_UI = {
   opened: false,
   pinned: false
 }
+
+const decorated = decorate(Dialog, {
+  "MDL": computed
+});
+export { decorated as Dialog };
 
 function dialogDrag(element, container, xOffset) {
   let posX, posY, divTop, divRight, marginRight, marginLeft, xOffsetRight, xOffsetLeft, eWi, eHe, cWi, cHe, diffX, diffY;

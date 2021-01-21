@@ -2,8 +2,9 @@ import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singlehandleslider";
 import { SimpleCheckbox } from "../../simplecheckbox/simplecheckbox";
+import {decorate, computed} from "mobx";
 
-export class Speed extends Dialog {
+class Speed extends Dialog {
   constructor(config) {
     config.template = `
       <div class='vzb-dialog-modal'>
@@ -106,10 +107,14 @@ export class Speed extends Dialog {
 
   }
 
-  draw() {
-    this.MDL = {
+
+  get MDL() {
+    return {
       frame: this.model.encoding.get("frame")
-    }
+    };
+  }
+
+  draw() {
 
     this.localise = this.services.locale.auto();
 
@@ -125,7 +130,12 @@ export class Speed extends Dialog {
 
 }
 
-Dialog.add("speed", Speed);
+const decorated = decorate(Speed, {
+  "MDL": computed
+});
+
+Dialog.add("speed", decorated);
+export { decorated as Speed};
 
 
 
