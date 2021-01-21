@@ -213,6 +213,9 @@ export class ButtonList extends BaseComponent {
     //store body overflow
     this._prev_body_overflow = document.body.style.overflow;
 
+    //TODO: maybe do the initial state setting here for all buttons
+    if(this.root.ui.buttons.buttons.includes("sidebarcollapse")) this.setSidebarCollapse();
+
     // this.setBubbleTrails();
     // this.setTimeForecast();
     // this.setBubbleLock();
@@ -499,15 +502,11 @@ export class ButtonList extends BaseComponent {
   toggleSidebarCollapse() {
     this.ui.sidebarCollapse = !this.ui.sidebarCollapse;
     this.setSidebarCollapse();
+    this.services.layout._resizeHandler();
   }
 
   setSidebarCollapse() {
-    const rootEl = this.root.element;
-    if (rootEl.classed("vzb-dialog-expand-true") == this.ui.sidebarCollapse) {
-      rootEl.classed("vzb-dialog-expand-true", !this.ui.sidebarCollapse);
-      this.services.layout._resizeHandler();
-      //this.root.trigger("resize");
-    }
+    this.root.element.classed("vzb-dialog-expand-true", !this.ui.sidebarCollapse);
   }
 
   toggleBubbleTrails() {
