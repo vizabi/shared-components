@@ -1,6 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import {BaseComponent} from "../base-component.js";
-
+import {decorate, computed} from "mobx";
 import { ICON_CLOSE as iconClose } from "../../icons/iconset.js";
 
 function key(d) {return d[Symbol.for("key")];}
@@ -50,7 +50,7 @@ const OPTIONS = {
   SUPPRESS_HIGHLIGHT_DURING_PLAY: true
 };
 
-export class Labels extends BaseComponent {
+class Labels extends BaseComponent {
 
   setup(options){
     this.context = this.parent;
@@ -77,8 +77,8 @@ export class Labels extends BaseComponent {
     utils.extend(this.options, newOptions);
   }
 
-  draw() {
-    this.MDL = {
+  get MDL() { 
+    return{
       frame: this.model.encoding.get("frame"),
       selected: this.model.encoding.get("selected").data.filter,
       highlighted: this.model.encoding.get("highlighted").data.filter,
@@ -87,7 +87,9 @@ export class Labels extends BaseComponent {
       color: this.model.encoding.get("color"),
       label: this.model.encoding.get("label")
     };
+  }
 
+  draw() {
     this.addReaction(this._updateLayoutProfile);
 
     //this._clearInitialFontSize();
@@ -968,3 +970,7 @@ Labels.DEFAULT_UI = {
   removeLabelBox: false
 };
 
+const decorated = decorate(Labels, {
+  "MDL": computed
+});
+export { decorated as Labels };
