@@ -89,7 +89,7 @@ class _BaseComponent {
   addReaction(method, sideEffect, options = {}){
     if(!this.reactions.has(method)){
       this.reactions.set(method, sideEffect ? 
-        reaction(method.bind(this), sideEffect.bind(this), options)
+        reaction(method.bind(this), sideEffect.bind(this), Object.assign(options, {name: method.name}))
         : 
         autorun(() => {
           if(this.status === STATUS.READY) method.bind(this)();
