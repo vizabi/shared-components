@@ -188,12 +188,11 @@ class Find extends Dialog {
 
   _processFramesData() {
     const KEY = this.KEY;
-    const KEYS = this.KEYS;
     const data = new Map();
     this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
       if (!data.has(key)) data.set(key, { 
         [KEY]: key, 
-        name: this._getCompoundLabelText(valuesObj.label, KEYS)
+        name: this._getCompoundLabelText(valuesObj)
       });
     }));
     return data;
@@ -240,8 +239,10 @@ class Find extends Dialog {
       });
   }
 
-  _getCompoundLabelText(labelObj, keys) {
-    return keys.map(key => labelObj[key]).join(",");
+  _getCompoundLabelText(d) {
+    if (typeof d.label == "object") return Object.values(d.label).join(", ");
+    if (d.label != null) return "" + d.label;
+    return d[Symbol.for("key")];
   }
 
   _updateBrokenData() {
