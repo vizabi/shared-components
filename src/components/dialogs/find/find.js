@@ -191,12 +191,10 @@ class Find extends Dialog {
     const KEYS = this.KEYS;
     const data = new Map();
     this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
-      //TODO: remove this when vizabi reactive can request un states https://github.com/vizabi/vizabi-reactive/issues/31;
-      if (!data.has(key) && valuesObj.unstate !== false && valuesObj.unstate !== 0 && valuesObj.unstate !== "FALSE") 
-        data.set(key, { 
-          [KEY]: key, 
-          name: this._getCompoundLabelText(valuesObj.label, KEYS)
-        });
+      if (!data.has(key)) data.set(key, { 
+        [KEY]: key, 
+        name: this._getCompoundLabelText(valuesObj.label, KEYS)
+      });
     }));
     return data;
   }
