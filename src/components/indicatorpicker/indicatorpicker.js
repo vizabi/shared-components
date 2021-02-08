@@ -1,4 +1,5 @@
-import * as utils from "../../legacy/base/utils";
+import * as legacy_utils from "../../legacy/base/utils";
+import * as Utils from "../../utils";
 import { BaseComponent } from "../base-component";
 import { ICON_QUESTION as iconQuestion } from "../../icons/iconset"
 
@@ -76,7 +77,7 @@ export class IndicatorPicker extends BaseComponent {
       return this.model.encoding.get(this.targetProp);
     }
     if (!this.submodel && !this.submodelFunc) return this.model;
-    return this.submodelFunc ? this.submodelFunc() : utils.getProp(this, this.submodel.split("."));
+    return this.submodelFunc ? this.submodelFunc() : legacy_utils.getProp(this, this.submodel.split("."));
   }
 
   _updateView() {
@@ -94,7 +95,7 @@ export class IndicatorPicker extends BaseComponent {
         const hoverKey = (this.model.dataMap.getByObjOrStr(null, key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
         selectText = this.state.hoverKeyLabels ? this.state.hoverKeyLabels[hoverKey] : this.localise(hoverKey);
       } else {
-        selectText = this.MDL.model.data.conceptProps.name;
+        selectText = Utils.getConceptShortName(this.MDL.model, this.localise);
       }
     }
     this.DOM.select.text(selectText);
@@ -172,7 +173,7 @@ const _IndPicker = {
             const _highlightedEntity = marker.getHighlighted();
             if (_highlightedEntity.length) {
               const KEYS = mdl.getDataKeys();
-              let value = frame[mdl._name][utils.getKey(_highlightedEntity[0], KEYS)];
+              let value = frame[mdl._name][legacy_utils.getKey(_highlightedEntity[0], KEYS)];
 
               // resolve strings via the color legend model
               const conceptType = mdl.getConceptprops().concept_type;
@@ -240,7 +241,7 @@ const _IndPicker = {
 
     this.infoEl = d3.select(this.element).select(".vzb-ip-info");
     if (_this.model.targetModel.isHook()) {
-      utils.setIcon(this.infoEl, iconQuestion)
+      legacy_utils.setIcon(this.infoEl, iconQuestion)
         .select("svg").attr("width", "0px").attr("height", "0px");
 
       this.infoEl.on("click", () => {

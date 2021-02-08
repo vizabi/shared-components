@@ -9,16 +9,41 @@ export const STATUS = {
 
 export function isEntityConcept(concept) {
   return ["entity_set", "entity_domain"].includes(concept.concept_type);
-};
+}
 
-export function getConceptProps(model, localise) {
-  if (model.data.isConstant()) {
-      return ({
-          name: localise("indicator/" + model.data.constant + "/" + model.scale.modelType)
-      });
-  } else {
-      return model.data.conceptProps;
-  }
+export function getConceptName(enc, localise) {
+  const cp = enc.data.conceptProps;
+
+  if (enc.data.isConstant()) 
+    return localise("indicator/" + enc.data.constant + "/" + enc.scale.modelType);
+
+  return cp.name || cp.concept || localise(enc.name);
+}
+
+export function getConceptShortName(enc, localise) {
+  const cp = enc.data.conceptProps;
+  return cp.name_short || getConceptName(enc, localise);
+}
+
+export function getConceptNameMinusShortName(enc, localise) {
+  const name = getConceptName(enc, localise);
+  const shortName = getConceptShortName(enc, localise);
+
+  let result = name.replace(shortName,"");
+
+  //remove leading comma if present
+  if (result[0] === ",") result = result.slice(1);
+
+  result = result.trim();
+
+  //remove brackets if string starts with "(" and ends with ")"
+  const regexpResult = /^\((.*)\)$|.*/.exec(result);
+  return regexpResult[1] || regexpResult[0] || "";
+}
+
+export function getConceptUnit(enc) {
+  const cp = enc.data.conceptProps;
+  return cp.unit || "";
 }
 
 export function getDefaultStateTree(defaultState, component) {
