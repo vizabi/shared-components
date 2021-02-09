@@ -112,10 +112,6 @@ class TimeSlider extends BaseComponent {
 
     this.DOM.slider = this.DOM.slider_outer.select("g");
 
-    //Scale
-    this.xScale = d3.scaleUtc()
-      .clamp(true);
-
     //Axis
     this.xAxis = axisSmart("bottom");
 
@@ -170,7 +166,7 @@ class TimeSlider extends BaseComponent {
     
     this.element.classed(class_loading, false);
     
-    this.xScale.domain(this.MDL.frame.scale.domain);
+    this.xScale = this.MDL.frame.scale.d3Scale;
 
     if (this._updateLayoutProfile()) return; //return if exists with error
 
