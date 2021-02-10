@@ -1085,7 +1085,7 @@ export class TreeMenu extends BaseComponent {
     return dataSourcesWithTags.length ? Promise.all(dataSourcesWithTags
       .map(([ds, query]) => ds.query(query).then(result => {
         const dataSourceName = this._getSourceName(ds);
-        return result.map(r => {
+        return [...result.values()].map(r => {
           r.dataSourceName = dataSourceName;
           return r;
         })
