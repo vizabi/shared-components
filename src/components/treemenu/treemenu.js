@@ -146,7 +146,7 @@ export class TreeMenu extends BaseComponent {
     const FOLDER_STRATEGY_FOLDER = "folder"; //put indicators in dataset's own folder inside a specified folder. use notation like "folder:other_datasets"
 
     //const dataModels = _this.model.marker._root.dataManager.getDataModels();
-    const FOLDER_STRATEGY_DEFAULT = dataModels.size == 1 ? FOLDER_STRATEGY_SPREAD : FOLDER_STRATEGY_ROOT;
+    const FOLDER_STRATEGY_DEFAULT = dataModels.length == 1 ? FOLDER_STRATEGY_SPREAD : FOLDER_STRATEGY_ROOT;
 
     //init the dictionary of tags and add default folders
     const tags = {};
@@ -1040,6 +1040,7 @@ export class TreeMenu extends BaseComponent {
 
   _filterAvailabilityBySpace(availability, space) {
     return availability.filter(({key}) => {
+      if (!key.length) return true;
       if (space.length > 1 && key.length < 2) return space.some(dim => dim == key);
       if (space.length !== key.length) return false;
       return space.every((dim, i) => key[i] == dim)
@@ -1079,7 +1080,9 @@ export class TreeMenu extends BaseComponent {
       dataSources.get(av.source).select.value.push(av.value.concept);
     });
 
-    return Promise.all([...dataSources].filter(([ds, query]) => query.select.value.length)
+    const dataSourcesWithTags = [...dataSources].filter(([ds, query]) => !query.select.value.length);
+
+    return dataSourcesWithTags.length ? Promise.all(dataSourcesWithTags
       .map(([ds, query]) => ds.query(query).then(result => {
         const dataSourceName = this._getSourceName(ds);
         return result.map(r => {
@@ -1087,7 +1090,8 @@ export class TreeMenu extends BaseComponent {
           return r;
         })
       })))
-      .then(results => this.mergeResults(results, ["tag"])); // using merge because key-duplicates terribly slow down treemenu
+      .then(results => this.mergeResults(results, ["tag"])) // using merge because key-duplicates terribly slow down treemenu
+    : Promise.resolve([]);    
   }
 
   /**
