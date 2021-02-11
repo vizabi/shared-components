@@ -107,7 +107,7 @@ export class ColorLegend extends BaseComponent {
     this.legendHasOwnModel = !this.MDL.color.data.isConstant() && ["entity_set", "entity_domain"]
       .includes(this.MDL.color.data.conceptProps.concept_type);
     
-    if (this.MDL.legend && !this._isLegendModelReady()) return;
+    if (this.MDL.legend && this.legendHasOwnModel && !this._isLegendModelReady()) return;
 
     this.KEY = Symbol.for("key");
     this.canShowMap = this.MDL.legend && this._canShowMap();
@@ -124,6 +124,7 @@ export class ColorLegend extends BaseComponent {
   }
 
   _canShowMap() {
+    if(!this.legendHasOwnModel) return false;
     const dataArray = this.MDL.legend.dataArray;
     return dataArray.length > 0 && dataArray.every(d => d.map);
   }
