@@ -1080,7 +1080,7 @@ export class TreeMenu extends BaseComponent {
       dataSources.get(av.source).select.value.push(av.value.concept);
     });
 
-    const dataSourcesWithTags = [...dataSources].filter(([ds, query]) => !query.select.value.length);
+    const dataSourcesWithTags = [...dataSources].filter(([ds, query]) => query.select.value.length);
 
     return dataSourcesWithTags.length ? Promise.all(dataSourcesWithTags
       .map(([ds, query]) => ds.query(query).then(result => {
