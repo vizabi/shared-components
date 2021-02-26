@@ -383,7 +383,7 @@ class Labels extends BaseComponent {
     }
 
     let contentBBox;
-    if (!cached.initTextBBox) {
+    //if (!cached.initTextBBox) {
       //turn off stroke because ie11/edge return stroked bounding box for text
       _text.style("stroke", "none");
       cached.initTextBBox = _text.node().getBBox();
@@ -392,7 +392,7 @@ class Labels extends BaseComponent {
         width: cached.initTextBBox.width,
         height: cached.initTextBBox.height
       };
-    }
+    //}
 
     const scale = cached.fontSize / cached.initFontSize;
     cached.textBBox.width = cached.initTextBBox.width * scale;
