@@ -871,6 +871,7 @@ export class TreeMenu extends BaseComponent {
     const _this = this;
 
     if (!this._targetModel) return;
+    if (!this._indicatorsTree) return console.error("Tree menu: indicator tree has not been constructed (yet?)");
 
     const { wrapper, wrapperOuter } = this.DOM;
 
@@ -991,8 +992,9 @@ export class TreeMenu extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-    this.addReaction(this.__getDataSourceConfigReaction, () => {
-      Promise.all(this._getDataSources(this.root.model.config.dataSources).map(ds => ds.metaDataPromise))
+    this.addReaction(this.__observeDataSourceConfig && this.__observeDataSourceState, () => {
+      const datasources = this._getDataSources(this.root.model.config.dataSources);
+      Promise.all(datasources.map(ds => ds.metaDataPromise))
         .then(promises => utils.defer(() => 
           this.getTags(this.services.locale.id, promises)
             .then(tags =>
@@ -1052,8 +1054,12 @@ export class TreeMenu extends BaseComponent {
   //     .then(this.updateView.bind(this));
   // }
 
-  __getDataSourceConfigReaction() {
-    return this._getDataSources(this.root.model.config.dataSources).map(ds => ds.config)
+  __observeDataSourceConfig() {
+    return this._getDataSources(this.root.model.config.dataSources).map(ds => ds.config);
+  }
+
+  __observeDataSourceState() {
+    return this._getDataSources(this.root.model.config.dataSources).map(ds => ds.state);
   }
 
     /**
