@@ -55,28 +55,7 @@ export class Repeater extends BaseComponent {
     const repeat = this.model.encoding.get("repeat");
     this.element.style("grid-template-columns", Array(repeat.column.length).fill("1fr").join(" "));
   }
-
-  resize() {
-    this.services.layout.size;
-
-    const repeat = this.model.encoding.get("repeat");
-
-    this.elementHeight = (this.element.node().clientHeight) || 0;
-    this.elementWidth = (this.element.node().clientWidth) || 0;
-
-    // this.ui.viewWH = { 
-    //   width: this.elementWidth / repeat.column.length,
-    //   height: this.elementHeight / repeat.row.length
-    // };
-    this.ui.viewWH.width = this.elementWidth / repeat.column.length,
-    this.ui.viewWH.height = this.elementHeight / repeat.row.length
-
-  }
 }
 
 Repeater.DEFAULT_UI = {
-  viewWH: {
-    width: 0,
-    height: 0
-  }
 }

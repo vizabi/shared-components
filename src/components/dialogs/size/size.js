@@ -42,7 +42,6 @@ export class Size extends Dialog {
       placeholder: ".vzb-dialog-bubblesize",
       options: {
         showArcs: true,
-        viewWH: "root.ui.chart.viewWH",
         submodelFunc: () => this.model.encoding.get("size").scale,
       }
     }];
