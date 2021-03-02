@@ -992,7 +992,7 @@ export class TreeMenu extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-    this.addReaction(this.__observeDataSourceConfig && this.__observeDataSourceState, () => {
+    this.addReaction(this.__observeDataSources, () => {
       const datasources = this._getDataSources(this.root.model.config.dataSources);
       Promise.all(datasources.map(ds => ds.metaDataPromise))
         .then(promises => utils.defer(() => 
@@ -1054,12 +1054,8 @@ export class TreeMenu extends BaseComponent {
   //     .then(this.updateView.bind(this));
   // }
 
-  __observeDataSourceConfig() {
-    return this._getDataSources(this.root.model.config.dataSources).map(ds => ds.config);
-  }
-
-  __observeDataSourceState() {
-    return this._getDataSources(this.root.model.config.dataSources).map(ds => ds.state);
+  __observeDataSources() {
+    return this._getDataSources(this.root.model.config.dataSources).map(ds => [ds.state, ds.config]);
   }
 
     /**
