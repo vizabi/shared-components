@@ -81,7 +81,6 @@ export class IndicatorPicker extends BaseComponent {
   }
 
   _updateView() {
-    this.state.hoverKeyLabels;
     let selectText;
 
     if (this._isEncoding()) {
@@ -93,11 +92,15 @@ export class IndicatorPicker extends BaseComponent {
         const highlightedMarkers = this.MDL.highlighted.data.filter.markers;
         const [key, payload] = highlightedMarkers.entries().next().value;
         const hoverKey = (this.model.dataMap.getByObjOrStr(null, key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
-        
-        if (this.state.hoverKeyLabels && this.state.hoverKeyLabels[hoverKey] != null)
-          selectText = this.state.hoverKeyLabels[hoverKey];
-        else
+
+        if (this.MDL.model.data.conceptProps.concept_type == "measure"){
           selectText = this.localise(hoverKey);
+        } else { //if it's not measure assume it's an entity domain or set and thus has an extra model to resolve names from          
+          if (this.state.hoverKeyLabels && this.state.hoverKeyLabels[hoverKey] != null)
+            selectText = this.state.hoverKeyLabels[hoverKey];
+          else
+            selectText = this.localise(hoverKey);
+        }
           
       } else {
         selectText = Utils.getConceptShortName(this.MDL.model, this.localise);
