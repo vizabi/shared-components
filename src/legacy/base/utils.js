@@ -441,7 +441,7 @@ export const deepExtend = function (/*obj_1, [obj_2], [obj_N]*/) {
       return;
     }
 
-    forEach(Object.keys(obj), key => {
+    forEach(Object.getOwnPropertyNames(obj), key => {
       src = target[key]; // source value
       val = obj[key]; // new value
 
