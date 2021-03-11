@@ -1,4 +1,5 @@
 import { BaseComponent } from "../base-component.js";
+import { STATUS } from "../../utils.js";
 import { Menu } from "./menu";
 import { OPTIONS, css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
 import * as utils from "../../legacy/base/utils";
@@ -868,8 +869,6 @@ export class TreeMenu extends BaseComponent {
   }
 
   updateView() {
-    const _this = this;
-
     if (!this._targetModel) return;
     if (!this._indicatorsTree) return console.error("Tree menu: indicator tree has not been constructed (yet?)");
 
@@ -913,6 +912,7 @@ export class TreeMenu extends BaseComponent {
 
   setup() {
     this.state = {
+      ownReadiness: STATUS.INIT
     };
 
     // object for manipulation with menu representation level
@@ -993,6 +993,7 @@ export class TreeMenu extends BaseComponent {
   draw() {
     this.localise = this.services.locale.auto();
     this.addReaction(this.__observeDataSources, () => {
+      this.state.ownReadiness = STATUS.PENDING;
       const datasources = this._getDataSources(this.root.model.config.dataSources);
       Promise.all(datasources.map(ds => ds.metaDataPromise))
         .then(promises => utils.defer(() => 
@@ -1003,10 +1004,9 @@ export class TreeMenu extends BaseComponent {
                 dataModels: this._getDataSources(this.root.model.config.dataSources)
               }))
             .then(this.updateView.bind(this))
-          )
-        )
-
-    }, { fireImmediately: true })
+            .then(() => this.state.ownReadiness = STATUS.READY)
+        ));
+    }, { fireImmediately: true });
 
     if (this._updateLayoutProfile()) return; //return if exists with error
     this._enableSearch();

@@ -37,7 +37,7 @@ export class IndicatorPicker extends BaseComponent {
       const rect = this.DOM.select.node().getBoundingClientRect();
       const rootEl = this.root.element;
       const rootRect = rootEl.node().getBoundingClientRect();
-      const treemenuComp = this.root.findChild({type: "TreeMenu"})
+      const treemenuComp = this.root.findChild({type: "TreeMenu"});
       const treemenuColWidth = treemenuComp.profileConstants.col_width;
       const treemenuWrapper = treemenuComp.element.select(".vzb-treemenu-wrap");
       const treemenuPaddLeft = parseInt(treemenuWrapper.style("padding-left"), 10) || 0;
@@ -106,7 +106,10 @@ export class IndicatorPicker extends BaseComponent {
         selectText = Utils.getConceptShortName(this.MDL.model, this.localise);
       }
     }
-    this.DOM.select.text(selectText);
+    this.treemenu = this.root.findChild({type: "TreeMenu"});
+    this.DOM.select
+      .classed("vzb-disabled", this.treemenu.state.ownReadiness !== Utils.STATUS.READY)
+      .text(selectText);
   }
 
   _isEncoding() {

@@ -43,6 +43,10 @@
       &:hover {
         background-color: $vzb-color-grey-light;
       }
+      &.vzb-disabled {
+        opacity: 0.3;
+        pointer-events: none;
+      }
     }
     .vzb-ip-info {
       @extend %vzb-chart-info;

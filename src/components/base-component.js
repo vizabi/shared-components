@@ -131,21 +131,16 @@ class _BaseComponent {
     }
   }
 
-  //updateStatus(){
   get status() {
-    //trace();
     const dependencies = Object.values(this.services).map((m)=>m.status)
       .concat(this.children.map((m)=>m.status))
       .concat(this.model.state);
 
     if (dependencies.every(dep => dep === STATUS.READY || dep == undefined))
-      //this.status = STATUS.READY;
       return STATUS.READY;
     else if (dependencies.some(dep => dep === STATUS.ERROR))
-      //this.status = STATUS.ERROR;
       return STATUS.ERROR;
     else
-      //this.status = STATUS.PENDING;
       return STATUS.PENDING;
   }
 

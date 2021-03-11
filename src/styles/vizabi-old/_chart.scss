@@ -43,6 +43,10 @@
   &:hover {
     text-decoration: underline;
   }
+  &.vzb-disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
 }
 
 %vzb-chart-axis-title-small {
