@@ -171,14 +171,14 @@ export class ColorLegend extends BaseComponent {
       })
       .on("mouseover", _this._interact().mouseover)
       .on("mouseout", _this._interact().mouseout)
-      .on("click", (...args) => {
-        if (_this.legendHasOwnModel) {
-          this._bindSelectDialogItems(...args);
-          this.DOM.selectDialog.classed("vzb-hidden", false);
-        } else {
-          this._interact().clickToChangeColor(...args);
-        }
-      })
+      // .on("click", (...args) => {
+      //   if (_this.legendHasOwnModel) {
+      //     this._bindSelectDialogItems(...args);
+      //     this.DOM.selectDialog.classed("vzb-hidden", false);
+      //   } else {
+      //     this._interact().clickToChangeColor(...args);
+      //   }
+      // })
       .merge(colorOptions);
 
     colorOptions.each(function(d, index) {
@@ -212,10 +212,10 @@ export class ColorLegend extends BaseComponent {
       .enter().append("path")
       .on("mouseover", this._interact().mouseover)
       .on("mouseout", this._interact().mouseout)
-      .on("click", (...args) => {
-        this._bindSelectDialogItems(...args);
-        this.DOM.selectDialog.classed("vzb-hidden", false);
-      })
+      // .on("click", (...args) => {
+      //   this._bindSelectDialogItems(...args);
+      //   this.DOM.selectDialog.classed("vzb-hidden", false);
+      // })
       .each(function(d) {
         let shapeString = d["map"].trim();
 
