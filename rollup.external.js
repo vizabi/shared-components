@@ -4,7 +4,6 @@ const meta = require("./package.json");
 const fs = require('fs');
 
 const postcss = require("postcss");
-const babel = require("rollup-plugin-babel");
 const {eslint} = require("rollup-plugin-eslint");
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
@@ -47,9 +46,6 @@ module.exports = dir => ({
     multiEntry(),
     resolve(),
     (process.env.NODE_ENV === "production" && eslint()),
-    // babel({
-    //   exclude: "node_modules/**"
-    // }),
     commonjs(),
     sass({
       include: path.resolve(__dirname,"src/**/*.scss"),
