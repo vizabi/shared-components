@@ -1037,7 +1037,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _getDataSources(dsConfig) {
-    return Object.keys(dsConfig).map(dsName => Vizabi.stores.dataSources.getByDefinition(dsName))
+    return Object.keys(dsConfig).map(dsName => Vizabi.stores.dataSources.get(dsName))
   }
 
   _filterAvailabilityBySpace(availability, space) {
