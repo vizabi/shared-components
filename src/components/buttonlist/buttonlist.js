@@ -724,7 +724,7 @@ function launchIntoFullscreen(elem) {
 }
 
 function exitFullscreen() {
-  if (document.exitFullscreen) {
+  if (document.exitFullscreen && document.fullscreenElement) {
     document.exitFullscreen();
   } else if (document.msExitFullscreen) {
     document.msExitFullscreen();
