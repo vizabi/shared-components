@@ -8,7 +8,6 @@ const {eslint} = require("rollup-plugin-eslint");
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
 const replace = require("rollup-plugin-replace");
-const {terser} = require("rollup-plugin-terser");
 const sass = require("rollup-plugin-sass");
 const json = require("rollup-plugin-json");
 const trash = require("rollup-plugin-delete");
@@ -61,7 +60,6 @@ module.exports = dir => ({
     json(),
     replace({
       ENV: JSON.stringify(process.env.NODE_ENV || "development")
-    }),
-    (process.env.NODE_ENV === "production" && terser({output: {preamble: copyright}})),
+    })
   ]
 });
