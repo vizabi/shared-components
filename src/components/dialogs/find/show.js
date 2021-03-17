@@ -104,6 +104,8 @@ export class Show extends BaseComponent {
         })
         :
         this.MDL.label.data.response.find(elem => elem.dim == dim).data
+          //TODO: HACK remove this UN state filter when we will be able to request entity properties separately
+          .filter(f => f.un_state !== 0)
           .map(d => {
             const result = { dim, category: key };
             result[key] = d[key];
