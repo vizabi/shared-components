@@ -17,12 +17,12 @@ export class Axes extends Dialog {
         </div>
         <div class="vzb-dialog-content">
           <p class="vzb-dialog-sublabel">
-            <span data-localise="buttons/axis_x"></span>
+            <span data-localise="buttons/x"></span>
             <span class="vzb-xaxis-selector"></span>
           </p>
           <div class="vzb-xaxis-minmax vzb-dialog-paragraph"></div>
           <p class="vzb-dialog-sublabel">
-            <span data-localise="buttons/axis_y"></span>
+            <span data-localise="buttons/y"></span>
             <span class="vzb-yaxis-selector"></span>
           </p>
           <div class="vzb-yaxis-minmax vzb-dialog-paragraph"></div>
