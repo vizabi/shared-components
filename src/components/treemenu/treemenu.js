@@ -1004,12 +1004,14 @@ export class TreeMenu extends BaseComponent {
                 dataModels: this._getDataSources(this.root.model.config.dataSources)
               }))
             .then(this.updateView.bind(this))
-            .then(() => this.state.ownReadiness = STATUS.READY)
+            .then(() => {
+              this._enableSearch();
+              this.state.ownReadiness = STATUS.READY;
+            })
         ));
     }, { fireImmediately: true });
 
-    if (this._updateLayoutProfile()) return; //return if exists with error
-    this._enableSearch();
+    this._updateLayoutProfile();
     this.addReaction(this._resize);
   }
 
@@ -1019,7 +1021,7 @@ export class TreeMenu extends BaseComponent {
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = this.element.node().clientHeight || 0;
     this.width = this.element.node().clientWidth || 0;
-    if (!this.height || !this.width) return utils.warn("TreeMenu _updateProfile() abort: container is too little or has display:none");
+    if (!this.height || !this.width) return "TreeMenu _updateProfile() abort: container is too little or has display:none";
   }
 
   _getSourceName(ds) {
