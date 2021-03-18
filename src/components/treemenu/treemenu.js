@@ -650,26 +650,36 @@ export class TreeMenu extends BaseComponent {
 
       if (isEncoding) {
         allowedIDs = utils.keys(indicatorsDB).filter(f => {
-          //TODO filter entity_domain, entity_set
-          //if (indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set") return false;
-          
+
+          //disallow constants for now, need to be implemented differently
+          if(f == "_default") return false; 
+
           //check if indicator is denied to show with allow->names->!indicator
           if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
             if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
             if (_this._targetModel.data.allow.names.indexOf(f) != -1) return true;
             if (_this._targetModel.data.allow.namesOnlyThese) return false;
           }
-          //keep indicator if nothing is specified in tool properties
-          if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
-          //keep indicator if any scale is allowed in tool properties
-          if (_this._targetModel.data.allow.scales[0] == "*") return true;
 
-          // if no scales defined, all are allowed
-          if (!indicatorsDB[f].scales) return true;
+          const allowedTypes = _this._targetModel.scale.allowedTypes;
+          const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
+          const indicatorScales = JSON.parse(indicatorsDB[f].scales || null);
 
-          //check if there is an intersection between the allowed tool scale types and the ones of indicator
-          for (let i = indicatorsDB[f].scales.length - 1; i >= 0; i--) {
-            if (_this._targetModel.data.allow.scales.indexOf(indicatorsDB[f].scales[i]) > -1) return true;
+          //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
+          if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
+
+          if (isEntity){
+            //for entities need an ordinal scale to be allowed at this point
+            if (allowedTypes.includes("ordinal")) return true;
+          } else {
+            // for other concept types:
+            // if no scales defined, all are allowed
+            if (!indicatorScales) return true;
+
+            //check if there is an intersection between the allowed tool scale types and the ones of indicator
+            for (let i = indicatorScales.length - 1; i >= 0; i--) {
+              if (allowedTypes.includes(indicatorScales[i])) return true;
+            }
           }
 
           return false;
