@@ -141,9 +141,9 @@ class Find extends Dialog {
 
   get MDL() {
     return {
-      frame: this.model.encoding.get("frame"),
-      selected: this.model.encoding.get("selected"),
-      highlighted: this.model.encoding.get("highlighted")
+      frame: this.model.encoding.frame,
+      selected: this.model.encoding.selected,
+      highlighted: this.model.encoding.highlighted
     };
   }
 

@@ -41,7 +41,7 @@ export class Label extends Dialog {
       placeholder: ".vzb-dialog-sizeslider",
       options: {
         constantUnit: "unit/pixels",
-        submodelFunc: () => this.model.encoding.get("size_label").scale,
+        submodelFunc: () => this.model.encoding.size_label.scale,
       }
     }, {
       type: IndicatorPicker,

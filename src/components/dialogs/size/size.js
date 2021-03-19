@@ -42,7 +42,7 @@ export class Size extends Dialog {
       placeholder: ".vzb-dialog-bubblesize",
       options: {
         showArcs: true,
-        submodelFunc: () => this.model.encoding.get("size").scale,
+        submodelFunc: () => this.model.encoding.size.scale,
       }
     }];
 
@@ -56,7 +56,7 @@ export class Size extends Dialog {
   }
 
   _updateSubtitle() {
-    const conceptProps = this.model.encoding.get("size").data.conceptProps;
+    const conceptProps = this.model.encoding.size.data.conceptProps;
     const subtitle = utils.getSubtitle(conceptProps.name, conceptProps.name_short);
 
     this.element.select(".vzb-dialog-subtitle").text(subtitle);

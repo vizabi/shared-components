@@ -25,13 +25,13 @@ export class PlayButton extends BaseComponent {
 
   setup() {
     this.buttonEl = this.element.select(".vzb-ts-btn")
-      .on("click", () => {this.model.encoding.get("frame").togglePlaying();});
+      .on("click", () => {this.model.encoding.frame.togglePlaying();});
   }
 
   draw() {
     const localise = this.services.locale.auto();
-    this.buttonEl.html(this.model.encoding.get("frame").playing ? HTML_ICON_PAUSE : HTML_ICON_PLAY);
-//    this.buttonEl.text(this.model.encoding.get("frame").playing ? localise("button-pause") : localise("button-play"));
+    this.buttonEl.html(this.model.encoding.frame.playing ? HTML_ICON_PAUSE : HTML_ICON_PLAY);
+//    this.buttonEl.text(this.model.encoding.frame.playing ? localise("button-pause") : localise("button-play"));
   }
 
   loading() {

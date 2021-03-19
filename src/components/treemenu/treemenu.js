@@ -53,7 +53,7 @@ export class TreeMenu extends BaseComponent {
   encoding(input) {
     if (!arguments.length) return this._encoding;
     this._encoding = input;
-    this.targetModel(this.model.encoding.get(this._encoding));
+    this.targetModel(this.model.encoding[this._encoding]);
     return this;
   }
   showWhenReady(input) {

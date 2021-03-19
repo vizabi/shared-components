@@ -79,13 +79,13 @@ class Labels extends BaseComponent {
 
   get MDL() { 
     return{
-      frame: this.model.encoding.get("frame"),
-      selected: this.model.encoding.get("selected").data.filter,
-      highlighted: this.model.encoding.get("highlighted").data.filter,
-      size: this.model.encoding.get("size"),
-      size_label: this.model.encoding.get("size_label"),
-      color: this.model.encoding.get("color"),
-      label: this.model.encoding.get("label")
+      frame: this.model.encoding.frame,
+      selected: this.model.encoding.selected.data.filter,
+      highlighted: this.model.encoding.highlighted.data.filter,
+      size: this.model.encoding.size,
+      size_label: this.model.encoding.size_label,
+      color: this.model.encoding.color,
+      label: this.model.encoding.label
     };
   }
 

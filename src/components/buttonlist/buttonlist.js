@@ -225,7 +225,7 @@ export class ButtonList extends BaseComponent {
 
   draw() {
     this.MDL = {
-      frame: this.model.encoding.get("frame")
+      frame: this.model.encoding.frame
     }
     this.localise = this.services.locale.auto();
 
@@ -511,20 +511,20 @@ export class ButtonList extends BaseComponent {
 
   toggleBubbleTrails() {
     if (this.model.encoding) {
-      const trail = this.model.encoding.get("trail");
+      const trail = this.model.encoding.trail;
       trail.setShow(!trail.show);
     }
     this.setBubbleTrails();
   }
   setBubbleTrails() {
     if (!this.model.encoding) return;
-    const trail = this.model.encoding.get("trail");
+    const trail = this.model.encoding.trail;
     if (!trail) return;
     const id = "trails";
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
     if (!btn.node()) return utils.warn("setBubbleTrails: no button '" + id + "' found in DOM. doing nothing");
     btn.classed(class_active_locked, trail.show);
-    const anySelected = this.model.encoding.get("selected").data.filter.any();
+    const anySelected = this.model.encoding.selected.data.filter.any();
     btn.classed(class_hidden, !anySelected);
   }
   toggleTimeForecast() {

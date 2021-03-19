@@ -95,10 +95,10 @@ export class ColorLegend extends BaseComponent {
 
   draw() {
     this.MDL = {
-      color: this.model.encoding.get(this.colorModelName),
-      selected: this.model.encoding.get("selected"),
-      highlighted: this.model.encoding.get("highlighted"),
-      superHighlighted: this.model.encoding.get("superhighlighted"),
+      color: this.model.encoding[this.colorModelName],
+      selected: this.model.encoding.selected,
+      highlighted: this.model.encoding.highlighted,
+      superHighlighted: this.model.encoding.superhighlighted,
     }
     this.MDL.legend = this.root.model.stores ? this.root.model.stores.markers.get(this.legendModelName) : null;
     this.localise = this.services.locale.auto();
@@ -144,7 +144,7 @@ export class ColorLegend extends BaseComponent {
 
     const KEY = this.KEY;
     const _this = this;
-    const cScale = this.MDL.legend ? this.MDL.legend.encoding.get("color").scale.d3Scale : this.MDL.color.scale.d3Scale;
+    const cScale = this.MDL.legend ? this.MDL.legend.encoding.color.scale.d3Scale : this.MDL.color.scale.d3Scale;
 
     let colorOptionsArray = [];
 
@@ -200,7 +200,7 @@ export class ColorLegend extends BaseComponent {
     if (!this._isLegendModelReady()) return;
 
     const _this = this;
-    const cScale = this.MDL.legend.encoding.get("color").scale.d3Scale;
+    const cScale = this.MDL.legend.encoding.color.scale.d3Scale;
 
     const tempdivEl = this.DOM.minimap.append("div").attr("class", "vzb-temp");
 

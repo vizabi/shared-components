@@ -157,7 +157,7 @@ class TimeSlider extends BaseComponent {
 
   get MDL() {
     return {
-      frame: this.model.encoding.get("frame")
+      frame: this.model.encoding.frame
     };
   }
 

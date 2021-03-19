@@ -65,7 +65,7 @@ export class IndicatorPicker extends BaseComponent {
       model: this._getModel()
     }
     if (this.showHoverValues) {
-      this.MDL.highlighted = this.model.encoding.get("highlighted");
+      this.MDL.highlighted = this.model.encoding.highlighted;
     }
 
     this.localise = this.services.locale.auto();
@@ -74,7 +74,7 @@ export class IndicatorPicker extends BaseComponent {
 
   _getModel() {
     if (this.submodel === "encoding") {
-      return this.model.encoding.get(this.targetProp);
+      return this.model.encoding[this.targetProp];
     }
     if (!this.submodel && !this.submodelFunc) return this.model;
     return this.submodelFunc ? this.submodelFunc() : legacy_utils.getProp(this, this.submodel.split("."));

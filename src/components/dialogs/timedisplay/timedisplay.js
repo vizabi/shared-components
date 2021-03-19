@@ -36,7 +36,7 @@ export class TimeDisplay extends Dialog {
   draw() {
     super.draw();
 
-    this.MDL.frame = this.model.encoding.get("frame")
+    this.MDL.frame = this.model.encoding.frame
 
     const _this = this;
     Object.assign(this.state, {

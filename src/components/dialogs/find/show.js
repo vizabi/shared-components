@@ -38,9 +38,9 @@ export class Show extends BaseComponent {
 
   draw() {
     this.MDL = {
-      label: this.model.encoding.get("label"),
-      selected: this.model.encoding.get("selected"),
-      frame: this.model.encoding.get("frame")
+      label: this.model.encoding.label,
+      selected: this.model.encoding.selected,
+      frame: this.model.encoding.frame
     };
 
     this.localise = this.services.locale.auto();

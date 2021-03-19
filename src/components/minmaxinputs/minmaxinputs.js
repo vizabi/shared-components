@@ -120,7 +120,7 @@ export class MinMaxInputs extends BaseComponent {
     if (this.state.submodel) {
       const submodel = this.state.submodel.split(".");
       if (submodel[0] === "encoding") {
-        return utils.getProp(this.model.encoding.get(submodel[1]), submodel.slice(2));
+        return utils.getProp(this.model.encoding[submodel[1]], submodel.slice(2));
       }
     }
     if (!this.state.submodel && !this.state.submodelFunc) return this.model;

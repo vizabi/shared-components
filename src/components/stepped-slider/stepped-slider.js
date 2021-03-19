@@ -56,7 +56,7 @@ export class SteppedSlider extends BaseComponent {
 
   draw() {
     this.MDL = {
-      frame: this.model.encoding.get("frame"),
+      frame: this.model.encoding.frame,
     }
 
     this.addReaction(this.redraw);

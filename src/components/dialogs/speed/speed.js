@@ -51,7 +51,7 @@ class Speed extends Dialog {
         domain: [1200, 900, 450, 200, 150, 100],
         ROUND_DIGITS: 0
       },
-      model: config.model.encoding.get("frame")
+      model: config.model.encoding.frame
       
     },{
       type: SimpleCheckbox,
@@ -110,7 +110,7 @@ class Speed extends Dialog {
 
   get MDL() {
     return {
-      frame: this.model.encoding.get("frame")
+      frame: this.model.encoding.frame
     };
   }
 

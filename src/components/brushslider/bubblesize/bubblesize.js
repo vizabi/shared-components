@@ -105,7 +105,7 @@ export class BubbleSize extends BrushSlider {
   }
 
   _getMinMaxBubbleRadius() {
-    const range = this.model.encoding.get("size").scale.range;
+    const range = this.model.encoding.size.scale.range;
     const min = utils.areaToRadius(d3.min(range));
     const max = utils.areaToRadius(d3.max(range));
     return { min, max };
