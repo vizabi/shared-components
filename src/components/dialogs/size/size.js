@@ -19,7 +19,7 @@ export class Size extends Dialog {
         </div>
         <div class="vzb-dialog-content">
           <div class="vzb-dialog-bubblesize"></div>
-          <span class="vzb-dialog-subtitle">teststs</span>
+          <span class="vzb-dialog-subtitle"></span>
         </div>
         <div class="vzb-dialog-buttons">
           <div data-click="closeDialog" class="vzb-dialog-button vzb-label-primary">
@@ -50,6 +50,8 @@ export class Size extends Dialog {
   }
 
   draw() {
+    super.draw();
+
     this.addReaction(this._updateSubtitle);
   }
 
