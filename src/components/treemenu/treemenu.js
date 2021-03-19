@@ -660,27 +660,34 @@ export class TreeMenu extends BaseComponent {
 
           const allowedTypes = _this._targetModel.scale.allowedTypes;
           const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
+          const isMeasure = indicatorsDB[f].concept_type == "measure";
+          const isTime = indicatorsDB[f].concept_type == "time";
           const isConstant = f === "_default"; //TODO: refactor constants
           const indicatorScales = JSON.parse(indicatorsDB[f].scales || null);
 
           //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
           if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
 
+          //match specific scale types if defined
+          if(indicatorScales) {
+            for (let i = indicatorScales.length - 1; i >= 0; i--) {
+              if (allowedTypes.includes(indicatorScales[i])) return true;
+            }
+          }
+
+          //otherwise go by concept types
           if (isEntity){
             //for entities need an ordinal scale to be allowed at this point
             if (allowedTypes.includes("ordinal")) return true;
           } else if (isConstant) {
             //for constants need a point scale to be allowed
             if (allowedTypes.includes("point")) return true;
-          } else {
-            // for other concept types:
-            // if no scales defined, all are allowed
-            if (!indicatorScales) return true;
-
-            //check if there is an intersection between the allowed tool scale types and the ones of indicator
-            for (let i = indicatorScales.length - 1; i >= 0; i--) {
-              if (allowedTypes.includes(indicatorScales[i])) return true;
-            }
+          } else if (isMeasure){
+            // for measures need linear or log or something
+            if (allowedTypes.includes("linear") || allowedTypes.includes("log")
+              || allowedTypes.includes("genericLog") || allowedTypes.includes("pow")) return true;
+          } else if (isTime) {
+            if (allowedTypes.includes("time")) return true;
           }
 
           return false;
