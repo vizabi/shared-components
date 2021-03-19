@@ -651,9 +651,6 @@ export class TreeMenu extends BaseComponent {
       if (isEncoding) {
         allowedIDs = utils.keys(indicatorsDB).filter(f => {
 
-          //disallow constants for now, need to be implemented differently
-          if(f == "_default") return false; 
-
           //check if indicator is denied to show with allow->names->!indicator
           if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
             if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
@@ -663,6 +660,7 @@ export class TreeMenu extends BaseComponent {
 
           const allowedTypes = _this._targetModel.scale.allowedTypes;
           const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
+          const isConstant = f === "_default"; //TODO: refactor constants
           const indicatorScales = JSON.parse(indicatorsDB[f].scales || null);
 
           //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
@@ -671,6 +669,9 @@ export class TreeMenu extends BaseComponent {
           if (isEntity){
             //for entities need an ordinal scale to be allowed at this point
             if (allowedTypes.includes("ordinal")) return true;
+          } else if (isConstant) {
+            //for constants need a point scale to be allowed
+            if (allowedTypes.includes("point")) return true;
           } else {
             // for other concept types:
             // if no scales defined, all are allowed
