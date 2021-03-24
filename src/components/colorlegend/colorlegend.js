@@ -6,12 +6,13 @@ import axisSmart from "../../legacy/helpers/d3.axisWithLabelPicker";
 import { STATUS, isEntityConcept } from "../../utils.js";
 import "./colorlegend.scss";
 import { runInAction } from "mobx";
+import {decorate, computed} from "mobx";
 
 /*!
  * VIZABI BUBBLE COLOR LEGEND COMPONENT
  */
 
-export class ColorLegend extends BaseComponent {
+class ColorLegend extends BaseComponent {
   constructor(config) {
     config.template = `
       <div class="vzb-cl-outer">
@@ -93,14 +94,18 @@ export class ColorLegend extends BaseComponent {
     this._initSelectDialog();
   }
 
-  draw() {
-    this.MDL = {
+
+  get MDL() {
+    return {
       color: this.model.encoding[this.colorModelName],
       selected: this.model.encoding.selected,
       highlighted: this.model.encoding.highlighted,
       superHighlighted: this.model.encoding.superhighlighted,
-    }
-    this.MDL.legend = this.root.model.stores ? this.root.model.stores.markers.get(this.legendModelName) : null;
+      legend: this.root.model.stores?.markers.get(this.legendModelName)
+    };
+  }
+
+  draw() {
     this.localise = this.services.locale.auto();
     this.colorPicker.translate(this.localise);
 
@@ -729,7 +734,10 @@ export class ColorLegend extends BaseComponent {
 
 }
 
-
+const decorated = decorate(ColorLegend, {
+  "MDL": computed
+});
+export { decorated as ColorLegend };
 
 
 
