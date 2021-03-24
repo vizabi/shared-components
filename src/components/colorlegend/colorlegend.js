@@ -108,11 +108,8 @@ class ColorLegend extends BaseComponent {
   draw() {
     this.localise = this.services.locale.auto();
     this.colorPicker.translate(this.localise);
-
-    this.legendHasOwnModel = !this.MDL.color.data.isConstant() && ["entity_set", "entity_domain"]
-      .includes(this.MDL.color.data.conceptProps.concept_type);
-    
-    if (this.MDL.legend && this.legendHasOwnModel && !this._isLegendModelReady()) return;
+   
+    if (this._legendHasOwnModel() && !this._isLegendModelReady()) return;
 
     this.KEY = Symbol.for("key");
     this.canShowMap = this.MDL.legend && this._canShowMap();
@@ -124,18 +121,24 @@ class ColorLegend extends BaseComponent {
 
   }
 
+  _legendHasOwnModel() {
+    return this.MDL.legend
+      && !this.MDL.color.data.isConstant() 
+      && ["entity_set", "entity_domain"].includes(this.MDL.color.data.conceptProps.concept_type);
+  }
+
   _isLegendModelReady() {
     return this.MDL.legend.state == STATUS.READY;
   }
 
   _canShowMap() {
-    if(!this.legendHasOwnModel) return false;
+    if(!this._legendHasOwnModel()) return false;
     const dataArray = this.MDL.legend.dataArray;
     return dataArray.length > 0 && dataArray.every(d => d.map);
   }
 
   _updateView() {
-    if (this.MDL.legend && this.legendHasOwnModel && !this._isLegendModelReady()) return;
+    if (this._legendHasOwnModel() && !this._isLegendModelReady()) return;
 
     const individualColors = false;
     this._updateListLegend(this.MDL.color.scale.isDiscrete() && !this.canShowMap && !individualColors);
@@ -147,15 +150,13 @@ class ColorLegend extends BaseComponent {
     this.DOM.listColors.classed("vzb-hidden", !isVisible);
     if (!isVisible) return;
 
-    const KEY = this.KEY;
     const _this = this;
-    const cScale = this.MDL.legend ? this.MDL.legend.encoding.color.scale.d3Scale : this.MDL.color.scale.d3Scale;
+    const cScale = this._legendHasOwnModel() && this._isLegendModelReady()? this.MDL.legend.encoding.color.scale.d3Scale : this.MDL.color.scale.d3Scale;
 
     let colorOptionsArray = [];
 
-    if (this.MDL.legend && !this.MDL.color.data.isConstant()) {
+    if (this._legendHasOwnModel() && this._isLegendModelReady() && !this.MDL.color.data.isConstant()) {
       colorOptionsArray = this.MDL.legend.dataArray;
-      //this.which == KEY ? this.markerArray : this.colorlegendMarkerArray;
     } else {
       colorOptionsArray = cScale.domain().map(value => {
         const result = {};
