@@ -17,9 +17,19 @@ $color-text: rgb(15, 14, 14);
 
     &.vzb-ts-disabled {
       opacity: 0.4;
-      pointer-events: none;
-      .vzb-ts-slider-handle {
-        visibility: hidden;
+      .vzb-ts-slider {
+        .vzb-ts-slider-slide {
+          pointer-events: none;
+        }
+        .vzb-ts-slider-handle {
+          visibility: hidden;
+          pointer-events: none;
+        }
+        .vzb-ts-slider-value {
+          visibility: hidden;
+        }
+      }
+      .vzb-ts-btns .vzb-ts-btn {
         pointer-events: none;
       }
     }

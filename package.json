@@ -1,6 +1,6 @@
 {
   "name": "vizabi-shared-components",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "",
   "main": "index.js",
   "files": [
@@ -8,6 +8,7 @@
     "build"
   ],
   "scripts": {
+    "prepublish": "npm run build",
     "build": "rollup -c",
     "build:prod": "NODE_ENV=production rollup -c",
     "eslint:fix": "eslint --fix src",

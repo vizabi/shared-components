@@ -362,7 +362,7 @@ class TimeSlider extends BaseComponent {
 
     const { value, speed, playing } = this.MDL.frame;
 
-    if (this.ui.dragging) return;
+    if (this.ui.dragging || this._isDomainNotVeryGood()) return;
     const { handle, valueText } = this.DOM; 
   
     //this.slide.call(this.brush.extent([value, value]));
@@ -460,21 +460,24 @@ class TimeSlider extends BaseComponent {
       .classed("vzb-hidden", this.services.layout.projector)
       .call(this.xAxis);
 
-    this.element.classed("vzb-ts-disabled", isOneFrameOnly(this.xScale.domain()));
+    this.element.classed("vzb-ts-disabled", this._isDomainNotVeryGood());
     this.element.classed(class_hide_play, !show_play);
     this.element.classed(class_playing, frame.playing);
     this.element.classed(class_show_value, show_value);
     this.element.classed(class_show_value_when_drag_play, show_value_when_drag_play);
     this.element.classed(class_axis_aligned, axis_aligned);
   }
-}
 
-function isOneFrameOnly(domain){
-  //domain not available
-  if(!domain || domain.length !== 2) return true;
-  //domain inverted or shrunk to one point
-  if(domain[1] - domain[0] <= 0) return true;
-  return false;
+  _isDomainNotVeryGood(){
+    const domain = this.xScale.domain();
+    //domain not available
+    if(!domain || domain.length !== 2) return true;
+    //domain inverted or shrunk to one point
+    if(domain[1] - domain[0] <= 0) return true;
+    //domain sucks in some other way
+    if(domain.some(s => s == null || isNaN(s))) return true;
+    return false;
+  }
 }
 
 TimeSlider.DEFAULT_UI = {
