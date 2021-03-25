@@ -235,6 +235,7 @@ export class ButtonList extends BaseComponent {
     const button_expand = (this.root.ui.dialogs.dialogs || {}).sidebar || [];
     const button_list = [].concat(this.root.ui.buttons.buttons);
     this._addButtons(button_list, button_expand);
+    this.addReaction(this._localiseButtons);
     this.addReaction(this._toggleButtons);
 
     this.root.ui.buttons.buttons.forEach(buttonId => {
@@ -305,6 +306,15 @@ export class ButtonList extends BaseComponent {
       const button = d3.select(this);
       button.style("display", "");
     });
+  }
+
+  _localiseButtons() {
+    const _this = this;
+    this.services.locale.id;
+    this.element.selectAll("span[data-localise]").each(function(d) {
+      const view = d3.select(this);
+      view.text(_this.localise(view.attr("data-localise")));
+    })
   }
 
   /*
@@ -445,9 +455,12 @@ export class ButtonList extends BaseComponent {
         return cls;
       })
       .attr("data-btn", d => d.id)
-      .html(btn => "<span class='vzb-buttonlist-btn-icon fa'>" +
-          btn.icon + "</span><span class='vzb-buttonlist-btn-title'>" +
-          t(btn.title) + "</span>");
+      .html(btn => `
+        <span class='vzb-buttonlist-btn-icon fa'>${btn.icon}</span>
+        <span class='vzb-buttonlist-btn-title'>
+          <span data-localise='${btn.title}'></span>
+        </span>
+      `);
 
     const buttons = this.element.selectAll(".vzb-buttonlist-btn");
 
