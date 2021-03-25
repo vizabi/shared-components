@@ -4,6 +4,7 @@ import { STATUS } from "../utils.js";
 
 const FALLBACK_PATH = "./assets/locale/";
 const FALLBACK_ID = "en";
+const RTL_CSS_CLASS = "vzb-rtl";
 
 class _LocaleService extends BaseService {
 
@@ -12,8 +13,11 @@ class _LocaleService extends BaseService {
     this.id = this.config.id || FALLBACK_ID;
     this.path = this.config.path || FALLBACK_PATH;
     this.content = {};
-    
+    this.placeholder = this.config.placeholder || "body";
+    this.element = d3.select(this.placeholder);
+
     this.removeLoadFileAutorun = autorun(this._loadFile.bind(this), {name: "Locale.js: _loadFile()"});
+    this.removeApplyRTL = autorun(this._applyRTL.bind(this), {name: "Locale.js: _applyRTL()"});
   }
 
   
@@ -22,11 +26,22 @@ class _LocaleService extends BaseService {
     super.deconstruct();
   }
 
+  _applyRTL() {
+    if (this.status !== STATUS.READY) return;
+    this.element.classed(RTL_CSS_CLASS, this.isRTL());
+  }
+
   _loadFile(){
     this.status = STATUS.PENDING;
-    d3.json(this.path + this.id + ".json")
+
+    const readers = [d3.json(this.path + this.id + ".json")];
+    if (this.id != FALLBACK_ID && !this.content[FALLBACK_ID]) {
+      readers.push(d3.json(this.path + FALLBACK_ID + ".json"));
+    }
+    Promise.all(readers)
       .then((content) => {
-        this.content[this.id] = content;
+        this.content[this.id] = content[0];
+        if (content[1]) this.content[FALLBACK_ID] = content[1];
         this._initFormatters();
         this.status = STATUS.READY;
       })
