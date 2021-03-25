@@ -327,7 +327,7 @@ export class TreeMenu extends BaseComponent {
 
   //happens on resizing of the container
   _resize() {
-    this.services.layout.width + this.services.layout.height;
+    this.services.layout.size;
     
     const _this = this;
     const { wrapper, wrapperOuter } = this.DOM;
@@ -1034,7 +1034,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _updateLayoutProfile(){
-    this.services.layout.width + this.services.layout.height;
+    this.services.layout.size;
 
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = this.element.node().clientHeight || 0;

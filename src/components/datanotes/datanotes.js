@@ -81,7 +81,7 @@ export class DataNotes extends BaseComponent {
   }
 
   resize(){
-    this.services.layout.width + this.services.layout.height;
+    this.services.layout.size;
     this.close();
   }
 
