@@ -1,5 +1,5 @@
 import { BaseService } from "./base-service.js";
-import { observable, action, decorate, autorun } from "mobx";
+import { observable, action, decorate, autorun, computed } from "mobx";
 import { STATUS } from "../utils.js";
 
 const PROFILES = [
@@ -28,6 +28,11 @@ const CSS_PROJECTOR_CLASS = "vzb-presentation";
 
 class _LayoutService extends BaseService {
 
+  static DEFAULTS = {
+    projector: false,
+    placeholder: "body"
+  }
+
   setup(){
     this.name = "layout";
     this.status = STATUS.INIT;
@@ -35,8 +40,7 @@ class _LayoutService extends BaseService {
     this.height = 1;
     this.size = this.getSize();
     this.profile = "SMALL";
-    this.projector = this.config.projector || false;
-    this.placeholder = this.config.placeholder || "body";
+    this.placeholder = this.config.placeholder || this.constructor.DEFAULTS.placeholder;
     this.hGrid = [];
     this.element = d3.select(this.placeholder)
       .classed(CSS_PLACEHOLDER_CLASS, true);
@@ -57,6 +61,14 @@ class _LayoutService extends BaseService {
     this.removeProjectorListener();
     this.removeListener();
     super.deconstruct();
+  }
+
+  get projector() {
+    return this.config.projector || this.constructor.DEFAULTS.projector;
+  }
+
+  set projector(projector) {
+    this.config.projector = projector;
   }
 
   getSize() {
@@ -112,7 +124,7 @@ class _LayoutService extends BaseService {
 export const LayoutService = decorate(_LayoutService, {
   "size": observable.ref, //reference watches when new object is created
   "hGrid": observable,
-  "projector": observable,
+  "projector": computed,
   "width": observable,
   "height": observable,
   "profile": observable,

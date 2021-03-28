@@ -1,5 +1,5 @@
 import { BaseService } from "./base-service.js";
-import { observable, decorate, autorun } from "mobx";
+import { observable, decorate, autorun, computed } from "mobx";
 import { STATUS } from "../utils.js";
 
 const FALLBACK_PATH = "./assets/locale/";
@@ -8,19 +8,31 @@ const RTL_CSS_CLASS = "vzb-rtl";
 
 class _LocaleService extends BaseService {
 
+  static DEFAULTS = {
+    id: FALLBACK_ID,
+    path: FALLBACK_PATH,
+    placeholder: "body"
+  }
+
   setup(){
     this.status = STATUS.INIT;
-    this.id = this.config.id || FALLBACK_ID;
-    this.path = this.config.path || FALLBACK_PATH;
-    this.content = {};
-    this.placeholder = this.config.placeholder || "body";
+    this.path = this.config.path || this.constructor.DEFAULTS.path
+    this.placeholder = this.config.placeholder || this.constructor.DEFAULTS.placeholder;
     this.element = d3.select(this.placeholder);
+    this.content = {};
 
     this.removeLoadFileAutorun = autorun(this._loadFile.bind(this), {name: "Locale.js: _loadFile()"});
     this.removeApplyRTL = autorun(this._applyRTL.bind(this), {name: "Locale.js: _applyRTL()"});
   }
 
-  
+  get id() {
+    return this.config.id || this.constructor.DEFAULTS.id;
+  }
+
+  set id(id) {
+    this.config.id = id;
+  }
+
   deconstruct(){
     this.removeLoadFileAutorun();
     super.deconstruct();
@@ -154,6 +166,6 @@ class _LocaleService extends BaseService {
 }
 
 export const LocaleService = decorate(_LocaleService, {
-  "id": observable,
+  "id": computed,
   "status": observable
 });
