@@ -151,8 +151,10 @@ class ColorLegend extends BaseComponent {
     if (!isVisible) return;
 
     const _this = this;
-    const cScale = this._legendHasOwnModel() && this._isLegendModelReady()? this.MDL.legend.encoding.color.scale.d3Scale : this.MDL.color.scale.d3Scale;
-
+    const cScale = d3.scaleOrdinal()
+      .domain(this.MDL.color.scale.domain)
+      .range(this.MDL.color.scale.range);
+      
     let colorOptionsArray = [];
 
     if (this._legendHasOwnModel() && this._isLegendModelReady() && !this.MDL.color.data.isConstant()) {
@@ -206,7 +208,9 @@ class ColorLegend extends BaseComponent {
     if (!this._isLegendModelReady()) return;
 
     const _this = this;
-    const cScale = this.MDL.legend.encoding.color.scale.d3Scale;
+    const cScale = d3.scaleOrdinal()
+      .domain(this.MDL.color.scale.domain)
+      .range(this.MDL.color.scale.range);
 
     const tempdivEl = this.DOM.minimap.append("div").attr("class", "vzb-temp");
 
@@ -236,7 +240,7 @@ class ColorLegend extends BaseComponent {
 
         d3.select(this)
           .attr("d", shapeString)
-          .style("fill", cScale(d["color"]))
+          .style("fill", cScale(d[_this.MDL.color.data.concept]))
           .append("title").text(d["name"]);
 
         tempdivEl.html("");
