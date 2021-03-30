@@ -1372,12 +1372,15 @@ export const eachTree = function (tree, filterCallback, parentTree) {
 };
 
 export const setIcon = function (element, icon) {
-  element.selectAll("*").remove();
-  element.node().appendChild(
-    element.node().ownerDocument.importNode(
-      new DOMParser().parseFromString(
-        icon, "application/xml").documentElement, true)
+  const svgIcon = element.node().ownerDocument.importNode(
+    new DOMParser().parseFromString(icon, "application/xml").documentElement,
+    true
   );
+  svgIcon.setAttribute("width", "0px");
+  svgIcon.setAttribute("height", "0px");
+
+  element.selectAll(".svg-icon").remove();
+  element.node().appendChild(svgIcon);
   return element;
 };
 
