@@ -5,16 +5,32 @@
 // ****************************************************************************
 %vzb-chart-wrapper {
   //@include position(absolute, 0);
+  direction: ltr;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  grid-row-start: 1;
+  grid-row-end: 2;
+  grid-column-start: 1;
+  grid-column-end: 2;  
+  grid-auto-rows: 0;
+  grid-auto-columns: 0;
 }
 
 %vzb-chart-svg {
   //@include position(absolute, 0);
   color: $vzb-color-grey-dark;
-  height: 100vh;//100%;
   margin: 0;
   overflow: hidden;
-  width: 100vw;//100%;
+  grid-row-start: 1;
+  grid-row-end: -1;
+  grid-column-start: 1;
+  grid-column-end: -1;
+  align-self: stretch;
+  justify-self: stretch;
+  //height: 100vh;//100%;
+  //width: 100vw;//100%;
 }
 
 %vzb-chart-ticks-small {
