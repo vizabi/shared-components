@@ -1,4 +1,4 @@
-import { throttle, transform } from "../../legacy/base/utils";
+import { throttle, transform, deepExtend } from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
 import "./stepped-slider.scss";
 
@@ -27,7 +27,7 @@ export class SteppedSlider extends BaseComponent {
 
   setup() {
     //this.setDelay = throttle(this.setDelay, 50);
-    this.config = Object.assign(CONFIG, this.config);
+    this.config = deepExtend(deepExtend({}, CONFIG), this.config);
     this.config.height -= this.config.triangleHeight / 2;
   
     const {
