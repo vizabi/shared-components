@@ -257,46 +257,11 @@ class ColorLegend extends BaseComponent {
     return {
       mouseover(d, i) {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", false);
-        //disable interaction if so stated in concept properties
-        if (!_this.MDL.color.scale.isDiscrete()) return;
 
-        const view = d3.select(this);
-        const target = d[which];
-        const _isEntityConcept = isEntityConcept(_this.MDL.color.data.conceptProps || {});
-
-        if (_isEntityConcept) {
-          const key = _this.MDL.color.name;
-          const trailKey = Symbol.for("trailHeadKey");
-          _this._highlight(_this.model.dataArray.filter(data => !data[trailKey] && data[key] == target));
-        } else {
-
+        if (isEntityConcept(_this.MDL.color.data.conceptProps)) {
+          const concept = _this.MDL.color.data.concept;
+          _this._highlight(_this.model.dataArray?.filter(f => f[concept] == d[concept]));
         }
-
-        // if (_this.colorModel.use == "indicator") {
-        //   _this.model.marker.getFrame(_this.model.time.value, frame => {
-        //     if (!frame) return;
-
-        //     const filterHash = Object.keys(frame[_this.colorModel._name]).filter(key => frame[_this.colorModel._name][key] == target)
-        //       .reduce((result, key) => {
-        //         result[key] = true;
-        //         return result;
-        //       }, {});
-
-        //     _this._highlight(_this.markerArray.filter(d => filterHash[utils.getKey(d, _this.colorModel.getDataKeys())]));
-        //   });
-        // } else if (_this.colorModel.use == "property") {
-        //   const filterHash = _this.colorModel.getValidItems()
-        //     //filter so that only countries of the correct target remain
-        //     .filter(f => f[_this.colorModel.which] == target)
-        //     .reduce((result, d) => {
-        //       result[d[KEY]] = true;
-        //       return result;
-        //     }, {});
-
-        //   _this._highlight(_this.markerArray.filter(key => filterHash[key[KEY]]));
-        // } else {
-        //   // in case of constant do nothing
-        // }
       },
 
       mouseout(d, i) {
@@ -456,15 +421,15 @@ class ColorLegend extends BaseComponent {
     });
   }
 
-  _highlight(values) {
+  _highlight(values = []) {
     if (!values.length) return;
-    utils.getProp(this, ["root", "ui", "chart", "superhighlightOnMinimapHover"]) ?
+    this.root.ui?.chart?.superhighlightOnMinimapHover && this.MDL.superHighlighted ?
       this.MDL.superHighlighted.data.filter.set(values) :
       this.MDL.highlighted.data.filter.set(values);
   }
 
   _unhighlight() {
-    utils.getProp(this, ["root", "ui", "chart", "superhighlightOnMinimapHover"]) ?
+    this.root.ui?.chart?.superhighlightOnMinimapHover && this.MDL.superHighlighted ?
       this.MDL.superHighlighted.data.filter.clear() :
       this.MDL.highlighted.data.filter.clear();
   }

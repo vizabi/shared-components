@@ -7,7 +7,7 @@ export const STATUS = {
   ERROR: "error"
 };
 
-export function isEntityConcept(concept) {
+export function isEntityConcept(concept = {}) {
   return ["entity_set", "entity_domain"].includes(concept.concept_type);
 }
 
