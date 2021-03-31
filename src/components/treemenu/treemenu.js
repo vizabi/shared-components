@@ -207,7 +207,10 @@ export class TreeMenu extends BaseComponent {
         if (folderStrategies[tag.dataSourceName] == FOLDER_STRATEGY_SPREAD) {
           tags[ROOT].children.push(tags[tag.tag]);
         } else {
-          tags[tag.dataSourceName].children.push(tags[tag.tag]);
+          if (tags[tag.dataSourceName])
+            tags[tag.dataSourceName].children.push(tags[tag.tag]);
+          else
+            utils.warn(`Tags request to the datasource ${tag.dataSourceName} probably didn't succeed`)
         }
       }
     });
