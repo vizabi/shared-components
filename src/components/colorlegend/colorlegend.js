@@ -260,7 +260,8 @@ class ColorLegend extends BaseComponent {
 
         if (isEntityConcept(_this.MDL.color.data.conceptProps)) {
           const concept = _this.MDL.color.data.concept;
-          _this._highlight(_this.model.dataArray?.filter(f => f[concept] == d[concept]));
+          const colorMdlName = _this.MDL.color.name;
+          _this._highlight(_this.model.dataArray?.filter(f => f[colorMdlName] == d[concept]));
         }
       },
 
