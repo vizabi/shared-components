@@ -128,7 +128,7 @@ class Find extends Dialog {
       });
 
     this.DOM.deselect_all.on("click", () => {
-      this._deselectMarkers();
+      this.MDL.selected.data.filter.clear();
     });
 
 
@@ -313,11 +313,6 @@ class Find extends Dialog {
         opacityNonSelectedSlider._updateView();
       })
     }
-  }
-
-  _deselectMarkers() {
-    const selectedFilter = this.MDL.selected.data.filter;
-    selectedFilter.delete([...selectedFilter.markers])
   }
 }
 
