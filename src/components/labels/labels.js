@@ -200,6 +200,7 @@ class Labels extends BaseComponent {
 
     //const select = _this.model.dataArray.filter(d => this.MDL.selected.has(d));
     const select = [...this.MDL.selected.markers.keys()]
+      .filter(key => _this.model.dataMap.hasByObjOrStr(null,key))
       .map(selectedKey => ({[Symbol.for("key")]: selectedKey}));
     this.entityLabels = this.labelsContainer.selectAll("." + _cssPrefix + "-entity")
       .data(select, key);
