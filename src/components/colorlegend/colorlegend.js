@@ -12,6 +12,10 @@ import {decorate, computed} from "mobx";
  * VIZABI BUBBLE COLOR LEGEND COMPONENT
  */
 
+function isTrailBubble(d){
+  return !!d[Symbol.for("trailHeadKey")];
+}
+
 class ColorLegend extends BaseComponent {
   constructor(config) {
     config.template = `
@@ -51,7 +55,7 @@ class ColorLegend extends BaseComponent {
           
           <span class="vzb-cl-more-hint vzb-hidden">click for more options</span>
 
-          <div class="vzb-cl-select-dialog">
+          <div class="vzb-cl-select-dialog vzb-hidden">
             <div class="vzb-cl-select-dialog-title"></div>
             <div class="vzb-cl-select-dialog-close"></div>
           </div>
@@ -177,14 +181,14 @@ class ColorLegend extends BaseComponent {
       })
       .on("mouseover", _this._interact().mouseover)
       .on("mouseout", _this._interact().mouseout)
-      // .on("click", (...args) => {
-      //   if (_this.legendHasOwnModel) {
-      //     this._bindSelectDialogItems(...args);
-      //     this.DOM.selectDialog.classed("vzb-hidden", false);
-      //   } else {
-      //     this._interact().clickToChangeColor(...args);
-      //   }
-      // })
+      .on("click", (...args) => {
+        if (this._legendHasOwnModel()) {
+          this._bindSelectDialogItems(...args);
+          this.DOM.selectDialog.classed("vzb-hidden", false);
+        } else {
+          this._interact().clickToChangeColor(...args);
+        }
+      })
       .merge(colorOptions);
 
     colorOptions.each(function(d, index) {
@@ -218,10 +222,10 @@ class ColorLegend extends BaseComponent {
       .enter().append("path")
       .on("mouseover", this._interact().mouseover)
       .on("mouseout", this._interact().mouseout)
-      // .on("click", (...args) => {
-      //   this._bindSelectDialogItems(...args);
-      //   this.DOM.selectDialog.classed("vzb-hidden", false);
-      // })
+      .on("click", (...args) => {
+        this._bindSelectDialogItems(...args);
+        this.DOM.selectDialog.classed("vzb-hidden", false);
+      })
       .each(function(d) {
         let shapeString = d["map"].trim();
 
@@ -258,18 +262,26 @@ class ColorLegend extends BaseComponent {
       mouseover(d, i) {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", false);
 
-        if (isEntityConcept(_this.MDL.color.data.conceptProps)) {
-          const concept = _this.MDL.color.data.concept;
-          const colorMdlName = _this.MDL.color.name;
-          _this._highlight(_this.model.dataArray?.filter(f => f[colorMdlName] == d[concept]));
-        }
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
+        const concept = _this.MDL.color.data.concept;
+        const colorMdlName = _this.MDL.color.name;
+        
+        const selectArray = _this.model.dataArray?.filter(f => f[colorMdlName] == d[concept]);
+
+        if (!selectArray) return;
+
+        _this.root.ui?.chart?.superhighlightOnMinimapHover && _this.MDL.superHighlighted ?
+          _this.MDL.superHighlighted.data.filter.set(selectArray) :
+          _this.MDL.highlighted.data.filter.set(selectArray);
       },
 
       mouseout(d, i) {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", true);
-        //disable interaction if so stated in concept properties
-        if (!_this.MDL.color.scale.isDiscrete()) return;
-        _this._unhighlight();
+
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
+        _this.root.ui?.chart?.superhighlightOnMinimapHover && _this.MDL.superHighlighted ?
+          _this.MDL.superHighlighted.data.filter.clear() :
+          _this.MDL.highlighted.data.filter.clear();
       },
       clickToChangeColor(d, i, group, d3event = d3.event) {
         //disable interaction if so stated in concept properties
@@ -287,68 +299,29 @@ class ColorLegend extends BaseComponent {
           .show(true);
       },
       clickToShow(d, i) {
-        //disable interaction if so stated in concept properties
-        if (!_this.MDL.color.scale.isDiscrete()) return;
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
-        const view = d3.select(this);
-        const target = d[which];
-
-        const oldShow = _this.model.entities.show[which] && _this.model.entities.show[which]["$in"] ?
-          utils.clone(_this.model.entities.show[which]["$in"]) :
-          [];
-
-        const entityIndex = oldShow.indexOf(d[which]);
-        if (entityIndex !== -1) {
-          oldShow.splice(entityIndex, 1);
-        } else {
-          oldShow.push(d[which]);
-        }
-
-        const show = {};
-        if (oldShow.length > 0)
-          show[which] = { "$in": oldShow };
-
-        _this.model.entities.set({ show });
-
+        const filter = _this.model.data.filter;
+        const colorSpace = _this.model.encoding.color.data.space;
+        const concept = _this.MDL.color.data.concept;
+        
+        filter.config.dimensions[colorSpace][concept] = d[concept];
       },
       clickToSelect(d, i) {
-        //disable interaction if so stated in concept properties
-        if (!_this.MDL.color.scale.isDiscrete()) return;
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
-        const view = d3.select(this);
-        const target = d[which];
-        const key = _this.MDL.color.name;
+        const concept = _this.MDL.color.data.concept;
+        const colorMdlName = _this.MDL.color.name;
         const selectedFilter = _this.MDL.selected.data.filter;
-        const trailKey = Symbol.for("trailHeadKey");
-
-        const selectArray = _this.model.dataArray.filter(data => !data[trailKey] && data[key] == target);
         
-        if (selectArray.every(d => selectedFilter.has(d))) {
+        const selectArray = _this.model.dataArray?.filter(f => !isTrailBubble(f) && f[colorMdlName] == d[concept]);
+        
+        if (!selectArray) return;
+
+        if (selectArray.every(d => selectedFilter.has(d)))
           runInAction(() => selectedFilter.delete(selectArray));
-        } else {
-          runInAction(() => selectedFilter.set(selectArray));
-        }
-
-
-        return 
-
-        // const filterHash = _this.colorModel.getValidItems()
-        //   //filter so that only countries of the correct target remain
-        //   .filter(f => f[_this.colorModel.which] == target)
-        //   //fish out the "key" field, leave the rest behind
-        //   .reduce((result, d) => {
-        //     result[d[KEY]] = true;
-        //     return result;
-        //   }, {});
-
-        // const select = _this.markerArray.filter(f => filterHash[f[KEY]])
-        //   .map(d => utils.clone(d, KEYS));
-
-        // if (select.filter(d => _this.model.marker.isSelected(d)).length == select.length) {
-        //   _this.model.marker.clearSelected();
-        // } else {
-        //   _this.model.marker.setSelect(select);
-        // }
+        else
+          runInAction(() => selectedFilter.set(selectArray));        
       }
     };
   }
@@ -371,14 +344,14 @@ class ColorLegend extends BaseComponent {
     this.DOM.selectAllButton = this.DOM.selectDialog.append("div")
       .classed("vzb-cl-select-dialog-item", true);
 
-    this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
-      .classed("vzb-cl-select-dialog-item", true);
+    // this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
+    //   .classed("vzb-cl-select-dialog-item", true);
 
-    this.DOM.editColorButton = this.DOM.selectDialog.append("div")
-      .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
+    // this.DOM.editColorButton = this.DOM.selectDialog.append("div")
+    //   .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
 
-    this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
-      .classed("vzb-cl-select-dialog-item-tooltip", true);
+    // this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
+    //   .classed("vzb-cl-select-dialog-item-tooltip", true);
   }
 
   _translateSelectDialog() {
@@ -420,19 +393,6 @@ class ColorLegend extends BaseComponent {
       this._interact().clickToChangeColor(...args);
       this._closeSelectDialog();
     });
-  }
-
-  _highlight(values = []) {
-    if (!values.length) return;
-    this.root.ui?.chart?.superhighlightOnMinimapHover && this.MDL.superHighlighted ?
-      this.MDL.superHighlighted.data.filter.set(values) :
-      this.MDL.highlighted.data.filter.set(values);
-  }
-
-  _unhighlight() {
-    this.root.ui?.chart?.superhighlightOnMinimapHover && this.MDL.superHighlighted ?
-      this.MDL.superHighlighted.data.filter.clear() :
-      this.MDL.highlighted.data.filter.clear();
   }
 
   _updateRainbowLegend(isVisible) {
