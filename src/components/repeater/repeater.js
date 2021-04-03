@@ -5,7 +5,11 @@ import "./repeater.scss";
 
 export class Repeater extends BaseComponent {
   constructor(config) {
-    const repeat = config.model.encoding.repeat;
+    const repeat = {
+      modelType: "repeat",
+      row: ["y"],
+      column: ["x"]
+    }
 
     const {
       COMP_CSSNAME,
@@ -52,7 +56,11 @@ export class Repeater extends BaseComponent {
   }
 
   loading() {
-    const repeat = this.model.encoding.repeat;
+    const repeat = {
+      modelType: "repeat",
+      row: ["y"],
+      column: ["x"] 
+    } // this.model.encoding.repeat;
     this.element.style("grid-template-columns", Array(repeat.column.length).fill("1fr").join(" "));
   }
 }
