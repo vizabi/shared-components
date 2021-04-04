@@ -1013,24 +1013,23 @@ export class TreeMenu extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-    this.addReaction(this.__observeDataSources, () => {
+    this.addReaction(() => {
       this.state.ownReadiness = STATUS.PENDING;
       const datasources = this._getDataSources(this.root.model.config.dataSources);
-      Promise.all(datasources.map(ds => ds.metaDataPromise))
-        .then(promises => utils.defer(() => 
-          this.getTags(this.services.locale.id, promises)
-            .then(tags =>
-              this._buildIndicatorsTree({
-                tagsArray: tags,
-                dataModels: this._getDataSources(this.root.model.config.dataSources)
-              }))
-            .then(this.updateView.bind(this))
-            .then(() => {
-              this._enableSearch();
-              this.state.ownReadiness = STATUS.READY;
-            })
-        ));
-    }, { fireImmediately: true });
+      if (Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == 'fulfilled') {
+        this.getTags(this.services.locale.id)
+          .then(tags =>
+            this._buildIndicatorsTree({
+              tagsArray: tags,
+              dataModels: this._getDataSources(this.root.model.config.dataSources)
+            }))
+          .then(this.updateView.bind(this))
+          .then(() => {
+            this._enableSearch();
+            this.state.ownReadiness = STATUS.READY;
+          })
+      }
+    }, undefined, { fireImmediately: true });
 
     this._updateLayoutProfile();
     this.addReaction(this._resize);
