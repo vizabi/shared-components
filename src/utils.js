@@ -22,12 +22,19 @@ export function getConceptName(enc, localise) {
 
 export function getConceptShortName(enc, localise) {
   const cp = enc.data.conceptProps;
+
+  if (enc.data.isConstant()) 
+    return localise("indicator/" + enc.data.constant + "/" + enc.scale.modelType);
+    
   return cp.name_short || getConceptName(enc, localise);
 }
 
 export function getConceptNameMinusShortName(enc, localise) {
   const name = getConceptName(enc, localise);
   const shortName = getConceptShortName(enc, localise);
+
+  if (enc.data.isConstant()) 
+    return name;
 
   let result = name.replace(shortName,"");
 
@@ -43,7 +50,7 @@ export function getConceptNameMinusShortName(enc, localise) {
 
 export function getConceptUnit(enc) {
   const cp = enc.data.conceptProps;
-  return cp.unit || "";
+  return cp && cp.unit || "";
 }
 
 export function getDefaultStateTree(defaultState, component) {
