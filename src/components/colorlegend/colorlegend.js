@@ -344,14 +344,14 @@ class ColorLegend extends BaseComponent {
     this.DOM.selectAllButton = this.DOM.selectDialog.append("div")
       .classed("vzb-cl-select-dialog-item", true);
 
-    // this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
-    //   .classed("vzb-cl-select-dialog-item", true);
+     this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
+       .classed("vzb-cl-select-dialog-item", true);
 
-    // this.DOM.editColorButton = this.DOM.selectDialog.append("div")
-    //   .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
+     this.DOM.editColorButton = this.DOM.selectDialog.append("div")
+       .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
 
-    // this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
-    //   .classed("vzb-cl-select-dialog-item-tooltip", true);
+     this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
+       .classed("vzb-cl-select-dialog-item-tooltip", true);
   }
 
   _translateSelectDialog() {
