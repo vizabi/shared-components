@@ -62,7 +62,7 @@ export class About extends Dialog {
       .html("<a href='https://github.com/Gapminder/vizabi/graphs/contributors' target='_blank'>Contributors</a>");
 
     //versions
-    const dataStore = this.root.model.stores.dataSources;
+    const dataStore = Vizabi.stores.dataSources;
 
     const toolData = {};
     const versionInfo = this.root.versionInfo;

@@ -1045,9 +1045,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _getSourceName(ds) {
-    const nameDs = [...Vizabi.stores.dataSources.named]
-      .filter(([dsName, dsModel]) => dsModel == ds);
-    return nameDs.length ? nameDs[0][0] : ("dataSource" + Vizabi.stores.dataSources.getAll().indexOf(ds));
+    return ds.id ?? "Unnamed datasource";
   }
 
   _getDatasetName(ds) {

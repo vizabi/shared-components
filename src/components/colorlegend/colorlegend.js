@@ -105,7 +105,7 @@ class ColorLegend extends BaseComponent {
       selected: this.model.encoding.selected,
       highlighted: this.model.encoding.highlighted,
       superHighlighted: this.model.encoding.superhighlighted,
-      legend: this.root.model.stores?.markers.get(this.legendModelName)
+      legend: this.root.model.markers[this.legendModelName]
     };
   }
 

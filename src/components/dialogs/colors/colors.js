@@ -48,8 +48,7 @@ export class Colors extends Dialog {
       //model: config.root.model.stores.markers.get("legend")
       state: {
         get hoverKeyLabels() {
-          if (!config.root.model.stores) return null;
-          const legendMarker = config.root.model.stores.markers.get("legend");
+          const legendMarker = config.root.model.markers?.legend;
           if (!legendMarker) return null;
           if (legendMarker.state === STATUS.READY) {
             //TODO: fix on multi dimensions config
