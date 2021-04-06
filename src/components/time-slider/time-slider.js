@@ -153,6 +153,9 @@ class TimeSlider extends BaseComponent {
       }
     });
 
+    this.DOM.forecastBoundary.on("click", () => {
+      this.MDL.frame.setValueAndStop(this.root.ui.chart.endBeforeForecast);
+    });
   }
 
   get MDL() {
@@ -170,8 +173,11 @@ class TimeSlider extends BaseComponent {
 
     if (this._updateLayoutProfile()) return; //return if exists with error
 
+    this.addReaction(this._configEndBeforeForecast);
     this.addReaction(this._updateSize);
+    this.addReaction(this._redrawForecast);
     this.addReaction(this._optionClasses);
+    this.addReaction(this._processForecast);
     this.addReaction(this._setHandle);
 
   }
@@ -186,13 +192,58 @@ class TimeSlider extends BaseComponent {
   //     .tickFormat(this.model.time.getFormatter());
   // }
 
-  _updateLayoutProfile(){
+  _updateLayoutProfile() {
     this.services.layout.size;
 
     this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = this.element.node().clientHeight || 0;
     this.width = this.element.node().clientWidth || 0;
     if (!this.height || !this.width) return utils.warn("Timeslider _updateProfile() abort: container is too little or has display:none");
+  }
+
+  _configEndBeforeForecast() {
+    const frame = this.MDL.frame;
+    
+    if (!this.root.ui.chart.endBeforeForecast) {
+      this.root.ui.chart.endBeforeForecast = this.localise(this.MDL.frame.stepScale(frame.step == 0 ? 0 : frame.step - 1));
+    }
+    this.nextBeforeForecast = frame.stepScale(frame.stepScale.invert(frame.parseValue(this.root.ui.chart.endBeforeForecast)) + 1);
+  }
+
+  _processForecast() {
+    const frame = this.MDL.frame;
+
+    if (this.root.ui.chart.showForecast && this.root.ui.chart.pauseBeforeForecast && frame.playing) {
+      if (((frame.value - this.nextBeforeForecast) == 0) && this.playing) {
+        frame.setValueAndStop(this.root.ui.chart.endBeforeForecast);
+      } else {
+        this.playing = true;
+      }
+    } else {
+      this.playing = false;
+    }
+  }
+
+  _redrawForecast() {
+    this.services.layout.size;
+    this.MDL.frame.scale.domain;
+
+    const endBeforeForecast = this.MDL.frame.parseValue(this.root.ui.chart.endBeforeForecast);
+    const forecastIsOn = this.root.ui.chart.showForecast && this.MDL.frame.data.domain.lastItem > endBeforeForecast;
+    this.DOM.forecastBoundary
+      .classed("vzb-hidden", !forecastIsOn);
+
+    if (forecastIsOn) {
+      const radius = this.profileConstants.radius;
+
+      this.DOM.forecastBoundary
+        .attr("transform", "translate(0," + this.height / 2 + ")")
+        .attr("x1", this.xScale(endBeforeForecast) - radius / 2)
+        .attr("x2", this.xScale(endBeforeForecast) + radius / 2)
+        .attr("y1", radius)
+        .attr("y2", radius);
+    }
+
   }
 
   /**
@@ -259,19 +310,6 @@ class TimeSlider extends BaseComponent {
 
     //this.sliderWidth = slider.node().getBoundingClientRect().width;
 
-    // const forecastBoundaryIsOn = this.model.time.end > this.model.time.endBeforeForecast;
-    // this.forecastBoundary
-    //   .classed("vzb-hidden", !forecastBoundaryIsOn);
-
-    // if (forecastBoundaryIsOn) {
-    //   this.forecastBoundary
-    //     .attr("transform", "translate(0," + this.height / 2 + ")")
-    //     .attr("x1", this.xScale(this.model.time.endBeforeForecast) - this.profile.radius / 2)
-    //     .attr("x2", this.xScale(this.model.time.endBeforeForecast) + this.profile.radius / 2)
-    //     .attr("y1", radius)
-    //     .attr("y2", radius);
-    // }
-
     // this.resizeSelectedLimiters();
     // this._resizeProgressBar();
     // this._setHandle();
@@ -315,8 +353,9 @@ class TimeSlider extends BaseComponent {
         let posX = utils.roundStep(Math.round(d3.mouse(this)[0]), precision);
         const maxPosX = _this.sliderWidth;
 
-        const forecastBoundaryIsOn = frame.scale.domain[1] > frame.endBeforeForecast;
-        const forecastBoundaryPos = _this.xScale(frame.endBeforeForecast);
+        const endBeforeForecast = frame.parseValue(_this.root.ui.chart.endBeforeForecast);
+        const forecastBoundaryIsOn = _this.root.ui.chart.showForecast && (frame.data.domain.lastItem > endBeforeForecast);
+        const forecastBoundaryPos = _this.xScale(endBeforeForecast);
         const snappyMargin = 0.5 * handle.attr("r");
 
         if (posX > maxPosX) {
