@@ -1,6 +1,7 @@
 import { throttle, transform, deepExtend } from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
 import "./stepped-slider.scss";
+import { computed, decorate } from "mobx";
 
 const CONFIG = {
   triangleWidth: 10,
@@ -11,7 +12,7 @@ const CONFIG = {
   range: [1200, 900, 450, 200, 150, 100]
 }
 
-export class SteppedSlider extends BaseComponent {
+class SteppedSlider extends BaseComponent {
 
   constructor(config) {
     config.template = `
@@ -55,11 +56,13 @@ export class SteppedSlider extends BaseComponent {
   }
 
   draw() {
-    this.MDL = {
-      frame: this.model.encoding.frame,
-    }
-
     this.addReaction(this.redraw);
+  }
+
+  get MDL() {
+    return {
+      frame: this.model.encoding.frame
+    };
   }
 
   initAxis() {
@@ -137,3 +140,8 @@ export class SteppedSlider extends BaseComponent {
   }
 
 }
+
+const decorated = decorate(SteppedSlider, {
+  "MDL": computed
+});
+export { decorated as SteppedSlider };
