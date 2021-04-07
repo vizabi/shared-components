@@ -1,5 +1,5 @@
 import { BaseService } from "./base-service.js";
-import { observable, decorate, autorun, computed } from "mobx";
+import { observable, decorate, autorun, computed, runInAction } from "mobx";
 import { STATUS } from "../utils.js";
 
 const FALLBACK_PATH = "./assets/locale/";
@@ -30,7 +30,10 @@ class _LocaleService extends BaseService {
   }
 
   set id(id) {
-    this.config.id = id;
+    runInAction(() => {
+      this.config.id = id;
+      Vizabi.stores.dataSources.getAll().forEach(e => e.config.locale = id);
+    });
   }
 
   deconstruct(){
