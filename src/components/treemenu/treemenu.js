@@ -1029,7 +1029,7 @@ export class TreeMenu extends BaseComponent {
             this.state.ownReadiness = STATUS.READY;
           })
       }
-    }, undefined, { fireImmediately: true });
+    }, true);
 
     this._updateLayoutProfile();
     this.addReaction(this._resize);
