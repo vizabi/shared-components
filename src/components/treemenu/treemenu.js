@@ -5,6 +5,7 @@ import { OPTIONS, css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
 import * as utils from "../../legacy/base/utils";
 import { ICON_CLOSE as iconClose } from "../../icons/iconset";
 import "./treemenu.scss";
+import {runInAction} from "mobx";
 
 const PROFILE_CONSTANTS = {
   SMALL: {
@@ -1013,26 +1014,33 @@ export class TreeMenu extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-    this.addReaction(() => {
+    this.addReaction(this._prepareTags, true);
+
+    this._updateLayoutProfile();
+    this.addReaction(this._resize);
+  }
+
+  _prepareTags() {
+    runInAction(() => {
       this.state.ownReadiness = STATUS.PENDING;
-      const datasources = this._getDataSources(this.root.model.config.dataSources);
-      if (Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == 'fulfilled') {
-        this.getTags(this.services.locale.id)
-          .then(tags =>
-            this._buildIndicatorsTree({
+    });
+    const datasources = this._getDataSources(this.root.model.config.dataSources);
+    if (Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == 'fulfilled') {
+      const localeId = this.services.locale.id;
+      runInAction(() => {
+        this.getTags(localeId)
+          .then(tags => {
+            return this._buildIndicatorsTree({
               tagsArray: tags,
               dataModels: this._getDataSources(this.root.model.config.dataSources)
-            }))
+            })})
           .then(this.updateView.bind(this))
           .then(() => {
             this._enableSearch();
             this.state.ownReadiness = STATUS.READY;
           })
-      }
-    }, true);
-
-    this._updateLayoutProfile();
-    this.addReaction(this._resize);
+      })
+    }
   }
 
   _updateLayoutProfile(){
