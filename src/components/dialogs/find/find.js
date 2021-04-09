@@ -242,8 +242,8 @@ class Find extends Dialog {
   _getCompoundLabelText(d) {
     if (typeof d.label == "object") {
       return Object.entries(d.label)
-        .filter(([key, _]) => key != this.MDL.frame.data.concept)
-        .map(([_, value]) => value)
+        .filter(entry => entry[0] != this.MDL.frame.data.concept)
+        .map(entry => entry[1])
         .join(", ");
     }
     if (d.label != null) return "" + d.label;
