@@ -240,7 +240,12 @@ class Find extends Dialog {
   }
 
   _getCompoundLabelText(d) {
-    if (typeof d.label == "object") return Object.values(d.label).join(", ");
+    if (typeof d.label == "object") {
+      return Object.entries(d.label)
+        .filter(([key, _]) => key != this.MDL.frame.data.concept)
+        .map(([_, value]) => value)
+        .join(", ");
+    }
     if (d.label != null) return "" + d.label;
     return d[Symbol.for("key")];
   }
