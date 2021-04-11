@@ -99,9 +99,10 @@ class Speed extends Dialog {
       })
       .on("change", function() {
         //TODO: where is time parser nowdays
-        const parsed = _this.MDL.frame.parseValue(this.value);
+        const frame = _this.MDL.frame;
+        const parsed = frame.parseValue(this.value);
         if (utils.isDate(parsed)) {
-          _this.root.ui.chart.endBeforeForecast = _this.localise(parsed);
+          _this.root.ui.chart.endBeforeForecast = _this.localise((parsed < frame.scale.domain[0]) ? frame.scale.domain[0] : (parsed > (frame.scale.domain[1] ?? frame.scale.domain[0]) ? (frame.scale.domain[1] ?? frame.scale.domain[0]) : parsed ));
         }
       });
 

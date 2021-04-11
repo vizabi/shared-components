@@ -174,6 +174,8 @@ class TimeSlider extends BaseComponent {
     if (this._updateLayoutProfile()) return; //return if exists with error
 
     this.addReaction(this._configEndBeforeForecast);
+    this.addReaction(this._adjustFrameValueToEndBeforeForecast);
+    this.addReaction(this._updateScales);
     this.addReaction(this._updateSize);
     this.addReaction(this._redrawForecast);
     this.addReaction(this._optionClasses);
@@ -201,35 +203,62 @@ class TimeSlider extends BaseComponent {
     if (!this.height || !this.width) return utils.warn("Timeslider _updateProfile() abort: container is too little or has display:none");
   }
 
+  get domain() {
+    if (this.root.ui.chart.showForecast) {
+      return this.MDL.frame.scale.domain;
+    } else {
+      return [this.MDL.frame.scale.domain[0], this.MDL.frame.parseValue(this.root.ui.chart.endBeforeForecast) || this.MDL.frame.scale.domain[1]];
+    }
+  }
+
   _configEndBeforeForecast() {
     const frame = this.MDL.frame;
     
     if (!this.root.ui.chart.endBeforeForecast) {
-      this.root.ui.chart.endBeforeForecast = this.localise(this.MDL.frame.stepScale(frame.step == 0 ? 0 : frame.step - 1));
+      //this.root.ui.chart.endBeforeForecast = this.localise(frame.stepScale(frame.stepScale.invert(frame.parseValue(this.localise(new Date(Date.now())))) - 1));
+      this.root.ui.chart.endBeforeForecast = this.localise(frame.stepScale(frame.step == 0 ? 0 : frame.step - 1));
     }
     this.nextBeforeForecast = frame.stepScale(frame.stepScale.invert(frame.parseValue(this.root.ui.chart.endBeforeForecast)) + 1);
+  }
+
+  _adjustFrameValueToEndBeforeForecast() {
+    if(!this.root.ui.chart.showForecast) {
+      const frame = this.MDL.frame;
+      const endBeforeForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
+      if (endBeforeForecast < frame.value) {
+        frame.setValueAndStop(endBeforeForecast);
+      }
+    }
   }
 
   _processForecast() {
     const frame = this.MDL.frame;
 
-    if (this.root.ui.chart.showForecast && this.root.ui.chart.pauseBeforeForecast && frame.playing) {
-      if (((frame.value - this.nextBeforeForecast) == 0) && this.playing) {
-        frame.setValueAndStop(this.root.ui.chart.endBeforeForecast);
+    if (frame.playing) {
+      if ((frame.value - this.nextBeforeForecast) == 0) {
+        if (this.__playing) {
+          if (!this.root.ui.chart.showForecast || this.root.ui.chart.pauseBeforeForecast) {
+            frame.setValueAndStop(this.root.ui.chart.endBeforeForecast);
+          }
+        } else {
+          if (!this.root.ui.chart.showForecast) {
+            frame.setStep(0);
+          }
+        }
       } else {
-        this.playing = true;
+        this.__playing = true;
       }
     } else {
-      this.playing = false;
+      this.__playing = false;
     }
   }
 
   _redrawForecast() {
     this.services.layout.size;
-    this.MDL.frame.scale.domain;
+    this.domain;
 
     const endBeforeForecast = this.MDL.frame.parseValue(this.root.ui.chart.endBeforeForecast);
-    const forecastIsOn = this.root.ui.chart.showForecast && this.MDL.frame.data.domain.lastItem > endBeforeForecast;
+    const forecastIsOn = this.root.ui.chart.showForecast && (this.MDL.frame.scale.domain[1] > endBeforeForecast);
     this.DOM.forecastBoundary
       .classed("vzb-hidden", !forecastIsOn);
 
@@ -246,13 +275,17 @@ class TimeSlider extends BaseComponent {
 
   }
 
+  _updateScales() {
+    this.xScale = this.MDL.frame.scale.d3Scale.domain(this.domain);
+  }
+
   /**
    * Executes everytime the container or vizabi is resized
    * Ideally,it contains only operations related to size
    */
   _updateSize() {
     this.services.layout.size;
-    this.MDL.frame.scale.domain;
+    this.domain;
 
     const {
       margin,
@@ -398,6 +431,7 @@ class TimeSlider extends BaseComponent {
   _setHandle(transition) {
     this.services.layout.size;
     this.services.layout.hGrid;
+    this.domain;
 
     const { value, speed, playing } = this.MDL.frame;
 
@@ -508,6 +542,7 @@ class TimeSlider extends BaseComponent {
   }
 
   _isDomainNotVeryGood(){
+    this.domain;
     const domain = this.xScale.domain();
     //domain not available
     if(!domain || domain.length !== 2) return true;
@@ -529,6 +564,7 @@ TimeSlider.DEFAULT_UI = {
 };
 
 const decorated = decorate(TimeSlider, {
+  "domain": computed,
   "MDL": computed
 });
 export { decorated as TimeSlider };
