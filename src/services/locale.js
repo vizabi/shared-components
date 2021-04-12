@@ -133,9 +133,11 @@ class _LocaleService extends BaseService {
     this.dateF = d3.timeFormat("%Y");
     
     this.stringF = function(string){
-      let translated = this.content[this.id].dictionary[string];
+      //the inline conditionals are needed because some translation files are stuck in cache 
+      //and don't have the "dictionary" object but have strings in the root instead
+      let translated = this.content[this.id].dictionary? this.content[this.id].dictionary[string] : this.content[this.id][string];
       if (translated || translated === "") return translated;
-      translated = this.content[FALLBACK_ID].dictionary[string];
+      translated = this.content[FALLBACK_ID].dictionary? this.content[FALLBACK_ID].dictionary[string] : this.content[FALLBACK_ID][string];
       if (translated || translated === "") return translated;
       return string;
     };
