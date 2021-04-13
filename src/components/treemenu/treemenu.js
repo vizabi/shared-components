@@ -697,6 +697,7 @@ export class TreeMenu extends BaseComponent {
           return false;
         });
         dataFiltered = utils.pruneTree(data, f => allowedIDs.indexOf(f.id) > -1);
+        dataFiltered = utils.pruneTree(data, f => f.key && this._targetModel.data.allow.space.filter(f.key));
       } else if (_this._targetModelIsMarker) {
         allowedIDs = data.children.map(child => child.id);
         dataFiltered = utils.pruneTree(data, f => f.type == "space");
