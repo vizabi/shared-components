@@ -220,56 +220,63 @@ export class TreeMenu extends BaseComponent {
     tags[ROOT].children.push({
       id: "_default",
       use: "constant"
-    })
+    });
 
     const properties = this.model.data.space.length > 1;
-    this._filterAvailabilityBySpace(this.model.availability, this.model.data.space).forEach(kvPair => {
-      const entry = kvPair.value;
-      //if entry's tag are empty don't include it in the menu
-      if (!entry || entry.tags == "_none") return;
-      if (!entry.tags) entry.tags = this._getSourceName(kvPair.source) || ROOT;
+    this._filterAvailabilityBySpace(this.model.availability, this.model.data.space)
+      .concat(this.model.data.space.map(d => {
+        return { 
+          key: [d],
+          source: this.model.data.source,
+          value: this.model.data.source.getConcept(d)
+        }; 
+      }))
+      .filter(f => f.value && f.value.tags !== "_none")
+      .forEach(kvPair => {
+        const entry = kvPair.value;
+        if (!entry.tags) entry.tags = this._getSourceName(kvPair.source) || ROOT;
 
-      const use = entry.concept == "_default" ? "constant" : (kvPair.key.length > 1 || entry.concept_type === "time" ? "indicator" : "property");
-      const concept = {
-        id: entry.concept,
-        key: kvPair.key,
-        name: entry.name,
-        name_catalog: entry.name_catalog,
-        description: entry.description,
-        dataSource: this._getSourceName(kvPair.source),
-        translateContributionLink: kvPair.source.translateContributionLink,
-        use
-      };
+        const use = entry.concept == "_default" ? "constant" : (kvPair.key.length > 1 || entry.concept_type === "time" ? "indicator" : "property");
+        const concept = {
+          id: entry.concept,
+          key: kvPair.key,
+          name: entry.name,
+          name_catalog: entry.name_catalog,
+          description: entry.description,
+          dataSource: this._getSourceName(kvPair.source),
+          translateContributionLink: kvPair.source.translateContributionLink,
+          use
+        };
 
-      if (properties && kvPair.key.length == 1 && entry.concept != "_default" && entry.concept_type != "time") {
+        if (properties && kvPair.key.length == 1 && entry.concept != "_default" && entry.concept_type != "time") {
 
-        const keyConcept = kvPair.source.getConcept(kvPair.key[0]);
-        const folderName = keyConcept.concept + "_properties";
-        if (!tags[folderName]) {
-          tags[folderName] = { id: folderName, name: keyConcept.name + " properties", type: "folder", children: [] };
-          tags[ROOT].children.push(tags[folderName]);
-        }
-        tags[folderName].children.push(concept);
-
-      } else {
-
-        entry.tags.split(",").forEach(tag => {
-          tag = tag.trim();
-          if (tags[tag]) {
-            tags[tag === "_root" && entry.concept != "_default" && entry.concept_type != "time" ? concept.dataSource : tag].children.push(concept);
-          } else {
-            //if entry's tag is not found in the tag dictionary
-            if (!_this.consoleGroupOpen) {
-              console.groupCollapsed("Some tags were not found, so indicators went under menu root");
-              _this.consoleGroupOpen = true;
-            }
-            utils.warn("tag '" + tag + "' for indicator '" + concept.id + "'");
-            tags[ROOT].children.push(concept);
+          const keyConcept = kvPair.source.getConcept(kvPair.key[0]);
+          const folderName = keyConcept.concept + "_properties";
+          if (!tags[folderName]) {
+            tags[folderName] = { id: folderName, name: keyConcept.name + " properties", type: "folder", children: [] };
+            tags[ROOT].children.push(tags[folderName]);
           }
-        });
+          tags[folderName].children.push(concept);
 
-      }
-    });
+        } else {
+
+          entry.tags.split(",").forEach(tag => {
+            tag = tag.trim();
+            if (tags[tag]) {
+              tags[tag === "_root" && entry.concept != "_default" && entry.concept_type != "time" ? concept.dataSource : tag].children.push(concept);
+            } else {
+              //if entry's tag is not found in the tag dictionary
+              if (!_this.consoleGroupOpen) {
+                console.groupCollapsed("Some tags were not found, so indicators went under menu root");
+                _this.consoleGroupOpen = true;
+              }
+              utils.warn("tag '" + tag + "' for indicator '" + concept.id + "'");
+              tags[ROOT].children.push(concept);
+            }
+          });
+
+        }
+      });
 
     /**
      * KEY-AVAILABILITY (dimensions for space-menu)
