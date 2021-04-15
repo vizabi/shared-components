@@ -93,13 +93,14 @@ export class IndicatorPicker extends BaseComponent {
         const [key, payload] = highlightedMarkers.entries().next().value;
         const hoverKey = (this.model.dataMap.getByObjOrStr(null, key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
 
-        if (this.MDL.model.data.conceptProps.concept_type == "measure"){
-          selectText = this.localise(hoverKey);
-        } else { //if it's not measure assume it's an entity domain or set and thus has an extra model to resolve names from          
+        if (["entity_domain", "entity_set"].includes(this.MDL.model.data.conceptProps.concept_type)){
+          // entity domain or set and may gave an extra model to resolve names from  
           if (this.state.hoverKeyLabels && this.state.hoverKeyLabels[hoverKey] != null)
             selectText = this.state.hoverKeyLabels[hoverKey];
           else
             selectText = this.localise(hoverKey);
+        } else {        
+          selectText = this.localise(hoverKey);
         }
           
       } else {
