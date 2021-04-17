@@ -23,6 +23,10 @@ export default function collisionResolver() {
         console.warn("D3 collision resolver stopped: missing a key for data. Example: key = 'geo' ");
         return;
       }
+      if (!g.node()) {
+        console.warn("D3 collision resolver stopped: missing the target DOM element", g);
+        return;
+      }
       labelHeight = g.node().getBBox().height * 0.8;
       //actually reposition the labels
       const data = g.filter(d => filter(d, time))
