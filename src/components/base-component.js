@@ -85,6 +85,7 @@ class _BaseComponent {
   }
 
   addReaction(method, ignoreStatus){
+    if(!method) return utils.warn("Basecomponent: addReaction() method not found", method);
     if(!this.reactions.has(method)){
       this.reactions.set(method, 
         autorun(() => {
