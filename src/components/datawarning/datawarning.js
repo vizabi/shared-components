@@ -1,12 +1,13 @@
 import * as utils from "../../legacy/base/utils.js";
 import { BaseComponent } from "../base-component.js";
+import {decorate, observable, computed, runInAction} from "mobx";
 import "./datawarning.scss";
 
 import { ICON_WARN, ICON_CLOSE } from "../../icons/iconset.js";
 
 let hidden = true;
-
-export class DataWarning extends BaseComponent {
+const HIDE_WHEN_SMALLER_THAN = 100; //px
+class _DataWarning extends BaseComponent {
   constructor(config) {
     config.template = `
       <div class="vzb-data-warning-background"></div>
@@ -20,18 +21,25 @@ export class DataWarning extends BaseComponent {
     super(config);
   }
 
-  setup(options) {
+  setup() {
     this.DOM = {
       background: this.element.select(".vzb-data-warning-background"),
       container: this.element.select(".vzb-data-warning-box"),
       icon: this.element.select(".vzb-data-warning-link"),
       close: this.element.select(".vzb-data-warning-close"),
       title: this.element.select(".vzb-data-warning-title"),
-      body: this.element.select(".vzb-data-warning-body")
-    }
+      body: this.element.select(".vzb-data-warning-body"),
+      button: d3.select(this.options.button)
+    };
     
     this.element.classed("vzb-hidden", true);
 
+    this.setupDialog();
+    this.setupTiggerButton();
+    this.setOptions();
+  }
+
+  setupDialog() {
     this.DOM.background
       .on("click", () => {
         this.toggle(true);
@@ -51,8 +59,42 @@ export class DataWarning extends BaseComponent {
       .append("div");
   }
 
+  setupTiggerButton(button = this.DOM.button) {
+    if(!button) return utils.warn("quit setupTiggerButton of DataWarning because no button provided");
+    
+    utils.setIcon(button, ICON_WARN)
+      .append("text")
+      .attr("text-anchor", "end")
+      .on("click", () => {
+        this.toggle();
+      })
+      .on("mouseover", () => {
+        this.updateButtonOpacity(1);
+      })
+      .on("mouseout", () => {
+        this.updateButtonOpacity();
+      });
+  }
+
+  get MDL(){
+    return {
+      frame: this.model.encoding.frame,
+      selected: this.model.encoding.selected
+    };
+  }
+
   draw() {
     this.localise = this.services.locale.auto();
+
+    this.addReaction(this.updateUIstrings);
+    this.addReaction(this.updateButtonOpacityScale);
+    this.addReaction(this.updateButtonOpacity);
+    this.addReaction(this.updateButtonPosition);
+  }
+
+  updateUIstrings(){
+    if (this.DOM.button) this.DOM.button.select("text")
+      .text(this.localise("hints/dataWarning"));
 
     this.DOM.icon.select("div")
       .text(this.localise("hints/dataWarning"));
@@ -73,101 +115,103 @@ export class DataWarning extends BaseComponent {
       c.element.classed("vzb-blur", c != this && !hidden);
     });
   }
-}
 
+  updateButtonOpacityScale() {
+    this.wScale = this.MDL.frame.scale.d3Scale.copy()
+      .domain(this.ui.doubtDomain.map(m => this.MDL.frame.parseValue("" + m)))
+      .range(this.ui.doubtRange)
+      .clamp(true);
+  }
 
+  updateButtonOpacity(opacity) {
+    if(!this.DOM.button) return utils.warn("quit updateButtonOpacity of DataWarning because no button provided");
 
-const _DataWarning = {
+    if (opacity == null) opacity = this.wScale(this.MDL.frame.value);
+    if (this.MDL.selected.data.filter.any()) opacity = 1;
+    this.DOM.button.style("opacity", opacity);
+  }
 
-  init(config, context) {
-    const _this = this;
+  updateButtonPosition() {
+    if(!this.DOM.button) return utils.warn("quit updateButtonPosition of DataWarning because no button provided");
+    const {vertical, horizontal, width, height, wLimit} = this;
+    const {top, bottom, left, right} = this;
 
-    this.name = "gapminder-datawarning";
+    // reset font size to remove jumpy measurement
+    const dataWarningText = this.DOM.button.select("text")
+      .style("font-size", null);
 
-    this.model_expects = [{
-      name: "locale",
-      type: "locale"
-    }];
+    // reduce font size if the caption doesn't fit
+    let warnBB = dataWarningText.node().getBBox();
+    const dataWarningWidth = warnBB.width + warnBB.height * 3;
+    if (wLimit > 0 && dataWarningWidth > wLimit) {
+      const font = parseInt(dataWarningText.style("font-size")) * wLimit / dataWarningWidth;
+      dataWarningText.style("font-size", font + "px");
+    }
 
-    this.context = context;
+    // position the warning icon
+    warnBB = dataWarningText.node().getBBox();
+    this.DOM.button.select("svg")
+      .attr("width", warnBB.height * 0.75)
+      .attr("height", warnBB.height * 0.75)
+      .attr("x", -warnBB.width - warnBB.height * 1.2)
+      .attr("y", -warnBB.height * 0.65);
 
-    this.model_binds = {
-      "translate:locale": function(evt) {
-        if (!_this._ready) return;
-        _this.redraw();
-      }
-    };
+    // position the whole group
+    warnBB = this.DOM.button.node().getBBox();
+    this.DOM.button
+      .classed("vzb-hidden", this.services.layout.projector || wLimit && wLimit < HIDE_WHEN_SMALLER_THAN)
+      .attr("transform", `translate(${
+        horizontal == "left" ? (left + warnBB.width) : (width - right)
+      }, ${
+        vertical == "top" ? (top + warnBB.height) : (height - bottom)
+      })`);
+  }
 
-    //contructor is the same as any component
-    this._super(config, context);
-  },
-
-  ready() {
-    this.redraw();
-  },
-
-  readyOnce() {
-    const _this = this;
-    this.element = d3.select(this.placeholder);
-
-    this.element.selectAll("div").remove();
-
-    this.element.append("div")
-      .attr("class", "vzb-data-warning-background")
-      .on("click", () => {
-        _this.toggle(true);
-      });
-
-    this.container = this.element.append("div")
-      .attr("class", "vzb-data-warning-box");
-
-    this.container.append("div")
-      .html(iconClose)
-      .on("click", () => {
-        _this.toggle();
-      })
-      .select("svg")
-      .attr("width", "0px")
-      .attr("height", "0px")
-      .attr("class", "vzb-data-warning-close");
-
-    const icon = this.container.append("div")
-      .attr("class", "vzb-data-warning-link")
-      .html(iconWarn);
-
-    icon.append("div");
-
-    this.container.append("div")
-      .attr("class", "vzb-data-warning-title");
-
-    this.container.append("div")
-      .attr("class", "vzb-data-warning-body vzb-dialog-scrollable");
-  },
-
-  redraw() {
-    this.translator = this.model.locale.getTFunction();
-
-    this.container.select(".vzb-data-warning-link div")
-      .text(this.translator("hints/dataWarning"));
-
-    const title = this.translator("datawarning/title/" + this.parent.name);
-    this.container.select(".vzb-data-warning-title")
-      .html(title)
-      .classed("vzb-hidden", !title || title == ("datawarning/title/" + this.parent.name));
-
-    this.container.select(".vzb-data-warning-body")
-      .html(this.translator("datawarning/body/" + this.parent.name));
-  },
-
-  toggle(arg) {
-    if (arg == null) arg = !hidden;
-    hidden = arg;
-    this.element.classed("vzb-hidden", hidden);
-
-    const _this = this;
-    this.parent.components.forEach(c => {
-      c.element.classed("vzb-blur", c != _this && !hidden);
+  setOptions({
+    //container size
+    width = 0,
+    height = 0,
+    //alignment
+    vertical = "top", 
+    horizontal = "right", 
+    //margins
+    top = 0,
+    bottom = 0,
+    left = 0,
+    right = 0,
+    //size limit
+    wLimit = null
+  } = {}) {
+    runInAction(() => {
+      this.vertical = vertical;
+      this.horizontal = horizontal;
+      this.width = width;
+      this.height = height;
+      this.top = top;
+      this.bottom = bottom;
+      this.left = left;
+      this.right = right;
+      this.wLimit = wLimit || width;
     });
   }
 
 }
+
+_DataWarning.DEFAULT_UI = {
+  doubtDomain: [],
+  doubtRange: []
+};
+
+//export default BubbleChart;
+export const DataWarning = decorate(_DataWarning, {
+  "MDL": computed,
+  "vertical": observable, 
+  "horizontal": observable, 
+  "width": observable, 
+  "height": observable, 
+  "top": observable, 
+  "bottom": observable, 
+  "left": observable, 
+  "right": observable, 
+  "wLimit": observable
+});

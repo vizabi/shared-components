@@ -328,7 +328,7 @@ $vzb-button-expand-width: 290px;
       }
     }
 
-    .vzb-data-warning text {
+    .vzb-datawarning-button text {
       font-size: $vzb-font-size-tiny;
     }
   }
@@ -481,7 +481,7 @@ $vzb-button-expand-width: 290px;
   }
 
   //Data warning
-  .vzb-data-warning {
+  .vzb-datawarning-button {
     cursor: pointer;
     fill: $vzb-color-accent-orange;
 
