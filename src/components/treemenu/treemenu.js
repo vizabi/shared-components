@@ -28,6 +28,20 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   }
 };
 
+
+function resolveDefaultScales(concept) {
+  if (concept.scales) return JSON.parse(concept.scales);
+  switch (concept.concept_type) {
+  case "measure": return ["linear", "log"];
+  case "string": return ["ordinal"];
+  case "entity_domain": return ["ordinal"];
+  case "entity_set": return ["ordinal"];
+  case "boolean": return ["ordinal"];
+  case "time": return ["time"];
+  default: return ["linear", "log"];
+  }
+}
+
 /*!
  * VIZABI TREEMENU
  * Treemenu component
@@ -763,13 +777,10 @@ export class TreeMenu extends BaseComponent {
     if (!useDataFiltered) {
       let pointer = "_default";
       if (allowedIDs.indexOf(utils.getProp(this._targetModel, this._targetProp)) > -1) pointer = utils.getProp(this._targetModel, this._targetProp);
-      if (!indicatorsDB[pointer]) utils.error("Concept properties of " + pointer + " are missing from the set, or the set is empty. Put a breakpoint here and check what you have in indicatorsDB");
+      const concept = indicatorsDB[pointer];
+      if (!concept) utils.error("Concept properties of " + pointer + " are missing from the set, or the set is empty. Put a breakpoint here and check what you have in indicatorsDB");
 
-      if (!indicatorsDB[pointer].scales) {
-        this.element.select("." + css.scaletypes).classed(css.hidden, true);
-        return true;
-      }
-      const scaleTypesData = isEncoding ? JSON.parse(indicatorsDB[pointer].scales || "[]").filter(f => {
+      const scaleTypesData = isEncoding ? resolveDefaultScales(concept).filter(f => {
         if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
         if (_this._targetModel.data.allow.scales[0] == "*") return true;
         return _this._targetModel.data.allow.scales.indexOf(f) > -1;
