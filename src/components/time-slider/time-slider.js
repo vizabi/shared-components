@@ -216,7 +216,7 @@ class TimeSlider extends BaseComponent {
     
     if (!this.root.ui.chart.endBeforeForecast) {
       const offset = Vizabi.utils.offset(frame.data.concept);
-      const stepBack = offset(new Date(), -1);
+      const stepBack = frame.scale.clampToDomain(offset(new Date(), -1));
       this.root.ui.chart.endBeforeForecast = this.localise(stepBack);
       //this.root.ui.chart.endBeforeForecast = this.localise(frame.stepScale(frame.step == 0 ? 0 : frame.step - 1));
     }
