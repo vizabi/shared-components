@@ -215,8 +215,10 @@ class TimeSlider extends BaseComponent {
     const frame = this.MDL.frame;
     
     if (!this.root.ui.chart.endBeforeForecast) {
-      //this.root.ui.chart.endBeforeForecast = this.localise(frame.stepScale(frame.stepScale.invert(frame.parseValue(this.localise(new Date(Date.now())))) - 1));
-      this.root.ui.chart.endBeforeForecast = this.localise(frame.stepScale(frame.step == 0 ? 0 : frame.step - 1));
+      const offset = Vizabi.utils.offset(frame.data.concept);
+      const stepBack = offset(new Date(), -1);
+      this.root.ui.chart.endBeforeForecast = this.localise(stepBack);
+      //this.root.ui.chart.endBeforeForecast = this.localise(frame.stepScale(frame.step == 0 ? 0 : frame.step - 1));
     }
     this.nextBeforeForecast = frame.stepScale(frame.stepScale.invert(frame.parseValue(this.root.ui.chart.endBeforeForecast)) + 1);
   }
@@ -225,7 +227,7 @@ class TimeSlider extends BaseComponent {
     if(!this.root.ui.chart.showForecast) {
       const frame = this.MDL.frame;
       const endBeforeForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
-      if (endBeforeForecast < frame.value) {
+      if (frame.value > endBeforeForecast) {
         frame.setValueAndStop(endBeforeForecast);
       }
     }
