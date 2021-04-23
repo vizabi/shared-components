@@ -174,7 +174,7 @@ class TimeSlider extends BaseComponent {
     if (this._updateLayoutProfile()) return; //return if exists with error
 
     this.addReaction(this._configEndBeforeForecast);
-    this.addReaction(this._adjustFrameValueToEndBeforeForecast);
+    this.addReaction(this._adjustFrameScaleDomainConfig);
     this.addReaction(this._updateScales);
     this.addReaction(this._updateSize);
     this.addReaction(this._redrawForecast);
@@ -213,42 +213,42 @@ class TimeSlider extends BaseComponent {
 
   _configEndBeforeForecast() {
     const frame = this.MDL.frame;
-    const offset = Vizabi.utils.offset(frame.data.concept);
-    const stepBack = frame.scale.clampToDomain(offset(new Date(), -1));
-    this.root.ui.chart.endBeforeForecast = this.localise(stepBack);
-    this.nextBeforeForecast = frame.stepScale(offset(stepBack, +1));
+    const { offset, floor } = Vizabi.utils.interval(frame.data.concept);
+    if (!this.root.ui.chart.endBeforeForecast) {
+      const stepBack = floor(offset(new Date(), -1));
+      this.root.ui.chart.endBeforeForecast = this.localise(stepBack);
+    }
+    this.firstForecastFrame = offset(frame.parseValue(this.root.ui.chart.endBeforeForecast), +1);
   }
 
-  _adjustFrameValueToEndBeforeForecast() {
-    if(!this.root.ui.chart.showForecast) {
-      const frame = this.MDL.frame;
-      const endBeforeForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
-      if (frame.value > endBeforeForecast) {
-        frame.setValueAndStop(endBeforeForecast);
-      }
+  _adjustFrameScaleDomainConfig() {
+    const frame = this.MDL.frame;
+    if (this.root.ui.chart.showForecast) {
+      delete frame.scale.config.domain;
+    } else {
+      frame.scale.config.domain = [ frame.data.domain[0], this.root.ui.chart.endBeforeForecast ];
     }
   }
 
   _processForecast() {
     const frame = this.MDL.frame;
+    const lastNonForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
+    const forecastPauseSetting = this.root.ui.chart.pauseBeforeForecast;
+    const equals = Vizabi.utils.equals;
 
-    if (frame.playing) {
-      if ((frame.value - this.nextBeforeForecast) == 0) {
-        if (this.__playing) {
-          if (!this.root.ui.chart.showForecast || this.root.ui.chart.pauseBeforeForecast) {
-            frame.setValueAndStop(this.root.ui.chart.endBeforeForecast);
-          }
-        } else {
-          if (!this.root.ui.chart.showForecast) {
-            frame.setStep(0);
-          }
-        }
-      } else {
-        this.__playing = true;
-      }
-    } else {
-      this.__playing = false;
+    // stop when 
+    // - first forecast value is reached, then set to previous year. This way animation finishes.
+    // - previous frame was reached while playing (= allowed)
+    if (frame.playing
+        && forecastPauseSetting 
+        && equals(frame.value, this.firstForecastFrame) 
+        && this.allowForecastPause
+    ) {
+      frame.setValueAndStop(lastNonForecast);
     }
+
+    // set up pause if we're playing and we're on the last frame before pause (i.e. the frame we actually want to pause on)
+    this.allowForecastPause = frame.playing && equals(frame.value, lastNonForecast);
   }
 
   _redrawForecast() {
