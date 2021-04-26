@@ -168,14 +168,11 @@ class TimeSlider extends BaseComponent {
     this.localise = this.services.locale.auto();
     
     this.element.classed(class_loading, false);
-    
-    this.xScale = this.MDL.frame.scale.d3Scale;
 
     if (this._updateLayoutProfile()) return; //return if exists with error
 
     this.addReaction(this._configEndBeforeForecast);
     this.addReaction(this._adjustFrameScaleDomainConfig);
-    this.addReaction(this._updateScales);
     this.addReaction(this._updateSize);
     this.addReaction(this._redrawForecast);
     this.addReaction(this._optionClasses);
@@ -203,12 +200,8 @@ class TimeSlider extends BaseComponent {
     if (!this.height || !this.width) return utils.warn("Timeslider _updateProfile() abort: container is too little or has display:none");
   }
 
-  get domain() {
-    if (this.root.ui.chart.showForecast) {
-      return this.MDL.frame.scale.domain;
-    } else {
-      return [this.MDL.frame.scale.domain[0], this.MDL.frame.parseValue(this.root.ui.chart.endBeforeForecast) || this.MDL.frame.scale.domain[1]];
-    }
+  get xScale() {
+      return this.MDL.frame.scale.d3Scale;
   }
 
   _configEndBeforeForecast() {
@@ -216,7 +209,7 @@ class TimeSlider extends BaseComponent {
     const { offset, floor } = Vizabi.utils.interval(frame.data.concept);
     if (!this.root.ui.chart.endBeforeForecast) {
       const stepBack = floor(offset(new Date(), -1));
-      this.root.ui.chart.endBeforeForecast = this.localise(stepBack);
+      this.root.ui.chart.endBeforeForecast = frame.formatValue(stepBack);
     }
     this.firstForecastFrame = offset(frame.parseValue(this.root.ui.chart.endBeforeForecast), +1);
   }
@@ -226,7 +219,12 @@ class TimeSlider extends BaseComponent {
     if (this.root.ui.chart.showForecast) {
       delete frame.scale.config.domain;
     } else {
-      frame.scale.config.domain = [ frame.data.domain[0], d3.min([frame.data.domain[1], this.root.ui.chart.endBeforeForecast]) ];
+      const lastNonForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
+      if (lastNonForecast && frame.data.domain[1] > lastNonForecast)
+        frame.scale.config.domain = [ frame.data.domain[0], lastNonForecast ]
+          .map(v => frame.formatValue(v));
+      else 
+        delete frame.scale.config.domain;
     }
   }
 
@@ -253,7 +251,6 @@ class TimeSlider extends BaseComponent {
 
   _redrawForecast() {
     this.services.layout.size;
-    this.domain;
 
     const endBeforeForecast = this.MDL.frame.parseValue(this.root.ui.chart.endBeforeForecast);
     const forecastIsOn = this.root.ui.chart.showForecast && (this.MDL.frame.scale.domain[1] > endBeforeForecast);
@@ -273,17 +270,12 @@ class TimeSlider extends BaseComponent {
 
   }
 
-  _updateScales() {
-    this.xScale = this.MDL.frame.scale.d3Scale.domain(this.domain);
-  }
-
   /**
    * Executes everytime the container or vizabi is resized
    * Ideally,it contains only operations related to size
    */
   _updateSize() {
     this.services.layout.size;
-    this.domain;
 
     const {
       margin,
@@ -314,7 +306,7 @@ class TimeSlider extends BaseComponent {
     //translate according to margins
     slider.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    this.xScale.range([0, this.sliderWidth]);
+    this.MDL.frame.scale.config.range = [0, this.sliderWidth];
 
     slide
       .attr("transform", "translate(0," + this.sliderHeight / 2 + ")")
@@ -429,7 +421,6 @@ class TimeSlider extends BaseComponent {
   _setHandle(transition) {
     this.services.layout.size;
     this.services.layout.hGrid;
-    this.domain;
 
     const { value, speed, playing } = this.MDL.frame;
 
@@ -540,7 +531,6 @@ class TimeSlider extends BaseComponent {
   }
 
   _isDomainNotVeryGood(){
-    this.domain;
     const domain = this.xScale.domain();
     //domain not available
     if(!domain || domain.length !== 2) return true;
@@ -562,7 +552,7 @@ TimeSlider.DEFAULT_UI = {
 };
 
 const decorated = decorate(TimeSlider, {
-  "domain": computed,
+  "xScale": computed,
   "MDL": computed
 });
 export { decorated as TimeSlider };
