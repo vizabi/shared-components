@@ -1,3 +1,4 @@
+
 import * as _Icons from "./icons/iconset";
 import * as _Utils from "./utils";
 import * as _LegacyUtils from "./legacy/base/utils";
@@ -9,6 +10,7 @@ import { onLongTap, onTap } from "./legacy/helpers/d3.touchEvents";
 d3.selection.prototype.onTap = onTap;
 d3.selection.prototype.onLongTap = onLongTap;
 
+export const versionInfo = {version: __VERSION, build: __BUILD, package: __PACKAGE_JSON_FIELDS};
 export const Icons = _Icons;
 export const Utils = _Utils;
 export const LegacyUtils = _LegacyUtils;

@@ -1,7 +1,7 @@
 {
   "name": "vizabi-shared-components",
-  "version": "1.8.3",
-  "description": "",
+  "version": "1.8.4",
+  "description": "Vizabi shared components",
   "main": "index.js",
   "files": [
     "src",
@@ -16,10 +16,29 @@
   },
   "keywords": [],
   "author": {
-    "name": "angie@gapminder.org",
-    "url": "https://gapminder.org"
+    "name": "Gapminder Foundation",
+    "url": "https://www.gapminder.org",
+    "email": "info@gapminder.org"
   },
-  "homepage": "https://gapminder.org",
+  "contributors": [
+    {
+      "name": "Jasper",
+      "url": "https://github.com/jheeffer"
+    },
+    {
+      "name": "Angie",
+      "url": "https://github.com/angieskazka"
+    },
+    {
+      "name": "Dima",
+      "url": "https://github.com/dab2000"
+    },
+    {
+      "name": "Ola",
+      "url": "https://github.com/olarosling"
+    }
+  ],
+  "homepage": "https://github.com/vizabi/vizabi-shared-components#readme",
   "license": "BSD-3-Clause",
   "dependencies": {
     "css.escape": "^1.5.1"
