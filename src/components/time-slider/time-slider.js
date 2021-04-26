@@ -226,7 +226,7 @@ class TimeSlider extends BaseComponent {
     if (this.root.ui.chart.showForecast) {
       delete frame.scale.config.domain;
     } else {
-      frame.scale.config.domain = [ frame.data.domain[0], this.root.ui.chart.endBeforeForecast ];
+      frame.scale.config.domain = [ frame.data.domain[0], d3.min([frame.data.domain[1], this.root.ui.chart.endBeforeForecast]) ];
     }
   }
 
