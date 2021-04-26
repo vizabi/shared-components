@@ -102,7 +102,7 @@ class Speed extends Dialog {
         const frame = _this.MDL.frame;
         const parsed = frame.parseValue(this.value);
         if (utils.isDate(parsed)) {
-          _this.root.ui.chart.endBeforeForecast = parsed;
+          _this.root.ui.chart.endBeforeForecast = this.value;
         }
       });
 
