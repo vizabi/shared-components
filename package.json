@@ -1,6 +1,6 @@
 {
   "name": "vizabi-shared-components",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "description": "Vizabi shared components",
   "main": "index.js",
   "files": [
@@ -39,7 +39,7 @@
     }
   ],
   "homepage": "https://github.com/vizabi/vizabi-shared-components#readme",
-  "license": "BSD-3-Clause",
+  "license": "CC-BY-4.0",
   "dependencies": {
     "css.escape": "^1.5.1"
   },
