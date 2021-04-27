@@ -3,6 +3,28 @@
     &[data-dlg="about"] {
       &.vzb-moreoptions.vzb-accordion-section.vzb-accordion-active {
         max-height: 2000px !important;
+
+        .vzb-about-header,
+        .vzb-about-body,
+        .vzb-about-footer {
+          margin-bottom: 2em;
+        }
+
+        p {
+          margin-bottom: 2em;
+          span {margin-right: 1em}
+        }
+
+        h1 {
+          font-size: 1.2em;
+          font-weight: bold;
+        }
+        
+        a.vzb-underline {
+          color: $vzb-color-blue;
+          text-decoration: underline;
+        }
+
       }
     }
   }

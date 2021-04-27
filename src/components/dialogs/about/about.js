@@ -1,11 +1,21 @@
-import * as utils from "base/utils";
 import { Dialog } from "../dialog";
-
-import globals from "base/globals";
 
 /*
  * About dialog
  */
+function formatVersion(version){
+  return version || "N/A";
+}
+
+function formatBuild(timestamp){
+  if (!timestamp) return "N/A";
+  return d3.utcFormat("%Y-%m-%d at %H:%M")(new Date(parseInt(timestamp)));
+}
+
+function url(text = "", link = ""){
+  if (!link) return text;
+  return `<a class='vzb-underline' href='${link}' target='_blank'>⧉ ${text}</a>`;
+}
 
 export class About extends Dialog {
   constructor(config) {
@@ -16,21 +26,9 @@ export class About extends Dialog {
         </div>
 
         <div class="vzb-dialog-content">
-          <p class="vzb-about-text0"></p>
-          <p class="vzb-about-text1"></p>
-          <br/>
-          <p class="vzb-about-version"></p>
-          <p class="vzb-about-updated"></p>
-          <br/>
-          <p class="vzb-about-report"></p>
-          <br/>
-          <p class="vzb-about-credits"></p>
-          <br/>
-          <p class="vzb-about-tool"></p>
-          <br/>
-          <p class="vzb-about-datasets"><span>Datasets:</span></p>
-          <br/>
-          <p class="vzb-about-readers"><span>Readers:</span></p>
+          <div class="vzb-about-header"></div>
+          <div class="vzb-about-body"></div>
+          <div class="vzb-about-footer"></div>
         </div>
     
         <div class="vzb-dialog-buttons">
@@ -44,73 +42,70 @@ export class About extends Dialog {
     super(config);
   }
 
-  setup(options) {
-    const version = "TODO";//globals.version;
-    const updated = Date.now();//new Date(parseInt(globals.build));
-
-    this.element.select(".vzb-about-text0")
-      .html("This chart is made with Vizabi,");
-    this.element.select(".vzb-about-text1")
-      .html("a project by <a href='http://gapminder.org' target='_blank'>Gapminder Foundation</a>");
-    this.element.select(".vzb-about-version")
-      .html("<a href='https://github.com/Gapminder/vizabi/releases/tag/v" + version + "' target='_blank'>Version: " + version + "</a>");
-    this.element.select(".vzb-about-updated")
-      .html("Build: " + d3.utcFormat("%Y-%m-%d at %H:%M")(updated));
-    this.element.select(".vzb-about-report")
-      .html("<a href='https://getsatisfaction.com/gapminder/' target='_blank'>Report a problem</a>");
-    this.element.select(".vzb-about-credits")
-      .html("<a href='https://github.com/Gapminder/vizabi/graphs/contributors' target='_blank'>Contributors</a>");
-
-    //versions
-    const dataStore = Vizabi.stores.dataSources;
-
-    const toolData = {};
-    const versionInfo = this.root.versionInfo;
-    toolData.version = versionInfo ? versionInfo.version : "N/A";
-    toolData.build = versionInfo ? d3.time.format("%Y-%m-%d at %H:%M")(new Date(parseInt(versionInfo.build))) : "N/A";
-    toolData.name = this.root.name;
-
-    const toolsEl = this.element.select(".vzb-about-tool");
-    toolsEl.html("");
-    toolsEl.append("p")
-      .text("Tool: " + toolData.name);
-    toolsEl.append("p")
-      .text("-version: " + toolData.version);
-    toolsEl.append("p")
-      .text("-build: " + toolData.build);
-
-    const readerData = dataStore.getAll().map(dataSource => {
-      const data = {};
-      const versionInfo = dataSource.reader.versionInfo;
-      data.version = versionInfo ? versionInfo.version : "N/A";
-      data.build = versionInfo ? d3.utcFormat("%Y-%m-%d at %H:%M")(new Date(parseInt(versionInfo.build))) : "N/A";
-      data.name = dataSource.reader._name;
-      return data;
-    });
-
-    let readersEl = this.element.select(".vzb-about-readers").selectAll(".vzb-about-reader").data(readerData);
-    readersEl.exit().remove();
-    readersEl = readersEl.enter()
-      .append("p")
-      .attr("class", "vzb-about-reader");
-    readersEl.append("p")
-      .text(d => d.name);
-    readersEl.append("p")
-      .text(d => "-version: " + d.version);
-    readersEl.append("p")
-      .text(d => "-build: " + d.build);
-
-    const datasetData = dataStore.getAll().map(dataSource => dataSource.reader.getDatasetName && dataSource.reader.getDatasetName());
-
-    let datasetsEl = this.element.select(".vzb-about-datasets").selectAll(".vzb-about-dataset").data(datasetData);
-    datasetsEl.exit().remove();
-    datasetsEl = datasetsEl.enter()
-      .append("p")
-      .attr("class", "vzb-about-dataset");
-    datasetsEl.append("p")
-      .text(d => d);
+  setup() {
+    this.DOM = {
+      header: this.element.select(".vzb-about-header"),
+      body: this.element.select(".vzb-about-body"),
+      footer: this.element.select(".vzb-about-footer")
+    };
   }
 
+  draw(){
+    this.addReaction(this.drawHeader);
+    this.addReaction(this.drawBody);
+    this.addReaction(this.drawFooter);
+  }
+
+
+  drawHeader(){
+    const author = this.root.constructor.versionInfo?.sharedComponents?.package?.author || {};
+
+    this.DOM.header.html("");
+    this.DOM.header.append("p").html(url("Report a problem (fixed this now ;)", "https://github.com/Gapminder/tools-page/issues"));
+    this.DOM.header.append("p").html("This chart is made with Vizabi, <br/> a project by " + url(author.name, author.url));
+  }
+
+
+  drawBody(){
+    const vizabiModulesData = [
+      this.root.constructor.versionInfo || {},
+      this.root.constructor.versionInfo?.sharedComponents || {},
+      Vizabi.versionInfo || {}
+    ];
+
+    const readerData = Vizabi.stores.dataSources.getAll().map(dataSource => {
+      return {
+        name: dataSource.config.name,
+        service: dataSource.config.service,
+        type: dataSource.config.modelType
+      };
+    }); 
+
+    this.DOM.body.html("");
+    this.DOM.body.append("div").append("p").append("h1").html("Components:");
+    this.DOM.body.append("div").selectAll("p")
+      .data(vizabiModulesData)
+      .enter().append("p")
+      .html(d => url(d.package?.description || d.package?.name, d.package?.homepage) + `<br/> - Version: ${formatVersion(d.version)} <br/> - Build ${formatBuild(d.build)}`);
+    
+    this.DOM.body.append("div").append("p").append("h1").html("Readers:");
+    this.DOM.body.append("div").selectAll("p")
+      .data(readerData)
+      .enter().append("p")
+      .html(d => url(d.type + " " + d.name, d.service));
+  }
+
+
+  drawFooter(){
+    const contributors = this.root.constructor.versionInfo?.sharedComponents?.package?.contributors || [];
+    
+    this.DOM.footer.html("");
+    this.DOM.footer.append("p").append("h1").html(`Contributors:`);
+    this.DOM.footer.append("p").selectAll("span")
+      .data(contributors)
+      .enter().append("span")
+      .html(d => url(d.name, d.url));
+  }
 }
 
 Dialog.add("about", About);
@@ -118,88 +113,3 @@ Dialog.add("about", About);
 
 
 
-
-
-
-const _About = {
-
-/**
- * Initializes the dialog component
- * @param config component configuration
- * @param context component context (parent)
- */
-  init(config, parent) {
-    this.name = "about";
-
-    this._super(config, parent);
-  },
-
-  readyOnce() {
-    const version = globals.version;
-    const updated = new Date(parseInt(globals.build));
-
-    this.element = d3.select(this.element);
-    this.element.select(".vzb-about-text0")
-      .html("This chart is made with Vizabi,");
-    this.element.select(".vzb-about-text1")
-      .html("a project by <a href='http://gapminder.org' target='_blank'>Gapminder Foundation</a>");
-    this.element.select(".vzb-about-version")
-      .html("<a href='https://github.com/Gapminder/vizabi/releases/tag/v" + version + "' target='_blank'>Version: " + version + "</a>");
-    this.element.select(".vzb-about-updated")
-      .html("Build: " + d3.time.format("%Y-%m-%d at %H:%M")(updated));
-    this.element.select(".vzb-about-report")
-      .html("<a href='https://getsatisfaction.com/gapminder/' target='_blank'>Report a problem</a>");
-    this.element.select(".vzb-about-credits")
-      .html("<a href='https://github.com/Gapminder/vizabi/graphs/contributors' target='_blank'>Contributors</a>");
-
-    //versions
-    const data = Data;
-
-    const toolData = {};
-    const versionInfo = this.root.versionInfo;
-    toolData.version = versionInfo ? versionInfo.version : "N/A";
-    toolData.build = versionInfo ? d3.time.format("%Y-%m-%d at %H:%M")(new Date(parseInt(versionInfo.build))) : "N/A";
-    toolData.name = this.root.name;
-
-    const toolsEl = this.element.select(".vzb-about-tool");
-    toolsEl.html("");
-    toolsEl.append("p")
-      .text("Tool: " + toolData.name);
-    toolsEl.append("p")
-      .text("-version: " + toolData.version);
-    toolsEl.append("p")
-      .text("-build: " + toolData.build);
-
-    const readerData = data.instances.map(dataInstance => {
-      const data = {};
-      const versionInfo = dataInstance.readerObject.versionInfo;
-      data.version = versionInfo ? versionInfo.version : "N/A";
-      data.build = versionInfo ? d3.time.format("%Y-%m-%d at %H:%M")(new Date(parseInt(versionInfo.build))) : "N/A";
-      data.name = dataInstance.readerObject._name;
-      return data;
-    });
-
-    let readersEl = this.element.select(".vzb-about-readers").selectAll(".vzb-about-reader").data(readerData);
-    readersEl.exit().remove();
-    readersEl = readersEl.enter()
-      .append("p")
-      .attr("class", "vzb-about-reader");
-    readersEl.append("p")
-      .text(d => d.name);
-    readersEl.append("p")
-      .text(d => "-version: " + d.version);
-    readersEl.append("p")
-      .text(d => "-build: " + d.build);
-
-    const datasetData = data.instances.map(dataInstance => dataInstance.getDatasetName());
-
-    let datasetsEl = this.element.select(".vzb-about-datasets").selectAll(".vzb-about-dataset").data(datasetData);
-    datasetsEl.exit().remove();
-    datasetsEl = datasetsEl.enter()
-      .append("p")
-      .attr("class", "vzb-about-dataset");
-    datasetsEl.append("p")
-      .text(d => d);
-
-  }
-};
