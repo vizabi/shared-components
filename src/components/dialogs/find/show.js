@@ -99,7 +99,7 @@ export class Show extends BaseComponent {
     utils.forEach(categories, ({ dim, key, name, entities }) => {
       const isSet = dim !== key;
         
-      entities = Object.values(entities)
+      entities = [...entities.values()]
         .map(d => Object.assign(d, {
           isShown: this._isMarkerInDimFilter(d, dim, key)
         }))
