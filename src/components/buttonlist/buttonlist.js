@@ -546,49 +546,49 @@ export class ButtonList extends BaseComponent {
     btn.classed(class_hidden, !anySelected);
   }
   toggleTimeForecast() {
-    this.model.state.time.showForecast = !this.model.state.time.showForecast;
+    this.root.ui.chart.showForecast = !this.root.ui.chart.showForecast;
     this.setTimeForecast();
   }
   setTimeForecast() {
-    const showForecast = (this.model.state.time || {}).showForecast;
+    const showForecast = this.root.ui.chart.showForecast;
     if (!showForecast && showForecast !== false) return;
     const id = "forecast";
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
     if (!btn.node()) return utils.warn("setBubbleTrails: no button '" + id + "' found in DOM. doing nothing");
 
     btn.classed(class_active_locked, showForecast);
-    btn.classed(class_hidden, !this.model.state.time.endBeforeForecast);
+    btn.classed(class_hidden, !this.root.ui.chart.endBeforeForecast);
   }
   toggleBubbleLock(id) {
-    const active = (this.model.ui.chart || {}).lockActive;
+    const active = (this.root.ui.chart || {}).lockActive;
 
-    if (this.model.state.marker.select.length == 0 && !active) return;
+    if (!this.model.encoding.selected.data.filter.any() && !active) return;
 
-    let locked = this.model.ui.chart.lockNonSelected;
-    const time = this.model.state.time;
-    locked = locked ? 0 : time.formatDate(time.value);
-    this.model.ui.chart.lockNonSelected = locked;
+    let locked = this.root.ui.chart.lockNonSelected;
+    const time = this.model.encoding.frame.value;
+    locked = locked ? 0 : this.localise(time);
+    this.root.ui.chart.lockNonSelected = locked;
 
     this.setBubbleLock();
   }
   setBubbleLock() {
-    let locked = (this.model.ui.chart || {}).lockNonSelected;
-    const active = (this.model.ui.chart || {}).lockActive;
-    const unavailable = (this.model.ui.chart || {}).lockUnavailable || false;
+    let locked = (this.root.ui.chart || {}).lockNonSelected;
+    const active = (this.root.ui.chart || {}).lockActive;
+    const unavailable = (this.root.ui.chart || {}).lockUnavailable || false;
     if (!locked && locked !== 0) return;
 
-    if (locked !== 0 && this.model.state.marker.select.length === 0 && !active) {
-      locked = this.model.ui.chart.lockNonSelected = 0;
+    if (locked !== 0 && this.model.encoding.selected.data.filter.any() && !active) {
+      locked = this.root.ui.chart.lockNonSelected = 0;
     }
 
     const id = "lock";
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
     if (!btn.node()) return utils.warn("setBubbleLock: no button '" + id + "' found in DOM. doing nothing");
 
-    //btn.classed(class_unavailable, this.model.state.marker.select.length == 0 && !active);
+    //btn.classed(class_unavailable, !this.model.encoding.selected.data.filter.any() && !active);
     btn.classed(class_unavailable, unavailable);
     if (typeof active === "undefined") {
-      btn.classed(class_hidden, this.model.state.marker.select.length == 0);
+      btn.classed(class_hidden, !this.model.encoding.selected.data.filter.any());
     } else {
       btn.classed(class_hidden, !active);
     }
@@ -604,15 +604,15 @@ export class ButtonList extends BaseComponent {
       .attr("data-vzb-translate", locked ? null : "buttons/lock");
   }
   toggleInpercent() {
-    this.model.ui.chart.inpercent = !this.model.ui.chart.inpercent;
+    this.root.ui.chart.inpercent = !this.root.ui.chart.inpercent;
     this.setInpercent();
   }
   setInpercent() {
-    if (typeof ((this.model.ui.chart || {}).inpercent) === "undefined") return;
+    if (typeof ((this.root.ui.chart || {}).inpercent) === "undefined") return;
     const id = "inpercent";
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
 
-    btn.classed(class_active_locked, this.model.ui.chart.inpercent);
+    btn.classed(class_active_locked, this.root.ui.chart.inpercent);
   }
   togglePresentationMode() {
     this.services.layout.projector = !this.services.layout.projector;
