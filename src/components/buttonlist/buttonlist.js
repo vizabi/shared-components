@@ -122,6 +122,11 @@ export class ButtonList extends BaseComponent {
         icon: "about",
         required: false
       },
+      "repeat": {
+        title: "buttons/repeat",
+        icon: "repeat",
+        required: false
+      },
       "axes": {
         title: "buttons/axes",
         icon: "axes",

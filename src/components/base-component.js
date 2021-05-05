@@ -8,10 +8,10 @@ class _BaseComponent {
   constructor({placeholder, model, services, subcomponents, template, id, parent, root, name, ui, default_ui = {}, state, options }){
     this.id = id || "c0";
     //this.status = STATUS.INIT;
-    this.template = this.template || template || "";
-    this.subcomponents = this.subcomponents || subcomponents || [];
-    this.services = this.services || services || {};
-    this.model = this.model || model;
+    this.template = template || "";
+    this.subcomponents = subcomponents || [];
+    this.services = services || {};
+    this.model = model;
     this.state = state || {};
     this.parent = parent || null;
     this.children = [];

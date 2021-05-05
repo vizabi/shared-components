@@ -59,10 +59,10 @@ class _DataWarning extends BaseComponent {
       .append("div");
   }
 
-  setupTiggerButton(button = this.DOM.button) {
-    if(!button) return utils.warn("quit setupTiggerButton of DataWarning because no button provided");
+  setupTiggerButton() {
+    if(!this.DOM.button.size()) return utils.warn("quit setupTiggerButton of DataWarning because no button provided");
     
-    utils.setIcon(button, ICON_WARN)
+    utils.setIcon(this.DOM.button, ICON_WARN)
       .append("text")
       .attr("text-anchor", "end")
       .on("click", () => {
@@ -124,7 +124,7 @@ class _DataWarning extends BaseComponent {
   }
 
   updateButtonOpacity(opacity) {
-    if(!this.DOM.button) return utils.warn("quit updateButtonOpacity of DataWarning because no button provided");
+    if(!this.DOM.button.size()) return utils.warn("quit updateButtonOpacity of DataWarning because no button provided");
 
     if (opacity == null) opacity = this.wScale(this.MDL.frame.value);
     if (this.MDL.selected.data.filter.any()) opacity = 1;
@@ -132,7 +132,7 @@ class _DataWarning extends BaseComponent {
   }
 
   updateButtonPosition() {
-    if(!this.DOM.button) return utils.warn("quit updateButtonPosition of DataWarning because no button provided");
+    if(!this.DOM.button.size()) return utils.warn("quit updateButtonPosition of DataWarning because no button provided");
     const {vertical, horizontal, width, height, wLimit} = this;
     const {top, bottom, left, right} = this;
 

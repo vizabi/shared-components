@@ -5,5 +5,17 @@
     grid-column-end: 1;
     grid-row-start: 1;
     grid-row-end: 1;
+    div.vzb-chart-highlight {
+      background: radial-gradient(transparent 50%, #f2fafc 75%, #e3eef0 100%);
+    }
+    div.vzb-chart-removepreview {
+      background: radial-gradient(transparent 50%, #ffe9e9 75%, #ffd4d4 100%);
+    }
+    div.vzb-chart-addrightpreview {
+      background: linear-gradient(to right, transparent 75%, #e9ffec 90%, #d5ffd7 100%);
+    }
+    div.vzb-chart-addbelowpreview {
+      background: linear-gradient(to bottom, transparent 75%, #e9ffec 90%, #d5ffd7 100%);
+    }
   }
 }

@@ -1,69 +1,80 @@
-import * as utils from "../../legacy/base/utils";
-import { ui } from "../../ui";
 import {BaseComponent} from "../base-component.js";
+import {decorate, computed} from "mobx";
 import "./repeater.scss";
 
-export class Repeater extends BaseComponent {
-  constructor(config) {
-    const repeat = {
-      modelType: "repeat",
-      row: ["y"],
-      column: ["x"]
-    }
+class _Repeater extends BaseComponent {
 
-    const {
-      COMP_CSSNAME,
-      COMP_TYPE
-    } = config.options;
-    const templateArray  = [];
-    const subcomponents = [];
+  get MDL(){
+    return {
+      repeat: this.model.encoding.repeat
+    };
+  }
 
-    const lastRowIndex = repeat.row.length - 1;
-    const lastColumnIndex = repeat.column.length - 1;
-    repeat.row.forEach((row, i) => {
-      repeat.column.forEach((column, j) => {
-        const classed = (i !== lastRowIndex ? "vzb-sm-axis-x-elements-hidden " : "") +
-          (j !== 0 ? "vzb-sm-axis-y-elements-hidden " : "") +
-          ((j === lastColumnIndex && i === lastRowIndex) ? "vzb-sm-last-chart" : "");
-        templateArray.push(
-          '<div class="' + COMP_CSSNAME + ' ' + COMP_CSSNAME + subcomponents.length + ' vzb-sm-chart ' + classed + '"></div>'
-        )
 
-        const subcompName = config.name+i+"_"+j;
-        const default_ui = ui(config.default_ui, config.ui);
-        delete default_ui[subcompName];
+  loading(){
+    this.addReaction(this.addRemoveSubcomponents, true);
+  }
 
-        subcomponents.push({
-          type: COMP_TYPE,
-          placeholder: "." + COMP_CSSNAME + subcomponents.length,
-          model: config.model,
-          name: subcompName,
-          state: {
-            alias: {
-              x: column,
-              y: row
-            }
-          },
-          default_ui: default_ui
-        });
-      });
+
+  addRemoveSubcomponents(){
+    const {componentCssName} = this.options;
+    const {rowcolumn, ncolumns, nrows} = this.MDL.repeat;
+    const repeat = this.MDL.repeat;
+
+    //The fr unit sets size of track as a fraction of the free space of grid container
+    //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
+    this.element
+      .style("grid-template-rows", "1fr ".repeat(nrows))
+      .style("grid-template-columns", "1fr ".repeat(ncolumns));
+
+    let sections = this.element.selectAll("div." + componentCssName)
+      .data(rowcolumn, d => repeat.getName(d));
+
+    sections.exit()
+      .each(d => this.removeSubcomponent(d))
+      .remove();      
+
+    sections.enter().append("div")
+      .attr("class", d => `${componentCssName} vzb-${repeat.getName(d)}`)
+      .each(d => this.addSubcomponent(d))
+      .merge(sections)      
+      .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
+      .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1);
+
+    this.services.layout._resizeHandler();
+  }
+
+
+  addSubcomponent(d){
+    const {ComponentClass} = this.options;
+    const name = this.MDL.repeat.getName(d);
+
+    const subcomponent = new ComponentClass({
+      placeholder: ".vzb-" + name,
+      model: this.model,
+      name,
+      parent: this,
+      root: this.root,
+      state: {alias: d},
+      services: this.services,
+      ui: this.ui,
+      default_ui: this.DEFAULT_UI
     });
-
-    config.subcomponents = subcomponents;
-    config.template = templateArray.join("\n");
-
-    super(config);
+    this.children.push(subcomponent);
   }
 
-  loading() {
-    const repeat = {
-      modelType: "repeat",
-      row: ["y"],
-      column: ["x"] 
-    } // this.model.encoding.repeat;
-    this.element.style("grid-template-columns", Array(repeat.column.length).fill("1fr").join(" "));
+
+  removeSubcomponent(d){
+    const subcomponent = this.findChild({name: this.MDL.repeat.getName(d)});
+    if(subcomponent) {
+      subcomponent.deconstruct();
+    }
   }
 }
 
-Repeater.DEFAULT_UI = {
-}
+_Repeater.DEFAULT_UI = {
+};
+
+export const Repeater = decorate(_Repeater, {
+  "MDL": computed
+});
