@@ -110,7 +110,7 @@ export class Show extends BaseComponent {
       if (this.model.encoding.unstate && key == this.model.encoding.unstate.data.space[0]){
         const response = this.model.encoding.unstate.data.response;
         entities = entities
-          .filter(entity => response.get({ [key]: entity[key] }).un_state);
+          .filter(entity => response.get(entity).un_state);
       }
       
       const section = this.DOM.list.append("div")
