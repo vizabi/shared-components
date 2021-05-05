@@ -107,13 +107,12 @@ export class Show extends BaseComponent {
         .sort((a, b) => (a.name < b.name) ? -1 : 1)
     
       //TODO: HACK remove this UN state filter when we will be able to request entity properties separately
-      if (this.model.encoding.unstate){
-        const unstateData = this.model.encoding.unstate.data.response[0].data;
-        const unstateDim = this.model.encoding.unstate.data.space[0];
+      if (this.model.encoding.unstate && key == this.model.encoding.unstate.data.space[0]){
+        const response = this.model.encoding.unstate.data.response;
         entities = entities
-          .filter(f => unstateDim !== key || unstateData.find(d => d[key] == f[key]).un_state);
+          .filter(entity => response.get({ [key]: entity[key] }).un_state);
       }
-
+      
       const section = this.DOM.list.append("div")
         .attr("class", "vzb-accordion-section")
         .classed("vzb-accordion-active", this.tabsConfig[key] === "open")
