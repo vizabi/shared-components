@@ -70,10 +70,10 @@ export class About extends Dialog {
     const vizabiModulesData = [
       this.root.constructor.versionInfo || {},
       this.root.constructor.versionInfo?.sharedComponents || {},
-      Vizabi.versionInfo || {}
+      this.services.Vizabi.Vizabi.versionInfo || {}
     ];
 
-    const readerData = Vizabi.stores.dataSources.getAll().map(dataSource => {
+    const readerData = this.services.Vizabi.Vizabi.stores.dataSources.getAll().map(dataSource => {
       return {
         name: dataSource.config.name,
         service: dataSource.config.service,
