@@ -377,7 +377,7 @@ class TimeSlider extends BaseComponent {
         const maxPosX = _this.sliderWidth;
 
         const endBeforeForecast = frame.parseValue(_this.root.ui.chart.endBeforeForecast);
-        const forecastBoundaryIsOn = _this.root.ui.chart.showForecast && (frame.data.domain.lastItem > endBeforeForecast);
+        const forecastBoundaryIsOn = _this.root.ui.chart.showForecast && (frame.data.domain.at(-1) > endBeforeForecast);
         const forecastBoundaryPos = _this.xScale(endBeforeForecast);
         const snappyMargin = 0.5 * handle.attr("r");
 
@@ -385,7 +385,7 @@ class TimeSlider extends BaseComponent {
           posX = maxPosX;
         } else if (posX < 0) {
           posX = 0;
-        } else if ((Math.abs(posX - forecastBoundaryPos) < snappyMargin) && !d3.event.sourceEvent.shiftKey && forecastBoundaryIsOn) {
+        } else if ((Math.abs(posX - forecastBoundaryPos) < snappyMargin) && d3.event.sourceEvent.shiftKey && forecastBoundaryIsOn) {
           posX = forecastBoundaryPos;
         }
 
