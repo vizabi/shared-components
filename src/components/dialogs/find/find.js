@@ -256,7 +256,7 @@ class Find extends Dialog {
     const KEY = this.KEY;
 
     findListItems.data().forEach(d => {
-      d.brokenData = !currentDataMap.hasByObjOrStr(null, d[KEY]);
+      d.brokenData = !currentDataMap.hasByStr(d[KEY]);
     });
 
     this._updateLabelTitle();

@@ -91,7 +91,7 @@ export class IndicatorPicker extends BaseComponent {
       } else if (this.showHoverValues && this.MDL.highlighted.data.filter.any()) {
         const highlightedMarkers = this.MDL.highlighted.data.filter.markers;
         const [key, payload] = highlightedMarkers.entries().next().value;
-        const hoverKey = (this.model.dataMap.getByObjOrStr(null, key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
+        const hoverKey = (this.model.dataMap.getByStr(key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
 
         if (["entity_domain", "entity_set"].includes(this.MDL.model.data.conceptProps.concept_type)){
           // entity domain or set and may gave an extra model to resolve names from  

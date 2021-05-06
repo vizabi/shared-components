@@ -200,7 +200,7 @@ class Labels extends BaseComponent {
 
     //const select = _this.model.dataArray.filter(d => this.MDL.selected.has(d));
     const select = [...this.MDL.selected.markers.keys()]
-      .filter(key => _this.model.dataMap.hasByObjOrStr(null,key))
+      .filter(key => _this.model.dataMap.hasByStr(key))
       .map(selectedKey => ({[Symbol.for("key")]: selectedKey}));
     this.entityLabels = this.labelsContainer.selectAll("." + _cssPrefix + "-entity")
       .data(select, key);
@@ -466,7 +466,7 @@ class Labels extends BaseComponent {
     this.services.layout.size;
 
     this.entityLabels.each(function(d) {
-      _this._updateLabelSize(d, null, d3.select(this), _this.model.dataMap.getByObjOrStr(null,d[Symbol.for("key")]).size_label);
+      _this._updateLabelSize(d, null, d3.select(this), _this.model.dataMap.getByStr(d[Symbol.for("key")]).size_label);
       if (_this.cached[key(d)]._new) return;
       const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
       _this.positionLabel(d, null, this, 0, null, lineGroup);
