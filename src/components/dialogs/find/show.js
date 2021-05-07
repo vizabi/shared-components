@@ -104,7 +104,7 @@ export class Show extends BaseComponent {
           isShown: this._isMarkerInDimFilter(d, dim, key)
         }))
         //sort data alphabetically
-        .sort((a, b) => (a.name < b.name) ? -1 : 1)
+        .sort((a, b) => (a.name < b.name) ? -1 : 1);
     
       //TODO: HACK remove this UN state filter when we will be able to request entity properties separately
       if (this.model.encoding.unstate && key == this.model.encoding.unstate.data.space[0]){

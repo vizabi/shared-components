@@ -45,7 +45,7 @@ export class MinMaxInputs extends BaseComponent {
       zoomed_labelMax: this.element.select(".vzb-mmi-zoomedmax-label"),
       zoomed_fieldMin: this.element.select(".vzb-mmi-zoomedmin"),
       zoomed_fieldMax: this.element.select(".vzb-mmi-zoomedmax")
-    }
+    };
 
     const _this = this;
 
@@ -73,7 +73,7 @@ export class MinMaxInputs extends BaseComponent {
   draw() {
     this.MDL = {
       model: this._getModel()
-    }
+    };
 
     this.localise = this.services.locale.auto();
 
@@ -137,7 +137,7 @@ export class MinMaxInputs extends BaseComponent {
 MinMaxInputs.DEFAULT_UI = {
   selectDomainMinMax: false,
   selectZoomedMinMax: true
-}
+};
 
 
 
@@ -276,4 +276,4 @@ const _MinMaxInputs = {
     this.model.marker[this.markerID][what] = utils.strToFloat(value);
   }
 
-}
+};

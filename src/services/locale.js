@@ -16,7 +16,7 @@ class _LocaleService extends BaseService {
 
   setup(){
     this.status = STATUS.INIT;
-    this.path = this.config.path || this.constructor.DEFAULTS.path
+    this.path = this.config.path || this.constructor.DEFAULTS.path;
     this.placeholder = this.config.placeholder || this.constructor.DEFAULTS.placeholder;
     this.element = d3.select(this.placeholder);
     this.content = {};

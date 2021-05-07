@@ -67,7 +67,7 @@ Dialog.add("label", Label);
 
 const _Label = {
 
-/**
+  /**
  * Initializes the dialog component
  * @param config component configuration
  * @param context component context (parent)
@@ -104,4 +104,4 @@ const _Label = {
 
     this._super(config, parent);
   }
-}
+};

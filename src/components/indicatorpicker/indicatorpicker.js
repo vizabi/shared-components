@@ -1,7 +1,7 @@
 import * as legacy_utils from "../../legacy/base/utils";
 import * as Utils from "../../utils";
 import { BaseComponent } from "../base-component";
-import { ICON_QUESTION as iconQuestion } from "../../icons/iconset"
+import { ICON_QUESTION as iconQuestion } from "../../icons/iconset";
 
 import "./indicatorpicker.scss";
 
@@ -31,7 +31,7 @@ export class IndicatorPicker extends BaseComponent {
     this.DOM = {
       select: this.element.select(".vzb-ip-select"),
       info: this.element.select(".vzb-ip-info")
-    }
+    };
 
     this.DOM.select.on("click", () => {
       const rect = this.DOM.select.node().getBoundingClientRect();
@@ -63,7 +63,7 @@ export class IndicatorPicker extends BaseComponent {
   draw() {
     this.MDL = {
       model: this._getModel()
-    }
+    };
     if (this.showHoverValues) {
       this.MDL.highlighted = this.model.encoding.highlighted;
     }
@@ -320,4 +320,4 @@ const _IndPicker = {
     this.infoEl.classed("vzb-invisible", hideInfoEl);
   }
 
-}
+};

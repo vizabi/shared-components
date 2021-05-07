@@ -39,7 +39,7 @@ Dialog.add("technical", Technical);
 
 const _Technical = {
 
-/**
+  /**
  * Initializes the dialog component
  * @param config component configuration
  * @param context component context (parent)
@@ -56,4 +56,4 @@ const _Technical = {
 
     this._super(config, parent);
   }
-}
+};

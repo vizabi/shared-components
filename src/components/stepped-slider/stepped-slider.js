@@ -10,7 +10,7 @@ const CONFIG = {
   lineWidth: 10,
   domain: [1, 2, 3, 4, 5, 6],
   range: [1200, 900, 450, 200, 150, 100]
-}
+};
 
 class SteppedSlider extends BaseComponent {
 
@@ -131,7 +131,7 @@ class SteppedSlider extends BaseComponent {
   }
 
   redraw() {
-    const y = this.axisScale(this.delayScale.invert(this.MDL.frame.speed))
+    const y = this.axisScale(this.delayScale.invert(this.MDL.frame.speed));
     this.DOM.slide.attr("transform", `translate(0, ${y})`);
   }
 

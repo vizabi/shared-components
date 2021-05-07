@@ -72,7 +72,7 @@ Dialog.add("presentation", Presentation);
 
 const _Presentation = {
 
-/**
+  /**
  * Initializes the dialog component
  * @param config component configuration
  * @param context component context (parent)
@@ -111,4 +111,4 @@ const _Presentation = {
 
     this._super(config, parent);
   }
-}
+};

@@ -65,7 +65,7 @@ export class BrushSlider extends BaseComponent {
       sliderSvg: this.element.select(".vzb-slider-svg"),
       sliderWrap: this.element.select(".vzb-slider-wrap"),
       slider: this.element.select(".vzb-slider")
-    }
+    };
     this.DOM.slider.classed("vzb-slider-" + this.constructor.name.toLowerCase(), true);
   
     const options = this.options = utils.deepExtend(utils.deepExtend({}, OPTIONS), _options || {});

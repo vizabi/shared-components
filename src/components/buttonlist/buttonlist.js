@@ -1,5 +1,5 @@
 import * as utils from "../../legacy/base/utils";
-import * as iconset from "../../icons/iconset"
+import * as iconset from "../../icons/iconset";
 import { BaseComponent } from "../base-component";
 import "./buttonlist.scss";
 
@@ -21,7 +21,7 @@ export class ButtonList extends BaseComponent {
 
   constructor(config) {
 
-    super(config)
+    super(config);
   } 
 
   setup() {
@@ -231,7 +231,7 @@ export class ButtonList extends BaseComponent {
   draw() {
     this.MDL = {
       frame: this.model.encoding.frame
-    }
+    };
     this.localise = this.services.locale.auto();
 
     this._dialogs = this.root.findChild({type: "Dialogs"});
@@ -319,7 +319,7 @@ export class ButtonList extends BaseComponent {
     this.element.selectAll("span[data-localise]").each(function(d) {
       const view = d3.select(this);
       view.text(_this.localise(view.attr("data-localise")));
-    })
+    });
   }
 
   /*
@@ -684,7 +684,7 @@ export class ButtonList extends BaseComponent {
 ButtonList.DEFAULT_UI = {
   buttons: ["fullscreen"],
   sidebarCollapse: false
-}
+};
 
 function isFullscreen() {
   if (!window) return false;

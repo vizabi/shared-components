@@ -56,7 +56,7 @@ export class Colors extends Dialog {
             return legendMarker.dataArray.reduce((labels, data) => {
               labels[data[labelKey]] = data.name;
               return labels;
-            }, {})
+            }, {});
           }
           
           return null;
@@ -69,7 +69,7 @@ export class Colors extends Dialog {
         colorModelName: "color",
         legendModelName: "legend"
       }
-    }]
+    }];
     
     super(config);
   }

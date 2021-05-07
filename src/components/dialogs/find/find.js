@@ -210,8 +210,8 @@ class Find extends Dialog {
     this.DOM.findListItems = findList.text("").selectAll("div")
       .data(data, function(d) { return d[KEY]; })
       .join("div")
-        .attr("class", "vzb-find-item vzb-dialog-checkbox")
-        .call(this._createListItem.bind(this));
+      .attr("class", "vzb-find-item vzb-dialog-checkbox")
+      .call(this._createListItem.bind(this));
   }
 
   _createListItem(listItem) {
@@ -316,7 +316,7 @@ class Find extends Dialog {
         const opacityNonSelectedSlider = this.findChild({ type: "SingleHandleSlider" });
         opacityNonSelectedSlider._updateSize();
         opacityNonSelectedSlider._updateView();
-      })
+      });
     }
   }
 }
@@ -662,4 +662,4 @@ const _Find = {
 
   }
 
-}
+};

@@ -15,12 +15,12 @@ export class TimeDisplay extends Dialog {
           </svg>
         </div>
         <div class="vzb-dialog-buttons"></div>
-      </div>`
+      </div>`;
   
     config.subcomponents = [{
       type: DynamicBackground,
       placeholder: ".vzb-timedisplay"
-    }]
+    }];
     
     super(config);
   }
@@ -36,14 +36,14 @@ export class TimeDisplay extends Dialog {
   draw() {
     super.draw();
 
-    this.MDL.frame = this.model.encoding.frame
+    this.MDL.frame = this.model.encoding.frame;
 
     const _this = this;
     Object.assign(this.state, {
       get duration() {
         return _this.MDL.frame.playing ? _this.MDL.frame.speed || 0 : 0;
       }
-    })
+    });
 
     this.addReaction(this._updateTime);
     this.addReaction(this._updateSize);

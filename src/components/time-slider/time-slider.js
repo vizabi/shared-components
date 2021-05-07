@@ -201,7 +201,7 @@ class TimeSlider extends BaseComponent {
   }
 
   get xScale() {
-      return this.MDL.frame.scale.d3Scale;
+    return this.MDL.frame.scale.d3Scale;
   }
 
   _configEndBeforeForecast() {

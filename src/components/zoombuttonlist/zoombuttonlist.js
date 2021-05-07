@@ -1,5 +1,5 @@
 import * as utils from "../../legacy/base/utils";
-import * as iconset from "../../icons/iconset"
+import * as iconset from "../../icons/iconset";
 import { BaseComponent } from "../base-component";
 
 /*!
@@ -18,7 +18,7 @@ const class_active = "vzb-active";
 export class ZoomButtonList extends BaseComponent {
   constructor(config) {
 
-    super(config)
+    super(config);
   } 
 
   setup() {
@@ -85,7 +85,7 @@ export class ZoomButtonList extends BaseComponent {
 
   }
 
-    /*
+  /*
    * adds buttons configuration to the components and template_data
    * @param {Array} button_list list of buttons to be added
    */

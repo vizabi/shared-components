@@ -99,7 +99,7 @@ export class SizeSlider extends BrushSlider {
       min: this.profileConstants["min" + propertyName],
       max: this.profileConstants["max" + propertyName],
       default: this.profileConstants["default" + propertyName],
-    }
+    };
   }
 
   _updateSize() {
@@ -295,4 +295,4 @@ const _SizeSlider = {
       .text((d, i) => texts[i]);
   }
 
-}
+};

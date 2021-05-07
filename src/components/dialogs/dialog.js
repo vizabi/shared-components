@@ -1,7 +1,7 @@
 import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
 import {decorate, computed} from "mobx";
-import { ICON_DRAG as iconDrag, ICON_PIN as iconPin } from "../../icons/iconset"
+import { ICON_DRAG as iconDrag, ICON_PIN as iconPin } from "../../icons/iconset";
 //import requireAll from "helpers/requireAll";
 //const dialogTemplates = requireAll(require.context("components/dialogs/", true, /\.html$/));
 import "./dialog.scss";
@@ -27,17 +27,17 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
 const CollectionMixin = superClass => class extends superClass {
   //static _collection = {};
   static add(name, addedClass) {
-      CollectionMixin._collection[name] = addedClass;
+    CollectionMixin._collection[name] = addedClass;
   }
-  static get(name) { return CollectionMixin._collection[name]}
-}
+  static get(name) { return CollectionMixin._collection[name];}
+};
 
 CollectionMixin._collection = {};
 
 class Dialog extends CollectionMixin(BaseComponent) {
   constructor(config) {
 
-    super(config)
+    super(config);
   } 
 
   setup() {
@@ -48,7 +48,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
       content: this.element.select(".vzb-dialog-modal > .vzb-dialog-content"),
       dragHandler: this.element.select("[data-click='dragDialog']"),
       pinIcon: this.element.select("[data-click='pinDialog']")
-    }
+    };
     this.transitionEvents = ["webkitTransitionEnd", "transitionend", "msTransitionEnd", "oTransitionEnd"];
 
     this.state["opened"] = false;
@@ -59,27 +59,27 @@ class Dialog extends CollectionMixin(BaseComponent) {
     this.DOM.pinIcon.html(iconPin);
     this.DOM.pinIcon.on("click", () => {
       this.setPin(!this.getPin());
-    })
+    });
 
     const dg = dialogDrag(this.element, this.root.element, 10);
     const dragBehavior = d3.drag()
-    .on("start", () => {
-      const topPos = _this.element.node().offsetTop;
-      _this.element.style("top", topPos + "px");
-      _this.element.style("bottom", "auto");
-      _this.element.dispatch("custom-dragstart");
-      dg.dragStart(d3.event);
-    })
-    .on("drag", () => {
-      _this.element.dispatch("custom-drag");
-      dg.drag(d3.event);
-    })
-    .on("end", () => {
-      _this.rightPos = _this.element.style("right");
-      _this.topPos = _this.element.style("top");
-      _this.element.dispatch("custom-dragend");
-    });
-  this.DOM.dragHandler.call(dragBehavior);
+      .on("start", () => {
+        const topPos = _this.element.node().offsetTop;
+        _this.element.style("top", topPos + "px");
+        _this.element.style("bottom", "auto");
+        _this.element.dispatch("custom-dragstart");
+        dg.dragStart(d3.event);
+      })
+      .on("drag", () => {
+        _this.element.dispatch("custom-drag");
+        dg.drag(d3.event);
+      })
+      .on("end", () => {
+        _this.rightPos = _this.element.style("right");
+        _this.topPos = _this.element.style("top");
+        _this.element.dispatch("custom-dragend");
+      });
+    this.DOM.dragHandler.call(dragBehavior);
   }
 
   get MDL() {
@@ -110,7 +110,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
     this.element.selectAll("span[data-localise]").each(function(d) {
       const view = d3.select(this);
       view.text(_this.localise(view.attr("data-localise")));
-    })
+    });
   }
 
   _updateLayoutProfile(){
@@ -329,7 +329,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
 Dialog.DEFAULT_UI = {
   opened: false,
   pinned: false
-}
+};
 
 const decorated = decorate(Dialog, {
   "MDL": computed
@@ -649,4 +649,4 @@ const _Dialog = {
     }
   }
 
-}
+};

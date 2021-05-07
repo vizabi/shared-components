@@ -89,7 +89,7 @@ export default class TextEllipsis {
 
     if (text !== initialText) {
       if (text === "") {
-         textEl.text(initialText[0]);
+        textEl.text(initialText[0]);
       }
       textEl
         .on("mouseover.tooltip", this.interact.mouseOver)

@@ -9,7 +9,7 @@ const OPTIONS = {
   submodel: null,
   submodelFunc: null,
   prefix: "",
-}
+};
 
 export class SimpleCheckbox extends BaseComponent {
   constructor(config) {
@@ -23,7 +23,7 @@ export class SimpleCheckbox extends BaseComponent {
     this.DOM = {
       check: this.element.select("input"),
       label: this.element.select("label")
-    }
+    };
     
     const options = this.options = utils.deepExtend(utils.deepExtend({}, OPTIONS), _options || {});
 
@@ -41,7 +41,7 @@ export class SimpleCheckbox extends BaseComponent {
   draw() {
     this.MDL = {
       model: this._getModel()
-    }
+    };
 
     this.localise = this.services.locale.auto();
     this.addReaction(this._updateView);

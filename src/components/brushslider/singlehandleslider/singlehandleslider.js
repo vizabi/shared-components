@@ -287,4 +287,4 @@ const _SingleHandleSlider = {
     }
     this._super(value, force, persistent);
   }
-}
+};

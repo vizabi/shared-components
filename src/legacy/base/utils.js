@@ -1452,8 +1452,8 @@ export function firstBy() {
     const x = typeof (this) === "function" ? this : false;
     const y = makeCompareFunction(func, opt);
     const f = x ? function (a, b) {
-        return x(a, b) || y(a, b);
-      }
+      return x(a, b) || y(a, b);
+    }
       : y;
     f.thenBy = tb;
     return f;

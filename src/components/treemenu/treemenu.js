@@ -111,7 +111,7 @@ export class TreeMenu extends BaseComponent {
   targetModel(input) {
     if (!arguments.length) return this._targetModel;
 
-    this.removeReaction(this._targetModelReaction)
+    this.removeReaction(this._targetModelReaction);
     this._targetModel = input;
     this._targetProp = null;
     if (this._targetModelIsEncoding) {
@@ -120,7 +120,7 @@ export class TreeMenu extends BaseComponent {
     if (this._targetModelIsMarker) {
       this._targetProp = ["data", "space"];
     }
-    this.addReaction(this._targetModelReaction)
+    this.addReaction(this._targetModelReaction);
 
     return this;
   }
@@ -225,7 +225,7 @@ export class TreeMenu extends BaseComponent {
           if (tags[tag.dataSourceName])
             tags[tag.dataSourceName].children.push(tags[tag.tag]);
           else
-            utils.warn(`Tags request to the datasource ${tag.dataSourceName} probably didn't succeed`)
+            utils.warn(`Tags request to the datasource ${tag.dataSourceName} probably didn't succeed`);
         }
       }
     });
@@ -527,7 +527,7 @@ export class TreeMenu extends BaseComponent {
       const itemRect = itemNode.getBoundingClientRect();
       const scrollTop = itemRect.bottom - rect.top - listNode.offsetHeight + 10;
       listNode.scrollTop = scrollTop;
-    };
+    }
   }
 
   setPos() {
@@ -1043,7 +1043,7 @@ export class TreeMenu extends BaseComponent {
       this.state.ownReadiness = STATUS.PENDING;
     });
     const datasources = this._getDataSources(this.root.model.config.dataSources);
-    if (Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == 'fulfilled') {
+    if (Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == "fulfilled") {
       const localeId = this.services.locale.id;
       runInAction(() => {
         this.getTags(localeId)
@@ -1051,13 +1051,13 @@ export class TreeMenu extends BaseComponent {
             return this._buildIndicatorsTree({
               tagsArray: tags,
               dataModels: this._getDataSources(this.root.model.config.dataSources)
-            })})
+            });})
           .then(this.updateView.bind(this))
           .then(() => {
             this._enableSearch();
             this.state.ownReadiness = STATUS.READY;
-          })
-      })
+          });
+      });
     }
   }
 
@@ -1083,7 +1083,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _getDataSources(dsConfig) {
-    return Object.keys(dsConfig).map(dsName => Vizabi.stores.dataSources.get(dsName))
+    return Object.keys(dsConfig).map(dsName => Vizabi.stores.dataSources.get(dsName));
   }
 
   _filterAvailabilityBySpace(availability, space) {
@@ -1091,8 +1091,8 @@ export class TreeMenu extends BaseComponent {
       if (!key.length) return true;
       if (space.length > 1 && key.length < 2) return space.some(dim => dim == key);
       if (space.length !== key.length) return false;
-      return space.every((dim, i) => key[i] == dim)
-    })
+      return space.every((dim, i) => key[i] == dim);
+    });
   }
   // ready() {
   //   this.model.marker._root.dataManager.getTags(this.model.locale.id)
@@ -1104,7 +1104,7 @@ export class TreeMenu extends BaseComponent {
     return this._getDataSources(this.root.model.config.dataSources).map(ds => [ds.state, ds.config]);
   }
 
-    /**
+  /**
    * Return tag entities with name and parents from all data sources
    * @return {array} Array of tag objects
    */
@@ -1112,8 +1112,8 @@ export class TreeMenu extends BaseComponent {
     const TAG_KEY = ["tag"];
     const query = {
       select: {
-          key: TAG_KEY,
-          value: []
+        key: TAG_KEY,
+        value: []
       },
       language: locale,
       from: "entities"
@@ -1136,10 +1136,10 @@ export class TreeMenu extends BaseComponent {
         return [...result.values()].map(r => {
           r.dataSourceName = dataSourceName;
           return r;
-        })
+        });
       })))
       .then(results => this.mergeResults(results, ["tag"])) // using merge because key-duplicates terribly slow down treemenu
-    : Promise.resolve([]);    
+      : Promise.resolve([]);    
   }
 
   /**
@@ -1148,7 +1148,7 @@ export class TreeMenu extends BaseComponent {
    * @param  {array} key     primary key to each result
    * @return {array}         merged results
    */
-   mergeResults(results, key) {
+  mergeResults(results, key) {
     const keys = new Map();
     results.forEach(result => {
       result.forEach(row => {

@@ -11,7 +11,7 @@ const HTML_ICON_PAUSE =
   <path xmlns="http://www.w3.org/2000/svg" d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-2 28h-4V16h4v16zm8 0h-4V16h4v16z"/>
   </svg>`;
 const HTML_ICON_LOADING =
-  `<div class='vzb-loader'></div>`
+  `<div class='vzb-loader'></div>`;
 
 export class PlayButton extends BaseComponent {
 
@@ -19,7 +19,7 @@ export class PlayButton extends BaseComponent {
     config.template = 
       `<button class="vzb-ts-btn">
         <div class='vzb-loader'></div>
-      </button>`
+      </button>`;
     super(config);
   }
 
@@ -31,7 +31,7 @@ export class PlayButton extends BaseComponent {
   draw() {
     const localise = this.services.locale.auto();
     this.buttonEl.html(this.model.encoding.frame.playing ? HTML_ICON_PAUSE : HTML_ICON_PLAY);
-//    this.buttonEl.text(this.model.encoding.frame.playing ? localise("button-pause") : localise("button-play"));
+    //    this.buttonEl.text(this.model.encoding.frame.playing ? localise("button-pause") : localise("button-play"));
   }
 
   loading() {

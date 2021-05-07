@@ -86,7 +86,7 @@ class Speed extends Dialog {
     this.DOM = {
       timeFormatExample: this.element.select(".vzb-timeformatexample-label"),
       forecastField: this.element.select(".vzb-endbeforeforecast-field")
-    }
+    };
 
     const _this = this;
     this.DOM.forecastField
@@ -143,7 +143,7 @@ export { decorated as Speed};
 
 const _Speed = {
 
-/**
+  /**
  * Initializes the dialog component
  * @param config component configuration
  * @param context component context (parent)
@@ -217,4 +217,4 @@ const _Speed = {
     );
     this.timeFormatExampleEl.text(this.model.state.time.formatDate(new Date()));
   }
-}
+};

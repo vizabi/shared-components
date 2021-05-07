@@ -1,6 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
-import { ICON_CLOSE as iconClose } from "../../icons/iconset"
+import { ICON_CLOSE as iconClose } from "../../icons/iconset";
 import ColorPicker from "../../legacy/helpers/d3.colorPicker";
 import axisSmart from "../../legacy/helpers/d3.axisWithLabelPicker";
 import { STATUS, isEntityConcept } from "../../utils.js";
@@ -91,7 +91,7 @@ class ColorLegend extends BaseComponent {
     this.DOM.subtitleDiv = this.DOM.rainbowHolder.select(".vzb-cl-subtitle");
     this.DOM.subtitleText = this.DOM.subtitleDiv.select(".vzb-cl-subtitle-text");
 
-    this.legendModelName = options.legendModelName
+    this.legendModelName = options.legendModelName;
     this.colorModelName = options.colorModelName;
   
     this.colorPicker = new ColorPicker(this.root.element);
@@ -344,14 +344,14 @@ class ColorLegend extends BaseComponent {
     this.DOM.selectAllButton = this.DOM.selectDialog.append("div")
       .classed("vzb-cl-select-dialog-item", true);
 
-     this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
-       .classed("vzb-cl-select-dialog-item", true);
+    this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
+      .classed("vzb-cl-select-dialog-item", true);
 
-     this.DOM.editColorButton = this.DOM.selectDialog.append("div")
-       .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
+    this.DOM.editColorButton = this.DOM.selectDialog.append("div")
+      .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
 
-     this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
-       .classed("vzb-cl-select-dialog-item-tooltip", true);
+    this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
+      .classed("vzb-cl-select-dialog-item-tooltip", true);
   }
 
   _translateSelectDialog() {
@@ -1446,4 +1446,4 @@ const _ColorLegend = {
     });
   }
 
-}
+};

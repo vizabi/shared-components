@@ -73,7 +73,7 @@ export function getChildrenDefaultState(parent, children) {
 export function clearEmpties(obj) {
   for (const key in obj) {
     if (!obj[key] || typeof obj[key] !== "object" || obj[key] instanceof Date) {
-      continue // If null or not an object, skip to the next iteration
+      continue; // If null or not an object, skip to the next iteration
     }
 
     // The property is an object

@@ -69,7 +69,7 @@ Dialog.add("size", Size);
 
 const _Size = {
 
-/**
+  /**
  * Initializes the dialog component
  * @param config component configuration
  * @param context component context (parent)
@@ -127,4 +127,4 @@ const _Size = {
 
     this.element.select(".vzb-dialog-subtitle").text(subtitle);
   }
-}
+};

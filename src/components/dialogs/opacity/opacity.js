@@ -58,7 +58,7 @@ Dialog.add("opacity", Opacity);
 
 const _Opacity = {
 
-/**
+  /**
  * Initializes the dialog component
  * @param config component configuration
  * @param context component context (parent)
@@ -84,4 +84,4 @@ const _Opacity = {
 
     this._super(config, parent);
   }
-}
+};

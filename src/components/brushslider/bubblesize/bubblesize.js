@@ -38,8 +38,8 @@ export class BubbleSize extends BrushSlider {
 
     if (this.showArcs) {
       this.DOM.sliderArcs = this.DOM.slider.selectAll(".vzb-bs-slider-thumb-arc").data([0, 0]).enter()
-      .append("path")
-      .attr("class", "vzb-bs-slider-thumb-arc");
+        .append("path")
+        .attr("class", "vzb-bs-slider-thumb-arc");
     }
 
     this.DOM.sliderLabelsWrapper = this.DOM.slider.append("g");

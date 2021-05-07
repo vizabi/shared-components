@@ -9,10 +9,10 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rollup -c",
-    "build:prod": "NODE_ENV=production rollup -c",
-    "eslint:fix": "eslint --fix src",
-    "start": "NODE_ENV=devserver rollup -c --watch"
+    "start": "rollup -c",
+    "build": "NODE_ENV=production rollup -c",
+    "eslint": "eslint src",
+    "eslint:fix": "eslint --fix src"
   },
   "keywords": [],
   "author": {

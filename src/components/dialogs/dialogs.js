@@ -1,6 +1,6 @@
 import { Dialog } from "./dialog";
 import * as utils from "../../legacy/base/utils";
-import * as iconset from "../../icons/iconset"
+import * as iconset from "../../icons/iconset";
 import { BaseComponent } from "../base-component";
 import { runInAction } from "mobx";
 
@@ -18,7 +18,7 @@ export class Dialogs extends BaseComponent {
     const subcomponents = [];
     const templateArray  = [];
 
-    const dialogList = utils.unique([...sidebar, ...popup])
+    const dialogList = utils.unique([...sidebar, ...popup]);
 
     dialogList.forEach(dlg => {      
       subcomponents.push({
@@ -53,9 +53,9 @@ export class Dialogs extends BaseComponent {
         _this.bringForward(d.name);
       })
       .select(".vzb-top-dialog>.vzb-dialog-modal>.vzb-dialog-buttons>[data-click='closeDialog']")
-        .on("click", d => {
-          this.toggleDialogOpen(d.name, false);
-        });
+      .on("click", d => {
+        this.toggleDialogOpen(d.name, false);
+      });
   }
 
   resize() {

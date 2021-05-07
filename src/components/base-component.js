@@ -80,7 +80,7 @@ class _BaseComponent {
 
   setup(options) {
     if (options.showLoading) {
-      this.addReaction(() => this.element.classed("vzb-loading-data", this.status == STATUS.PENDING), true)
+      this.addReaction(() => this.element.classed("vzb-loading-data", this.status == STATUS.PENDING), true);
     }
   }
 

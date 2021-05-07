@@ -61,7 +61,7 @@ export class Axes extends Dialog {
       state: {
         submodel: "encoding.y.scale"
       }
-    }]
+    }];
 
     super(config);
   }
@@ -114,4 +114,4 @@ const _Axes = {
 
     this._super(config, parent);
   }
-}
+};

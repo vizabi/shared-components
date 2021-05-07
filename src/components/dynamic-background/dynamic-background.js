@@ -7,7 +7,7 @@ export class DynamicBackground extends BaseComponent {
     this.DOM = {
       textEl: this.element.append("text").style("font-size", "20px"),
       sampleTextEl: this.element.append("text").style("font-size", "20px").style("opacity", 0)
-    }
+    };
     
     this.element.classed("vzb-dynamic-background", true);
 
@@ -136,9 +136,9 @@ export class DynamicBackground extends BaseComponent {
     this.textWidth = bbox.width * this.scalar;
 
     switch (this.yAlign) {
-      case "bottom": textEl.attr("dy", ".325em"); break;
-      case "center": textEl.attr("dy", ".325em"); break;
-      case "top": textEl.attr("dy", "0"); break;
+    case "bottom": textEl.attr("dy", ".325em"); break;
+    case "center": textEl.attr("dy", ".325em"); break;
+    case "top": textEl.attr("dy", "0"); break;
     }
 
     this.element.attr("transform", "translate(" + this._getLeftOffset() + "," + this._getTopOffset() + ")");
@@ -148,24 +148,24 @@ export class DynamicBackground extends BaseComponent {
 
   _getLeftOffset() {
     switch (this.xAlign) {
-      case "right":
-        return this.width - this.textWidth / 2 - this.rightOffset;
-      case "left":
-        return this.textWidth / 2 + this.leftOffset;
-      default :
-        return this.width / 2;
+    case "right":
+      return this.width - this.textWidth / 2 - this.rightOffset;
+    case "left":
+      return this.textWidth / 2 + this.leftOffset;
+    default :
+      return this.width / 2;
     }
   }
 
   _getTopOffset() {
     switch (this.yAlign) {
-      case "top":
-        return this.textHeight / 2 + this.topOffset;
-      case "bottom":
-        return this.height - this.textHeight / 2 - this.bottomOffset;
-      default :
-        return this.height / 2;
+    case "top":
+      return this.textHeight / 2 + this.topOffset;
+    case "bottom":
+      return this.height - this.textHeight / 2 - this.bottomOffset;
+    default :
+      return this.height / 2;
     }
   }
 
-};
+}

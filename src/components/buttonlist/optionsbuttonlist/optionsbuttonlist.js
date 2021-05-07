@@ -33,7 +33,7 @@ export class OptionsButtonList extends ButtonList {
       const { hiddenButtons } = d3.event.detail;
       this.element.selectAll(".vzb-buttonlist-btn")
         .style("display", d => hiddenButtons.indexOf(d.id) == -1 ? "none" : "");
-    })
+    });
   }
 
   _toggleButtons() {
