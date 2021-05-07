@@ -33,27 +33,3 @@ export class Technical extends Dialog {
 }
 
 Dialog.add("technical", Technical);
-
-
-
-
-const _Technical = {
-
-  /**
- * Initializes the dialog component
- * @param config component configuration
- * @param context component context (parent)
- */
-  init(config, parent) {
-    this.name = "technical";
-
-    this.components = [{
-      component: simplecheckbox,
-      placeholder: ".vzb-advancedshowandselect-switch",
-      model: ["ui.dialogs.dialog.find", "locale"],
-      checkbox: "enableSelectShowSwitch"
-    }];
-
-    this._super(config, parent);
-  }
-};

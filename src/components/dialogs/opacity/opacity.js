@@ -50,38 +50,3 @@ export class Opacity extends Dialog {
 }
 
 Dialog.add("opacity", Opacity);
-
-
-
-
-
-
-const _Opacity = {
-
-  /**
- * Initializes the dialog component
- * @param config component configuration
- * @param context component context (parent)
- */
-  init(config, parent) {
-    this.name = "opacity";
-
-    // in dialog, this.model_expects = ["state", "data"];
-
-    this.components = [
-      {
-        component: singlehandleslider,
-        placeholder: ".vzb-dialog-bubbleopacity-regular",
-        model: ["state.marker", "locale"],
-        arg: "opacityRegular"
-      }, {
-        component: singlehandleslider,
-        placeholder: ".vzb-dialog-bubbleopacity-selectdim",
-        model: ["state.marker", "locale"],
-        arg: "opacitySelectDim"
-      }
-    ];
-
-    this._super(config, parent);
-  }
-};
