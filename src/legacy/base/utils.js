@@ -1,3 +1,5 @@
+/* eslint no-prototype-builtins: "off" */
+
 export const d3json = function (path, callback) {
   d3.json(path)
     .then(response => callback(null, response))
