@@ -191,7 +191,7 @@ class ColorLegend extends BaseComponent {
       })
       .merge(colorOptions);
 
-    colorOptions.each(function(d, index) {
+    colorOptions.each(function(d) {
       d3.select(this).select(".vzb-cl-color-sample")
         .style("background-color", cScale(d[_this.which]))
         .style("border", "1px solid " + cScale(d[_this.which]));
@@ -209,7 +209,6 @@ class ColorLegend extends BaseComponent {
 
     if (!this._isLegendModelReady()) return;
 
-    const _this = this;
     const cScale = this.MDL.legend.encoding.color.scale.d3Scale;
 
     const tempdivEl = this.DOM.minimap.append("div").attr("class", "vzb-temp");
@@ -254,12 +253,10 @@ class ColorLegend extends BaseComponent {
 
   _interact() {
     const _this = this;
-    const KEYS = this.KEYS;
-    const KEY = this.KEY;
     const which = this.which;
 
     return {
-      mouseover(d, i) {
+      mouseover(d) {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", false);
 
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
@@ -275,7 +272,7 @@ class ColorLegend extends BaseComponent {
           _this.MDL.highlighted.data.filter.set(selectArray);
       },
 
-      mouseout(d, i) {
+      mouseout() {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", true);
 
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
@@ -287,9 +284,7 @@ class ColorLegend extends BaseComponent {
         //disable interaction if so stated in concept properties
         //if (!_this.MDL.color.scale.palette.isUserSelectable) return;
         const colorScaleModel = _this.MDL.color.scale;
-        const palette = colorScaleModel.palette.palette;
         const defaultPalette = colorScaleModel.palette.defaultPalette;
-        const view = d3.select(this);
         const target = !colorScaleModel.isDiscrete() ? d.paletteKey : d[which];
         _this.colorPicker
           .colorOld(colorScaleModel.palette.getColor(target))
@@ -298,7 +293,7 @@ class ColorLegend extends BaseComponent {
           .fitToScreen([d3event.pageX, d3event.pageY])
           .show(true);
       },
-      clickToShow(d, i) {
+      clickToShow(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
         const filter = _this.model.data.filter;
@@ -307,7 +302,7 @@ class ColorLegend extends BaseComponent {
         
         filter.config.dimensions[colorSpace][concept] = d[concept];
       },
-      clickToSelect(d, i) {
+      clickToSelect(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
         const concept = _this.MDL.color.data.concept;
@@ -505,7 +500,7 @@ class ColorLegend extends BaseComponent {
 
       if (!edgeDomain.includes(0)) {
         //find tick with zero
-        const zeroTickEl = this.DOM.labelScaleG.selectAll(".tick text").filter(function() { return d3.select(this).text() === "0"; })
+        this.DOM.labelScaleG.selectAll(".tick text").filter(function() { return d3.select(this).text() === "0"; })
           .style("cursor", "pointer")
           .on("dblclick", () => {
             const color = cScale(0);
@@ -542,7 +537,7 @@ class ColorLegend extends BaseComponent {
       }));
 
       const legendDrag = d3.drag()
-        .on("start", function start(d, i) {
+        .on("start", function start(d) {
           //click сompatible node raise
           let nextSibling = this.nextSibling;
           while (nextSibling) {
@@ -651,7 +646,7 @@ class ColorLegend extends BaseComponent {
         .call(legendDrag)
         .merge(this.rainbowLegend);
 
-      this.rainbowLegend.each(function(d, i) {
+      this.rainbowLegend.each(function(d) {
         d3.select(this).attr("fill", d.color);
         d3.select(this).attr("cx", d.x = _this.labelScale(d.val));
       });
@@ -665,6 +660,12 @@ const decorated = decorate(ColorLegend, {
   "MDL": computed
 });
 export { decorated as ColorLegend };
+
+
+
+
+
+
 
 
 
@@ -703,15 +704,15 @@ const _ColorLegend = {
     }];
 
     this.model_binds = {
-      "change:color.scaleType": function(evt, path) {
+      "change:color.scaleType": function() {
         if (!_this._readyOnce || _this.colorModel.scale.isDiscrete()) return;
         _this.updateView();
       },
-      "change:color.palette": function(evt, path) {
+      "change:color.palette": function() {
         if (!_this._readyOnce || (_this.colorModel.scale.isDiscrete() && !_this.frame && !_this.colorModel.use === "constant")) return;
         _this.updateView();
       },
-      "change:marker.highlight": function(evt, values) {
+      "change:marker.highlight": function() {
         if (!_this.colorModel.scale.isDiscrete()) return;
 
         _this.model.marker.getFrame(_this.model.time.value, frame => {
@@ -723,13 +724,13 @@ const _ColorLegend = {
           }
         });
       },
-      "change:time.start": function(evt, original) {
+      "change:time.start": function() {
         if (!_this._readyOnce || _this.model.time.splash) return;
         if (_this.colorModel.which == _this.model.time.dim) {
           _this.ready();
         }
       },
-      "change:time.end": function(evt, original) {
+      "change:time.end": function() {
         if (!_this._readyOnce || _this.model.time.splash) return;
         if (_this.colorModel.which == _this.model.time.dim) {
           _this.ready();
@@ -958,7 +959,7 @@ const _ColorLegend = {
       })
       .merge(colorOptions);
 
-    colorOptions.each(function(d, index) {
+    colorOptions.each(function(d) {
       d3.select(this).select(".vzb-cl-color-sample")
         .style("background-color", cScale(d[_this.which]))
         .style("border", "1px solid " + cScale(d[_this.which]));
@@ -1060,8 +1061,6 @@ const _ColorLegend = {
 
     }
 
-    const labelScaleType = (d3.min(domain) <= 0 && d3.max(domain) >= 0 && this.colorModel.scaleType === "log") ? "genericLog" : this.colorModel.scaleType;
-
     this.labelScale = cScale.copy()
       .interpolate(d3.interpolate)
       .range(range);
@@ -1132,7 +1131,7 @@ const _ColorLegend = {
 
       if (!edgeDomain.includes(0)) {
         //find tick with zero
-        const zeroTickEl = this.DOM.labelScaleG.selectAll(".tick text").filter(function() { return d3.select(this).text() === "0"; })
+        this.DOM.labelScaleG.selectAll(".tick text").filter(function() { return d3.select(this).text() === "0"; })
           .style("cursor", "pointer")
           .on("dblclick", () => {
             const color = cScale(0);
@@ -1169,7 +1168,7 @@ const _ColorLegend = {
       }));
 
       const legendDrag = d3.drag()
-        .on("start", function start(d, i) {
+        .on("start", function start(d) {
           //click сompatible node raise
           let nextSibling = this.nextSibling;
           while (nextSibling) {
@@ -1278,7 +1277,7 @@ const _ColorLegend = {
         .call(legendDrag)
         .merge(this.rainbowLegend);
 
-      this.rainbowLegend.each(function(d, i) {
+      this.rainbowLegend.each(function(d) {
         d3.select(this).attr("fill", d.color);
         d3.select(this).attr("cx", d.x = _this.labelScale(d.val));
       });
@@ -1313,12 +1312,11 @@ const _ColorLegend = {
     const which = this.which;
 
     return {
-      mouseover(d, i) {
+      mouseover(d) {
         _this.moreOptionsHint.classed("vzb-hidden", false);
         //disable interaction if so stated in concept properties
         if (!_this.colorModel.scale.isDiscrete()) return;
 
-        const view = d3.select(this);
         const target = d[which];
 
         if (_this.colorModel.use == "indicator") {
@@ -1348,7 +1346,7 @@ const _ColorLegend = {
         }
       },
 
-      mouseout(d, i) {
+      mouseout() {
         _this.moreOptionsHint.classed("vzb-hidden", true);
         //disable interaction if so stated in concept properties
         if (!_this.colorModel.scale.isDiscrete()) return;
@@ -1359,7 +1357,6 @@ const _ColorLegend = {
         if (!_this.colorModel.isUserSelectable()) return;
         const palette = _this.colorModel.getPalette();
         const defaultPalette = _this.colorModel.getDefaultPalette();
-        const view = d3.select(this);
         const target = !_this.colorModel.scale.isDiscrete() ? d.paletteKey : d[which];
         _this.colorPicker
           .colorOld(palette[target])
@@ -1368,12 +1365,9 @@ const _ColorLegend = {
           .fitToScreen([d3event.pageX, d3event.pageY])
           .show(true);
       },
-      clickToShow(d, i) {
+      clickToShow(d) {
         //disable interaction if so stated in concept properties
         if (!_this.colorModel.scale.isDiscrete()) return;
-
-        const view = d3.select(this);
-        const target = d[which];
 
         const oldShow = _this.model.entities.show[which] && _this.model.entities.show[which]["$in"] ?
           utils.clone(_this.model.entities.show[which]["$in"]) :
@@ -1393,11 +1387,10 @@ const _ColorLegend = {
         _this.model.entities.set({ show });
 
       },
-      clickToSelect(d, i) {
+      clickToSelect(d) {
         //disable interaction if so stated in concept properties
         if (!_this.colorModel.scale.isDiscrete()) return;
 
-        const view = d3.select(this);
         const target = d[which];
 
         const filterHash = _this.colorModel.getValidItems()

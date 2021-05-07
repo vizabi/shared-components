@@ -88,7 +88,7 @@ export default function axisSmart(_orient) {
       // patch the label positioning after the view is generated
       const padding = axis.tickPadding();
       g.selectAll("text")
-        .each(function(d, i) {
+        .each(function() {
           if (axis.pivot() == null) return;
 
           const view = d3.select(this);
@@ -210,7 +210,7 @@ export default function axisSmart(_orient) {
         repositionLabelsThatStickOut([highlightValue], o, orient, axis.scale(), dimension)[highlightValue])[dimension];
 
       // this function will help to move the hovered value to the right place
-      const getTransform = function(d) {
+      const getTransform = function() {
         return highlightValue == "none" ? "translate(0,0)" :
           "translate("
             + (orient == HORIZONTAL ? axis.scale()(highlightValue) + hlValueShift * pivot : 0) + ","
@@ -414,7 +414,6 @@ export default function axisSmart(_orient) {
 
       const domain = axis.scale().domain();
       const range = axis.scale().range();
-      const lengthDomain = Math.abs(domain[domain.length - 1] - domain[0]);
       const lengthRange = Math.abs(range[range.length - 1] - range[0]);
 
       const min = d3.min([domain[0], domain[domain.length - 1]]);
@@ -464,8 +463,6 @@ export default function axisSmart(_orient) {
       const labelsFitIntoScale = function(tickValues, lengthRange, approximationStyle, rescalingLabels) {
         if (tickValues == null || tickValues.length <= 1) return true;
         if (approximationStyle == null) approximationStyle = PESSIMISTIC;
-        if (rescalingLabels == null) scaleType = "none";
-
 
         if (labelsStackOnTop) {
           //labels stack on top of each other. digit height matters
@@ -622,7 +619,7 @@ export default function axisSmart(_orient) {
 
           let spawn = spawnZero.concat(spawnPos).concat(spawnNeg).sort(d3.ascending);
 
-          options.stops.forEach((stop, i) => {
+          options.stops.forEach((stop) => {
             tickValuesMinor = tickValuesMinor.concat(spawn.map(d => d * stop));
           });
 

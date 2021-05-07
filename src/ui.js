@@ -13,7 +13,6 @@ export function ui(defaults = {}, config = {}, baseConfig = {}) {
                 
       _ui[key] = ui(defaults[key], config[key], baseConfig[key]);
     } else {
-      const newObj = {};
       const descriptor = {
         get() {
           return (typeof config[key] !== "undefined") ? config[key] : 

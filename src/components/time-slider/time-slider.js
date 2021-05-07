@@ -206,7 +206,7 @@ class TimeSlider extends BaseComponent {
 
   _configEndBeforeForecast() {
     const frame = this.MDL.frame;
-    const { offset, floor } = Vizabi.utils.interval(frame.data.concept);
+    const { offset, floor } = this.services.Vizabi.Vizabi.utils.interval(frame.data.concept);
     if (!this.root.ui.chart.endBeforeForecast) {
       const stepBack = floor(offset(new Date(), -1));
       this.root.ui.chart.endBeforeForecast = frame.formatValue(stepBack);
@@ -232,7 +232,7 @@ class TimeSlider extends BaseComponent {
     const frame = this.MDL.frame;
     const lastNonForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
     const forecastPauseSetting = this.root.ui.chart.pauseBeforeForecast;
-    const equals = Vizabi.utils.equals;
+    const equals = this.services.Vizabi.Vizabi.utils.equals;
 
     // stop when 
     // - first forecast value is reached, then set to previous year. This way animation finishes.
@@ -301,7 +301,6 @@ class TimeSlider extends BaseComponent {
       : margin.right;
     this.sliderWidth = this.width - margin.left - marginRight;
     this.sliderHeight = this.height - margin.bottom - margin.top;
-    const _this = this;
 
     //translate according to margins
     slider.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -343,7 +342,7 @@ class TimeSlider extends BaseComponent {
    * Returns width of slider text value.
    * Parameters in this function needed for memoize function, so they are not redundant.
    */
-  _getValueWidth(layout, value) {
+  _getValueWidth() {
     return this.valueText.node().getBoundingClientRect().width;
   }
 
@@ -418,7 +417,7 @@ class TimeSlider extends BaseComponent {
     };
   }
 
-  _setHandle(transition) {
+  _setHandle() {
     this.services.layout.size;
     this.services.layout.hGrid;
 

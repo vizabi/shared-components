@@ -5,28 +5,6 @@ import "./datanotes.scss";
 import { ICON_CLOSE } from "../../icons/iconset.js";
 
 
-
-const PROFILE_CONSTANTS = {
-  SMALL: {
-
-  },
-  MEDIUM: {
-
-  },
-  LARGE: {
-
-  }
-};
-
-const PROFILE_CONSTANTS_FOR_PROJECTOR = {
-  MEDIUM: {
-
-  },
-  LARGE: {
-
-  }
-};
-
 export class DataNotes extends BaseComponent {
 
   constructor(config) {

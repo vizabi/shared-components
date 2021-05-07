@@ -258,7 +258,6 @@ export class Menu {
   }
 
   _closeHorizontal(cb) {
-    const elementWidth = this.entity.node().offsetWidth;
     const _this = this;
     const openSubmenuNow = _this.parent.parentMenu.openSubmenuNow;
     _this.entity.transition()
@@ -387,7 +386,7 @@ class MenuItem {
     this.entity = item;
     this.entity.select("." + css.list_item_label).call(select => {
       if (utils.isTouchDevice()) {
-        select.onTap(evt => {
+        select.onTap(() => {
           d3.event.stopPropagation();
           if (_this.parentMenu.direction == MENU_VERTICAL) {
             const view = _this.entity.select("." + css.list_item_label);
@@ -475,7 +474,6 @@ class MenuItem {
   }
 
   marqueeToggleAll(toggle) {
-    const _this = this;
     const labels = this.entity.selectAll("." + css.list_item_label);
     labels.each(function() {
       const label = d3.select(this).select("span");

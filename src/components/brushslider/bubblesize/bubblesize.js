@@ -81,7 +81,6 @@ export class BubbleSize extends BrushSlider {
   }
 
   _updateLabels(s) {
-    const _this = this;
     if (s) { this.DOM.sliderLabels.data(s); }
     this.DOM.sliderLabels
       .attr("transform", (d, i) => {

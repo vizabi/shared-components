@@ -15,15 +15,6 @@ const OPTIONS = {
   snapValue: null
 };
 
-const PROFILE_CONSTANTS = {
-  SMALL: {
-  },
-  MEDIUM: {
-  },
-  LARGE: {
-  }
-};
-
 export class SingleHandleSlider extends BrushSlider {
 
 
@@ -55,7 +46,6 @@ export class SingleHandleSlider extends BrushSlider {
   }
 
   _createThumbs(thumbsEl) {
-    const barWidth = this.options.BAR_WIDTH;
     const halfThumbHeight = this.options.THUMB_HEIGHT * 0.5;
 
     const thumbArc = d3.arc()

@@ -82,7 +82,7 @@ class Speed extends Dialog {
     super(config);
   }
 
-  setup(options) {
+  setup() {
     this.DOM = {
       timeFormatExample: this.element.select(".vzb-timeformatexample-label"),
       forecastField: this.element.select(".vzb-endbeforeforecast-field")

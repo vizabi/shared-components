@@ -1,4 +1,3 @@
-import * as utils from "../../legacy/base/utils";
 import {BaseComponent} from "../base-component.js";
 
 export class DynamicBackground extends BaseComponent {

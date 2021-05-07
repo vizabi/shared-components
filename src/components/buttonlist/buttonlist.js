@@ -12,10 +12,7 @@ import "./buttonlist.scss";
 const class_active = "vzb-active";
 const class_hidden = "vzb-hidden";
 const class_active_locked = "vzb-active-locked";
-const class_hide_btn = "vzb-dialog-side-btn";
 const class_unavailable = "vzb-unavailable";
-const class_vzb_fullscreen = "vzb-force-fullscreen";
-const class_container_fullscreen = "vzb-container-fullscreen";
 
 export class ButtonList extends BaseComponent {
 
@@ -267,22 +264,11 @@ export class ButtonList extends BaseComponent {
 
   proceedClick(id) {
     const _this = this;
-    const btn = _this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
-    const classes = btn.attr("class");
     const btn_config = _this._available_buttons[id];
 
     if (btn_config && btn_config.func) {
       btn_config.func(id);
     } else {
-      //trying open dialog be default
-      // const btn_active = classes.indexOf(class_active) === -1;
-
-      // btn.classed(class_active, btn_active);
-
-      // const evt = {};
-      // evt["id"] = id;
-      // evt["active"] = btn_active;
-      // _this.trigger("click", evt);
       this._dialogs.toggleDialogOpen(id);
     }
   }
@@ -305,9 +291,8 @@ export class ButtonList extends BaseComponent {
    */
   _showAllButtons() {
     // show all existing buttons
-    const _this = this;
     const buttons = this.element.selectAll(".vzb-buttonlist-btn");
-    buttons.each(function(d, i) {
+    buttons.each(function() {
       const button = d3.select(this);
       button.style("display", "");
     });
@@ -316,7 +301,7 @@ export class ButtonList extends BaseComponent {
   _localiseButtons() {
     const _this = this;
     this.services.locale.id;
-    this.element.selectAll("span[data-localise]").each(function(d) {
+    this.element.selectAll("span[data-localise]").each(function() {
       const view = d3.select(this);
       view.text(_this.localise(view.attr("data-localise")));
     });
@@ -337,8 +322,6 @@ export class ButtonList extends BaseComponent {
 
     const buttons = this.element.selectAll(".vzb-buttonlist-btn");
 
-    const container = this.element.node().getBoundingClientRect();
-
     const not_required = [];
     const required = [];
 
@@ -349,7 +332,7 @@ export class ButtonList extends BaseComponent {
     let buttons_width = 0;
     let buttons_height = 0;
 
-    buttons.filter(d => !d.ignoreSize).each(function(d, i) {
+    buttons.filter(d => !d.ignoreSize).each(function(d) {
       const button_data = d;
       const button = d3.select(this);
       const expandable = button_expand.indexOf(button_data.id) !== -1;
@@ -444,8 +427,6 @@ export class ButtonList extends BaseComponent {
       details_btn.icon = iconset["ICON_" + details_btn.icon.toUpperCase()];
       details_btns.push(details_btn);
     }
-
-    const t = this.localise;
 
     this.element.selectAll("button").data(details_btns)
       .enter().append("button")
@@ -559,7 +540,7 @@ export class ButtonList extends BaseComponent {
     btn.classed(class_active_locked, showForecast);
     btn.classed(class_hidden, !this.root.ui.chart.endBeforeForecast);
   }
-  toggleBubbleLock(id) {
+  toggleBubbleLock() {
     const active = (this.root.ui.chart || {}).lockActive;
 
     if (!this.model.encoding.selected.data.filter.any() && !active) return;
@@ -631,15 +612,10 @@ export class ButtonList extends BaseComponent {
     let component = this;
     //let pholder = component.placeholder;
     let pholder = component.root.element.node();
-    let pholder_found = false;
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
     const fs = !this.ui.fullscreen;
     const body_overflow = (fs) ? "hidden" : this._prev_body_overflow;
 
-    // while (!(pholder_found = utils.hasClass(pholder, "vzb-placeholder"))) {
-    //   component = component.parent;
-    //   pholder = component.placeholder;
-    // }
 
     //TODO: figure out a way to avoid fullscreen resize delay in firefox
     if (fs) {
@@ -669,14 +645,6 @@ export class ButtonList extends BaseComponent {
     document.body.style.overflow = body_overflow;
 
     if (!this.resizeInExitHandler) this.services.layout._resizeHandler();
-
-    //force window resize event
-    // utils.defer(function() {
-    //   event = window.document.createEvent("HTMLEvents");
-    //   event.initEvent("resize", true, true);
-    //   event.eventName = "resize";
-    //   window.dispatchEvent(event);
-    // });
   }
 
 }

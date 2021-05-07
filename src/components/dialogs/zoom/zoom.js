@@ -1,4 +1,3 @@
-import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 import { ZoomButtonList } from "../../zoombuttonlist/zoombuttonlist";
 import { SimpleCheckbox } from "../../simplecheckbox/simplecheckbox";

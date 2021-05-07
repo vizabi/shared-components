@@ -29,9 +29,7 @@ export class PlayButton extends BaseComponent {
   }
 
   draw() {
-    const localise = this.services.locale.auto();
     this.buttonEl.html(this.model.encoding.frame.playing ? HTML_ICON_PAUSE : HTML_ICON_PLAY);
-    //    this.buttonEl.text(this.model.encoding.frame.playing ? localise("button-pause") : localise("button-play"));
   }
 
   loading() {

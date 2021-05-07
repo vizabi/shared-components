@@ -358,7 +358,7 @@ export const extend = function (dest) {
   //objects to overwrite dest are next arguments
   const objs = Array.prototype.slice.call(arguments, 1);
   //loop through each obj and each argument, left to right
-  forEach(objs, (obj, i) => {
+  forEach(objs, (obj) => {
     forEach(obj, (value, k) => {
       if (obj.hasOwnProperty(k)) {
         dest[k] = value;
@@ -433,7 +433,7 @@ export const deepExtend = function (/*obj_1, [obj_2], [obj_N]*/) {
   // convert arguments to array and cut off target object
   const args = Array.prototype.slice.call(arguments, 1, (lastArgIsBool ? -1 : arguments.length));
 
-  let val, src, clone;
+  let val, src;
 
   forEach(args, obj => {
     // skip argument if it is array or isn't object
@@ -493,7 +493,7 @@ export const merge = function (dest) {
   const objs = Array.prototype.slice.call(arguments, 1);
 
   // loop through each obj and each argument, left to right
-  forEach(objs, (obj, i) => {
+  forEach(objs, (obj) => {
     forEach(obj, (value, k) => {
       if (obj.hasOwnProperty(k)) {
         if (dest.hasOwnProperty(k)) {
@@ -745,7 +745,7 @@ export const matchAny = function (values, compare, wildc) {
 
 export const preventAncestorScrolling = function (element) {
   let preventScrolling = false;
-  element.on("mousewheel", function (d, i) {
+  element.on("mousewheel", function () {
     const scrollTop = this.scrollTop;
     const scrollHeight = this.scrollHeight;
     const height = element.node().offsetHeight;
@@ -1543,7 +1543,6 @@ export const getSubtitle = (title = "", shortTitle) => {
 
 export const getBrowserDetails = () => {
 
-  const nVer = navigator.appVersion;
   const nAgt = navigator.userAgent;
   let browserName = navigator.appName;
   let fullVersion = "" + parseFloat(navigator.appVersion);

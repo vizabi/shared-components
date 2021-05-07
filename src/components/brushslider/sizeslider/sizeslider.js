@@ -78,7 +78,7 @@ export class SizeSlider extends BrushSlider {
         const dY = 0;
         return "translate(" + ((this.services.locale.isRTL() ? -1 : 1) * dX) + "," + (dY) + ")";
       })
-      .attr("font-size", (d, i) => this.propertyScale(d));
+      .attr("font-size", (d) => this.propertyScale(d));
     if (this.MDL.model.data.isConstant())
       this.DOM.sliderLabels.text(d => ~~(this.propertyScale(d)) + (this.localise(this.options.constantUnit) || ""));
   }

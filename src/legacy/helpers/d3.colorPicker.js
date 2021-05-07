@@ -68,7 +68,7 @@ export default class ColorPicker {
     this._arc = d3.arc();
 
 
-    this._pie = d3.pie().sort(null).value(d => 1);
+    this._pie = d3.pie().sort(null).value(() => 1);
     this._colorPointer = null;
     this._showColorPicker = false;
     this._sampleRect = null;
@@ -297,7 +297,7 @@ export default class ColorPicker {
       this._colorPointer
         .classed(css.INVISIBLE, false)
         .attr("d", d3.select(view).attr("d"))
-        .style("stroke", d3.select(view).datum().data.stroke || _colorWhite);
+        .style("stroke", d3.select(view).datum().data.stroke || this._colorWhite);
 
     this._sampleRect.style("fill", value);
     this._sampleText.text(value);

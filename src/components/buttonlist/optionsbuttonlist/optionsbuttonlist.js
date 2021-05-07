@@ -1,4 +1,3 @@
-import * as utils from "base/utils";
 import { ButtonList } from "../buttonlist";
 
 /*!
@@ -52,7 +51,6 @@ const _OptionsButtonList = {
   init(config, context) {
 
     //set properties
-    const _this = this;
     this.name = "gapminder-optionsbuttonlist";
 
     this._super(config, context);
@@ -74,12 +72,10 @@ const _OptionsButtonList = {
 
     this.buttonListComp.on("toggle", (evt, params) => {
       const btn = _this.element.selectAll(".vzb-buttonlist-btn");
-      let visibleButton = 0;
       btn.each(function(d) {
         const button = d3.select(this);
         const isHidden = params.hiddenButtons.indexOf(d.id) == -1;
         button.style("display", isHidden ? "none" : "");
-        if (!isHidden) visibleButton++;
       });
     });
 

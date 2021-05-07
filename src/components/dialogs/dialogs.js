@@ -1,6 +1,5 @@
 import { Dialog } from "./dialog";
 import * as utils from "../../legacy/base/utils";
-import * as iconset from "../../icons/iconset";
 import { BaseComponent } from "../base-component";
 import { runInAction } from "mobx";
 

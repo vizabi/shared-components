@@ -107,7 +107,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
 
   _localiseDialogTexts() {
     const _this = this;
-    this.element.selectAll("span[data-localise]").each(function(d) {
+    this.element.selectAll("span[data-localise]").each(function() {
       const view = d3.select(this);
       view.text(_this.localise(view.attr("data-localise")));
     });
@@ -294,7 +294,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
     //this.trigger("close");
   }
 
-  _transitionEnd(eventName) {
+  _transitionEnd() {
     const _this = this;
 
     this.transitionEvents.forEach(event => {

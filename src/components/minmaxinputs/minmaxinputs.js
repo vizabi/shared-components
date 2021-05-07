@@ -34,7 +34,7 @@ export class MinMaxInputs extends BaseComponent {
     super(config);
   }
 
-  setup(_options) {
+  setup() {
     this.DOM = {
       domain_labelMin: this.element.select(".vzb-mmi-domainmin-label"),
       domain_labelMax: this.element.select(".vzb-mmi-domainmax-label"),

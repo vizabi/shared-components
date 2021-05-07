@@ -1,7 +1,6 @@
 import * as legacy_utils from "../../legacy/base/utils";
 import * as Utils from "../../utils";
 import { BaseComponent } from "../base-component";
-import { ICON_QUESTION as iconQuestion } from "../../icons/iconset";
 
 import "./indicatorpicker.scss";
 

@@ -274,8 +274,6 @@ class Find extends Dialog {
   }
 
   _selectDataPoints() {
-    const _this = this;
-    const KEY = this.KEY;
     //    const selected = this.model.state.marker.getSelected(KEY);
     const selected = this.MDL.selected.data.filter;
     this.DOM.findListItems.order().select("input")

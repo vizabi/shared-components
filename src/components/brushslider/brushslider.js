@@ -192,8 +192,7 @@ export class BrushSlider extends BaseComponent {
       .attr("d", "M" + (halfThumbHeight + barWidth) + " " + (halfThumbHeight + barWidth * 1.5) + "l" + (-halfThumbHeight) + " " + (halfThumbHeight * 1.5) + "h" + (halfThumbHeight * 2) + "Z");
   }
 
-  _updateThumbs(extent) {
-
+  _updateThumbs() {
   }
 
   _updateSize() {
@@ -277,7 +276,7 @@ export class BrushSlider extends BaseComponent {
    * @param {boolean} force force firing the change event
    * @param {boolean} persistent sets the persistency of the change event
    */
-  _setModel(value, force, persistent) {
+  _setModel(value) {
     const roundDigits = this.options.ROUND_DIGITS;
     value = [+value[0].toFixed(roundDigits), +value[1].toFixed(roundDigits)];
     if (this.setValueFunc) {

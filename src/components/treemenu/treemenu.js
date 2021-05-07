@@ -153,7 +153,6 @@ export class TreeMenu extends BaseComponent {
     const _this = this;
 
     const ROOT = "_root";
-    const DEFAULT = "_default";
     const ADVANCED = "advanced";
     const OTHER_DATASETS = "other_datasets";
 
@@ -177,7 +176,7 @@ export class TreeMenu extends BaseComponent {
 
     //put the dataset folders where they should be: either in root or in specific folders or ==root in case of spreading
     const folderStrategies = {};
-    dataModels.forEach((m, mIndex) => {
+    dataModels.forEach((m) => {
       const mName = this._getSourceName(m);// + mIndex; TODO
 
       //figure out the folder strategy
@@ -660,7 +659,7 @@ export class TreeMenu extends BaseComponent {
     let dataFiltered, allowedIDs;
 
     const indicatorsDB = { _default:{} };
-    utils.forEach(Vizabi.stores.dataSources.getAll(), m => {
+    utils.forEach(this.services.Vizabi.Vizabi.stores.dataSources.getAll(), m => {
       m.concepts.forEach(c => {
         indicatorsDB[c.concept] = c;
       });
@@ -1043,7 +1042,7 @@ export class TreeMenu extends BaseComponent {
       this.state.ownReadiness = STATUS.PENDING;
     });
     const datasources = this._getDataSources(this.root.model.config.dataSources);
-    if (Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == "fulfilled") {
+    if (this.services.Vizabi.Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == "fulfilled") {
       const localeId = this.services.locale.id;
       runInAction(() => {
         this.getTags(localeId)
@@ -1083,7 +1082,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _getDataSources(dsConfig) {
-    return Object.keys(dsConfig).map(dsName => Vizabi.stores.dataSources.get(dsName));
+    return Object.keys(dsConfig).map(dsName => this.services.Vizabi.Vizabi.stores.dataSources.get(dsName));
   }
 
   _filterAvailabilityBySpace(availability, space) {

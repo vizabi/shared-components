@@ -1,4 +1,3 @@
-import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 import { OptionsButtonList } from "../../buttonlist/optionsbuttonlist/optionsbuttonlist";
 

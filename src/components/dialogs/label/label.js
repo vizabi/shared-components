@@ -1,9 +1,5 @@
-import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 
-import sizeslider from "components/brushslider/sizeslider/sizeslider";
-import indicatorpicker from "components/indicatorpicker/indicatorpicker";
-import simplecheckbox from "components/simplecheckbox/simplecheckbox";
 import { IndicatorPicker } from "../../indicatorpicker/indicatorpicker";
 import { SizeSlider } from "../../brushslider/sizeslider/sizeslider";
 import { SimpleCheckbox } from "../../simplecheckbox/simplecheckbox";

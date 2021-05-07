@@ -78,7 +78,7 @@ export default function collisionResolver() {
         keys[first[KEY]].valueY = first.valueY + first.shiftY;
         keys[second[KEY]].valueY = second.valueY + second.shiftY;
       }
-      g.each(function(d, i) {
+      g.each(function(d) {
         if (keys[d[KEY]] && keys[d[KEY]].valueY) {
           d3.select(this).selectAll(selector).transition().duration(DURATION).attr("transform", "translate(0," +
             keys[d[KEY]].valueY + ")");

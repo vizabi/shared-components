@@ -25,7 +25,7 @@ export class SimpleCheckbox extends BaseComponent {
       label: this.element.select("label")
     };
     
-    const options = this.options = utils.deepExtend(utils.deepExtend({}, OPTIONS), _options || {});
+    this.options = utils.deepExtend(utils.deepExtend({}, OPTIONS), _options || {});
 
     const _this = this;
 

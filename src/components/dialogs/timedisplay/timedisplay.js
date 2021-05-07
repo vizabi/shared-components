@@ -1,4 +1,3 @@
-import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 import { DynamicBackground } from "../../dynamic-background/dynamic-background";
 
@@ -26,11 +25,10 @@ export class TimeDisplay extends Dialog {
   }
 
   setup(options) {
-    super.setup();
+    super.setup(options);
 
     this._year = this.findChild({type: "DynamicBackground"});
     this._year.setConditions({ widthRatio: 1, heightRatio: 1 });
-    
   }
 
   draw() {

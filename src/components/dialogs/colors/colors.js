@@ -1,4 +1,3 @@
-import * as utils from "base/utils";
 import { Dialog } from "../dialog";
 import { IndicatorPicker } from "../../indicatorpicker/indicatorpicker";
 import { STATUS } from "../../../utils.js";

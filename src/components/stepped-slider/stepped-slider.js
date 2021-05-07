@@ -1,4 +1,4 @@
-import { throttle, transform, deepExtend } from "../../legacy/base/utils";
+import { transform, deepExtend } from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
 import "./stepped-slider.scss";
 import { computed, decorate } from "mobx";
@@ -109,12 +109,6 @@ class SteppedSlider extends BaseComponent {
   }
 
   initTriangle() {
-    const {
-      triangleWidth,
-      triangleHeight,
-      lineWidth
-    } = this.config;
-
     this.DOM.slide
       .append("g")
       .append("path")

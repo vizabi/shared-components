@@ -4,7 +4,7 @@ function detectTouchEvent(element, onTap, onLongTap) {
   var coordY;
   var namespace = onTap ? ".onTap" : ".onLongTap";
   d3.select(element)
-    .on("touchstart" + namespace, function(d, i) {
+    .on("touchstart" + namespace, function() {
       start = d3.event.timeStamp;
       coordX = d3.event.changedTouches[0].screenX;
       coordY = d3.event.changedTouches[0].screenY;
