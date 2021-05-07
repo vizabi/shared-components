@@ -10,6 +10,9 @@ class Repeat extends Dialog {
   constructor(config) {
     config.template = `
       <div class='vzb-dialog-modal'>
+        <span class="thumb-tack-class thumb-tack-class-ico-pin fa" data-dialogtype="colors" data-click="pinDialog"></span>
+        <span class="thumb-tack-class thumb-tack-class-ico-drag fa" data-dialogtype="colors" data-click="dragDialog"></span>
+
         <div class="vzb-dialog-title"> 
           <span data-localise="buttons/repeat"></span>
         </div>
@@ -32,12 +35,12 @@ class Repeat extends Dialog {
     super(config);
   }
 
-  setup() {
-    this.DOM = {
-      header: this.element.select(".vzb-repeat-header"),
-      body: this.element.select(".vzb-repeat-body"),
-      grid: this.element.select(".vzb-repeat-grid")
-    };
+  setup(options) {
+    super.setup(options);
+
+    this.DOM.header = this.element.select(".vzb-repeat-header");
+    this.DOM.body = this.element.select(".vzb-repeat-body");
+    this.DOM.grid = this.element.select(".vzb-repeat-grid");
   }
 
   get MDL(){
@@ -47,18 +50,37 @@ class Repeat extends Dialog {
   }
 
   draw(){
+    super.draw();
+
     this.addReaction(this.drawHeader);
     this.addReaction(this.drawBody);
   }
 
 
   drawHeader(){
-    this.DOM.header.html("Add or remove repeated charts");
+    const header = this.DOM.header;
+    const localise = this.services.locale.auto();
+    const {allowEnc, useConnectedRowsAndColumns} = this.MDL.repeat;
+
+    header.selectAll("p").remove();
+    header.append("p")
+      .attr("class", "vzb-repeat-experimental")
+      .html(localise("hint/experimentalfeature"));
+    header.append("p")
+      .html(localise("hint/repeat/addremovecharts"));
+
+    if (useConnectedRowsAndColumns) {
+      header.append("p")
+        .html(allowEnc[0] + " " + localise("hint/repeat/issharedacrossrows"));
+      header.append("p")
+        .html(allowEnc[1] + " " + localise("hint/repeat/issharedacroscolumns"));
+    }
   }
 
   drawBody(){
     const {rowcolumn, ncolumns, nrows} = this.MDL.repeat;
     const repeat = this.MDL.repeat;
+    const localise = this.services.locale.auto();
 
     this.DOM.grid
       .style("grid-template-rows", "1fr ".repeat(nrows) + "30px")
@@ -73,6 +95,7 @@ class Repeat extends Dialog {
       .attr("title", d => JSON.stringify(d, null, 1))
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
       .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
+      .html(() => ncolumns == 1 && nrows == 1 ? localise("hint/repeat/pressplus") : "")
       .on("mouseover", (d) => {
         d3.select(".vzb-" + repeat.getName(d))
           .classed("vzb-chart-highlight", true);

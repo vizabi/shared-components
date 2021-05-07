@@ -1,11 +1,15 @@
 .vzb-dialogs {
     .vzb-dialogs-dialog {
       &[data-dlg="repeat"] {
-        &.vzb-moreoptions.vzb-accordion-section.vzb-accordion-active {
-          max-height: 2000px !important;
+        .vzb-dialog-content {
+          max-height: 500px !important;
   
           .vzb-repeat-header {
             margin-bottom: 30px;
+            .vzb-repeat-experimental {
+              color: $vzb-color-red;
+              margin-bottom: 5px;
+            }
           }
           .vzb-repeat-body {
             .vzb-repeat-grid {
@@ -18,11 +22,13 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                border-radius: 4px;                
+                border-radius: 4px;
+                min-width: 0px;
               }
               .vzb-repeat-segment{
                 border-color: black;
                 background-color: $vzb-color-grey-light;
+                padding: 10px;
               }
               .vzb-repeat-addcolumn, .vzb-repeat-addrow{
                 border-color: green;
