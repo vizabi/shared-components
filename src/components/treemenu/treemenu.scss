@@ -362,9 +362,19 @@
                   color: $vzb-color-grey-dark;
                   font-size: $vzb-font-size-small;
                   font-family: $vzb-font-family-alt;
+                  &.vzb-treemenu-leaf-content-item-space {
+                    select {
+                      border: none;
+                      background-color: transparent;
+                      font-size: $vzb-font-size-small;
+                      position: relative;
+                      left: -4px;
+                      outline: none;
+                    }
+                  }
                   &.vzb-treemenu-leaf-content-item-title {
                     font-size: $vzb-font-size-regular;
-                    font-weight: bold;
+                    font-weight: bold;                    
                   }
                   &.vzb-treemenu-leaf-content-item-helptranslate {
                     display: block;
