@@ -14,7 +14,7 @@ export function isEntityConcept(concept = {}) {
 export function getConceptName(enc, localise) {
   const cp = enc.data.conceptProps;
 
-  if (enc.data.isConstant()) 
+  if (enc.data.isConstant) 
     return localise("indicator/" + enc.data.constant + "/" + enc.scale.modelType);
 
   return cp.name || cp.concept || localise(enc.name);
@@ -23,7 +23,7 @@ export function getConceptName(enc, localise) {
 export function getConceptShortName(enc, localise) {
   const cp = enc.data.conceptProps;
 
-  if (enc.data.isConstant()) 
+  if (enc.data.isConstant) 
     return localise("indicator/" + enc.data.constant + "/" + enc.scale.modelType);
     
   return cp.name_short || getConceptName(enc, localise);
@@ -33,7 +33,7 @@ export function getConceptNameMinusShortName(enc, localise) {
   const name = getConceptName(enc, localise);
   const shortName = getConceptShortName(enc, localise);
 
-  if (enc.data.isConstant()) 
+  if (enc.data.isConstant) 
     return name;
 
   let result = name.replace(shortName,"");

@@ -94,7 +94,7 @@ export class BubbleSize extends BrushSlider {
   _setLabelsText() {
     let texts = [];
 
-    if (this.MDL.model.data.isConstant()) {
+    if (this.MDL.model.data.isConstant) {
       texts = ["", ""];
     } else {
       texts = this.MDL.model[this.options.labelsValue].map(this.localise);

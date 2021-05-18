@@ -53,7 +53,7 @@ export class SizeSlider extends BrushSlider {
   draw() { 
     super.draw();
 
-    if (this.MDL.model.data.isConstant()) {
+    if (this.MDL.model.data.isConstant) {
       this.DOM.slider.selectAll(".w").classed("vzb-hidden", true);
       this.DOM.slider.select(".selection").classed("vzb-hidden", true);
       this.DOM.slider.select(".overlay").classed("vzb-pointerevents-none", true);
@@ -79,7 +79,7 @@ export class SizeSlider extends BrushSlider {
         return "translate(" + ((this.services.locale.isRTL() ? -1 : 1) * dX) + "," + (dY) + ")";
       })
       .attr("font-size", (d) => this.propertyScale(d));
-    if (this.MDL.model.data.isConstant())
+    if (this.MDL.model.data.isConstant)
       this.DOM.sliderLabels.text(d => ~~(this.propertyScale(d)) + (this.localise(this.options.constantUnit) || ""));
   }
 
@@ -87,7 +87,7 @@ export class SizeSlider extends BrushSlider {
     const domain = this.MDL.model.domain;
     const texts = [domain[0], domain[domain.length - 1]].map(this.localise);
 
-    if (this.MDL.model.data.isConstant()) return;
+    if (this.MDL.model.data.isConstant) return;
 
     this.DOM.sliderLabels.text((d, i) => texts[i]);
   }
@@ -118,7 +118,7 @@ export class SizeSlider extends BrushSlider {
   }
 
   _valueToExtent(value) {
-    if (this.MDL.model.data.isConstant() && value[1] === null) {
+    if (this.MDL.model.data.isConstant && value[1] === null) {
       return super._valueToExtent([value[0], this.propertyScale.invert(this._getMinMaxDefaultPropertyValues().default)]);
     }
     return super._valueToExtent(value);

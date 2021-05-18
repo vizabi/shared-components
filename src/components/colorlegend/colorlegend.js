@@ -127,7 +127,7 @@ class ColorLegend extends BaseComponent {
 
   _legendHasOwnModel() {
     return this.MDL.legend
-      && !this.MDL.color.data.isConstant() 
+      && !this.MDL.color.data.isConstant 
       && ["entity_set", "entity_domain"].includes(this.MDL.color.data.conceptProps.concept_type);
   }
 
@@ -159,7 +159,7 @@ class ColorLegend extends BaseComponent {
 
     let colorOptionsArray = [];
 
-    if (this._legendHasOwnModel() && this._isLegendModelReady() && !this.MDL.color.data.isConstant()) {
+    if (this._legendHasOwnModel() && this._isLegendModelReady() && !this.MDL.color.data.isConstant) {
       colorOptionsArray = this.MDL.legend.dataArray;
     } else {
       colorOptionsArray = cScale.domain().map(value => {
@@ -198,7 +198,7 @@ class ColorLegend extends BaseComponent {
       //Apply names to color legend entries if color is a property
       let label = d["name"];
       if (!label && label !== 0) label = d[_this.which];
-      if (_this.MDL.color.data.isConstant()) label = _this.localise("indicator/_default/color");
+      if (_this.MDL.color.data.isConstant) label = _this.localise("indicator/_default/color");
       d3.select(this).select(".vzb-cl-color-legend").text(label);
     });
   }

@@ -83,7 +83,7 @@ export class IndicatorPicker extends BaseComponent {
     let selectText;
 
     if (this._isEncoding()) {
-      if (this.MDL.model.data.isConstant()) {
+      if (this.MDL.model.data.isConstant) {
         const constant = this.MDL.model.data.constant;
         const scaleModelType = this.MDL.model.scale.config.modelType;
         selectText = this.localise("indicator/" + constant + (scaleModelType ? "/" + scaleModelType : ""));

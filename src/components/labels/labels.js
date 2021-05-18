@@ -150,7 +150,7 @@ class Labels extends BaseComponent {
     this.minLabelTextSize = Math.max(minLabelTextSize + minMaxDelta * extent[0], minLabelTextSize);
     this.maxLabelTextSize = Math.max(minLabelTextSize + minMaxDelta * extent[1], minLabelTextSize);
 
-    if (this.MDL.size_label.data.isConstant()) {
+    if (this.MDL.size_label.data.isConstant) {
       // if(!this.MDL.size_label.which) {
       //   this.maxLabelTextSize = this.profileConstants.defaultLabelTextSize;
       //   this.MDL.size_label.set({'domainMax': (this.maxLabelTextSize - minLabelTextSize) / minMaxDelta, 'which': '_default'});
