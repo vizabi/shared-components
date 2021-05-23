@@ -369,7 +369,33 @@
                       font-size: $vzb-font-size-small;
                       position: relative;
                       left: -4px;
-                      outline: none;
+                      outline: none;                      
+                    }
+                    .vzb-treemenu-leaf-space-compliment {
+                      margin-top: 5px;
+                      margin-bottom: 5px;
+                    }
+                    .vzb-treemenu-leaf-space-compliment-setter {
+                      margin-bottom: 5px;
+                      label {
+                        margin-right: 5px;
+                      }
+                    }
+                    .vzb-treemenu-leaf-space-reset,
+                    .vzb-treemenu-leaf-space-apply {
+                      display: inline;
+                      text-transform: uppercase;
+                      &.vzb-disabled {
+                        color: $vzb-color-grey-light;
+                        pointer-events: none;
+                      }
+                    }
+                    .vzb-treemenu-leaf-space-reset {
+                      color: darkred;
+                      margin-right: 20px;
+                    }
+                    .vzb-treemenu-leaf-space-apply {
+                      color: darkgreen;
                     }
                   }
                   &.vzb-treemenu-leaf-content-item-title {

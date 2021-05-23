@@ -1,6 +1,6 @@
 import { css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
+import {DeepLeaf} from "./deepleaf.js";
 import * as utils from "../../legacy/base/utils";
-import { runInAction } from 'mobx';
 export class Menu {
   constructor(context, parent, menu, options) {
     const _this = this;
@@ -33,7 +33,7 @@ export class Menu {
         _this.addSubmenu(d3.select(this));
       });
     if (!this.menuItems.length && this.isActive()) {
-      this.buildLeaf();
+      this.deepleaf = new DeepLeaf(this.context, this.entity);
     }
     this.setWidth(this.OPTIONS.COL_WIDTH, false, true);
     return this;
@@ -104,7 +104,7 @@ export class Menu {
       _this.parent.parentMenu.openSubmenuNow = true;
       this.closeNeighbors(() => {
         if (_this.direction == MENU_HORIZONTAL) {
-          if (!this.menuItems.length) _this.buildLeaf();
+          if (!this.menuItems.length) _this.deepleaf = new DeepLeaf(_this.context, this.entity);
           _this._openHorizontal();
           _this.calculateMissingWidth(0);
         } else {
@@ -251,6 +251,7 @@ export class Menu {
     const _this = this;
     this.closeAllChildren(() => {
       if (_this.direction == MENU_HORIZONTAL) {
+        _this.deepleaf = null;
         _this._closeHorizontal(cb);
       } else {
         _this._closeVertical(cb);
@@ -360,95 +361,7 @@ export class Menu {
     }
 
   }
-
-  buildLeaf() {
-    const leafDatum = this.entity.datum();
-    const _this = this;
-
-    this.entity.selectAll("div").data([leafDatum]).enter()
-      .append("div").classed(css.leaf + " " + css.leaf_content + " vzb-dialog-scrollable", true)
-      .style("width", this.width + "px")
-      .each(function(d) {
-        const leafContent = d3.select(this);
-        leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_title, true)
-          .text(utils.replaceNumberSpacesToNonBreak(d.name) || "");
-        const spaceSelect = leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_space, true)
-          .append("select")
-          .attr("name", "vzb-select-treemenu-leaf-space")
-          .attr("id", "vzb-select-treemenu-leaf-space")
-          .on("click", ()=>{
-            d3.event.stopPropagation();
-          })
-          .on("change", function(){
-            const newSpace = d3.select(this).property("value").split("-");
-            const encoding = _this.context._targetModel;
-            const compliment = _this.context.services.Vizabi.Vizabi.utils.relativeComplement(encoding.data.space, newSpace)
-              .map(dim => ({ dim, encoding }));
-            
-            const promises = compliment.map(d => {
-              return d.encoding.data.source.query({
-                select: {
-                  key: [d.dim],
-                  value: ["name"]
-                },
-                from: "entities"
-              }).then(data => {
-                return { data, dim: d.dim };
-              });
-            });
-
-            Promise.all(promises).then(dims => {
-              const dimUpdate = leafContent.selectAll("span.vzb-treemenu-leaf-compliment-setter")
-                .data(dims);
-              dimUpdate.exit().remove();
-              const dimEnter = dimUpdate
-                .enter().append("span")
-                .attr("class", "vzb-treemenu-leaf-compliment-setter")
-                .on("click", ()=>{
-                  d3.event.stopPropagation();
-                });
-              dimEnter
-                .append("label")
-                .attr("for", d => d.dim + "_extraDim")
-                .text(d => d.dim);
-              dimEnter
-                .append("select")
-                .attr("id", d => d.dim + "_extraDim")
-                .on("change", function(d) {
-                  const kv = d3.select(this.options[this.selectedIndex]).datum();
-                  runInAction(()=>{
-                    encoding.data.config.space = newSpace;
-                    encoding.data.filter.config.dimensions[d.dim] = {
-                      [d.dim]: kv[d.dim]
-                    };
-                  });
-                })
-                .selectAll("option")
-                .data(d => [...d.data.values()])
-                .enter().append("option")
-                .text(d => d.name);
-            });
-          });
-
-        spaceSelect
-          .selectAll("option")
-          .data(d.spaces)
-          .enter().append("option")
-          .attr("value", option => option.join("-"))
-          .text(option => "by " + option.join(", "));
-
-        spaceSelect
-          .property("value", _this.context.getNearestSpaceByLength(d.spaces).join("-"));
-
-        leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_descr, true)
-          .text(utils.replaceNumberSpacesToNonBreak(d.description) || "");
-        leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_helptranslate, true)
-          .classed("vzb-invisible", !d.translateContributionLink)
-          .html(`<a href="${d.translateContributionLink}" target="_blank">${d.translateContributionText}</a>`);
-      });
-  }
 }
-
 class MenuItem {
   constructor(context, parent, item, options) {
     const _this = this;
