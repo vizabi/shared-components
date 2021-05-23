@@ -147,10 +147,8 @@ export class TreeMenu extends BaseComponent {
     this.updateView();
   }
 
-  _buildIndicatorsTree({ tagsArray, dataModels }) {
+  _buildTagFolderTree({ tagsArray, dataModels }) {
     if (tagsArray === true || !tagsArray) tagsArray = [];
-
-    const _this = this;
 
     const ROOT = "_root";
     const ADVANCED = "advanced";
@@ -203,9 +201,6 @@ export class TreeMenu extends BaseComponent {
       folderStrategies[mName] = strategy;
     });
 
-    //init the tag tree
-    const indicatorsTree = tags[ROOT];
-
     //populate the tag tree
     tagsArray.forEach(tag => {
 
@@ -229,62 +224,73 @@ export class TreeMenu extends BaseComponent {
       }
     });
 
-    //add constant entry
-    tags[ROOT].children.push({
-      id: "_default",
-      use: "constant"
-    });
+    return {tags, tagsRoot: tags[ROOT]};
+  }
 
-    const properties = this.model.data.space.length > 1;
-    this._filterAvailabilityBySpace(this.model.availability, this.model.data.space)
+  _buildIndicatorsTree({ tagsArray, dataModels }) {
+
+    let consoleGroupOpen = false;
+    const {tags, tagsRoot} = this._buildTagFolderTree({ tagsArray, dataModels });
+
+    //add constant pseudoconcept
+    tagsRoot.children.push({id: "_default"});
+
+    const nest = this._nestAvailabilityByConcepts(this.model.availability);
+    const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
+    const concepts = this._convertConceptMapToArray(filtervl);
+
+    concepts
+      //add marker space concepts to be able to select "color by countries" or "x by time"
       .concat(this.model.data.space.map(d => {
         return { 
-          key: [d],
+          spaces: [[d]],
           source: this.model.data.source,
-          value: this.model.data.source.getConcept(d)
+          concept: this.model.data.source.getConcept(d)
         }; 
       }))
-      .filter(f => f.value && f.value.tags !== "_none")
-      .forEach(kvPair => {
-        const entry = kvPair.value;
-        if (!entry.tags) entry.tags = this._getSourceName(kvPair.source) || ROOT;
+      .filter(f => !f.concept.tags || f.concept.tags !== "_none")
+      .forEach(({concept, spaces, source}) => {
 
-        const use = entry.concept == "_default" ? "constant" : (kvPair.key.length > 1 || entry.concept_type === "time" ? "indicator" : "property");
-        const concept = {
-          id: entry.concept,
-          key: kvPair.key,
-          name: entry.name,
-          name_catalog: entry.name_catalog,
-          description: entry.description,
-          dataSource: this._getSourceName(kvPair.source),
-          translateContributionLink: kvPair.source.translateContributionLink,
-          use
+        const props = {
+          id: concept.concept,
+          spaces,
+          name: concept.name,
+          name_catalog: concept.name_catalog,
+          description: concept.description,
+          dataSource: this._getSourceName(source),
+          translateContributionLink: source.translateContributionLink,
+          type: "indicator"
         };
 
-        if (properties && kvPair.key.length == 1 && entry.concept != "_default" && entry.concept_type != "time") {
+        if (concept.concept_type == "time" || concept.concept == "_default"){
+          //special concepts
+          tagsRoot.children.push(props);
 
-          const keyConcept = kvPair.source.getConcept(kvPair.key[0]);
+        } else if (concept.concept_type == "entity_domain" || concept.concept_type == "entity_set") {
+          //entity sets and domains
+          const keyConcept = source.getConcept(spaces[0][0]);
           const folderName = keyConcept.concept + "_properties";
           if (!tags[folderName]) {
             tags[folderName] = { id: folderName, name: keyConcept.name + " properties", type: "folder", children: [] };
-            tags[ROOT].children.push(tags[folderName]);
+            tagsRoot.children.push(tags[folderName]);
           }
-          tags[folderName].children.push(concept);
+          tags[folderName].children.push(props);
 
         } else {
-
-          entry.tags.split(",").forEach(tag => {
+          //regulat indicators
+          const conceptTags = concept.tags || this._getSourceName(source) || "_root";
+          conceptTags.split(",").forEach(tag => {
             tag = tag.trim();
             if (tags[tag]) {
-              tags[tag === "_root" && entry.concept != "_default" && entry.concept_type != "time" ? concept.dataSource : tag].children.push(concept);
+              tags[tag].children.push(props);
             } else {
               //if entry's tag is not found in the tag dictionary
-              if (!_this.consoleGroupOpen) {
+              if (!consoleGroupOpen) {
                 console.groupCollapsed("Some tags were not found, so indicators went under menu root");
-                _this.consoleGroupOpen = true;
+                consoleGroupOpen = true;
               }
-              utils.warn("tag '" + tag + "' for indicator '" + concept.id + "'");
-              tags[ROOT].children.push(concept);
+              utils.warn("tag '" + tag + "' for indicator '" + props.id + "'");
+              tagsRoot.children.push(props);
             }
           });
 
@@ -292,13 +298,13 @@ export class TreeMenu extends BaseComponent {
       });
 
     /**
-     * KEY-AVAILABILITY (dimensions for space-menu)
+     * KEY-AVAILABILITY (dimensions for marker space-menu)
      */
     this.model.spaceAvailability.forEach(space => {
       //TODO: get concept for space
       if (space.length < 2) return;
       
-      indicatorsTree.children.push({
+      tagsRoot.children.push({
         id: space.join(","),
         name: space.join(", "),
         name_catalog: space.join(", "),
@@ -308,12 +314,9 @@ export class TreeMenu extends BaseComponent {
       });
     });
 
-    if (_this.consoleGroupOpen) {
-      console.groupEnd();
-      delete _this.consoleGroupOpen;
-    }
-    this._sortChildren(indicatorsTree);
-    this.indicatorsTree(indicatorsTree);
+    if (consoleGroupOpen) console.groupEnd();
+    this._sortChildren(tagsRoot);
+    this.indicatorsTree(tagsRoot);
 
     return Promise.resolve();
   }
@@ -644,8 +647,8 @@ export class TreeMenu extends BaseComponent {
     input.on("input", searchIt);
   }
 
-  _selectIndicator(value) {
-    this._callback(this._targetProp, value);
+  _selectIndicator({concept, space}) {
+    this._setModel(this._targetProp, {concept, space});
     this.toggle();
   }
 
@@ -716,7 +719,7 @@ export class TreeMenu extends BaseComponent {
 
           return false;
         });
-        dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.key && this._targetModel.data.allow.space.filter(f.key));
+        dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && this._targetModel.data.allow.space.filter(f.spaces[0]));
       } else if (_this._targetModelIsMarker) {
         allowedIDs = data.children.map(child => child.id);
         dataFiltered = utils.pruneTree(data, f => f.type == "space");
@@ -768,7 +771,7 @@ export class TreeMenu extends BaseComponent {
 
     this.selectedNode = null;
     wrapper.datum(dataFiltered);
-    this.menuEntity = new Menu(null, wrapper, this.OPTIONS);
+    this.menuEntity = new Menu(this, null, wrapper, this.OPTIONS);
     wrapper.classed("vzb-hidden", false);
 
     this._setHorizontalMenuHeight();
@@ -796,7 +799,7 @@ export class TreeMenu extends BaseComponent {
         scaleTypes = scaleTypes.enter().append("span")
           .on("click", d => {
             d3.event.stopPropagation();
-            _this._setModel("scaleType", d);
+            _this._setModelScaleType(d);
           })
           .merge(scaleTypes);
 
@@ -843,7 +846,7 @@ export class TreeMenu extends BaseComponent {
         //only for leaf nodes
         if (view.attr("children")) return;
         d3.event.stopPropagation();
-        _this._selectIndicator({ concept: d.id, key: d.key, dataSource: d.dataSource, use: d.use });
+        _this._selectIndicator({concept: d, space: null});
       })
       .append("span")
       .text(d => {
@@ -867,9 +870,10 @@ export class TreeMenu extends BaseComponent {
           }
           if (!d.description) d.description = noDescriptionText;
           d.translateContributionText = helpTranslateText;
-          const deepLeaf = view.append("div").attr("class", css.menuHorizontal + " " + css.list_outer + " " + css.list_item_leaf);
+          const deepLeaf = view.append("div")
+            .attr("class", css.menuHorizontal + " " + css.list_outer + " " + css.list_item_leaf);
           deepLeaf.on("click", d => {
-            _this._selectIndicator({ concept: d.id, key: d.key, dataSource: d.dataSource, use: d.use });
+            _this._selectIndicator({concept: d, space: null});
           });
         }
 
@@ -920,10 +924,7 @@ export class TreeMenu extends BaseComponent {
     wrapperOuter.classed(css.alignXl, this._alignX === "left");
     wrapperOuter.classed(css.alignXr, this._alignX === "right");
 
-    const setModel = this._setModel.bind(this);
-    this
-      .callback(setModel)
-      .redraw();
+    this.redraw();
 
     if (this._showWhenReady) this.setHiddenOrVisible(false).showWhenReady(false);
 
@@ -942,11 +943,40 @@ export class TreeMenu extends BaseComponent {
     }
   }
 
-  _setModel(what, value) {
+  _setModelScaleType(type){
+    this._targetModel.scale.config.type = type;
+  }
+
+  _setModel(what, {concept, space}) {
     const mdl = this._targetModel;
-    if (what == "scaleType") mdl.scale.config.type = value;
-    if (what[1] == "concept") mdl.setWhich({ key: value.key && value.key.slice(0), value });
-    if (what[1] == "space") mdl.data.config.space = value.concept.split(",");
+    //for setting encoding concept and encoding space
+    if (what[1] == "concept") {
+      if (!space) {
+        //try to resolve space if not specified
+        if(concept.id == "_default") {
+          //constant
+          space = null;
+        } else if (concept.spaces.find(f => f.join(",") == mdl.data.space.concat().sort().join(","))){
+          //concept has an available space same as already set in enc: retain enc space
+          space = mdl.data.space;
+        } else {
+          //if a new space needed: rank them by priorities so that difference of length with
+          //the current enc space is minimal
+          space = this.getNearestSpaceByLength(concept.spaces);
+        }
+      }
+      console.log("setWhich", { key: space, value: {concept: concept.id, dataSource: concept.dataSource} });
+      mdl.setWhich({ key: space, value: {concept: concept.id, dataSource: concept.dataSource} });
+    }
+    //for setting marker space
+    if (what[1] == "space") mdl.data.config.space = space;
+  }
+
+  getNearestSpaceByLength(spaces){
+    const markerSpaceLen = this.model.data.space.length;
+    const spacesPrio = spaces.concat()
+      .sort((a, b) => Math.abs(a.length - markerSpaceLen) - Math.abs(b.length - markerSpaceLen));
+    return spacesPrio[0];
   }
 
   setup() {
@@ -956,11 +986,6 @@ export class TreeMenu extends BaseComponent {
 
     // object for manipulation with menu representation level
     this.menuEntity = null;
-
-    //default callback
-    this._callback = function(indicator) {
-      console.log("Indicator selector: stub callback fired. New indicator is ", indicator);
-    };
 
     this._alignX = "center";
     this._alignY = "center";
@@ -1041,7 +1066,7 @@ export class TreeMenu extends BaseComponent {
     runInAction(() => {
       this.state.ownReadiness = STATUS.PENDING;
     });
-    const datasources = this._getDataSources(this.root.model.config.dataSources);
+    const datasources = this._getDataModels(this.root.model.config.dataSources);
     if (this.services.Vizabi.Vizabi.utils.combineStates(datasources.map(ds => ds.state)) == "fulfilled") {
       const localeId = this.services.locale.id;
       runInAction(() => {
@@ -1049,7 +1074,7 @@ export class TreeMenu extends BaseComponent {
           .then(tags => {
             return this._buildIndicatorsTree({
               tagsArray: tags,
-              dataModels: this._getDataSources(this.root.model.config.dataSources)
+              dataModels: this._getDataModels(this.root.model.config.dataSources)
             });})
           .then(this.updateView.bind(this))
           .then(() => {
@@ -1081,26 +1106,42 @@ export class TreeMenu extends BaseComponent {
     return this._getSourceName(ds);
   }
 
-  _getDataSources(dsConfig) {
+  _getDataModels(dsConfig) {
     return Object.keys(dsConfig).map(dsName => this.services.Vizabi.Vizabi.stores.dataSources.get(dsName));
   }
 
-  _filterAvailabilityBySpace(availability, space) {
-    return availability.filter(({key}) => {
-      if (!key.length) return true;
-      if (space.length > 1 && key.length < 2) return space.some(dim => dim == key);
-      if (space.length !== key.length) return false;
-      return space.every((dim, i) => key[i] == dim);
-    });
+  _nestAvailabilityByConcepts(availability){
+    return availability.reduce((map, kv) => {
+      const key = kv.value;
+      const space = kv.key;
+      if (!map.has(key)) map.set(key, {source: kv.source, spaces: new Set()});
+      map.get(key).spaces.add(space);
+      return map;
+    }, new Map());
   }
-  // ready() {
-  //   this.model.marker._root.dataManager.getTags(this.model.locale.id)
-  //     .then(this._buildIndicatorsTree.bind(this))
-  //     .then(this.updateView.bind(this));
-  // }
+
+  //returns concepts and their spaces (availbility keys), 
+  //such that only strict superspaces, strict subspaces and matching spaces remain
+  _conceptsCompatibleWithMarkerSpace(availabilityMapByConcepts, markerSpace){
+    const filteredValueLookup = new Map();
+    const markerSpaceSet = new Set(markerSpace);
+    const intersect = (a,b) => a.filter(e => b.has(e));
+    for (const [concept, {source, spaces}] of availabilityMapByConcepts) {  
+      const filteredSpaces = [...spaces].filter(space => {
+        const intersection = intersect(space, markerSpaceSet);
+        return intersection.length == markerSpaceSet.size || intersection.length == space.length;
+      });
+      if (filteredSpaces.length) filteredValueLookup.set(concept, {source, spaces: filteredSpaces});
+    }
+    return filteredValueLookup;
+  }
+
+  _convertConceptMapToArray(conceptmap){
+    return [...conceptmap].map(([concept, {source, spaces}]) => ({concept, source, spaces: [...spaces]}));
+  }
 
   __observeDataSources() {
-    return this._getDataSources(this.root.model.config.dataSources).map(ds => [ds.state, ds.config]);
+    return this._getDataModels(this.root.model.config.dataSources).map(ds => [ds.state, ds.config]);
   }
 
   /**
@@ -1108,24 +1149,26 @@ export class TreeMenu extends BaseComponent {
    * @return {array} Array of tag objects
    */
   getTags(locale) {
-    const TAG_KEY = ["tag"];
+    const TAG_KEY = "tag";
     const query = {
       select: {
-        key: TAG_KEY,
+        key: [TAG_KEY],
         value: []
       },
       language: locale,
       from: "entities"
     };
 
-    const dataSources = this._getDataSources(this.root.model.config.dataSources).reduce((res, ds) => {
+    const dataSources = this._getDataModels(this.root.model.config.dataSources).reduce((res, ds) => {
       res.set(ds, utils.deepClone(query));
       return res;
     }, new Map());
 
-    this._filterAvailabilityBySpace(this.model.availability, TAG_KEY).forEach(av => {
-      dataSources.get(av.source).select.value.push(av.value.concept);
-    });
+    this.model.availability
+      .filter(f => f.key.join() == TAG_KEY)
+      .forEach(av => {
+        dataSources.get(av.source).select.value.push(av.value.concept);
+      });
 
     const dataSourcesWithTags = [...dataSources].filter(([ds, query]) => query.select.value.length);
 

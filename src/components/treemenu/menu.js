@@ -1,9 +1,10 @@
 import { css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
+import {DeepLeaf} from "./deepleaf.js";
 import * as utils from "../../legacy/base/utils";
-
 export class Menu {
-  constructor(parent, menu, options) {
+  constructor(context, parent, menu, options) {
     const _this = this;
+    this.context = context;
     this.parent = parent;
     this.OPTIONS = options;
     this.width = this.OPTIONS.MIN_COL_WIDTH;
@@ -32,7 +33,7 @@ export class Menu {
         _this.addSubmenu(d3.select(this));
       });
     if (!this.menuItems.length && this.isActive()) {
-      this.buildLeaf();
+      this.deepleaf = new DeepLeaf(this.context, this.entity);
     }
     this.setWidth(this.OPTIONS.COL_WIDTH, false, true);
     return this;
@@ -94,7 +95,7 @@ export class Menu {
   }
 
   addSubmenu(item) {
-    this.menuItems.push(new MenuItem(this, item, this.OPTIONS));
+    this.menuItems.push(new MenuItem(this.context, this, item, this.OPTIONS));
   }
 
   open() {
@@ -103,7 +104,7 @@ export class Menu {
       _this.parent.parentMenu.openSubmenuNow = true;
       this.closeNeighbors(() => {
         if (_this.direction == MENU_HORIZONTAL) {
-          if (!this.menuItems.length) _this.buildLeaf();
+          if (!this.menuItems.length) _this.deepleaf = new DeepLeaf(_this.context, this.entity);
           _this._openHorizontal();
           _this.calculateMissingWidth(0);
         } else {
@@ -250,6 +251,7 @@ export class Menu {
     const _this = this;
     this.closeAllChildren(() => {
       if (_this.direction == MENU_HORIZONTAL) {
+        _this.deepleaf = null;
         _this._closeHorizontal(cb);
       } else {
         _this._closeVertical(cb);
@@ -359,29 +361,11 @@ export class Menu {
     }
 
   }
-
-  buildLeaf() {
-    const leafDatum = this.entity.datum();
-
-    this.entity.selectAll("div").data([leafDatum]).enter()
-      .append("div").classed(css.leaf + " " + css.leaf_content + " vzb-dialog-scrollable", true)
-      .style("width", this.width + "px")
-      .each(function(d) {
-        const leafContent = d3.select(this);
-        leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_title, true)
-          .text(utils.replaceNumberSpacesToNonBreak(d.name) || "");
-        leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_descr, true)
-          .text(utils.replaceNumberSpacesToNonBreak(d.description) || "");
-        leafContent.append("span").classed(css.leaf_content_item + " " + css.leaf_content_item_helptranslate, true)
-          .classed("vzb-invisible", !d.translateContributionLink)
-          .html(`<a href="${d.translateContributionLink}" target="_blank">${d.translateContributionText}</a>`);
-      });
-  }
 }
-
 class MenuItem {
-  constructor(parent, item, options) {
+  constructor(context, parent, item, options) {
     const _this = this;
+    this.context = context;
     this.parentMenu = parent;
     this.entity = item;
     this.entity.select("." + css.list_item_label).call(select => {
@@ -394,7 +378,7 @@ class MenuItem {
             if (!view.attr("children")) return;
           }
           if (!_this.submenu) {
-            _this.submenu = new Menu(_this, _this.entity, options);
+            _this.submenu = new Menu(_this.context, _this, _this.entity, options);
           }
           _this.toggleSubmenu();
         });
@@ -402,7 +386,7 @@ class MenuItem {
         select.on("mouseenter", function() {
           if (_this.parentMenu.direction == MENU_HORIZONTAL && !d3.select(this).attr("children")) {
             if (!_this.submenu) {
-              _this.submenu = new Menu(_this, _this.entity, options);
+              _this.submenu = new Menu(_this.context, _this, _this.entity, options);
             }
             _this.openSubmenu();
           } else if (!_this.parentMenu.hasActiveParentNeighbour()) {
@@ -412,7 +396,7 @@ class MenuItem {
         }).on("click.item", function() {
           d3.event.stopPropagation();
           if (!_this.submenu) {
-            _this.submenu = new Menu(_this, _this.entity, options);
+            _this.submenu = new Menu(_this.context, _this, _this.entity, options);
           }
           if (_this.parentMenu.direction == MENU_HORIZONTAL) {
             _this.openSubmenu();
@@ -427,7 +411,7 @@ class MenuItem {
 
       if (options.selectedPath[0] === select.datum().id) {
         options.selectedPath.shift();
-        _this.submenu = new Menu(_this, _this.entity, options);
+        _this.submenu = new Menu(_this.context, _this, _this.entity, options);
       }
     });
     return this;
