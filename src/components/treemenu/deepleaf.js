@@ -3,18 +3,23 @@ import { css } from "./config";
 import { runInAction } from "mobx";
 import * as utils from "../../legacy/base/utils";
 
+function spacesAreEqual(a, b){
+  return a.concat().sort().join() === b.concat().sort().join();
+}
 export class DeepLeaf{
 
   constructor(context, entity){
     this.context = context;
     this.entity = entity;
+    this.spaceChanged = false;
 
     this.buildLeaf();
   }
   
   buildLeaf() {
-    const leafDatum = this.entity.datum();
     const _this = this;
+    const leafDatum = this.entity.datum();
+    const encoding = this.context._targetModel;
 
     this.entity.selectAll("div").remove();
 
@@ -38,14 +43,22 @@ export class DeepLeaf{
       .classed("vzb-invisible", !leafDatum.translateContributionLink)
       .html(`<a href="${leafDatum.translateContributionLink}" target="_blank">${leafDatum.translateContributionText}</a>`);
 
-    if(leafDatum.id == _this.context.targetModel().data.concept) {
-      const currentSpace = _this.context.targetModel().data.space;
+    const currentSpace = encoding.data.space;
+    const markerSpace = encoding.marker.data.space;
+
+    const isSelectedConcept = () => leafDatum.id == encoding.data.concept;
+    const multipleSpacesAvailable = () => leafDatum.spaces.length > 1;
+    const shorterThanMarkerSpace = () => leafDatum.spaces[0].length < markerSpace.length;
+
+    //only build the UI for selecting spaces if many conditions are met
+    if(isSelectedConcept() && (multipleSpacesAvailable() || !spacesAreEqual(leafDatum.spaces[0], markerSpace) && !shorterThanMarkerSpace())) {
 
       const spaceSelect = spaceContainer
         .append("select")
         .attr("name", "vzb-select-treemenu-leaf-space")
         .attr("id", "vzb-select-treemenu-leaf-space")
         .on("change", function(){
+          _this.spaceChanged = true;
           _this.updateComplimentSetters();
         });
   
@@ -121,6 +134,7 @@ export class DeepLeaf{
             .append("select")
             .attr("id", d.dim + "_extraDim")
             .on("change", () => {
+              _this.spaceChanged = true;
               _this.updateResetApply();
             });
 
@@ -174,28 +188,27 @@ export class DeepLeaf{
 
 
   updateResetApply() {
-    const markerSpace = this.context.targetModel().marker.data.space;
+    const currentSpace = this.context.targetModel().data.space;
+    const defaultSpace = this.context.getNearestSpaceToMarkerSpace(this.entity.datum().spaces);
 
     const selectedSpace = this.getSelectedSpace();
     const selectedFilter = this.getSelectedFilter();
 
-    const hidden = markerSpace.join() == selectedSpace.join();
-
     const spaceContainer = this.entity.select("div." + css.leaf_content_item_space);
     spaceContainer.select(".vzb-treemenu-leaf-space-reset")
-      .classed("vzb-hidden", hidden);
+      .classed("vzb-hidden", spacesAreEqual(currentSpace, defaultSpace));
     spaceContainer.select(".vzb-treemenu-leaf-space-apply")
-      .classed("vzb-hidden", hidden)
-      .classed("vzb-disabled", !selectedFilter);
-    
+      .classed("vzb-hidden", !this.spaceChanged)
+      .classed("vzb-disabled", !selectedFilter && !spacesAreEqual(currentSpace, selectedSpace));
   }
 
 
   resetPickers() {
-    const markerSpace = this.context.targetModel().marker.data.space;
+    const defaultSpace = this.context.getNearestSpaceToMarkerSpace(this.entity.datum().spaces);
+    
     this.entity.select("div." + css.leaf_content_item_space)
       .select("select")
-      .property("value", markerSpace.join());
+      .property("value", defaultSpace.join());
 
     this.updateComplimentSetters();
     this.setModel();

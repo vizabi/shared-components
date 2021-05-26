@@ -371,6 +371,9 @@
                       left: -4px;
                       outline: none;                      
                     }
+                    label {
+                      font-size: $vzb-font-size-small;
+                    }
                     .vzb-treemenu-leaf-space-compliment {
                       margin-top: 5px;
                       margin-bottom: 5px;

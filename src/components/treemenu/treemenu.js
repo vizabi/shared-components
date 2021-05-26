@@ -42,6 +42,10 @@ function resolveDefaultScales(concept) {
   }
 }
 
+function spacesAreEqual(a, b){
+  return a.concat().sort().join() === b.concat().sort().join();
+}
+
 /*!
  * VIZABI TREEMENU
  * Treemenu component
@@ -647,8 +651,8 @@ export class TreeMenu extends BaseComponent {
     input.on("input", searchIt);
   }
 
-  _selectIndicator({concept, space}) {
-    this._setModel(this._targetProp, {concept, space});
+  _selectIndicator(concept) {
+    this._setModelWhich(concept);
     this.toggle();
   }
 
@@ -846,7 +850,7 @@ export class TreeMenu extends BaseComponent {
         //only for leaf nodes
         if (view.attr("children")) return;
         d3.event.stopPropagation();
-        _this._selectIndicator({concept: d, space: null});
+        _this._selectIndicator(d);
       })
       .append("span")
       .text(d => {
@@ -873,7 +877,7 @@ export class TreeMenu extends BaseComponent {
           const deepLeaf = view.append("div")
             .attr("class", css.menuHorizontal + " " + css.list_outer + " " + css.list_item_leaf);
           deepLeaf.on("click", d => {
-            _this._selectIndicator({concept: d, space: null});
+            _this._selectIndicator(d);
           });
         }
 
@@ -947,32 +951,20 @@ export class TreeMenu extends BaseComponent {
     this._targetModel.scale.config.type = type;
   }
 
-  _setModel(what, {concept, space}) {
-    const mdl = this._targetModel;
-    //for setting encoding concept and encoding space
-    if (what[1] == "concept") {
-      if (!space) {
-        //try to resolve space if not specified
-        if(concept.id == "_default") {
-          //constant
-          space = null;
-        } else if (concept.spaces.find(f => f.join(",") == mdl.data.space.concat().sort().join(","))){
-          //concept has an available space same as already set in enc: retain enc space
-          space = mdl.data.space;
-        } else {
-          //if a new space needed: rank them by priorities so that difference of length with
-          //the current enc space is minimal
-          space = this.getNearestSpaceByLength(concept.spaces);
-        }
-      }
-      console.log("setWhich", { key: space, value: {concept: concept.id, dataSource: concept.dataSource} });
-      mdl.setWhich({ key: space, value: {concept: concept.id, dataSource: concept.dataSource} });
-    }
-    //for setting marker space
-    if (what[1] == "space") mdl.data.config.space = space;
+  _setModelWhich(concept) {    
+    this._targetModel.setWhich({
+      key: concept.id == "_default" ? null : this.getNearestSpaceToMarkerSpace(concept.spaces),
+      value: {concept: concept.id, dataSource: concept.dataSource}
+    });
   }
 
-  getNearestSpaceByLength(spaces){
+  getNearestSpaceToMarkerSpace(spaces){
+    //concept has an available space same as already set in marker: perfect match!
+    if (spaces.find(f => spacesAreEqual(f, this.model.data.space))) 
+      return this.model.data.space;
+
+    //otherwise return space that is closest by length to marker space length
+    //so we prioritise [country, gender, time] over [country, gender, age, time]
     const markerSpaceLen = this.model.data.space.length;
     const spacesPrio = spaces.concat()
       .sort((a, b) => Math.abs(a.length - markerSpaceLen) - Math.abs(b.length - markerSpaceLen));
