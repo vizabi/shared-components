@@ -2,6 +2,7 @@
 import { css } from "./config";
 import { runInAction } from "mobx";
 import * as utils from "../../legacy/base/utils";
+import * as Utils from "../../utils";
 
 function spacesAreEqual(a, b){
   return a.concat().sort().join() === b.concat().sort().join();
@@ -67,7 +68,7 @@ export class DeepLeaf{
         .data(leafDatum.spaces)
         .enter().append("option")
         .attr("value", option => option.join())
-        .text(option => "by " + option.join(", "));
+        .text(option => "by " + Utils.getSpaceName(encoding, option));
   
       spaceSelect
         .property("value", currentSpace.join());
@@ -98,18 +99,17 @@ export class DeepLeaf{
     const _this = this;
     const spaceContainer = this.entity.select("div." + css.leaf_content_item_space);
     const encoding = this.context._targetModel;
-    const compliment = this.context.services.Vizabi.Vizabi.utils.relativeComplement(encoding.marker.data.space, this.getSelectedSpace())
-      .map(dim => ({ dim, encoding }));
+    const compliment = this.context.services.Vizabi.Vizabi.utils.relativeComplement(encoding.marker.data.space, this.getSelectedSpace());
     
-    const promises = compliment.map(d => {
-      return d.encoding.data.source.query({
+    const promises = compliment.map(dim => {
+      return encoding.data.source.query({
         select: {
-          key: [d.dim],
+          key: [dim],
           value: ["name"]
         },
         from: "entities"
       }).then(data => {
-        return { data, dim: d.dim };
+        return { data, dim };
       });
     });
 
@@ -128,7 +128,7 @@ export class DeepLeaf{
           view
             .append("label")
             .attr("for", d.dim + "_extraDim")
-            .text(d.dim + ":");
+            .text(Utils.getSpaceName(encoding, d.dim) + ":");
     
           const select = view
             .append("select")

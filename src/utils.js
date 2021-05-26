@@ -1,4 +1,4 @@
-import { deepClone, deepExtend } from "./legacy/base/utils";
+import { deepClone, deepExtend, isArray } from "./legacy/base/utils";
 
 export const STATUS = {
   INIT: "init", 
@@ -9,6 +9,12 @@ export const STATUS = {
 
 export function isEntityConcept(concept = {}) {
   return ["entity_set", "entity_domain"].includes(concept.concept_type);
+}
+
+export function getSpaceName(enc, space){
+  if(!space) space = enc.data.space;
+  if(!isArray(space)) space = [space];
+  return space.map(m => enc.data.source.getConcept(m).name).join(", ");
 }
 
 export function getConceptName(enc, localise) {
