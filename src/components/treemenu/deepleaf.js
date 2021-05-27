@@ -101,19 +101,7 @@ export class DeepLeaf{
     const encoding = this.context._targetModel;
     const compliment = this.context.services.Vizabi.Vizabi.utils.relativeComplement(encoding.marker.data.space, this.getSelectedSpace());
     
-    const promises = compliment.map(dim => {
-      return encoding.data.source.query({
-        select: {
-          key: [dim],
-          value: ["name"]
-        },
-        from: "entities"
-      }).then(data => {
-        return { data, dim };
-      });
-    });
-
-    Promise.all(promises).then(dims => {
+    Utils.requestEntityNames(encoding.data.source, compliment).then(dims => {
       let dimSetters = spaceContainer.select("div.vzb-treemenu-leaf-space-compliment")
         .selectAll("div.vzb-treemenu-leaf-space-compliment-setter")
         .data(dims, d => d.dim);
