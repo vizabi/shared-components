@@ -1,5 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
+import {decorate, computed} from "mobx";
 
 import "./brushslider.scss";
 
@@ -40,7 +41,7 @@ const OPTIONS = {
   }
 };
 
-export class BrushSlider extends BaseComponent {
+class BrushSlider extends BaseComponent {
   constructor (config) {
     config.template = `
       <div class="vzb-slider-holder">
@@ -111,12 +112,14 @@ export class BrushSlider extends BaseComponent {
       .attr("transform", "translate(0," + (-barWidth * 0.5) + ")");
 
   }
-
-  draw() {
-    this.MDL = {
+  
+  get MDL() {
+    return {
       model: this._getModel()
     };
-    
+  }
+
+  draw() {
     this.localise = this.services.locale.auto();
 
     if(this._updateLayoutProfile()) return;
@@ -231,7 +234,7 @@ export class BrushSlider extends BaseComponent {
     this.services.layout.size;
     const value = this.MDL.model[this.value];
 
-    if (!value && value!==0) 
+    if (!value && value!==0 && value!==false) 
       console.error(`Slider inside ${this.parent.name || this.parent.constructor.name} was unable to access value ${this.value} in its model`);
 
     this.DOM.slider.call(this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]));
@@ -287,4 +290,9 @@ export class BrushSlider extends BaseComponent {
   }
 
 }
+
+const decorated = decorate(BrushSlider, {
+  "MDL": computed
+});
+export { decorated as BrushSlider};
 

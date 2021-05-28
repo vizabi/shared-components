@@ -49,10 +49,9 @@ class Speed extends Dialog {
         value: "speed",
         setValueFunc: "setSpeed",
         domain: [1200, 900, 450, 200, 150, 100],
-        ROUND_DIGITS: 0
-      },
-      model: config.model.encoding.frame
-      
+        ROUND_DIGITS: 0,
+        submodel: "model.encoding.frame"
+      }
     },{
       type: SimpleCheckbox,
       placeholder: ".vzb-showforecast-switch",
