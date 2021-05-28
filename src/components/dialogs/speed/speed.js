@@ -24,6 +24,7 @@ class Speed extends Dialog {
           <p class="vzb-dialog-sublabel">
             <span data-localise="hints/forecastoptions"></span>
           </p>
+
           <form class="vzb-dialog-paragraph">
             <div class="vzb-showforecast-switch"></div>
             <div class="vzb-pausebeforeforecast-switch"></div>
@@ -36,6 +37,15 @@ class Speed extends Dialog {
               <span class="vzb-timeformatexample-hint" data-localise="hints/timeformatexample"></span>
               <span class="vzb-timeformatexample-label"></span>
             </div>
+          </form>
+
+          <p class="vzb-dialog-sublabel">
+          <span data-localise="hints/sparcedata"></span>
+          </p>
+
+          <form class="vzb-dialog-paragraph">
+            <span class="vzb-extrapolate-hint"></span>
+            <div class="vzb-extrapolate-slider"></div>
           </form>
         </div>
       </div>  
@@ -76,6 +86,17 @@ class Speed extends Dialog {
         checkbox: "showForecastOverlay",
         submodel: "root.ui.chart"
       }
+    },{
+      type: SingleHandleSlider,
+      placeholder: ".vzb-extrapolate-slider",
+      name: "extrapolate-slider",
+      options: {
+        value: "extrapolate",
+        setValueFunc: "setExtrapolate",
+        domain: d3.range(100),
+        ROUND_DIGITS: 0,
+        submodel: "model.encoding.frame"
+      }
     }];
 
     super(config);
@@ -84,7 +105,8 @@ class Speed extends Dialog {
   setup() {
     this.DOM = {
       timeFormatExample: this.element.select(".vzb-timeformatexample-label"),
-      forecastField: this.element.select(".vzb-endbeforeforecast-field")
+      forecastField: this.element.select(".vzb-endbeforeforecast-field"),
+      extrapolateHint: this.element.select(".vzb-extrapolate-hint")
     };
 
     const _this = this;
@@ -115,17 +137,31 @@ class Speed extends Dialog {
   }
 
   draw() {
-
     this.localise = this.services.locale.auto();
 
-    this.addReaction(this._updateView);
+    this.addReaction(this.updateForecastField);
+    this.addReaction(this.updateExtrapolateSlider);
   }
 
-  _updateView() {
+  updateForecastField() {
     this.DOM.forecastField.property("value",
       this.localise(this.root.ui.chart.endBeforeForecast)
     );
     this.DOM.timeFormatExample.text(this.localise(new Date()));
+  }
+
+  updateExtrapolateSlider(){
+    const sliderSize = this.MDL.frame.stepCount <= 2 ? 2 : this.MDL.frame.stepCount;
+    this.findChild({name: "extrapolate-slider"})
+      ._setDomain(d3.range(sliderSize));
+
+    const hintText = this.MDL.frame.extrapolate ? 
+      this.localise("hints/extendDataNSteps").replace("{n}", this.MDL.frame.extrapolate)
+      : this.localise("hints/dontExtendData");
+
+    this.DOM.extrapolateHint
+      .text(hintText)
+      .attr("title", this.localise("hints/extrapolation"));
   }
 
 }

@@ -25,11 +25,7 @@ export class SingleHandleSlider extends BrushSlider {
 
     super.setup(options);
 
-    if (this.options.domain) {
-      this.options.EXTENT_MIN = this.options.domain[0];
-      this.options.EXTENT_MAX = this.options.domain[1];
-      this.rescaler.domain(this.options.domain);
-    }
+    if (this.options.domain) this._setDomain(this.options.domain);
 
     this.DOM.slider.selectAll(".w").classed("vzb-hidden", true);
     this.DOM.slider.select(".selection").classed("vzb-hidden", true);
@@ -43,6 +39,12 @@ export class SingleHandleSlider extends BrushSlider {
 
     this.DOM.slider.selectAll(".vzb-slider-thumb-badge")
       .style("stroke-width", this.options.THUMB_STROKE_WIDTH + "px");
+  }
+
+  _setDomain(domain){
+    this.options.EXTENT_MIN = this.options.domain[0];
+    this.options.EXTENT_MAX = this.options.domain[1];
+    this.rescaler.domain(domain);
   }
 
   _createThumbs(thumbsEl) {
