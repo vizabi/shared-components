@@ -220,7 +220,7 @@ class BrushSlider extends BaseComponent {
 
   _getModel() {
     if (this.submodelFunc) {
-      return this.submodelFunc();
+      return this.submodelFunc.call(this.model);
     } else if (this.submodel) {
       const model = utils.getProp(this, this.submodel.split("."));
       if (!model) console.error(`Slider inside ${this.parent.name || this.parent.constructor.name} was not able to access part of model ${this.submodel}`);
