@@ -40,7 +40,7 @@ class Speed extends Dialog {
           </form>
 
           <p class="vzb-dialog-sublabel">
-          <span data-localise="hints/sparcedata"></span>
+          <span data-localise="hints/sparsedata"></span>
           </p>
 
           <form class="vzb-dialog-paragraph">
