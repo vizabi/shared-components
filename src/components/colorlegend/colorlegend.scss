@@ -15,9 +15,9 @@
   .vzb-cl-outer {
 
     .vzb-cl-holder {
+      min-height: 140px;
       width: 100%;
       overflow: hidden;
-      position: relative;
     }
 
     .vzb-cl-colorlist {
@@ -137,8 +137,7 @@
       position: absolute;
       display: block;
       padding: 5px 15px;
-      top: 50%;
-      transform: translate(0, -50%);
+      top: 25%;
       left: 20px;
       right: 20px;
       border: 1px solid #000;
@@ -146,25 +145,34 @@
       background: $vzb-color-primary-lightest;
       z-index: 1;
 
+      .vzb-clickable {
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      input {
+        border: none;
+        width: 20px;
+        height: 10px;
+      }
+
       &-item {
         @include rtl {
           float: right;
         }
         float: left;
         margin: 3px auto;
-        cursor: pointer;
 
-        &:hover {
-          text-decoration: underline;
-        }
-
-        &-moreoptions {
-          display: none;
-        }
+        // &-moreoptions {
+        //   display: none;
+        // }
 
         &-disabled {
           opacity: 0.5;
           cursor: default;
+          pointer-events: none;
         }
 
         &-tooltip {
@@ -198,9 +206,9 @@
   }
 
   .vzb-moreoptions {
-    .vzb-cl-select-dialog-item-moreoptions {
-      display: block;
-    }
+    // .vzb-cl-select-dialog-item-moreoptions {
+    //   display: block;
+    // }
     .vzb-cl-labelscale {
       height: 55px;
     }

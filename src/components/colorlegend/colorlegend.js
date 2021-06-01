@@ -121,14 +121,13 @@ class ColorLegend extends BaseComponent {
 
     this.addReaction(this._updateView);
     this.addReaction(this._translateSelectDialog);
-    this.addReaction(this._updateSelectDialog);
-
+    this.addReaction(this.closeSelectDialogOnConceptChange);
   }
 
   _legendHasOwnModel() {
     return this.MDL.legend
       && !this.MDL.color.data.isConstant 
-      && ["entity_set", "entity_domain"].includes(this.MDL.color.data.conceptProps.concept_type);
+      && isEntityConcept(this.MDL.color.data.conceptProps);
   }
 
   _isLegendModelReady() {
@@ -182,12 +181,8 @@ class ColorLegend extends BaseComponent {
       .on("mouseover", _this._interact().mouseover)
       .on("mouseout", _this._interact().mouseout)
       .on("click", (...args) => {
-        if (this._legendHasOwnModel()) {
-          this._bindSelectDialogItems(...args);
-          this.DOM.selectDialog.classed("vzb-hidden", false);
-        } else {
-          this._interact().clickToChangeColor(...args);
-        }
+        this._bindSelectDialogItems(...args);
+        this.DOM.selectDialog.classed("vzb-hidden", false);
       })
       .merge(colorOptions);
 
@@ -325,10 +320,6 @@ class ColorLegend extends BaseComponent {
     this.DOM.moreOptionsHint = this.DOM.wrapper.select(".vzb-cl-more-hint");
 
     this.DOM.selectDialog = this.DOM.wrapper.select(".vzb-cl-select-dialog");
-    this._initSelectDialogItems();
-  }
-
-  _initSelectDialogItems() {
     this.DOM.selectDialogTitle = this.DOM.selectDialog.select(".vzb-cl-select-dialog-title");
 
     this.DOM.selectDialogClose = this.DOM.selectDialog.select(".vzb-cl-select-dialog-close");
@@ -337,16 +328,25 @@ class ColorLegend extends BaseComponent {
       .on("click", () => this._closeSelectDialog());
 
     this.DOM.selectAllButton = this.DOM.selectDialog.append("div")
-      .classed("vzb-cl-select-dialog-item", true);
+      .attr("class", "vzb-cl-select-dialog-item vzb-clickable");
 
     this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
-      .classed("vzb-cl-select-dialog-item", true);
+      .attr("class", "vzb-cl-select-dialog-item vzb-clickable");
 
     this.DOM.editColorButton = this.DOM.selectDialog.append("div")
-      .classed("vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions", true);
+      .attr("class", "vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions");
+    this.DOM.editColorButton.append("label")
+      .attr("class", "vzb-clickable")
+      .attr("for", "vzb-cl-select-dialog-color-" + this.id);
+    this.DOM.editColorButton.append("input")
+      .attr("type", "color")
+      .attr("class", "vzb-invisible")
+      .attr("id", "vzb-cl-select-dialog-color-" + this.id);
+    this.DOM.editColorButton.append("span")
+      .attr("class", "vzb-clickable");
 
     this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
-      .classed("vzb-cl-select-dialog-item-tooltip", true);
+      .attr("class", "vzb-cl-select-dialog-item-tooltip");
   }
 
   _translateSelectDialog() {
@@ -354,16 +354,14 @@ class ColorLegend extends BaseComponent {
     this.DOM.moreOptionsHint.text(t("hints/color/more"));
     this.DOM.selectAllButton.text("✅ " + t("dialogs/color/select-all"));
     this.DOM.removeElseButton.text("🗑️ " + t("dialogs/color/remove-else"));
-    this.DOM.editColorButton.text("🎨 " + t("dialogs/color/edit-color"));
+    this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
+    this.DOM.editColorButton.select("span").text(t("buttons/reset"));
     this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint"));
   }
-
-  _updateSelectDialog() {
-    const isColorSelectable = this.MDL.color.scale.palette.isUserSelectable;
-    this.DOM.editColorButtonTooltip.classed("vzb-hidden", isColorSelectable);
-    this.DOM.editColorButton.classed("vzb-cl-select-dialog-item-disabled", !isColorSelectable);
-
-    this.DOM.selectDialog.classed("vzb-hidden", true);
+  
+  closeSelectDialogOnConceptChange(){
+    this.MDL.color.data.concept;
+    this._closeSelectDialog();
   }
 
   _closeSelectDialog() {
@@ -371,23 +369,54 @@ class ColorLegend extends BaseComponent {
   }
 
   _bindSelectDialogItems(...args) {
-    const [, index, indicators] = args;
-    this.DOM.selectDialogTitle.text(indicators[index].textContent);
+    const _this = this;
+    const [d] = args;
+    this.DOM.selectDialogTitle.text(d.name);
 
-    this.DOM.selectAllButton.on("click", () => {
-      this._interact().clickToSelect(...args);
-      this._closeSelectDialog();
-    });
+    this.DOM.selectAllButton
+      .classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
+      .on("click", () => {
+        this._interact().clickToSelect(...args);
+        this._closeSelectDialog();
+      });
 
-    this.DOM.removeElseButton.on("click", () => {
-      this._interact().clickToShow(...args);
-      this._closeSelectDialog();
-    });
+    this.DOM.removeElseButton
+      .classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
+      .on("click", () => {
+        this._interact().clickToShow(...args);
+        this._closeSelectDialog();
+      });
 
-    this.DOM.editColorButton.on("click", () => {
-      this._interact().clickToChangeColor(...args);
-      this._closeSelectDialog();
-    });
+    const isColorSelectable = this.MDL.color.scale.palette.isUserSelectable;
+    this.DOM.editColorButtonTooltip.classed("vzb-hidden", isColorSelectable);
+    this.DOM.editColorButton.select("span").classed("vzb-hidden", !isColorSelectable);
+    this.DOM.editColorButton.classed("vzb-cl-select-dialog-item-disabled", !isColorSelectable);
+    
+    if (isColorSelectable){
+      const colorScaleModel = this.MDL.color.scale;
+      const concept = this.MDL.color.data.concept;
+      const target = this.MDL.color.data.isConstant ? "_default" :
+        (colorScaleModel.isDiscrete() ? d[concept] : d.paletteKey);
+      const colorOld = colorScaleModel.palette.getColor(target);
+      const colorDef = colorScaleModel.palette.getColor(target, colorScaleModel.palette.defaultPalette);
+      this.DOM.editColorButton.select("input")
+        .property("value", colorOld)
+        .on("input", function(){
+          const value = d3.select(this).property("value");
+          colorScaleModel.palette.setColor(value, "" + target);
+        })
+        .on("change", function(){
+          _this._closeSelectDialog();
+        });
+
+      this.DOM.editColorButton.select("span")
+        .classed("vzb-hidden", colorOld == colorDef)
+        .style("color", colorDef)
+        .on("click", function(){
+          colorScaleModel.palette.setColor(colorDef, "" + target);
+          _this._closeSelectDialog();
+        });
+    }
   }
 
   _updateRainbowLegend(isVisible) {
@@ -832,8 +861,8 @@ const _ColorLegend = {
   },
 
   _bindSelectDialogItems(...args) {
-    const [, index, indicators] = args;
-    this.selectDialogTitle.text(indicators[index].textContent);
+    const [d] = args;
+    this.selectDialogTitle.text(d.name);
 
     this.selectAllButton.on("click", () => {
       this._interact().clickToSelect(...args);

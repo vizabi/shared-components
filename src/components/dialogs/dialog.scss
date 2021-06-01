@@ -10,6 +10,10 @@ $vzb-dialog-content-height: 250px;
 .vzb-tool {
   .vzb-dialogs {
     .vzb-dialogs-dialog {
+      .vzb-dialog-modal {
+        position: relative;
+      }
+      
       width: 280px;
       margin: 0;
       //margin-left: -140px;
