@@ -237,7 +237,7 @@ export class TreeMenu extends BaseComponent {
     const {tags, tagsRoot} = this._buildTagFolderTree({ tagsArray, dataModels });
 
     //add constant pseudoconcept
-    tagsRoot.children.push({id: "_default"});
+    tagsRoot.children.push({id: "_default", type: "indicator", spaces: [[]]});
 
     const nest = this._nestAvailabilityByConcepts(this.model.availability);
     const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
@@ -711,8 +711,8 @@ export class TreeMenu extends BaseComponent {
             //for entities need an ordinal scale to be allowed at this point
             if (allowedTypes.includes("ordinal")) return true;
           } else if (isConstant) {
-            //for constants need a point scale to be allowed
-            if (allowedTypes.includes("point")) return true;
+            //for constants need a ordinal scale to be allowed
+            if (allowedTypes.includes("ordinal")) return true;
           } else if (isMeasure){
             // for measures need linear or log or something
             if (allowedTypes.includes("linear") || allowedTypes.includes("log")
