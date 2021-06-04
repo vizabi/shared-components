@@ -34,8 +34,9 @@ export class Presentation extends Dialog {
       type: SimpleCheckbox,
       placeholder: ".vzb-decorations-switch",
       options: {
-        checkbox: "decorations",
-        submodel: "root.ui.chart"
+        checkbox: "enabled",
+        prefix: "decorations",
+        submodel: "root.ui.chart.decorations"
       }
     }, {
       type: SimpleCheckbox,
