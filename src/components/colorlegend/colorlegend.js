@@ -35,11 +35,7 @@ class ColorLegend extends BaseComponent {
             </div>
 
             <div class="vzb-cl-rainbow-legend">
-              <svg>
-                <g>
-                  <rect></rect>
-                </g>
-              </svg>
+              <div class="vzb-cl-rainbow-legend-eventarea"></div>
             </div>
 
             <div class="vzb-cl-labelscale">
@@ -50,6 +46,7 @@ class ColorLegend extends BaseComponent {
 
             <div class="vzb-cl-subtitle">
               <span class="vzb-cl-subtitle-text"></span>
+              <span class="vzb-cl-subtitle-reset"></span>
             </div>
           </div>
           
@@ -80,16 +77,14 @@ class ColorLegend extends BaseComponent {
     this.DOM.rainbow = this.DOM.rainbowHolder.select(".vzb-cl-rainbow");
     this.DOM.rainbowCanvas = this.DOM.rainbow.select("canvas");
     this.DOM.rainbowLegend = this.DOM.rainbowHolder.select(".vzb-cl-rainbow-legend");
-    this.DOM.rainbowLegendSVG = this.DOM.rainbowLegend.select("svg");
-    this.DOM.rainbowLegendG = this.DOM.rainbowLegendSVG.select("g");
-    //this.DOM.rainbowLegendG.append("rect");
-    this.rainbowLegend = null;
+    this.DOM.rainbowLegendEventArea = this.DOM.rainbowLegend.select(".vzb-cl-rainbow-legend-eventarea");
 
     this.DOM.labelScale = this.DOM.rainbowHolder.select(".vzb-cl-labelscale");
     this.DOM.labelScaleSVG = this.DOM.labelScale.select("svg");
     this.DOM.labelScaleG = this.DOM.labelScaleSVG.select("g");
     this.DOM.subtitleDiv = this.DOM.rainbowHolder.select(".vzb-cl-subtitle");
     this.DOM.subtitleText = this.DOM.subtitleDiv.select(".vzb-cl-subtitle-text");
+    this.DOM.subtitleReset = this.DOM.subtitleDiv.select(".vzb-cl-subtitle-reset");
 
     this.legendModelName = options.legendModelName;
     this.colorModelName = options.colorModelName;
@@ -275,19 +270,6 @@ class ColorLegend extends BaseComponent {
           _this.MDL.superHighlighted.data.filter.clear() :
           _this.MDL.highlighted.data.filter.clear();
       },
-      clickToChangeColor(d, i, group, d3event = d3.event) {
-        //disable interaction if so stated in concept properties
-        //if (!_this.MDL.color.scale.palette.isUserSelectable) return;
-        const colorScaleModel = _this.MDL.color.scale;
-        const defaultPalette = colorScaleModel.palette.defaultPalette;
-        const target = !colorScaleModel.isDiscrete() ? d.paletteKey : d[which];
-        _this.colorPicker
-          .colorOld(colorScaleModel.palette.getColor(target))
-          .colorDef(colorScaleModel.palette.getColor(target, defaultPalette))
-          .callback((value, isClick) => colorScaleModel.palette.setColor(value, "" + target, null, isClick, isClick))
-          .fitToScreen([d3event.pageX, d3event.pageY])
-          .show(true);
-      },
       clickToShow(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
@@ -395,25 +377,25 @@ class ColorLegend extends BaseComponent {
     if (isColorSelectable){
       const colorScaleModel = this.MDL.color.scale;
       const concept = this.MDL.color.data.concept;
-      const target = this.MDL.color.data.isConstant ? "_default" :
-        (colorScaleModel.isDiscrete() ? d[concept] : d.paletteKey);
+      const target = this.MDL.color.data.isConstant ? "_default" : d[concept];
       const colorOld = colorScaleModel.palette.getColor(target);
       const colorDef = colorScaleModel.palette.getColor(target, colorScaleModel.palette.defaultPalette);
       this.DOM.editColorButton.select("input")
         .property("value", colorOld)
         .on("input", function(){
           const value = d3.select(this).property("value");
-          colorScaleModel.palette.setColor(value, "" + target);
+          colorScaleModel.palette.setColor(value, target);
         })
         .on("change", function(){
           _this._closeSelectDialog();
         });
 
+      //reset color
       this.DOM.editColorButton.select("span")
         .classed("vzb-hidden", colorOld == colorDef)
         .style("color", colorDef)
         .on("click", function(){
-          colorScaleModel.palette.setColor(colorDef, "" + target);
+          colorScaleModel.palette.removeColor(target);
           _this._closeSelectDialog();
         });
     }
@@ -425,18 +407,16 @@ class ColorLegend extends BaseComponent {
 
     //Hide rainbow element if showing minimap or if color is discrete
     this.DOM.rainbowHolder.classed("vzb-hidden", !isVisible);
-    //this.DOM.labelScale.classed("vzb-hidden", !isVisible);
-    //this.DOM.rainbowLegend.classed("vzb-hidden", !isVisible);
     if (!isVisible) return;
 
     const gradientWidth = this.DOM.rainbow.node().getBoundingClientRect().width;
     const paletteKeys = colorModel.palette.paletteDomain.map(parseFloat);
     const cScale = colorModel.d3Scale.copy();
     const circleRadius = 6;
+    this.DOM.rainbow.style("top", 3 + circleRadius + "px");
 
     let domain;
     let range;
-    //const formatter = colorModel.getTickFormatter();
     let fitIntoScale = null;
 
     const paletteLabels = colorModel.palette.paletteLabels;
@@ -456,8 +436,6 @@ class ColorLegend extends BaseComponent {
       range = paletteKeys.map(val => val / paletteMax * gradientWidth);
 
     }
-
-    //const labelScaleType = (d3.min(domain) <= 0 && d3.max(domain) >= 0 && colorModel.scaleType === "log") ? "genericLog" : colorModel.scaleType;
 
     this.labelScale = cScale.copy()
       .interpolate(d3.interpolate)
@@ -516,14 +494,27 @@ class ColorLegend extends BaseComponent {
     if (this.DOM.rainbowLegend.style("display") !== "none") {
       const edgeDomain = d3.extent(domain);
 
+
+      this.DOM.subtitleReset
+        .text(this.localise("buttons/reset"))
+        .classed("vzb-hidden", !Object.keys(colorModel.palette.config.palette).length)
+        .on("click", () => {
+          runInAction(()=>{
+            Object.keys(colorModel.palette.config.palette)
+              .forEach(d => colorModel.palette.removeColor(d));
+          });
+        });
+
+
       this.domainScale = this.labelScale.copy()
         .domain(edgeDomain)
         .range(edgeDomain);
 
       this.paletteScaleLinear = d3.scaleLinear().domain(edgeDomain).range([0, 100]);
 
-      this.DOM.rainbowLegendSVG.style("width", marginLeft + gradientWidth + marginRight + "px");
-      this.DOM.rainbowLegendG.attr("transform", "translate(" + marginLeft + ", " + 7 + ")");
+      this.DOM.rainbowLegend.style("width", gradientWidth + "px");
+      this.DOM.rainbowLegend.style("left", (marginLeft - circleRadius) + "px");
+      this.DOM.rainbowLegend.style("top", "3px");
 
       this.DOM.labelScale.selectAll(".vzb-axis-value text").attr("dy", "1.5em");
 
@@ -533,14 +524,15 @@ class ColorLegend extends BaseComponent {
           .style("cursor", "pointer")
           .on("dblclick", () => {
             const color = cScale(0);
-            const paletteKey = +_this.paletteScaleLinear(_this.domainScale(0));
-            colorModel.palette.setColor(color, "" + paletteKey, null, true, true);
+            const paletteKey = Math.round(+_this.paletteScaleLinear(_this.domainScale(0)));
+            colorModel.palette.setColor(color, paletteKey);
           });
       }
 
-      this.DOM.rainbowLegendG.select("rect")
-        .attr("width", gradientWidth)
-        .attr("height", 20)
+      this.DOM.rainbowLegendEventArea
+        .style("width", gradientWidth + "px")
+        .style("top", 3 + circleRadius + "px")
+        .style("left", circleRadius + "px")
         .on("mousemove", function() {
           _this.DOM.labelScaleG.call(_this.labelsAxis.highlightValue(_this.labelScale.invert(d3.mouse(this)[0])));
         })
@@ -550,43 +542,36 @@ class ColorLegend extends BaseComponent {
           x = x <= (circleRadius * 2) ? circleRadius * 2 : x >= (gradientWidth - circleRadius * 2) ? gradientWidth - circleRadius * 2 : x;
           const newValue = _this.labelScale.invert(x);
           const color = cScale(newValue);
-          const paletteKey = _this.paletteScaleLinear(_this.domainScale(newValue));
-          colorModel.palette.setColor(color, "" + paletteKey, null, true, true);
+          const paletteKey = Math.round(+_this.paletteScaleLinear(_this.domainScale(newValue)));
+          colorModel.palette.setColor(color, paletteKey);
         });
 
       const colorRange = cScale.range();
 
       const value0 = d3.min(domain) < 0 && d3.max(domain) > 0 ? this.labelScale(0) : null;
-      const gIndicators = domain.map((val, i) => ({ val, i, value0,
+      const colorStops = domain.map((val, i) => ({ 
+        val, 
+        i, 
+        value0,
         isEdgePoint: i === 0 || i === domain.length - 1,
         color: colorRange[i],
         paletteKey: paletteKeys[i],
         xMin: i - 1 < 0 ? 1 : this.labelScale(domain[i - 1]) + circleRadius * 2,
         xMax: i + 1 >= domain.length ? gradientWidth - 1 : this.labelScale(domain[i + 1]) - circleRadius * 2
       }));
-
+      
       const legendDrag = d3.drag()
         .on("start", function start(d) {
-          //click сompatible node raise
-          let nextSibling = this.nextSibling;
-          while (nextSibling) {
-            this.parentNode.insertBefore(nextSibling, this);
-            nextSibling = this.nextSibling;
-          }
 
           const circle = d3.select(this);
           let dragged = false;
-          let ghostCircle = null;
-
-          if (d.isEdgePoint) {
-            ghostCircle = circle.clone().lower().classed("ghost", true).style("opacity", 0.8);
-          }
 
           circle.classed("dragging", true);
 
           d3.event.on("drag", drag).on("end", end);
 
           function drag(d) {
+            if (d.isEdgePoint) return;
             if (d3.event.x < 0) return;
             if (d3.event.x > gradientWidth) return;
             if (d3.event.x < d.xMin || d3.event.x > d.xMax) return;
@@ -597,88 +582,90 @@ class ColorLegend extends BaseComponent {
               d.x = (d.x < d.value0 - 3 || d.x > d.value0 + 3) ? d.x : d.value0;
             }
 
-            circle.attr("cx", d.x);
+            circle.style("left", d.x + "px");
 
             if (dragged) {
               const newValue = _this.labelScale.invert(d.x);
-              const paletteKey = +_this.paletteScaleLinear(_this.domainScale(newValue));
+              const paletteKey = Math.round(+_this.paletteScaleLinear(_this.domainScale(newValue)));
               _this.DOM.labelScaleG.call(_this.labelsAxis.highlightValue(newValue));
 
-              colorModel.palette.setColor(d.color, "" + paletteKey, !d.isEdgePoint ? "" + d.paletteKey : "-1", false);
-              d.val = newValue;
+              if(d.paletteKey !== paletteKey){
 
-              if (d.isEdgePoint && d.paletteKey !== paletteKey) d.isEdgePoint = false;
-
-              d.paletteKey = paletteKey;
+                runInAction(()=>{
+                  if (colorModel.palette.defaultPalette[d.paletteKey])
+                    colorModel.palette.setColor(null, d.paletteKey);    
+                  else 
+                    colorModel.palette.removeColor(d.paletteKey);            
+                  colorModel.palette.setColor(d.color, paletteKey);
+                });
+                
+                d.val = newValue;
+                d.paletteKey = paletteKey;
+              }
             }
           }
 
-          function end(d) {
+          function end() {
             circle.classed("dragging", false);
-            if (ghostCircle) ghostCircle.remove();
-
-            if (dragged) {
-              let snapX = null;
-
-              if (d.x < (circleRadius * 2)) {
-                snapX = d.x < circleRadius ? 0 : (circleRadius * 2);
-              } else if (d.x > (gradientWidth - circleRadius * 2)) {
-                snapX = d.x > (gradientWidth - circleRadius) ? gradientWidth : (gradientWidth - circleRadius * 2);
-              }
-
-              utils.defer(() => {
-                if (snapX !== null) {
-                  const newValue = _this.labelScale.invert(snapX);
-                  const paletteKey = +_this.paletteScaleLinear(_this.domainScale(newValue));
-                  colorModel.palette.setColor(d.color, "" + paletteKey, "" + d.paletteKey, false, false);
-                  colorModel.palette.setColor(d.color, "" + paletteKey, "" + d.paletteKey, true, true);
-                } else {
-                  colorModel.palette.setColor(d.color, "" + d.paletteKey, null, true, true);
-                }
-              });
-            }
           }
         });
 
       let dblclick = false;
       let lastClickId;
 
-      this.rainbowLegend = this.DOM.rainbowLegendG.selectAll("circle")
-        .data(gIndicators, d => d.i);
-      this.rainbowLegend.exit().remove();
-      this.rainbowLegend = this.rainbowLegend.enter().append("circle")
-        .attr("r", circleRadius + "px")
-        .attr("stroke", "#000")
+      let rainbowLegendCircles = this.DOM.rainbowLegend.selectAll(".vzb-cl-rainbow-legend-circle")
+        .data(colorStops, d => d.i);
+      rainbowLegendCircles.exit().remove();
+      rainbowLegendCircles = rainbowLegendCircles.enter().append("div")
+        .attr("class", "vzb-cl-rainbow-legend-circle")
+        
+        .style("width", 2 * circleRadius + "px")
+        .style("height", 2 * circleRadius + "px")
+        .style("border", "1px solid #000")
         .on("mouseenter", d => {
           _this.DOM.labelScaleG.call(_this.labelsAxis.highlightValue(d.val));
         })
         .on("mouseleave", () => {
           _this.DOM.labelScaleG.call(_this.labelsAxis.highlightValue("none"));
         })
-        .on("click", (d, i) => {
-          const d3event = { pageX: d3.event.pageX, pageY: d3.event.pageY };
+        .each(function(){
+          d3.select(this).append("input")
+            .attr("type", "color");
+        })
+        .merge(rainbowLegendCircles);
+        
+      rainbowLegendCircles
+        .style("border-radius", d => d.isEdgePoint ? null : (circleRadius + "px"))
+        .call(legendDrag)
+        .on("click", function(){
+          const input = d3.select(this).select("input").node();
           lastClickId = setTimeout(() => {
-            if (!dblclick) _this._interact().clickToChangeColor(d, i, null, d3event);
-            else {
+            if (!dblclick){
+              input.click();
+            } else {
               clearTimeout(lastClickId);
               dblclick = false;
             }
           }, 500);
         })
-        .on("dblclick", d => {
+        .on("dblclick", function(d, i){
           dblclick = true;
           if (d.isEdgePoint) return;
-          utils.defer(() => {
-            colorModel.palette.setColor(null, null, "" + d.paletteKey, true, true);
-          });
+          if (colorModel.palette.defaultPalette[d.paletteKey])
+            colorModel.palette.setColor(null, d.paletteKey);    
+          else 
+            colorModel.palette.removeColor(d.paletteKey);  
         })
-        .call(legendDrag)
-        .merge(this.rainbowLegend);
-
-      this.rainbowLegend.each(function(d) {
-        d3.select(this).attr("fill", d.color);
-        d3.select(this).attr("cx", d.x = _this.labelScale(d.val));
-      });
+        .each(function(d, i) {
+          d3.select(this).select("input").property("value", d.color)
+            .on("click", ()=>{d3.event.stopPropagation();})
+            .on("input", function(){
+              console.log(i, d.paletteKey);
+              const value = d3.select(this).property("value");
+              colorModel.palette.setColor(value, d.paletteKey);
+            });
+          d3.select(this).style("left", (d.x = _this.labelScale(d.val)) + "px");
+        });
     }
 
   }
