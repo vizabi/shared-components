@@ -239,7 +239,7 @@ export class TreeMenu extends BaseComponent {
     //add constant pseudoconcept
     tagsRoot.children.push({id: "_default", type: "indicator", spaces: [[]]});
 
-    const nest = this._nestAvailabilityByConcepts(this.model.availability);
+    const nest = this._nestAvailabilityByConcepts(this._getAvailability());
     const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
     const concepts = this._convertConceptMapToArray(filtervl);
 
@@ -1136,6 +1136,16 @@ export class TreeMenu extends BaseComponent {
     return this._getDataModels(this.root.model.config.dataSources).map(ds => [ds.state, ds.config]);
   }
 
+  _getAvailability(){
+    const items = [];
+    this._getDataModels(this.root.model.config.dataSources).forEach(ds => {
+      ds.availability.data.forEach(kv => {
+        items.push({ key: kv.key, value: ds.getConcept(kv.value), source: ds });
+      });
+    });
+    return items;
+  }
+
   /**
    * Return tag entities with name and parents from all data sources
    * @return {array} Array of tag objects
@@ -1156,7 +1166,7 @@ export class TreeMenu extends BaseComponent {
       return res;
     }, new Map());
 
-    this.model.availability
+    this._getAvailability()
       .filter(f => f.key.join() == TAG_KEY)
       .forEach(av => {
         dataSources.get(av.source).select.value.push(av.value.concept);
