@@ -34,7 +34,7 @@ class Find extends Dialog {
             </form>
           </span>
 
-          <span class="vzb-find-filter-selector"></span>
+          <span class="vzb-spaceconfig-button"></span>
         </div>
 
         <div class="vzb-dialog-content vzb-dialog-content-fixed vzb-dialog-scrollable">
@@ -94,6 +94,7 @@ class Find extends Dialog {
     this.DOM.panelFind = this.DOM.content.select(".vzb-dialog-panel-find");
     this.DOM.input_search = this.element.select(".vzb-find-search");
     this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
+    this.DOM.markerSpaceButton = this.element.select(".vzb-spaceconfig-button");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
 
     this.DOM.titleSwitchInput.on("change", () => {
@@ -157,6 +158,7 @@ class Find extends Dialog {
     this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
 
     this.addReaction(this._enablePanelModeSwitch);
+    this.addReaction(this._enableMarkerSpaceOptions);
     this.addReaction(this._changePanelMode);
     this.addReaction(this._createFindList);
     this.addReaction(this._updateBrokenData);
@@ -179,6 +181,10 @@ class Find extends Dialog {
   _enablePanelModeSwitch() {
     this.DOM.titleSwitchSlider.classed("vzb-hidden", !this.ui.enableSelectShowSwitch);
     this.DOM.titleSwitch.style("pointer-events", this.ui.enableSelectShowSwitch ? "auto" : "none");
+  }
+
+  _enableMarkerSpaceOptions() {
+    this.DOM.markerSpaceButton.classed("vzb-hidden", !this.ui.enableMarkerSpaceOptions);
   }
 
   _buttonAdjust() {
@@ -321,6 +327,7 @@ class Find extends Dialog {
 
 Find.DEFAULT_UI = {
   enableSelectShowSwitch: false,
+  enableMarkerSpaceOptions: false,
   panelMode: "find",
   enablePicker: false
 };
