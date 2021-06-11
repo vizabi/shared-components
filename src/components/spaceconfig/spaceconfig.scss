@@ -1,0 +1,206 @@
+@import "../../styles/common.scss";
+
+.vzb-tool {
+  .vzb-spaceconfig {
+    @include position(absolute, 0 0 null null);
+    height: 100%;
+    width: 100%;
+
+    .vzb-spaceconfig-background {
+      background-color: $vzb-color-grey-lightest;
+      height: 100%;
+      opacity: 0.4;
+      width: 100%;
+    }
+
+    .vzb-spaceconfig-box {
+      //opacity: 1;
+      @include rtl {
+        padding-left: 15px;
+        padding-right: 25px;
+      }
+      @include box-shadow(0, 8px, 15px, rgba(0, 0, 0, 0.24));
+      transition: 300ms ease-in-out;
+      background-color: #fff;
+      border-top: 1px solid #f7f7f7;
+      padding: 0 15px 10px 25px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+
+
+      .vzb-spaceconfig-title {
+        @include rtl {
+          margin-left: 30px;
+          margin-right: 5px;
+        }
+        color: $vzb-color-primary;
+        font-size: $vzb-font-size-medium;
+        margin: 15px 30px 10px 5px;
+        white-space: normal;
+      }
+
+      .vzb-spaceconfig-body {
+        @include rtl {
+          padding-left: 30px;
+          padding-right: 5px;
+          text-align: right;
+        }
+        font-size: $vzb-font-size-regular;
+        padding: 10px 30px 10px 5px;
+        color: $vzb-color-black;
+        white-space: normal;
+        line-height: 150%;
+        height: 80%;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        .vzb-spaceconfig-encodings {
+          >div {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            .vzb-spaceconfig-enc-status {
+              margin-right: 10px;
+              display: inline;
+            }
+            .vzb-spaceconfig-enc-name {
+              display: inline;
+            }
+            .vzb-spaceconfig-enc-concept {}
+          }
+        }
+
+        a {
+          color: $vzb-color-accent-orange;
+          //color: $vzb-color-primary-dark;
+          text-decoration: none;
+        }
+
+        a:hover {
+          text-decoration: underline;
+        }
+      }
+      .vzb-spaceconfig-buttons {
+        .vzb-spaceconfig-button-apply {
+          color: darkgreen;
+          display: inline;
+          float: right;
+          margin-left: 10px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+        .vzb-spaceconfig-button-cancel {
+          color: darkred;
+          display: inline;
+          float: right;
+          margin-left: 10px;
+          margin-right: 10px;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+      }
+
+      .vzb-spaceconfig-close {
+        @include rtl {
+          left: 10px;
+          right: auto;
+        }
+        cursor: pointer;
+        fill: $vzb-color-primary;
+        fill-opacity: 0.7;
+        height: 25px;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 25px;
+
+        &:hover {
+          fill-opacity: 1;
+        }
+      }
+    }
+  }
+
+  &.vzb-small.vzb-portrait {
+    .vzb-spaceconfig-box {
+      @include position(absolute, 10% null null 5%);
+      bottom: $size-button-list;
+      width: 90%;
+      height: 80%;
+
+      .vzb-spaceconfig-link {
+        font-size: $vzb-font-size-regular;
+      }
+
+      .vzb-spaceconfig-title {
+        font-size: $vzb-font-size-regular;
+      }
+
+      .vzb-spaceconfig-body {
+        font-size: $vzb-font-size-small;
+      }
+    }
+  }
+
+  &.vzb-small.vzb-landscape {
+    .vzb-spaceconfig-box {
+      @include position(absolute, 10% null null 10%);
+      height: 80%;
+      margin-right: 10px;
+      right: $size-button-list;
+      width: 80%;
+
+      .vzb-spaceconfig-link {
+        font-size: $vzb-font-size-regular;
+      }
+
+      .vzb-spaceconfig-title {
+        font-size: $vzb-font-size-regular;
+      }
+
+      .vzb-spaceconfig-body {
+        font-size: $vzb-font-size-small;
+      }
+    }
+  }
+
+  &.vzb-medium {
+    .vzb-spaceconfig-box {
+      @include position(absolute, 10% null null 20%);
+      height: 80%;
+      width: 60%;
+
+      .vzb-spaceconfig-link {
+        font-size: $vzb-font-size-medium;
+      }
+
+      .vzb-spaceconfig-title {
+        font-size: $vzb-font-size-medium;
+      }
+
+      .vzb-spaceconfig-body {
+        font-size: $vzb-font-size-small;
+      }
+    }
+  }
+
+  &.vzb-large {
+    .vzb-spaceconfig-box {
+      @include position(absolute, 10% null null 25%);
+      width: 50%;
+      height: 80%;
+
+      .vzb-spaceconfig-link {
+        font-size: $vzb-font-size-medium;
+      }
+
+      .vzb-spaceconfig-title {
+        font-size: $vzb-font-size-medium;
+      }
+
+      .vzb-spaceconfig-body {
+        font-size: $vzb-font-size-regular;
+      }
+    }
+  }
+}
