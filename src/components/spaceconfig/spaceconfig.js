@@ -233,6 +233,15 @@ class _SpaceConfig extends BaseComponent {
 
   }
 
+  getEncodings(){
+    const encs = this.model.encoding;
+    return Object.keys(encs).filter(enc => {
+      if (!this.model.requiredEncodings || this.model.requiredEncodings.includes(enc)) return true;
+      if (enc == "color") return true;
+      if (enc == "label") return true;
+    });
+  }
+
   updateEncodigns(){
     const _this = this;
     const encs = this.model.encoding;
@@ -241,11 +250,12 @@ class _SpaceConfig extends BaseComponent {
     //const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
     this.concepts = this._convertConceptMapToArray(nest);
     console.log(this.concepts);
+    this.encNewConfig = {};
 
     this.DOM.encodings
       .html("")
       .selectAll("div")
-      .data(this.model.requiredEncodings || Object.keys(encs), d=>d)
+      .data(this.getEncodings(), d=>d)
       .enter().append("div")
       .each(function(enc){
         const view = d3.select(this);
@@ -253,6 +263,8 @@ class _SpaceConfig extends BaseComponent {
         const encoding = encs[enc];
         const status = _this.getSpaceCompatibilityStatus(encoding);
         const concept = _this.concepts.find(f => f.concept.concept == encoding.data.concept);
+        const isSpaceSet = encoding.data.config.space;
+        const newConfig = _this.encNewConfig[enc] = {};
 
         view.append("div")
           .attr("class", "vzb-spaceconfig-enc-status")
@@ -263,7 +275,7 @@ class _SpaceConfig extends BaseComponent {
           .attr("class", "vzb-spaceconfig-enc-name")
           .text(enc);
 
-        if(encoding.data.isConstant){
+        if(status.status == "constant"){
           view.append("div")
             .attr("class", "vzb-spaceconfig-enc-concept")
             .text("constant: " + encoding.data.constant);
@@ -275,26 +287,79 @@ class _SpaceConfig extends BaseComponent {
 
           view.append("div")
             .attr("for", "vzb-spaceconfig-enc-space-current")
-            .text("current space: " + encoding.data.space.join() + (encoding.data.config.space? " (set)" : " (inherited)") );
+            .text("current space: " + encoding.data.space.join() + (isSpaceSet? " (set)" : " (inherited)") );
 
-          view.append("label")
-            .attr("for", "vzb-spaceconfig-enc-space-select")
-            .text("new space:");
+          if(status.status == "alreadyInSpace") {
+            view.append("div")
+              .attr("for", "vzb-spaceconfig-enc-space-new")
+              .text("new space: will reset to marker space if set");
+
+            if(isSpaceSet) newConfig["space"] = null;
+            if(encoding.data.config.filter) newConfig["filter"] = {};
+          }
+
+          if(status.status == "matchingSpaceAvailable") {
+            view.append("div")
+              .attr("for", "vzb-spaceconfig-enc-space-new")
+              .text("new space: " + status.spaces[0].join() + (isSpaceSet? " (set)" : " (inherited)"));
+
+            if(isSpaceSet) newConfig["space"] = null;
+            if(encoding.data.config.filter) newConfig["filter"] = {};
+          }     
           
-          view.append("select")
-            .attr("class", "vzb-spaceconfig-enc-space")
-            .attr("id", "vzb-spaceconfig-enc-space-select")          
-            .selectAll("option")
-            .data(status.spaces)
-            .enter().append("option")
-            .attr("value", option => option.join())
-            .text(option => option.join())
-            //.text(option => "by " + Utils.getSpaceName(encoding, option));
-            .property("selected", (d, i) => i == 0);
+          if(status.status == "subspaceAvailable") {
+            view.append("div")
+              .attr("for", "vzb-spaceconfig-enc-space-new")
+              .text("new space: " + status.spaces[0].join() + " (set)");
 
-          // view.append("div")
-          //   .attr("class", "vzb-spaceconfig-enc-space")
-          //   .text(encs[enc].data.config.space?);
+            newConfig["space"] = status.spaces[0];
+            if(encoding.data.config.filter) newConfig["filter"] = {};
+          }  
+
+          if(status.status == "superspaceAvailable") {
+            view.append("div")
+              .attr("for", "vzb-spaceconfig-enc-space-new")
+              .text("new space: " + status.spaces[0].join() + " (set)");
+            view.append("div")
+              .attr("for", "vzb-spaceconfig-enc-space-new")
+              .text("suggest constants for compliment dimensions!");
+
+            newConfig["space"] = status.spaces[0];
+            if(encoding.data.config.filter) newConfig["filter"] = {};
+          }  
+
+
+          if(status.status == "patialOverlap" || status.status == "noOverlap") {
+            view.append("div")
+              .attr("for", "vzb-spaceconfig-enc-space-new")
+              .text("new space: not avaiable");
+
+            view.append("label")
+              .attr("for", "vzb-spaceconfig-enc-space-select")
+              .text("select concept:");
+
+            const filtervl = _this._conceptsCompatibleWithMarkerSpace(nest, _this.proposedSpace);
+            const concepts = _this._convertConceptMapToArray(filtervl);
+  
+            const select = view.append("select")
+              .attr("class", "vzb-spaceconfig-enc-concept-new")
+              .attr("id", "vzb-spaceconfig-enc-space-select")
+              .on("change", function(){
+                newConfig["concept"] = d3.select(this).property("value");
+                newConfig["space"] = null;
+                newConfig["filter"] = {};
+              })
+              .selectAll("option")
+              .data(concepts)
+              .enter().append("option")
+              .attr("value", option => option.concept.concept)
+              .text(option => option.concept.name);
+
+            select.property("selectedIndex", -1);
+            
+  
+          }  
+
         }
       });
   }
@@ -361,6 +426,23 @@ class _SpaceConfig extends BaseComponent {
     if (!this.proposedSpace) return;
     runInAction(()=>{
       this.model.config.data.space = this.proposedSpace;
+      Object.keys(this.encNewConfig).forEach(enc => {
+        const newConfig = this.encNewConfig[enc];
+
+        if (newConfig.concept)
+          this.model.encoding[enc].config.data.concept = newConfig.concept;
+
+        if (newConfig.space)
+          this.model.encoding[enc].config.data.space = newConfig.space;
+        else if (newConfig.hasOwnProperty("space"))
+          delete this.model.encoding[enc].config.data.space;
+
+        if (newConfig.filter)
+          this.model.encoding[enc].config.data.filter = newConfig.filter;
+        else if (newConfig.hasOwnProperty("filter"))
+          delete this.model.encoding[enc].config.data.filter;
+          
+      });
     });
     this.toggle();
   }
