@@ -14,16 +14,10 @@ const OPTIONS = {
 
   PROFILE_CONSTANTS: {
     SMALL: {
-      minRadiusPx: 0.5,
-      maxRadiusEm: 0.05
     },
     MEDIUM: {
-      minRadiusPx: 1,
-      maxRadiusEm: 0.05
     },
     LARGE: {
-      minRadiusPx: 1,
-      maxRadiusEm: 0.05
     }
   }
 };
