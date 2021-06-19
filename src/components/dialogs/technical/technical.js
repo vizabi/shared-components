@@ -11,6 +11,7 @@ export class Technical extends Dialog {
 
         <div class="vzb-dialog-content">
           <div class="vzb-advancedshowandselect-switch"></div>
+          <div class="vzb-advancedmarkerspace-switch"></div>
         </div>
 
       </div>
@@ -21,6 +22,15 @@ export class Technical extends Dialog {
       placeholder: ".vzb-advancedshowandselect-switch",
       options: {
         checkbox: "enableSelectShowSwitch",
+        submodelFunc: () => this.root
+          .findChild({name: "dialogs"})
+          .findChild({name: "find"}).ui
+      }
+    },{
+      type: SimpleCheckbox,
+      placeholder: ".vzb-advancedmarkerspace-switch",
+      options: {
+        checkbox: "enableMarkerSpaceOptions",
         submodelFunc: () => this.root
           .findChild({name: "dialogs"})
           .findChild({name: "find"}).ui
