@@ -63,8 +63,8 @@ class _BaseComponent {
     });
 
     this.setup(this.options);
-    //autorun(this.updateStatus.bind(this));
-    this.addReaction(this.render, true);
+    this.addReaction(this.draw);
+    this.addReaction(this.loading, true);
     this.addReaction(this.resize);
   }
 
@@ -78,19 +78,19 @@ class _BaseComponent {
     return _ui(defaults, ui, baseUI);
   }
 
-  setup(options) {
-    if (options.showLoading) {
-      this.addReaction(() => this.element.classed("vzb-loading-data", this.status == STATUS.PENDING), true);
-    }
-  }
-
   addReaction(method, ignoreStatus){
     if(!method) return utils.warn("Basecomponent: addReaction() method not found", method);
     if(!this.reactions.has(method)){
       this.reactions.set(method, 
         autorun(() => {
           if(ignoreStatus || this.status === STATUS.READY) method.bind(this)();
-        }, {name: method.name})
+        }, {
+          name: method.name, 
+          onError: (err) => {
+            this.element.classed("vzb-loading-data", false);
+            this.error(err);
+          }
+        })
       );
     }
   }
@@ -141,17 +141,12 @@ class _BaseComponent {
       return STATUS.PENDING;
   }
 
-  render() {
-    if(this.status === STATUS.READY) this.draw();
-    if(this.status === STATUS.PENDING) this.loading();
-    if(this.status === STATUS.ERROR) {
-      this.removeAllReactions();
-      this.error();
-    }
-  }
-
+  setup() {}
   draw() {}
-  loading() {}
+  loading() {
+    if (this.options.showLoading)
+      this.element.classed("vzb-loading-data", this.status == STATUS.PENDING);
+  }
   error() {}
   resize() {}
 }
