@@ -451,10 +451,10 @@ export class ButtonList extends BaseComponent {
     const buttons = this.element.selectAll(".vzb-buttonlist-btn");
 
     //clicking the button
-    buttons.on("click", function() {
+    buttons.on("click", function(event) {
 
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
       const id = d3.select(this).attr("data-btn");
       _this.proceedClick(id);

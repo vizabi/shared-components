@@ -133,10 +133,10 @@ export class ZoomButtonList extends BaseComponent {
     const buttons = this.element.selectAll(".vzb-buttonlist-btn");
 
     //clicking the button
-    buttons.on("click", function(d) {
+    buttons.on("click", function(event, d) {
 
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
       _this.proceedClick(d.id);
     });

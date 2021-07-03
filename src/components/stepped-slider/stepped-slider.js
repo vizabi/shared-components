@@ -82,9 +82,8 @@ class SteppedSlider extends BaseComponent {
     const tx = triangleWidth + lineWidth / 2;
     const ty = triangleHeight / 2;
     this.DOM.svg
-      .on("mousedown", () => {
-        const { offsetY } = d3.event;
-        const y = Math.max(0, Math.min(offsetY - ty, height));
+      .on("mousedown", event => {
+        const y = Math.max(0, Math.min(event.offsetY - ty, height));
 
         this.setDelay(Math.round(this.delayScale(this.axisScale.invert(y))), true, true);
       })
@@ -93,10 +92,9 @@ class SteppedSlider extends BaseComponent {
       .call(axis);
 
     this.drag = d3.drag()
-      .on("drag", () => {
-        const { dy } = d3.event;
+      .on("drag", event => {
         const { translateY } = transform(this.DOM.slide.node());
-        const y = Math.max(0, Math.min(dy + translateY, height));
+        const y = Math.max(0, Math.min(event.dy + translateY, height));
 
         this.setDelay(Math.round(this.delayScale(this.axisScale.invert(y))), true);
         //this.redraw(y);

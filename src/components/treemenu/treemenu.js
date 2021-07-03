@@ -801,8 +801,8 @@ export class TreeMenu extends BaseComponent {
         scaleTypes.exit().remove();
 
         scaleTypes = scaleTypes.enter().append("span")
-          .on("click", d => {
-            d3.event.stopPropagation();
+          .on("click", (event, d) => {
+            event.stopPropagation();
             _this._setModelScaleType(d);
           })
           .merge(scaleTypes);
@@ -845,11 +845,11 @@ export class TreeMenu extends BaseComponent {
       // })
       .attr("children", d => d.children ? "true" : null)
       .attr("type", d => d.type ? d.type : null)
-      .on("click", function(d) {
+      .on("click", function(event, d) {
         const view = d3.select(this);
         //only for leaf nodes
         if (view.attr("children")) return;
-        d3.event.stopPropagation();
+        event.stopPropagation();
         _this._selectIndicator(d);
       })
       .append("span")
@@ -876,7 +876,7 @@ export class TreeMenu extends BaseComponent {
           d.translateContributionText = helpTranslateText;
           const deepLeaf = view.append("div")
             .attr("class", css.menuHorizontal + " " + css.list_outer + " " + css.list_item_leaf);
-          deepLeaf.on("click", d => {
+          deepLeaf.on("click", (event, d) => {
             _this._selectIndicator(d);
           });
         }
@@ -992,8 +992,8 @@ export class TreeMenu extends BaseComponent {
     this.element.classed(css.hidden, true)
       .append("div")
       .attr("class", css.background)
-      .on("click", () => {
-        d3.event.stopPropagation();
+      .on("click", (event) => {
+        event.stopPropagation();
         this.toggle();
       });
 
@@ -1009,15 +1009,15 @@ export class TreeMenu extends BaseComponent {
       .classed("vzb-dialog-scrollable", true);
 
     wrapper
-      .on("click", () => {
-        d3.event.stopPropagation();
+      .on("click", (event) => {
+        event.stopPropagation();
       });
 
     wrapper.append("div")
       .attr("class", css.close)
       .html(iconClose)
-      .on("click", () => {
-        d3.event.stopPropagation();
+      .on("click", (event) => {
+        event.stopPropagation();
         this.toggle();
       })
       .select("svg")

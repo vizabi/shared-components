@@ -48,11 +48,11 @@ export class Dialogs extends BaseComponent {
     this.element.selectAll(".vzb-top-dialog").data(this.children.map(c => ({ 
       name: c.name
     })))
-      .on("custom-dragstart", function(d) {
+      .on("custom-dragstart", function(event, d) {
         _this.bringForward(d.name);
       })
       .select(".vzb-top-dialog>.vzb-dialog-modal>.vzb-dialog-buttons>[data-click='closeDialog']")
-      .on("click", d => {
+      .on("click", (event, d) => {
         this.toggleDialogOpen(d.name, false);
       });
   }

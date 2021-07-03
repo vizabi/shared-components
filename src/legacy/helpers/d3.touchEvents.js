@@ -4,18 +4,18 @@ function detectTouchEvent(element, onTap, onLongTap) {
   var coordY;
   var namespace = onTap ? ".onTap" : ".onLongTap";
   d3.select(element)
-    .on("touchstart" + namespace, function() {
-      start = d3.event.timeStamp;
-      coordX = d3.event.changedTouches[0].screenX;
-      coordY = d3.event.changedTouches[0].screenY;
+    .on("touchstart" + namespace, function(event) {
+      start = event.timeStamp;
+      coordX = event.changedTouches[0].screenX;
+      coordY = event.changedTouches[0].screenY;
     })
-    .on("touchend" + namespace, function(d, i) {
-      coordX = Math.abs(coordX - d3.event.changedTouches[0].screenX);
-      coordY = Math.abs(coordY - d3.event.changedTouches[0].screenY);
+    .on("touchend" + namespace, function(event, d) {
+      coordX = Math.abs(coordX - event.changedTouches[0].screenX);
+      coordY = Math.abs(coordY - event.changedTouches[0].screenY);
       if (coordX < 5 && coordY < 5) {
-        if (d3.event.timeStamp - start < 500)
-          return onTap ? onTap(d, i) : undefined;
-        return onLongTap ? onLongTap(d, i) : undefined;
+        if (event.timeStamp - start < 500)
+          return onTap ? onTap(event, d) : undefined;
+        return onLongTap ? onLongTap(event, d) : undefined;
       } else return undefined;
     });
 }

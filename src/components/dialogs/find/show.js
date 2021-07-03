@@ -136,8 +136,8 @@ export class Show extends BaseComponent {
         .call(elem => elem.append("span")
           .attr("class", "vzb-show-clear-cross")
           .text("✖")
-          .on("click", () => {
-            d3.event.stopPropagation();
+          .on("click", (event) => {
+            event.stopPropagation();
             section.selectAll(".vzb-checked input")
               .property("checked", false)
               .dispatch("change");
@@ -146,8 +146,8 @@ export class Show extends BaseComponent {
         .call(elem => elem.append("span")
           .attr("class", "vzb-show-more vzb-dialog-button")
           .text(_this.localise("buttons/moreellipsis"))
-          .on("click", () => {
-            d3.event.stopPropagation();
+          .on("click", (event) => {
+            event.stopPropagation();
             section.classed("vzb-fullexpand", true);
           })
         );
@@ -167,8 +167,8 @@ export class Show extends BaseComponent {
         .attr("class", "vzb-show-item")
         .attr("id", d => "-show-" + key + "-" + d[key] + "-" + _this.id)
         .property("checked",  d => d.isShown)
-        .on("change", (d, i, group) => {
-          if (d.isShown !== group[i].checked) {
+        .on("change", (event, d) => {
+          if (d.isShown !== event.currentTarget.checked) {
             this.checkedDifference[key + d[key]] = true;
           } else {
             delete this.checkedDifference[key + d[key]];

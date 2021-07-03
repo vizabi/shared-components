@@ -28,8 +28,8 @@ export class OptionsButtonList extends ButtonList {
     super.draw();
 
     const buttonList = this.root.findChild({ name: "buttons" });
-    buttonList.element.on("custom-togglebuttons", () => {
-      const { hiddenButtons } = d3.event.detail;
+    buttonList.element.on("custom-togglebuttons", (event) => {
+      const { hiddenButtons } = event.detail;
       this.element.selectAll(".vzb-buttonlist-btn")
         .style("display", d => hiddenButtons.indexOf(d.id) == -1 ? "none" : "");
     });

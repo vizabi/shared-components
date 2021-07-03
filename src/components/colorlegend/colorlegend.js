@@ -170,10 +170,10 @@ class ColorLegend extends BaseComponent {
         d3.select(this).append("div").attr("class", "vzb-cl-color-sample");
         d3.select(this).append("div").attr("class", "vzb-cl-color-legend");
       })
-      .on("mouseover", _this._interact().mouseover)
-      .on("mouseout", _this._interact().mouseout)
-      .on("click", (...args) => {
-        this._bindSelectDialogItems(...args);
+      .on("mouseover", (event, d) => this._interact().mouseover(d))
+      .on("mouseout", () => this._interact().mouseout())
+      .on("click", (event, d) => {
+        this._bindSelectDialogItems(d);
         this.DOM.selectDialog.classed("vzb-hidden", false);
       })
       .merge(colorOptions);
@@ -206,10 +206,10 @@ class ColorLegend extends BaseComponent {
     this.DOM.minimapG.selectAll("path")
       .data(this.MDL.legend.dataArray, d => d[this.KEY])
       .enter().append("path")
-      .on("mouseover", this._interact().mouseover)
-      .on("mouseout", this._interact().mouseout)
-      .on("click", (...args) => {
-        this._bindSelectDialogItems(...args);
+      .on("mouseover", (event, d) => this._interact().mouseover(d))
+      .on("mouseout", () => this._interact().mouseout())
+      .on("click", (event, d) => {
+        this._bindSelectDialogItems(d);
         this.DOM.selectDialog.classed("vzb-hidden", false);
       })
       .each(function(d) {
@@ -346,22 +346,21 @@ class ColorLegend extends BaseComponent {
     this.DOM.selectDialog.classed("vzb-hidden", true);
   }
 
-  _bindSelectDialogItems(...args) {
+  _bindSelectDialogItems(d) {
     const _this = this;
-    const [d] = args;
     this.DOM.selectDialogTitle.text(d.name);
 
     this.DOM.selectAllButton
       .classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
       .on("click", () => {
-        this._interact().clickToSelect(...args);
+        this._interact().clickToSelect(d);
         this._closeSelectDialog();
       });
 
     this.DOM.removeElseButton
       .classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
       .on("click", () => {
-        this._interact().clickToShow(...args);
+        this._interact().clickToShow(d);
         this._closeSelectDialog();
       });
 

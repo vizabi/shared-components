@@ -33,8 +33,8 @@ export class DeepLeaf{
       .text(utils.replaceNumberSpacesToNonBreak(leafDatum.name) || "");
     const spaceContainer = leafContent.append("div")
       .classed(css.leaf_content_item + " " + css.leaf_content_item_space, true)
-      .on("click", ()=>{
-        d3.event.stopPropagation();
+      .on("click", event => {
+        event.stopPropagation();
       });
     leafContent.append("div")
       .classed(css.leaf_content_item + " " + css.leaf_content_item_descr, true)

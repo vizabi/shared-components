@@ -370,8 +370,8 @@ class MenuItem {
     this.entity = item;
     this.entity.select("." + css.list_item_label).call(select => {
       if (utils.isTouchDevice()) {
-        select.onTap(() => {
-          d3.event.stopPropagation();
+        select.onTap((event) => {
+          event.stopPropagation();
           if (_this.parentMenu.direction == MENU_VERTICAL) {
             const view = _this.entity.select("." + css.list_item_label);
             //only for leaf nodes
@@ -393,8 +393,8 @@ class MenuItem {
             _this.closeNeighbors();
           }
           _this.marqueeToggle(true);
-        }).on("click.item", function() {
-          d3.event.stopPropagation();
+        }).on("click.item", function(event) {
+          event.stopPropagation();
           if (!_this.submenu) {
             _this.submenu = new Menu(_this.context, _this, _this.entity, options);
           }

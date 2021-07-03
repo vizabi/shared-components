@@ -58,8 +58,6 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   }
 };
 
-const precision = 1;
-
 //constants
 const class_playing = "vzb-playing";
 const class_loading = "vzb-ts-loading";
@@ -128,27 +126,19 @@ class TimeSlider extends BaseComponent {
       .attr("text-anchor", "middle")
       .attr("dy", "-0.7em");
 
-    const brushed = this._getBrushed();
-    const brushedEnd = this._getBrushedEnd();
-  
-    this.brush = d3.drag()
-      //.on("start.interrupt", function() { _this.slide.interrupt(); })
-      .on("start drag", function() {
-        brushed.call(this);
-      })
-      .on("end", function() {
-        brushedEnd.call(this);
-      });
-
     //Slide
-    slide.call(this.brush);
+    slide.call(d3.drag()
+      //.on("start.interrupt", function() { _this.slide.interrupt(); })
+      .on("start drag", event => this._brushed(event))
+      .on("end", event => this._brushedEnd(event))
+    );
 
-    slider_outer.on("mousewheel", () => {
+    slider_outer.on("mousewheel", (event) => {
       //do nothing and dont pass the event on if we are currently dragging the slider
       if (this.ui.dragging) {
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        d3.event.returnValue = false;
+        event.stopPropagation();
+        event.preventDefault();
+        event.returnValue = false;
         return false;
       }
     });
@@ -346,75 +336,66 @@ class TimeSlider extends BaseComponent {
     return this.valueText.node().getBoundingClientRect().width;
   }
 
-  _getBrushed() {
-    const _this = this;
-    return function() {
+  _brushed(event) {
+    const { frame } = this.MDL;
+    const { handle, valueText } = this.DOM;
 
-      const { frame } = _this.MDL;
-      const { handle, valueText } = _this.DOM;
+    if (frame.playing) {
+      frame.stopPlaying();
+    }
 
-      if (frame.playing) {
-        frame.stopPlaying();
+    this.ui.dragging = true;
+    this.element.classed(class_dragging, this.ui.dragging);
+
+    let value;// = _this.brush.extent()[0];
+    //var value = d3.brushSelection(_this.slide.node());
+
+    //if(!value) return;
+
+    //set brushed properties
+
+    if (event.sourceEvent) {
+      // Prevent window scrolling on cursor drag in Chrome/Chromium.
+      event.sourceEvent.preventDefault();
+
+      //_this.model.time.dragStart();
+      let posX = event.x;
+      const maxPosX = this.sliderWidth;
+
+      const endBeforeForecast = frame.parseValue(this.root.ui.chart.endBeforeForecast);
+      const forecastBoundaryIsOn = this.root.ui.chart.showForecast && (frame.data.domain.at(-1) > endBeforeForecast);
+      const forecastBoundaryPos = this.xScale(endBeforeForecast);
+      const snappyMargin = 0.5 * handle.attr("r");
+
+      if (posX > maxPosX) {
+        posX = maxPosX;
+      } else if (posX < 0) {
+        posX = 0;
+      } else if ((Math.abs(posX - forecastBoundaryPos) < snappyMargin) && event.sourceEvent.shiftKey && forecastBoundaryIsOn) {
+        posX = forecastBoundaryPos;
       }
 
-      _this.ui.dragging = true;
-      _this.element.classed(class_dragging, _this.ui.dragging);
+      value = this.xScale.invert(posX);
+      //set handle position
+      handle.attr("cx", posX);
+      valueText.attr("transform", "translate(" + posX + "," + (this.sliderHeight / 2) + ")");
+      valueText.text(this.localise(value));
+    }
 
-      let value;// = _this.brush.extent()[0];
-      //var value = d3.brushSelection(_this.slide.node());
-
-      //if(!value) return;
-
-      //set brushed properties
-
-      if (d3.event.sourceEvent) {
-        // Prevent window scrolling on cursor drag in Chrome/Chromium.
-        d3.event.sourceEvent.preventDefault();
-
-        //_this.model.time.dragStart();
-        let posX = utils.roundStep(Math.round(d3.mouse(this)[0]), precision);
-        const maxPosX = _this.sliderWidth;
-
-        const endBeforeForecast = frame.parseValue(_this.root.ui.chart.endBeforeForecast);
-        const forecastBoundaryIsOn = _this.root.ui.chart.showForecast && (frame.data.domain.at(-1) > endBeforeForecast);
-        const forecastBoundaryPos = _this.xScale(endBeforeForecast);
-        const snappyMargin = 0.5 * handle.attr("r");
-
-        if (posX > maxPosX) {
-          posX = maxPosX;
-        } else if (posX < 0) {
-          posX = 0;
-        } else if ((Math.abs(posX - forecastBoundaryPos) < snappyMargin) && d3.event.sourceEvent.shiftKey && forecastBoundaryIsOn) {
-          posX = forecastBoundaryPos;
-        }
-
-        value = _this.xScale.invert(posX);
-        //set handle position
-        handle.attr("cx", posX);
-        valueText.attr("transform", "translate(" + posX + "," + (_this.sliderHeight / 2) + ")");
-        valueText.text(_this.localise(value));
-      }
-
-      //set time according to dragged position
-      if (value - _this.MDL.frame.value !== 0) {
-        _this._setTime(value);
-      }
-    };
+    //set time according to dragged position
+    if (value - this.MDL.frame.value !== 0) {
+      this._setTime(value);
+    }
   }
 
   /**
    * Gets brushedEnd function to be executed when dragging ends
    * @returns {Function} brushedEnd function
    */
-  _getBrushedEnd() {
-    const _this = this;
-    return function() {
-      //_this._setTime.recallLast();
-      _this.element.classed(class_dragging, _this.ui.dragging);
-      //_this.model.time.dragStop();
-      _this.MDL.frame.snap();
-      _this.ui.dragging = false;
-    };
+  _brushedEnd() {
+    this.element.classed(class_dragging, this.ui.dragging);
+    this.MDL.frame.snap();
+    this.ui.dragging = false;
   }
 
   _setHandle() {

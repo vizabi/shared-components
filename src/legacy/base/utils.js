@@ -308,10 +308,6 @@ export const findScrollableAncestor = function (node) {
   return null;
 };
 
-export const roundStep = function (number, step) {
-  return Math.round(number / step) * step;
-};
-
 /*
  * transforms a string into a validated fload value
  * @param {string} string to be transformed
@@ -747,16 +743,16 @@ export const matchAny = function (values, compare, wildc) {
 
 export const preventAncestorScrolling = function (element) {
   let preventScrolling = false;
-  element.on("mousewheel", function () {
+  element.on("mousewheel", function (event) {
     const scrollTop = this.scrollTop;
     const scrollHeight = this.scrollHeight;
     const height = element.node().offsetHeight;
-    const delta = d3.event.wheelDelta;
+    const delta = event.wheelDelta;
     const up = delta > 0;
     const prevent = function () {
-      d3.event.stopPropagation();
-      d3.event.preventDefault();
-      d3.event.returnValue = false;
+      event.stopPropagation();
+      event.preventDefault();
+      event.returnValue = false;
       return false;
     };
 
@@ -1340,11 +1336,7 @@ export const debounce = function (func, wait, immediate) {
 };
 
 export const isTouchDevice = function () {
-  //'ontouchstart' is not reliable in Google Chrome #2116, but Chrome has this firesTouchEvents flag
-  if (((d3.event || {}).sourceCapabilities || {}).firesTouchEvents != null) {
-    return d3.event.sourceCapabilities.firesTouchEvents;
-  }
-  return !!(("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch);
+  return !!("ontouchstart" in document.documentElement);
 };
 
 //return a pruneed tree

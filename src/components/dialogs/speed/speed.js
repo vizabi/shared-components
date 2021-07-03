@@ -111,10 +111,10 @@ class Speed extends Dialog {
 
     const _this = this;
     this.DOM.forecastField
-      .on("keypress", function() {
-        if (d3.event.charCode == 13 || d3.event.keyCode == 13) {
+      .on("keypress", function(event) {
+        if (event.charCode == 13 || event.keyCode == 13) {
           //this prevents form submission action with subsequent page reload
-          d3.event.preventDefault();
+          event.preventDefault();
           this.blur();
         }
       })

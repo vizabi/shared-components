@@ -32,8 +32,8 @@ export class DataNotes extends BaseComponent {
     this.element.classed("vzb-hidden", this.hidden);
     this.element.append("div")
       .html(ICON_CLOSE)
-      .on("click", () => {
-        d3.event.stopPropagation();
+      .on("click", (event) => {
+        event.stopPropagation();
         this.close();
       })
       .select("svg")

@@ -619,10 +619,10 @@ class Labels extends BaseComponent {
       };
 
       const labelDragger = d3.drag()
-        .on("start", () => {
-          d3.event.sourceEvent.stopPropagation();
+        .on("start", event => {
+          event.sourceEvent.stopPropagation();
         })
-        .on("drag", function(d) {
+        .on("drag", function(event, d) {
           if (!_this.ui.dragging) return;
           if (!_this.dragging) _this.dragging = key(d);
           const cache = _this.cached[key(d)];
@@ -631,8 +631,8 @@ class Labels extends BaseComponent {
           const viewWidth = _this.context.width;
           const viewHeight = _this.context.height;
 
-          cache.labelX_ += d3.event.dx / viewWidth;
-          cache.labelY_ += d3.event.dy / viewHeight;
+          cache.labelX_ += event.dx / viewWidth;
+          cache.labelY_ += event.dy / viewHeight;
 
           const resolvedX = _this.xScale(cache.labelX0) + cache.labelX_ * viewWidth;
           const resolvedY = _this.yScale(cache.labelY0) + cache.labelY_ * viewHeight;
@@ -644,7 +644,7 @@ class Labels extends BaseComponent {
 
           label._repositionLabels(d, null, this, resolvedX, resolvedY, resolvedX0, resolvedY0, 0, null, lineGroup);
         })
-        .on("end", (d) => {
+        .on("end", (event, d) => {
           if (_this.dragging) {
             const cache = _this.cached[key(d)];
             _this.dragging = null;
@@ -674,9 +674,9 @@ class Labels extends BaseComponent {
               .attr("filter", "url(" + location.pathname + "#vzb-glow-filter)");
             view.append("rect")
               .attr("class", "vzb-label-fill vzb-tooltip-border");
-            //          .on("click", function(d, i) {
+            //          .on("click", function(event, d) {
             //            //default prevented is needed to distinguish click from drag
-            //            if(d3.event.defaultPrevented) return;
+            //            if(event.defaultPrevented) return;
             //
             //            var maxmin = _this.cached[key(d)].maxMinValues;
             //            var radius = utils.areaToRadius(_this.sScale(maxmin.valueSmax));
@@ -707,10 +707,10 @@ class Labels extends BaseComponent {
                 .attr("width", "0px")
                 .attr("height", "0px");
 
-              cross.on("click", () => {
+              cross.on("click", event => {
                 //default prevented is needed to distinguish click from drag
-                if (d3.event.defaultPrevented) return;
-                d3.event.stopPropagation();
+                if (event.defaultPrevented) return;
+                event.stopPropagation();
                 _this.MDL.highlighted.delete(d);
                 _this.MDL.selected.delete(d);
               });
@@ -721,7 +721,7 @@ class Labels extends BaseComponent {
         if (!isTooltip) {
           container
             .call(labelDragger)
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function(event, d) {
               if (utils.isTouchDevice() || _this.dragging) return;
               _this.MDL.highlighted.set(d);
               // hovered label should be on top of other labels: if "a" is not the hovered element "d", send "a" to the back
@@ -729,13 +729,13 @@ class Labels extends BaseComponent {
               d3.select(this).selectAll("." + _cssPrefix + "-label-x")
                 .classed("vzb-transparent", false);
             })
-            .on("mouseleave", function(d) {
+            .on("mouseleave", function(event, d) {
               if (utils.isTouchDevice() || _this.dragging) return;
               _this.MDL.highlighted.delete(d);
               d3.select(this).selectAll("." + _cssPrefix + "-label-x")
                 .classed("vzb-transparent", true);
             })
-            .on("click", function(d) {
+            .on("click", function(event, d) {
               if (!utils.isTouchDevice()) return;
               const cross = d3.select(this).selectAll("." + _cssPrefix + "-label-x");
               const hidden = cross.classed("vzb-transparent");

@@ -7,6 +7,10 @@ export const STATUS = {
   ERROR: "rejected"
 };
 
+export function injectIndexes(array) {
+  return array.map((m, i) => Object.assign({}, m, {i}));
+}
+
 export function isEntityConcept(concept = {}) {
   return ["entity_set", "entity_domain"].includes(concept.concept_type);
 }

@@ -141,12 +141,12 @@ export function updateRainbowLegend(isVisible) {
       .style("width", gradientWidth + "px")
       .style("top", 3 + CIRCLE_RADIUS + "px")
       .style("left", CIRCLE_RADIUS + "px")
-      .on("mousemove", function() {
-        highlightValue(labelScale.invert(d3.mouse(this)[0]));
+      .on("mousemove", function(event) {
+        highlightValue(labelScale.invert(d3.pointer(event)[0]));
       })
       .on("mouseleave", () => highlightValue("none"))
-      .on("dblclick", function() {
-        let x = d3.mouse(this)[0];
+      .on("dblclick", function(event) {
+        let x = d3.pointer(event)[0];
         x = x <= (CIRCLE_RADIUS * 2) ? CIRCLE_RADIUS * 2 : x >= (gradientWidth - CIRCLE_RADIUS * 2) ? gradientWidth - CIRCLE_RADIUS * 2 : x;
         const newValue = labelScale.invert(x);
         const color = cScale(newValue);
@@ -216,14 +216,14 @@ export function updateRainbowLegend(isVisible) {
           }
         }, 500);
       })
-      .on("dblclick", function(d){
+      .on("dblclick", function(event, d){
         dblclick = true;
         if (d.isEdgePoint) return;
         removeColor(d.paletteKey);
       })
       .each(function(d) {
         d3.select(this).select("input").property("value", d.color)
-          .on("click", ()=>{d3.event.stopPropagation();})
+          .on("click", (event)=>{event.stopPropagation();})
           .on("input", function(){
             const value = d3.select(this).property("value");
             setColor(value, d.paletteKey);
@@ -235,23 +235,23 @@ export function updateRainbowLegend(isVisible) {
 
   function dragCircles() {
     return d3.drag()
-      .on("start", function start() {
+      .on("start", function start(event) {
 
         const circle = d3.select(this);
         let dragged = false;
 
         circle.classed("dragging", true);
 
-        d3.event.on("drag", drag).on("end", end);
+        event.on("drag", drag).on("end", end);
 
-        function drag(d) {
+        function drag(event, d) {
           if (d.isEdgePoint) return;
-          if (d3.event.x < 0) return;
-          if (d3.event.x > gradientWidth) return;
-          if (d3.event.x < d.xMin || d3.event.x > d.xMax) return;
-          if (!dragged && d3.event.dx !== 0) dragged = true;
+          if (event.x < 0) return;
+          if (event.x > gradientWidth) return;
+          if (event.x < d.xMin || event.x > d.xMax) return;
+          if (!dragged && event.dx !== 0) dragged = true;
 
-          d.x = d3.event.x;
+          d.x = event.x;
           if (d.value0 !== null) {
             d.x = (d.x < d.value0 - 3 || d.x > d.value0 + 3) ? d.x : d.value0;
           }

@@ -96,11 +96,11 @@ class Repeat extends Dialog {
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
       .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
       .html(() => ncolumns == 1 && nrows == 1 ? localise("hint/repeat/pressplus") : "")
-      .on("mouseover", (d) => {
+      .on("mouseover", (event, d) => {
         d3.select(".vzb-" + repeat.getName(d))
           .classed("vzb-chart-highlight", true);
       })
-      .on("mouseout", (d) => {
+      .on("mouseout", (event, d) => {
         d3.select(".vzb-" + repeat.getName(d))
           .classed("vzb-chart-highlight", false);
       });

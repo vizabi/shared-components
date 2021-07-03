@@ -63,16 +63,16 @@ class Dialog extends CollectionMixin(BaseComponent) {
 
     const dg = dialogDrag(this.element, this.root.element, 10);
     const dragBehavior = d3.drag()
-      .on("start", () => {
+      .on("start", (event) => {
         const topPos = _this.element.node().offsetTop;
         _this.element.style("top", topPos + "px");
         _this.element.style("bottom", "auto");
         _this.element.dispatch("custom-dragstart");
-        dg.dragStart(d3.event);
+        dg.dragStart(event);
       })
-      .on("drag", () => {
+      .on("drag", (event) => {
         _this.element.dispatch("custom-drag");
-        dg.drag(d3.event);
+        dg.drag(event);
       })
       .on("end", () => {
         _this.rightPos = _this.element.style("right");
@@ -350,7 +350,7 @@ function dialogDrag(element, container, xOffset) {
         posX = evt.sourceEvent.clientX;
         posY = evt.sourceEvent.clientY;
       } else {
-        const touchCoord = d3.touches(container.node());
+        const touchCoord = d3.pointer(container.node());
         posX = touchCoord[0][0];
         posY = touchCoord[0][1];
       }
@@ -373,7 +373,7 @@ function dialogDrag(element, container, xOffset) {
         posX = evt.sourceEvent.clientX;
         posY = evt.sourceEvent.clientY;
       } else {
-        const touchCoord = d3.touches(container.node());
+        const touchCoord = d3.pointer(container.node());
         posX = touchCoord[0][0];
         posY = touchCoord[0][1];
       }

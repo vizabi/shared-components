@@ -101,8 +101,7 @@ class Find extends Dialog {
       this.ui.panelMode = this.DOM.titleSwitchInput.property("checked") ? "show" : "find";
     }).property("checked", this._getPanelMode() !== "find");
 
-    this.DOM.input_search.on("keyup", () => {
-      const event = d3.event;
+    this.DOM.input_search.on("keyup", event => {
       if (event.keyCode == 13 && this.DOM.input_search.node().value == "select all") {
         this.DOM.input_search.node().value = "";
 
@@ -123,8 +122,8 @@ class Find extends Dialog {
       .on("reset", () => {
         utils.defer(() => this.panelComps[this._getPanelMode()]._showHideSearch());
       })
-      .on("submit", () => {
-        d3.event.preventDefault();
+      .on("submit", event => {
+        event.preventDefault();
         return false;
       });
 
@@ -225,7 +224,7 @@ class Find extends Dialog {
       .attr("type", "checkbox")
       .attr("class", "vzb-find-item")
       .attr("id", (d, i) => "-find-" + i + "-" + this.id)
-      .on("change", d => {
+      .on("change", (event, d) => {
         //clear highlight so it doesn't get in the way when selecting an entity
         if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
         this.MDL.selected.data.filter.toggle(d);
@@ -237,10 +236,10 @@ class Find extends Dialog {
     listItem.append("label")
       .attr("for", (d, i) => "-find-" + i + "-" + this.id)
       .text(d => d.name)
-      .on("mouseover", d => {
+      .on("mouseover", (event, d) => {
         if (!utils.isTouchDevice() && !d.brokenData) this.MDL.highlighted.data.filter.set(d);
       })
-      .on("mouseout", d => {
+      .on("mouseout", (event, d) => {
         if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
       });
   }

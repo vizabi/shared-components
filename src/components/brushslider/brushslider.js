@@ -165,24 +165,24 @@ class BrushSlider extends BaseComponent {
     const _this = this;
 
     return {
-      start: () => {
-        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
-        if (d3.event.selection && d3.event.selection[0] == d3.event.selection[1]) {
+      start: (event) => {
+        if (_this.nonBrushChange || !event.sourceEvent) return;
+        if (event.selection && event.selection[0] == event.selection[1]) {
           const brushDatum = _this.DOM.slider.node().__brush;
           brushDatum.selection[1][0] += 0.01;
         }
         _this._setFromExtent(false, false, false);
       },
-      brush: () => {
-        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
-        if (d3.event.selection && d3.event.selection[0] == d3.event.selection[1]) {
+      brush: (event) => {
+        if (_this.nonBrushChange || !event.sourceEvent) return;
+        if (event.selection && event.selection[0] == event.selection[1]) {
           const brushDatum = _this.DOM.slider.node().__brush;
           brushDatum.selection[1][0] += 0.01;
         }
         _this._setFromExtent(true, false, false); // non persistent change
       },
-      end: () => {
-        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
+      end: (event) => {
+        if (_this.nonBrushChange || !event.sourceEvent) return;
         _this._setFromExtent(true, true); // force a persistent change
       }
     };

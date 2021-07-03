@@ -1,6 +1,6 @@
 {
   "name": "vizabi-shared-components",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "description": "Vizabi shared components",
   "main": "index.js",
   "files": [
@@ -43,6 +43,10 @@
   "dependencies": {
     "css.escape": "^1.5.1"
   },
+  "peerDependencies": {
+    "mobx": "^5.15.7",
+    "d3": "^6.7.0"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-json": "^4.1.0",
@@ -52,9 +56,7 @@
     "babel-eslint": "^10.1.0",
     "bourbon": "^5.1.0",
     "cssnano": "4.1.10",
-    "d3": "^5.12.0",
     "eslint": "^6.6.0",
-    "mobx": "^5.14.2",
     "postcss": "7.0.27",
     "rollup": "^2.18.1",
     "rollup-plugin-copy": "^3.1.0",

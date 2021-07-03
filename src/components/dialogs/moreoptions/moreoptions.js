@@ -78,7 +78,7 @@ export class MoreOptions extends Dialog {
       })));
       const titleEl = sections
         .select(".vzb-dialog-title>span:first-child");
-      titleEl.on("click", d => {
+      titleEl.on("click", (event, d) => {
         const sectionEl = _this.findChild({ name: d.name }).element;
         const activeEl = _this.DOM.accordion.select(".vzb-accordion-active");
         if (activeEl) {

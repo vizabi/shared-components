@@ -64,8 +64,8 @@ export class MinMaxInputs extends BaseComponent {
     });
 
     this.element.selectAll("input")
-      .on("keypress", () => {
-        if (d3.event.which == 13) document.activeElement.blur();
+      .on("keypress", (event) => {
+        if (event.which == 13) document.activeElement.blur();
       });
 
   }

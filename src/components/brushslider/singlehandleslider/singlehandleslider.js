@@ -67,18 +67,18 @@ export class SingleHandleSlider extends BrushSlider {
 
     return {
       start: _superListeners.start,
-      brush: (...args) => {
-        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
+      brush: (event, d) => {
+        if (_this.nonBrushChange || !event.sourceEvent) return;
         if (!_this.options.suppressInput) {
-          _superListeners.brush(...args);
+          _superListeners.brush(event, d);
         } else {
-          _this._snap(d3.event.selection);
+          _this._snap(event.selection);
         }
       },
-      end: () => {
-        if (_this.nonBrushChange || !d3.event.sourceEvent) return;
+      end: (event) => {
+        if (_this.nonBrushChange || !event.sourceEvent) return;
         if (_this.options.snapValue) {
-          this._snap(d3.event.selection);
+          this._snap(event.selection);
         }
         _this._setFromExtent(true, true); // force a persistent change
       }
