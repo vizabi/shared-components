@@ -61,7 +61,7 @@ export class About extends Dialog {
     const author = this.root.constructor.versionInfo?.sharedComponents?.package?.author || {};
 
     this.DOM.header.html("");
-    this.DOM.header.append("p").html(url("Report a problem (fixed this now ;)", "https://github.com/Gapminder/tools-page/issues"));
+    this.DOM.header.append("p").html(url("Report a problem", "https://github.com/Gapminder/tools-page/issues"));
     this.DOM.header.append("p").html("This chart is made with Vizabi, <br/> a project by " + url(author.name, author.url));
   }
 
