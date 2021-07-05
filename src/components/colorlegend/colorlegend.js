@@ -146,7 +146,7 @@ class ColorLegend extends BaseComponent {
     if (!isVisible) return;
 
     const _this = this;
-    const cScale = this._legendHasOwnModel() && this._isLegendModelReady()? this.MDL.legend.encoding.color.scale.d3Scale : this.MDL.color.scale.d3Scale;
+    const cScale = this.MDL.color.scale.d3Scale;
 
     let colorOptionsArray = [];
 
@@ -196,7 +196,7 @@ class ColorLegend extends BaseComponent {
 
     if (!this._isLegendModelReady()) return;
 
-    const cScale = this.MDL.legend.encoding.color.scale.d3Scale;
+    const cScale = this.MDL.color.scale.d3Scale;
 
     const tempdivEl = this.DOM.minimap.append("div").attr("class", "vzb-temp");
 
