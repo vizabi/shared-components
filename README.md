@@ -1,4 +1,4 @@
-# vizabi-shared-components
+# vizabi shared components
 
 Contains handy but not necessary things for making data visualisations in vizabi framework
 Hosts the shared functionality as described below:

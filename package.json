@@ -41,7 +41,7 @@
       "url": "https://github.com/olarosling"
     }
   ],
-  "homepage": "https://github.com/vizabi/vizabi-shared-components#readme",
+  "homepage": "https://github.com/vizabi/@vizabi/shared-components#readme",
   "license": "CC-BY-4.0",
   "dependencies": {
     "css.escape": "^1.5.1"
