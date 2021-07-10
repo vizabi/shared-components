@@ -62,12 +62,23 @@
         overflow-x: hidden;
         overflow-y: auto;
 
+        .vzb-errormessage-message {
+          white-space: normal
+        }
+
+        .vzb-errormessage-expand {
+          cursor: pointer;
+          margin-top: 20px;
+          font-size: $vzb-font-size-tiny;
+        }
         .vzb-errormessage-details {
             font-size: $vzb-font-size-tiny;
             line-height: 1.2;
             max-height: 300px;
-            overflow-x: scroll;
-            overflow-y: scroll;
+            overflow-x: auto;
+            overflow-y: auto;
+            background: $vzb-color-primary-lightest;
+            border: 1px solid $vzb-color-grey;
         }
 
         a {
@@ -149,7 +160,7 @@
   &.vzb-medium {
     .vzb-errormessage-box {
       @include position(absolute, 10% null null 20%);
-      height: 80%;
+      max-height: 80%;
       width: 60%;
 
       .vzb-errormessage-link {
@@ -170,7 +181,7 @@
     .vzb-errormessage-box {
       @include position(absolute, 10% null null 25%);
       width: 50%;
-      height: 80%;
+      max-height: 80%;
 
       .vzb-errormessage-link {
         font-size: $vzb-font-size-medium;

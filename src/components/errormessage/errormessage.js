@@ -5,7 +5,6 @@ import "./errormessage.scss";
 
 import { ICON_ELLIPSIS_V, ICON_CLOSE } from "../../icons/iconset.js";
 
-
 let hidden = true;
 class _ErrorMessage extends BaseComponent {
   constructor(config) {
@@ -16,7 +15,8 @@ class _ErrorMessage extends BaseComponent {
         <div class="vzb-errormessage-title"></div>
         <div class="vzb-errormessage-body vzb-dialog-scrollable">
           <div class="vzb-errormessage-message"></div>
-          <pre class="vzb-errormessage-details"></pre>
+          <div class="vzb-errormessage-expand"></div>
+          <pre class="vzb-errormessage-details vzb-hidden"></pre>
         </div>
       </div>
     `;
@@ -32,16 +32,33 @@ class _ErrorMessage extends BaseComponent {
       hero: this.element.select(".vzb-errormessage-hero"),
       title: this.element.select(".vzb-errormessage-title"),
       message: this.element.select(".vzb-errormessage-message"),
+      expand: this.element.select(".vzb-errormessage-expand"),
       details: this.element.select(".vzb-errormessage-details")
     };
     
     this.element.classed("vzb-hidden", true);
+    this.DOM.background.on("click", () => {
+      this.toggle(true);
+    });
+    this.DOM.expand.on("click", () => {
+      this.DOM.details.classed("vzb-hidden", !this.DOM.details.classed("vzb-hidden"))
+    });
   }
 
   get MDL(){
     return {
       frame: this.model.encoding.frame
     };
+  }
+
+  //this is a hack because MobX autorun onError would eat the error rethrowing from there doesn't help
+  rethrow(err){
+    setTimeout(function(){
+      throw(err);
+    }, 1)
+    setTimeout(function(){
+      throw("ERROR REACHED USER");
+    }, 1)
   }
 
   toggle(arg) {
@@ -55,13 +72,26 @@ class _ErrorMessage extends BaseComponent {
   }
 
   error(err){
+    if(!hidden) return console.warn("errorMessage: skipping action because already in error");
+
     const localise = this.services.locale.status == "fulfilled"?
       this.services.locale.auto()
       : nop => nop;
+
     this.DOM.title.text(localise(err.name));
-    this.DOM.message.text(err.message);
-    this.DOM.details.text(JSON.stringify(err.details, null, 2));
+    this.DOM.message.text(localise(err.message));
+
+    this.DOM.expand
+      .style("display", err.details ? "block" : "none")
+      .html(localise("crash/expand"));
+
+    this.DOM.details
+      .style("display", err.details ? "block" : "none")
+      .text(JSON.stringify(err.details, null, 2));
+
     this.toggle(false);
+
+    this.rethrow(err);
   }
 }
 

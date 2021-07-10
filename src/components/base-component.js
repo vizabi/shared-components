@@ -147,7 +147,7 @@ class _BaseComponent {
     if (this.options.showLoading)
       this.element.classed("vzb-loading-data", this.status == STATUS.PENDING);
   }
-  error() {}
+  error(err) {console.warn(err);}
   resize() {}
 }
 
