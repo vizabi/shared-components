@@ -53,9 +53,7 @@ class _ErrorMessage extends BaseComponent {
 
   //this is a hack because MobX autorun onError would eat the error rethrowing from there doesn't help
   rethrow(err){
-    setTimeout(function(){
-      throw(err);
-    }, 1)
+      throw new Error("new rethrow");
     setTimeout(function(){
       throw("ERROR REACHED USER");
     }, 1)
@@ -72,7 +70,7 @@ class _ErrorMessage extends BaseComponent {
   }
 
   error(err){
-    if(!hidden) return console.warn("errorMessage: skipping action because already in error");
+    //if(!hidden) return console.warn("errorMessage: skipping action because already in error");
 
     const localise = this.services.locale.status == "fulfilled"?
       this.services.locale.auto()
