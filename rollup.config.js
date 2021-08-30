@@ -8,7 +8,7 @@ const {eslint} = require("rollup-plugin-eslint");
 const resolve = require("@rollup/plugin-node-resolve").default;
 const commonjs = require("@rollup/plugin-commonjs");
 const replace = require("@rollup/plugin-replace");
-const sass = require("rollup-plugin-sass");
+const scss = require("rollup-plugin-scss");
 const json = require("@rollup/plugin-json");
 const trash = require("rollup-plugin-delete");
 const copy = require("rollup-plugin-copy");
@@ -48,7 +48,7 @@ export default {
     resolve(),
     (process.env.NODE_ENV === "production" && eslint()),
     commonjs(),
-    sass({
+    scss({
       include: path.resolve(__dirname,"src/**/*.scss"),
       //output: "build/VizabiSharedComponents.css",
       output(styles) {
