@@ -66,7 +66,7 @@ export class Colors extends Dialog {
       placeholder: ".vzb-clegend-container",
       options: {
         colorModelName: "color",
-        legendModelName: "legend"
+        legendModelName: config.root.options.legendMarkerName || "legend"
       }
     }];
     
