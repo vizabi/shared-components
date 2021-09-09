@@ -405,6 +405,17 @@
                     font-size: $vzb-font-size-regular;
                     font-weight: bold;                    
                   }
+                  &.vzb-treemenu-leaf-content-item-datasources {
+                    padding-bottom: 4px;
+                    span {
+                      cursor: pointer;
+                      border: 1px solid;
+                      padding: 3px;
+                      border-radius: 4px;
+                      margin-left: 2px;
+                      margin-right: 2px;
+                    }             
+                  }
                   &.vzb-treemenu-leaf-content-item-helptranslate {
                     display: block;
                     position: absolute;

@@ -28,6 +28,18 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   }
 };
 
+function getItemName(item){
+  if (item.type == "indicator"){
+    return item.byDataSources.map(m => m.name_catalog)
+      .concat(item.byDataSources.map(m => m.name))
+      .concat(item.id)
+      .filter(f => f)
+      [0]
+  } else {
+    return item.name_catalog || item.name || item.id;
+  }
+}
+
 
 function resolveDefaultScales(concept) {
   if (concept.scales) return JSON.parse(concept.scales);
@@ -216,13 +228,25 @@ export class TreeMenu extends BaseComponent {
     return {tags, tagsRoot: tags[ROOT]};
   }
 
+  _addIndicatorToTheTree(id, item, folder) {
+    const existing = folder.children.find(f => f.id == id);
+    if (existing) {
+      //add to an existing item group
+      existing.byDataSources.push(item);
+    } else {
+      //create a new item group
+      folder.children.push({ id: id, type: "indicator", byDataSources: [item] });
+    }
+    return folder;
+  }
+
   _buildIndicatorsTree({ tagsArray, dataModels }) {
 
     let consoleGroupOpen = false;
     const {tags, tagsRoot} = this._buildTagFolderTree({ tagsArray, dataModels });
 
     //add constant pseudoconcept
-    tagsRoot.children.push({id: "_default", type: "indicator", spaces: [[]]});
+    this._addIndicatorToTheTree("_default", { spaces: [[]] }, tagsRoot);
 
     const nest = this._nestAvailabilityByConcepts(this._getAvailability());
     const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
@@ -240,20 +264,18 @@ export class TreeMenu extends BaseComponent {
       .filter(f => !f.concept.tags || f.concept.tags !== "_none")
       .forEach(({concept, spaces, source}) => {
 
+        const id = concept.concept;
         const props = {
-          id: concept.concept,
+          dataSource: source,
           spaces,
           name: concept.name,
           name_catalog: concept.name_catalog,
-          description: concept.description,
-          dataSource: this._getSourceName(source),
-          translateContributionLink: source.translateContributionLink,
-          type: "indicator"
+          description: concept.description
         };
 
         if (concept.concept_type == "time" || concept.concept == "_default"){
           //special concepts
-          tagsRoot.children.push(props);
+          this._addIndicatorToTheTree(id, props, tagsRoot);
 
         } else if (concept.concept_type == "entity_domain" || concept.concept_type == "entity_set") {
           //entity sets and domains
@@ -263,7 +285,7 @@ export class TreeMenu extends BaseComponent {
             tags[folderName] = { id: folderName, name: keyConcept.name + " properties", type: "folder", children: [] };
             tagsRoot.children.push(tags[folderName]);
           }
-          tags[folderName].children.push(props);
+          this._addIndicatorToTheTree(id, props, tags[folderName]);
 
         } else {
           //regulat indicators
@@ -271,7 +293,7 @@ export class TreeMenu extends BaseComponent {
           conceptTags.split(",").forEach(tag => {
             tag = tag.trim();
             if (tags[tag]) {
-              tags[tag].children.push(props);
+              this._addIndicatorToTheTree(id, props, tags[tag]);
             } else {
               //if entry's tag is not found in the tag dictionary
               if (!consoleGroupOpen) {
@@ -279,7 +301,7 @@ export class TreeMenu extends BaseComponent {
                 consoleGroupOpen = true;
               }
               utils.warn("tag '" + tag + "' for indicator '" + props.id + "'");
-              tagsRoot.children.push(props);
+              this._addIndicatorToTheTree(id, props, tagsRoot);
             }
           });
 
@@ -315,7 +337,7 @@ export class TreeMenu extends BaseComponent {
             if (b.id == "_default") return -1;
           }
           //sort items alphabetically. folders go down because of the emoji folder in the beginning of the name
-          return (a.name_catalog || a.name) > (b.name_catalog || b.name) ? 1 : -1;
+          return getItemName(a) > getItemName(b) ? 1 : -1;
         })
     );
 
@@ -572,7 +594,9 @@ export class TreeMenu extends BaseComponent {
       //translation integration
       const translationMatch = function(value, data, i) {
 
-        let translate = data[i].name;
+        //search name in all datasources
+        const item = data[i];
+        let translate = item.type == "folder" && item.name || item.type == "indicator" && item.byDataSources.map(m => m.name).join();
         if (!translate && _this.localise) {
           const t1 = _this.localise("indicator" + "/" + data[i][_this.OPTIONS.SEARCH_PROPERTY] + "/" + _this._targetModel._type);
           translate =  t1 || _this.localise("indicator/" + data[i][_this.OPTIONS.SEARCH_PROPERTY]);
@@ -621,6 +645,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _selectIndicator(concept) {
+    if(concept.id == this._targetModel.data.concept) return;
     this._setModelWhich(concept);
     this.toggle();
   }
@@ -688,8 +713,14 @@ export class TreeMenu extends BaseComponent {
         }
 
         return false;
-      });            
-      dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && this._targetModel.data.allow.space.filter(f.spaces[0]));
+      });
+      const satisfiesAllowedSpaces = (item) => {
+        //optionally check if at least one space in at least one space of at least one DS of a menu item satisfies the "allow.space" filter
+        let spacesFromAllDS = [];
+        item.byDataSources.forEach(item => spacesFromAllDS = spacesFromAllDS.concat(item.spaces));
+        return spacesFromAllDS.some(space => this._targetModel.data.allow.space.filter(space));          
+      }
+      dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && satisfiesAllowedSpaces(f));
 
       this.dataFiltered = dataFiltered;
     }
@@ -779,8 +810,6 @@ export class TreeMenu extends BaseComponent {
   _createSubmenu(select, data, toplevel) {
     if (!data.children) return;
     const _this = this;
-    const noDescriptionText = _this.localise("hints/nodescr");
-    const helpTranslateText = _this.localise("dialogs/helptranslate");
     const targetModelName = _this._targetModel.name || _this._targetModel.config.type;
     const _select = toplevel ? select : select.append("div")
       .classed(css.list_outer, true);
@@ -801,6 +830,13 @@ export class TreeMenu extends BaseComponent {
       // })
       .attr("children", d => d.children ? "true" : null)
       .attr("type", d => d.type ? d.type : null)
+      .style("color", d => {
+        if (this.ui.showDataSources && d.type == "indicator" && d.id !== "_default" && d.byDataSources.length == 1) {
+          return this.dsColorScaleDark(d.byDataSources[0].dataSource.id);
+        } else {
+          return null;
+        }
+      })
       .on("click", function(event, d) {
         const view = d3.select(this);
         //only for leaf nodes
@@ -811,7 +847,7 @@ export class TreeMenu extends BaseComponent {
       .append("span")
       .text(d => {
         //Let the indicator "_default" in tree menu be translated differnetly for every hook type
-        const translated = d.id === "_default" ? _this.localise("indicator/_default/" + targetModelName) : d.name_catalog || d.name || d.id;
+        const translated = d.id === "_default" ? _this.localise("indicator/_default/" + targetModelName) : getItemName(d);
         if (!translated && translated !== "") utils.warn("translation missing: NAME of " + d.id);
         return translated || "";
       });
@@ -825,11 +861,9 @@ export class TreeMenu extends BaseComponent {
         //deepLeaf
         if (!d.children) {
           if (d.id === "_default") {
-            d.name = _this.localise("indicator/_default/" + targetModelName);
-            d.description = _this.localise("description/_default/" + targetModelName);
+            d.byDataSources[0].name = _this.localise("indicator/_default/" + targetModelName);
+            d.byDataSources[0].description = _this.localise("description/_default/" + targetModelName);
           }
-          if (!d.description) d.description = noDescriptionText;
-          d.translateContributionText = helpTranslateText;
           const deepLeaf = view.append("div")
             .attr("class", css.menuHorizontal + " " + css.list_outer + " " + css.list_item_leaf);
           deepLeaf.on("click", (event, d) => {
@@ -908,10 +942,32 @@ export class TreeMenu extends BaseComponent {
   }
 
   _setModelWhich(concept) {    
-    this._targetModel.setWhich({
-      key: concept.id == "_default" ? null : this.getNearestSpaceToMarkerSpace(concept.spaces),
-      value: {concept: concept.id, dataSource: concept.dataSource}
-    });
+    if(concept.id == "_default"){
+      this._targetModel.setWhich({
+        key: null,
+        value: {concept: "_default", dataSource: null}
+      });
+    } else {
+      const {space, dataSource} = this.getBestFittingDataSourceAndSpace(concept.byDataSources);
+      this._targetModel.setWhich({
+        key: space,
+        value: {concept: concept.id, dataSource: dataSource.id}
+      });
+    }
+  }
+
+  getBestFittingDataSourceAndSpace(byDataSources) {
+    const bestSpacePerDataSource = byDataSources.map(m => this.getNearestSpaceToMarkerSpace(m.spaces));
+    const bestSpace = this.getNearestSpaceToMarkerSpace(bestSpacePerDataSource);
+
+    const dsCandidates = byDataSources.filter(f => f.spaces.find(s => spacesAreEqual(s, bestSpace))).map(m => m.dataSource);
+     
+    if (dsCandidates.includes(this.model.data.source))
+      return {space: bestSpace, dataSource: this.model.data.source};
+    else if (dsCandidates.includes(this._targetModel.data.source)) 
+      return {space: bestSpace, dataSource: this._targetModel.data.source};
+    else
+      return {space: bestSpace, dataSource: dsCandidates[0]};
   }
 
   getNearestSpaceToMarkerSpace(spaces){
@@ -1000,6 +1056,9 @@ export class TreeMenu extends BaseComponent {
       //if(_this.menuEntity.direction != MENU_VERTICAL) _this.menuEntity.closeAllChildren();
     });
 
+    const datasources = this._getDataModels(this.root.model.config.dataSources);
+    this.dsColorScaleLight = d3.scaleOrdinal().range(d3.schemePastel2).domain(datasources.map(m=>m.id));
+    this.dsColorScaleDark = d3.scaleOrdinal().range(d3.schemeSet2).domain(datasources.map(m=>m.id));
   }
 
   draw() {

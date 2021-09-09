@@ -12,6 +12,7 @@ export class Technical extends Dialog {
         <div class="vzb-dialog-content">
           <div class="vzb-advancedshowandselect-switch"></div>
           <div class="vzb-advancedmarkerspace-switch"></div>
+          <div class="vzb-showdatasources-switch"></div>
         </div>
 
       </div>
@@ -34,6 +35,14 @@ export class Technical extends Dialog {
         submodelFunc: () => this.root
           .findChild({name: "dialogs"})
           .findChild({name: "find"}).ui
+      }
+    },{
+      type: SimpleCheckbox,
+      placeholder: ".vzb-showdatasources-switch",
+      options: {
+        checkbox: "showDataSources",
+        submodelFunc: () => this.root
+          .findChild({name: "tree-menu"}).ui
       }
     }];
 

@@ -19,6 +19,7 @@ export const css = {
   leaf_content: "vzb-treemenu-leaf-content",
   leaf_content_item: "vzb-treemenu-leaf-content-item",
   leaf_content_item_title: "vzb-treemenu-leaf-content-item-title",
+  leaf_content_item_datasources: "vzb-treemenu-leaf-content-item-datasources",
   leaf_content_item_space: "vzb-treemenu-leaf-content-item-space",
   leaf_content_item_descr: "vzb-treemenu-leaf-content-item-descr",
   leaf_content_item_helptranslate: "vzb-treemenu-leaf-content-item-helptranslate",

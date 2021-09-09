@@ -88,7 +88,7 @@ export class About extends Dialog {
       .enter().append("p")
       .html(d => url(d.package?.description || d.package?.name, d.package?.homepage) + `<br/> - Version: ${formatVersion(d.version)} <br/> - Build ${formatBuild(d.build)}`);
     
-    this.DOM.body.append("div").append("p").append("h1").html("Readers:");
+    this.DOM.body.append("div").append("p").append("h1").html("Data sources:");
     this.DOM.body.append("div").selectAll("p")
       .data(readerData)
       .enter().append("p")

@@ -9,52 +9,122 @@ function spacesAreEqual(a, b){
 }
 export class DeepLeaf{
 
-  constructor(context, entity){
+  constructor(context, view){
     this.context = context;
-    this.entity = entity;
+    this.view = view;
     this.spaceChanged = false;
+    this.encoding = this.context._targetModel;
+    this.datum = view.datum();
 
     this.buildLeaf();
   }
   
-  buildLeaf() {
-    const _this = this;
-    const leafDatum = this.entity.datum();
-    const encoding = this.context._targetModel;
+  _getDatumForDS(){    
+    return this.datum.byDataSources.find(f => f.dataSource == this.encoding.data.source) || this.datum.byDataSources[0];
+  }
+  _isSelectedConcept() {
+    return this.datum.id == this.encoding.data.concept;
+  }
 
-    this.entity.selectAll("div").remove();
+  buildLeaf() {        
+    this.view.selectAll("div").remove();
 
-    const leafContent = this.entity
-      .append("div").classed(css.leaf + " " + css.leaf_content + " vzb-dialog-scrollable", true)
+    const leafContent = this.view
+      .append("div").attr("class", `${css.leaf} ${css.leaf_content} vzb-dialog-scrollable`)
       .style("width", this.width + "px");
+    
+    this.DOM = {
+      title: leafContent.append("div")
+        .attr("class", `${css.leaf_content_item} ${css.leaf_content_item_title}`),
 
-    leafContent.append("div")
-      .classed(css.leaf_content_item + " " + css.leaf_content_item_title, true)
-      .text(utils.replaceNumberSpacesToNonBreak(leafDatum.name) || "");
-    const spaceContainer = leafContent.append("div")
-      .classed(css.leaf_content_item + " " + css.leaf_content_item_space, true)
-      .on("click", event => {
-        event.stopPropagation();
-      });
-    leafContent.append("div")
-      .classed(css.leaf_content_item + " " + css.leaf_content_item_descr, true)
-      .text(utils.replaceNumberSpacesToNonBreak(leafDatum.description) || "");
-    leafContent.append("div")
-      .classed(css.leaf_content_item + " " + css.leaf_content_item_helptranslate, true)
-      .classed("vzb-invisible", !leafDatum.translateContributionLink)
-      .html(`<a href="${leafDatum.translateContributionLink}" target="_blank">${leafDatum.translateContributionText}</a>`);
+      datasourceContainer: leafContent.append("div")
+        .attr("class", `${css.leaf_content_item} ${css.leaf_content_item_datasources}`)
+        .on("click", event => event.stopPropagation()),
 
-    const currentSpace = encoding.data.space;
-    const markerSpace = encoding.marker.data.space;
+      spaceContainer: leafContent.append("div")
+        .classed(css.leaf_content_item + " " + css.leaf_content_item_space, true)
+        .on("click", event => event.stopPropagation()),
 
-    const isSelectedConcept = () => leafDatum.id == encoding.data.concept;
-    const multipleSpacesAvailable = () => leafDatum.spaces.length > 1;
-    const shorterThanMarkerSpace = () => leafDatum.spaces[0].length < markerSpace.length;
+      descr: leafContent.append("div")
+        .attr("class", `${css.leaf_content_item} ${css.leaf_content_item_descr}`),
+
+      helptranslate: leafContent.append("div")
+        .attr("class", `${css.leaf_content_item} ${css.leaf_content_item_helptranslate}`)
+    };
+    
+    this.updateNameSection();
+    this.updateDatasoutceSection();
+    this.updateSpaceSection();
+    this.updateDescrSection();
+  }
+
+  updateNameSection(datumForDS = this._getDatumForDS()){
+    this.DOM.title.text(utils.replaceNumberSpacesToNonBreak(datumForDS.name) || "");
+  }
+
+
+  updateDescrSection(datumForDS = this._getDatumForDS()){   
+    this.DOM.descr.text(utils.replaceNumberSpacesToNonBreak(datumForDS.description || this.context.localise("hints/nodescr")));
+
+    this.DOM.helptranslate
+      .classed("vzb-invisible", !datumForDS.dataSource?.translateContributionLink)
+      .html(`<a href="${datumForDS.dataSource?.translateContributionLink}" target="_blank">${this.context.localise("dialogs/helptranslate")}</a>`);
+  }
+
+
+  updateDatasoutceSection(){
+    const _this = this;
+
+    if(this.datum.id == "_default") return;
+
+    const getDSColorLight = (v) => this.context.dsColorScaleLight(v.dataSource.id);
+    const getDSColorDark = (v) => this.context.dsColorScaleDark(v.dataSource.id);
+    const paintBackground = (v) => (v.dataSource == this.encoding.data.source) && this._isSelectedConcept() && multipleDataSourcesAvailable;        
+    const multipleDataSourcesAvailable = () => this.datum.byDataSources > 1;
+
+    if(this.context.ui.showDataSources){
+      this.DOM.datasourceContainer.selectAll("span")
+        .data(this.datum.byDataSources, v => v)
+        .enter().append("span")
+        //.text(v => v.dataSource.config.name)
+        .text(v => v.dataSource.id)
+        .on("mouseenter", function(event, v) {
+          d3.select(this).style("background-color", getDSColorLight(v))
+          _this.updateNameSection(v);
+          _this.updateDescrSection(v);
+        })
+        .on("mouseout", function(event, v) {
+          d3.select(this).style("background-color", paintBackground(v) ? getDSColorLight(v) : null)
+          _this.updateNameSection();
+          _this.updateDescrSection();
+        })
+        .on("click", function(event, v){
+          if(_this.DOM.spaceContainer.select("select").node()) _this.resetPickers();
+          _this.setDatasource(v);
+        });
+      
+      this.DOM.datasourceContainer.selectAll("span")
+        .style("pointer-events", this._isSelectedConcept() ? null : "none")
+        .style("border-color", getDSColorDark)
+        .style("background-color", v => paintBackground(v) ? getDSColorLight(v) : null);
+    }
+  }
+
+  updateSpaceSection(datumForDS = this._getDatumForDS()){
+    const _this = this;
+
+    if(this.datum.id == "_default") return;
+
+    const currentSpace = this.encoding.data.space;
+    const markerSpace = this.encoding.marker.data.space;
+
+    const multipleSpacesAvailable = () => datumForDS.spaces.length > 1;
+    const shorterThanMarkerSpace = () => datumForDS.spaces[0].length < markerSpace.length;
 
     //only build the UI for selecting spaces if many conditions are met
-    if(isSelectedConcept() && (multipleSpacesAvailable() || !spacesAreEqual(leafDatum.spaces[0], markerSpace) && !shorterThanMarkerSpace())) {
+    if(this._isSelectedConcept() && (multipleSpacesAvailable() || !spacesAreEqual(datumForDS.spaces[0], markerSpace) && !shorterThanMarkerSpace())) {
 
-      const spaceSelect = spaceContainer
+      const spaceSelect = this.DOM.spaceContainer
         .append("select")
         .attr("name", "vzb-select-treemenu-leaf-space")
         .attr("id", "vzb-select-treemenu-leaf-space")
@@ -65,25 +135,26 @@ export class DeepLeaf{
   
       spaceSelect
         .selectAll("option")
-        .data(leafDatum.spaces)
+        .data(datumForDS.spaces)
         .enter().append("option")
         .attr("value", option => option.join())
-        .text(option => "by " + Utils.getSpaceName(encoding, option));
+        .text(option => "by " + Utils.getSpaceName(this.encoding, option));
   
       spaceSelect
         .property("value", currentSpace.join());
       
-      spaceContainer.append("div")
+      this.DOM.spaceContainer.append("div")
         .attr("class","vzb-treemenu-leaf-space-compliment");
 
-      spaceContainer.append("div")
+      this.DOM.spaceContainer.append("div")
         .attr("class","vzb-hidden vzb-treemenu-leaf-space-reset")
         .text("Reset")
         .on("click", () => {
           this.resetPickers();
+          this.setModel();
         });
 
-      spaceContainer.append("div")
+      this.DOM.spaceContainer.append("div")
         .attr("class","vzb-hidden vzb-treemenu-leaf-space-apply")
         .text("Apply")
         .on("click", () => {
@@ -97,12 +168,11 @@ export class DeepLeaf{
 
   updateComplimentSetters() {
     const _this = this;
-    const spaceContainer = this.entity.select("div." + css.leaf_content_item_space);
     const encoding = this.context._targetModel;
-    const compliment = this.context.services.Vizabi.Vizabi.utils.relativeComplement(encoding.marker.data.space, this.getSelectedSpace());
+    const compliment = this.context.services.Vizabi.Vizabi.utils.relativeComplement(encoding.marker.data.space, this._getSelectedSpace());
     
     Utils.requestEntityNames(encoding.data.source, compliment).then(dims => {
-      let dimSetters = spaceContainer.select("div.vzb-treemenu-leaf-space-compliment")
+      let dimSetters = this.DOM.spaceContainer.select("div.vzb-treemenu-leaf-space-compliment")
         .selectAll("div.vzb-treemenu-leaf-space-compliment-setter")
         .data(dims, d => d.dim);
 
@@ -123,7 +193,7 @@ export class DeepLeaf{
             .attr("id", d.dim + "_extraDim")
             .on("change", () => {
               _this.spaceChanged = true;
-              _this.updateResetApply();
+              _this.updateResetApplyButtons();
             });
 
           select.selectAll("option")
@@ -148,22 +218,22 @@ export class DeepLeaf{
         });   
         
         
-      this.updateResetApply();
+      this.updateResetApplyButtons();
     });
   }
 
 
-  getSelectedSpace() {
-    const node = this.entity.select("div." + css.leaf_content_item_space)
+  _getSelectedSpace() {
+    const node = this.view.select("div." + css.leaf_content_item_space)
       .select("select").node();
     return d3.select(node.options[node.selectedIndex]).datum();
   }
 
 
-  getSelectedFilter() {
+  _getSelectedFilter() {
     const filter = {};
     let invalidFilter = false;
-    this.entity.select("div." + css.leaf_content_item_space)
+    this.view.select("div." + css.leaf_content_item_space)
       .select("div.vzb-treemenu-leaf-space-compliment")
       .selectAll("select")
       .each(function(d){ 
@@ -175,14 +245,14 @@ export class DeepLeaf{
   }
 
 
-  updateResetApply() {
+  updateResetApplyButtons(datumForDS = this._getDatumForDS()) {
     const currentSpace = this.context.targetModel().data.space;
-    const defaultSpace = this.context.getNearestSpaceToMarkerSpace(this.entity.datum().spaces);
+    const defaultSpace = this.context.getNearestSpaceToMarkerSpace(datumForDS.spaces);
 
-    const selectedSpace = this.getSelectedSpace();
-    const selectedFilter = this.getSelectedFilter();
+    const selectedSpace = this._getSelectedSpace();
+    const selectedFilter = this._getSelectedFilter();
 
-    const spaceContainer = this.entity.select("div." + css.leaf_content_item_space);
+    const spaceContainer = this.view.select("div." + css.leaf_content_item_space);
     spaceContainer.select(".vzb-treemenu-leaf-space-reset")
       .classed("vzb-hidden", spacesAreEqual(currentSpace, defaultSpace));
     spaceContainer.select(".vzb-treemenu-leaf-space-apply")
@@ -191,22 +261,28 @@ export class DeepLeaf{
   }
 
 
-  resetPickers() {
-    const defaultSpace = this.context.getNearestSpaceToMarkerSpace(this.entity.datum().spaces);
+  resetPickers(datumForDS = this._getDatumForDS()) {
+    const defaultSpace = this.context.getNearestSpaceToMarkerSpace(datumForDS.spaces);
     
-    this.entity.select("div." + css.leaf_content_item_space)
+    this.view.select("div." + css.leaf_content_item_space)
       .select("select")
       .property("value", defaultSpace.join());
 
     this.updateComplimentSetters();
-    this.setModel();
   }
 
+
+  setDatasource(datumForDS = this._getDatumForDS()){
+    const encoding = this.context._targetModel;
+    runInAction(()=>{
+      encoding.data.config.source = datumForDS.dataSource.id;
+    });
+  }
   
   setModel() {
     const encoding = this.context._targetModel;
-    const selectedSpace = this.getSelectedSpace();
-    const selectedFilter = this.getSelectedFilter() || {};
+    const selectedSpace = this._getSelectedSpace();
+    const selectedFilter = this._getSelectedFilter() || {};
 
     runInAction(()=>{
       encoding.data.config.space = selectedSpace;
