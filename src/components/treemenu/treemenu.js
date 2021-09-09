@@ -118,12 +118,7 @@ export class TreeMenu extends BaseComponent {
     this.removeReaction(this._targetModelReaction);
     this._targetModel = input;
     this._targetProp = null;
-    if (this._targetModelIsEncoding) {
-      this._targetProp = ["data", "concept"];
-    }
-    if (this._targetModelIsMarker) {
-      this._targetProp = ["data", "space"];
-    }
+    this._targetProp = ["data", "concept"];
     this.addReaction(this._targetModelReaction);
 
     return this;
@@ -135,18 +130,8 @@ export class TreeMenu extends BaseComponent {
     return this;
   }
 
-  get _targetModelIsEncoding() {
-    return this._targetModel && this._targetModel.hasOwnProperty("marker");
-  }
-
-  get _targetModelIsMarker() {
-    return this._targetModel && this._targetModel.hasOwnProperty("encoding");
-  }
-
   _targetModelReaction() {
-    if (this._targetModelIsEncoding) {
-      utils.getProp(this._targetModel, ["scale", "type"]);
-    }
+    utils.getProp(this._targetModel, ["scale", "type"]);
     utils.getProp(this._targetModel, this._targetProp);
     this.updateView();
   }
@@ -301,22 +286,6 @@ export class TreeMenu extends BaseComponent {
         }
       });
 
-    /**
-     * KEY-AVAILABILITY (dimensions for marker space-menu)
-     */
-    this.model.spaceAvailability.forEach(space => {
-      //TODO: get concept for space
-      if (space.length < 2) return;
-      
-      tagsRoot.children.push({
-        id: space.join(","),
-        name: space.join(", "),
-        name_catalog: space.join(", "),
-        description: "no description",
-        dataSource: "All data sources",
-        type: "space"
-      });
-    });
 
     if (consoleGroupOpen) console.groupEnd();
     this._sortChildren(tagsRoot);
@@ -661,8 +630,6 @@ export class TreeMenu extends BaseComponent {
   redraw(data, useDataFiltered) {
     const _this = this;
 
-    const isEncoding = _this._targetModelIsEncoding;
-
     let dataFiltered, allowedIDs;
 
     const indicatorsDB = { _default:{} };
@@ -672,65 +639,57 @@ export class TreeMenu extends BaseComponent {
       });
     });
 
-    const targetModelType = _this._targetModel.name || _this._targetModel.config.type;
+    const targetModelName = _this._targetModel.name || _this._targetModel.config.type;
 
     if (useDataFiltered) {
       dataFiltered = data;
     } else {
       if (data == null) data = this._indicatorsTree;
 
-      if (isEncoding) {
-        allowedIDs = utils.keys(indicatorsDB).filter(f => {
+      allowedIDs = utils.keys(indicatorsDB).filter(f => {
 
-          //check if indicator is denied to show with allow->names->!indicator
-          if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
-            if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
-            if (_this._targetModel.data.allow.names.indexOf(f) != -1) return true;
-            if (_this._targetModel.data.allow.namesOnlyThese) return false;
+        //check if indicator is denied to show with allow->names->!indicator
+        if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
+          if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
+          if (_this._targetModel.data.allow.names.indexOf(f) != -1) return true;
+          if (_this._targetModel.data.allow.namesOnlyThese) return false;
+        }
+
+        const allowedTypes = _this._targetModel.scale.allowedTypes;
+        const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
+        const isMeasure = indicatorsDB[f].concept_type == "measure";
+        const isTime = indicatorsDB[f].concept_type == "time";
+        const isConstant = f === "_default"; //TODO: refactor constants
+        const indicatorScales = JSON.parse(indicatorsDB[f].scales || null);
+
+        //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
+        if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
+
+        //match specific scale types if defined
+        if(indicatorScales) {
+          for (let i = indicatorScales.length - 1; i >= 0; i--) {
+            if (allowedTypes.includes(indicatorScales[i])) return true;
           }
+        }
 
-          const allowedTypes = _this._targetModel.scale.allowedTypes;
-          const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
-          const isMeasure = indicatorsDB[f].concept_type == "measure";
-          const isTime = indicatorsDB[f].concept_type == "time";
-          const isConstant = f === "_default"; //TODO: refactor constants
-          const indicatorScales = JSON.parse(indicatorsDB[f].scales || null);
+        //otherwise go by concept types
+        if (isEntity){
+          //for entities need an ordinal scale to be allowed at this point
+          if (allowedTypes.includes("ordinal")) return true;
+        } else if (isConstant) {
+          //for constants need a ordinal scale to be allowed
+          if (allowedTypes.includes("ordinal")) return true;
+        } else if (isMeasure){
+          // for measures need linear or log or something
+          if (allowedTypes.includes("linear") || allowedTypes.includes("log")
+            || allowedTypes.includes("genericLog") || allowedTypes.includes("pow")) return true;
+        } else if (isTime) {
+          if (allowedTypes.includes("time")) return true;
+        }
 
-          //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
-          if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
-
-          //match specific scale types if defined
-          if(indicatorScales) {
-            for (let i = indicatorScales.length - 1; i >= 0; i--) {
-              if (allowedTypes.includes(indicatorScales[i])) return true;
-            }
-          }
-
-          //otherwise go by concept types
-          if (isEntity){
-            //for entities need an ordinal scale to be allowed at this point
-            if (allowedTypes.includes("ordinal")) return true;
-          } else if (isConstant) {
-            //for constants need a ordinal scale to be allowed
-            if (allowedTypes.includes("ordinal")) return true;
-          } else if (isMeasure){
-            // for measures need linear or log or something
-            if (allowedTypes.includes("linear") || allowedTypes.includes("log")
-              || allowedTypes.includes("genericLog") || allowedTypes.includes("pow")) return true;
-          } else if (isTime) {
-            if (allowedTypes.includes("time")) return true;
-          }
-
-          return false;
-        });
-        dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && this._targetModel.data.allow.space.filter(f.spaces[0]));
-      } else if (_this._targetModelIsMarker) {
-        allowedIDs = data.children.map(child => child.id);
-        dataFiltered = utils.pruneTree(data, f => f.type == "space");
-      } else {
-        allowedIDs = utils.keys(indicatorsDB);
-        dataFiltered = utils.pruneTree(data, f => allowedIDs.indexOf(f.id) > -1);
-      }
+        return false;
+      });            
+      dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && this._targetModel.data.allow.space.filter(f.spaces[0]));
 
       this.dataFiltered = dataFiltered;
     }
@@ -742,10 +701,7 @@ export class TreeMenu extends BaseComponent {
     if (this._title || this._title === "") {
       title = this._title;
     } else {
-      title = this.localise(
-        _this._targetModelIsMarker ? _this._targetModel.name + "/" + _this._targetModel.name
-          : "buttons/" + (isEncoding ? _this._targetModel.name : (targetModelType + "/" + _this._targetProp))
-      );
+      title = this.localise("buttons/" + targetModelName);
     }
     this.element.select("." + css.title).select("span")
       .text(title);
@@ -786,11 +742,11 @@ export class TreeMenu extends BaseComponent {
       const concept = indicatorsDB[pointer];
       if (!concept) utils.error("Concept properties of " + pointer + " are missing from the set, or the set is empty. Put a breakpoint here and check what you have in indicatorsDB");
 
-      const scaleTypesData = isEncoding ? resolveDefaultScales(concept).filter(f => {
+      const scaleTypesData = resolveDefaultScales(concept).filter(f => {
         if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
         if (_this._targetModel.data.allow.scales[0] == "*") return true;
         return _this._targetModel.data.allow.scales.indexOf(f) > -1;
-      }) : [];
+      });
       if (scaleTypesData.length == 0) {
         this.element.select("." + css.scaletypes).classed(css.hidden, true);
       } else {
@@ -825,7 +781,7 @@ export class TreeMenu extends BaseComponent {
     const _this = this;
     const noDescriptionText = _this.localise("hints/nodescr");
     const helpTranslateText = _this.localise("dialogs/helptranslate");
-    const targetModelType = _this._targetModel.name;
+    const targetModelName = _this._targetModel.name || _this._targetModel.config.type;
     const _select = toplevel ? select : select.append("div")
       .classed(css.list_outer, true);
 
@@ -855,7 +811,7 @@ export class TreeMenu extends BaseComponent {
       .append("span")
       .text(d => {
         //Let the indicator "_default" in tree menu be translated differnetly for every hook type
-        const translated = d.id === "_default" ? _this.localise("indicator/_default/" + targetModelType) : d.name_catalog || d.name || d.id;
+        const translated = d.id === "_default" ? _this.localise("indicator/_default/" + targetModelName) : d.name_catalog || d.name || d.id;
         if (!translated && translated !== "") utils.warn("translation missing: NAME of " + d.id);
         return translated || "";
       });
@@ -869,8 +825,8 @@ export class TreeMenu extends BaseComponent {
         //deepLeaf
         if (!d.children) {
           if (d.id === "_default") {
-            d.name = _this.localise("indicator/_default/" + targetModelType);
-            d.description = _this.localise("description/_default/" + targetModelType);
+            d.name = _this.localise("indicator/_default/" + targetModelName);
+            d.description = _this.localise("description/_default/" + targetModelName);
           }
           if (!d.description) d.description = noDescriptionText;
           d.translateContributionText = helpTranslateText;
