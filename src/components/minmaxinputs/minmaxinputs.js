@@ -1,5 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
+import {decorate, computed} from "mobx";
 
 import "./minmaxinputs.scss";
 /*!
@@ -11,7 +12,7 @@ const ZOOMED = "zoomed";
 const MIN = 0;
 const MAX = 1;
 
-export class MinMaxInputs extends BaseComponent {
+class MinMaxInputs extends BaseComponent {
   constructor(config) {
     config.template = `
       <div class="vzb-mmi-holder">
@@ -70,11 +71,13 @@ export class MinMaxInputs extends BaseComponent {
 
   }
 
-  draw() {
-    this.MDL = {
+  get MDL() {
+    return {
       model: this._getModel()
     };
+  }
 
+  draw() {
     this.localise = this.services.locale.auto();
 
     const _this = this;
@@ -138,3 +141,9 @@ MinMaxInputs.DEFAULT_UI = {
   selectDomainMinMax: false,
   selectZoomedMinMax: true
 };
+
+const decorated = decorate(MinMaxInputs, {
+  "MDL": computed
+});
+
+export { decorated as MinMaxInputs };
