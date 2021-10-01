@@ -1,10 +1,11 @@
 import { Dialog } from "../dialog";
 import { DynamicBackground } from "../../dynamic-background/dynamic-background";
+import {decorate, computed} from "mobx";
 
 /*
  * Timedisplay dialog
  */
-export class TimeDisplay extends Dialog {
+class TimeDisplay extends Dialog {
   constructor(config) {
     config.template = `
       <div class="vzb-dialog-modal">
@@ -31,10 +32,14 @@ export class TimeDisplay extends Dialog {
     this._year.setConditions({ widthRatio: 1, heightRatio: 1 });
   }
 
+  get MDL() {
+    return {
+      frame: this.model.encoding.frame
+    };
+  }
+
   draw() {
     super.draw();
-
-    this.MDL.frame = this.model.encoding.frame;
 
     const _this = this;
     Object.assign(this.state, {
@@ -63,3 +68,7 @@ export class TimeDisplay extends Dialog {
 }
 
 Dialog.add("timedisplay", TimeDisplay);
+const decorated = decorate(TimeDisplay, {
+  "MDL": computed
+});
+export { decorated as TimeDisplay };

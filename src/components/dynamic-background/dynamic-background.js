@@ -1,6 +1,6 @@
 import {BaseComponent} from "../base-component.js";
-
-export class DynamicBackground extends BaseComponent {
+import {decorate, computed} from "mobx";
+class DynamicBackground extends BaseComponent {
 
   setup(conditions) {
     this.DOM = {
@@ -56,10 +56,13 @@ export class DynamicBackground extends BaseComponent {
     return this;
   }
 
-  draw() {
-    this.MDL = {
-
+  get MDL() {
+    return {
+      frame: this.model.encoding.frame
     };
+  }
+
+  draw() {
   }
 
   resizeText(width, height, topOffset, leftOffset) {
@@ -168,3 +171,8 @@ export class DynamicBackground extends BaseComponent {
   }
 
 }
+
+const decorated = decorate(DynamicBackground, {
+  "MDL": computed
+});
+export { decorated as DynamicBackground };
