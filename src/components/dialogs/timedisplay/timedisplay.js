@@ -55,7 +55,7 @@ class TimeDisplay extends Dialog {
 
   _updateTime() {
     const frame = this.MDL.frame;
-    this._year.setText(this.localise(frame.value), this.state.duration);
+    this._year.setText(frame.value, this.state.duration);
   }
 
   _updateSize() {

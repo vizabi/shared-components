@@ -130,8 +130,14 @@ class _LocaleService extends BaseService {
       return (formatted + suffix + (options === PERCENT || options === SHARE ? "%" : ""));
     };
 
-    this.dateF = d3.timeFormat("%Y");
-    
+    this.dateF = {
+      year: d3.timeFormat("%Y"),
+      month: d3.timeFormat("%Y-%m"),
+      day: d3.timeFormat("%Y-%m-%d"),
+      quater: d3.timeFormat("%Yw%V"),
+      week: d3.timeFormat("%Yq%q")
+    };
+
     this.stringF = function(string){
       //the inline conditionals are needed because some translation files are stuck in cache 
       //and don't have the "dictionary" object but have strings in the root instead
@@ -147,8 +153,8 @@ class _LocaleService extends BaseService {
     return this.numberF(arg);
   }
 
-  getFormattedDate(arg) {
-    return this.dateF(arg);
+  getFormattedDate(arg, dateIntervalSize) {
+    return this.dateF[dateIntervalSize](arg);
   }
   
   getUIstring(arg) {
@@ -156,11 +162,11 @@ class _LocaleService extends BaseService {
   }
 
   auto(){
-    return (function(arg){
+    return (function(arg, dateIntervalSize = "year"){
       // null, NaN and undefined are bypassing any formatter
       if (!arg && arg !== 0 && arg !== "") return arg;
       if (typeof arg === "number") return this.getFormattedNumber(arg);
-      if (arg instanceof Date) return this.getFormattedDate(arg);
+      if (arg instanceof Date) return this.getFormattedDate(arg, dateIntervalSize);
       if (typeof arg === "string") return this.getUIstring(arg);
     }).bind(this);
   }

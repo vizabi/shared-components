@@ -63,6 +63,7 @@ class DynamicBackground extends BaseComponent {
   }
 
   draw() {
+    this.localise = this.services.locale.auto();
   }
 
   resizeText(width, height, topOffset, leftOffset) {
@@ -84,6 +85,8 @@ class DynamicBackground extends BaseComponent {
       textEl,
       sampleTextEl
     } = this.DOM;
+
+    text = this.localise(text, this.MDL.frame.interval);
 
     const callback = () => {
       sampleTextEl.text(text);
