@@ -1,6 +1,6 @@
 import {BaseComponent} from "../base-component.js";
 import {decorate, computed} from "mobx";
-class DynamicBackground extends BaseComponent {
+class DateTimeBackground extends BaseComponent {
 
   setup(conditions) {
     this.DOM = {
@@ -8,7 +8,7 @@ class DynamicBackground extends BaseComponent {
       sampleTextEl: this.element.append("text").style("font-size", "20px").style("opacity", 0)
     };
     
-    this.element.classed("vzb-dynamic-background", true);
+    this.element.classed("vzb-datetime-background", true);
 
     this.width = 0;
     this.height = 0;
@@ -175,7 +175,7 @@ class DynamicBackground extends BaseComponent {
 
 }
 
-const decorated = decorate(DynamicBackground, {
+const decorated = decorate(DateTimeBackground, {
   "MDL": computed
 });
-export { decorated as DynamicBackground };
+export { decorated as DateTimeBackground };

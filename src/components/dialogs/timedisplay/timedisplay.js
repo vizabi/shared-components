@@ -1,5 +1,5 @@
 import { Dialog } from "../dialog";
-import { DynamicBackground } from "../../dynamic-background/dynamic-background";
+import { DateTimeBackground } from "../../datetime-background/datetime-background";
 import {decorate, computed} from "mobx";
 
 /*
@@ -18,7 +18,7 @@ class TimeDisplay extends Dialog {
       </div>`;
   
     config.subcomponents = [{
-      type: DynamicBackground,
+      type: DateTimeBackground,
       placeholder: ".vzb-timedisplay"
     }];
     
@@ -28,8 +28,8 @@ class TimeDisplay extends Dialog {
   setup(options) {
     super.setup(options);
 
-    this._year = this.findChild({type: "DynamicBackground"});
-    this._year.setConditions({ widthRatio: 1, heightRatio: 1 });
+    this._date = this.findChild({type: "DateTimeBackground"});
+    this._date.setConditions({ widthRatio: 1, heightRatio: 1 });
   }
 
   get MDL() {
@@ -55,14 +55,14 @@ class TimeDisplay extends Dialog {
 
   _updateTime() {
     const frame = this.MDL.frame;
-    this._year.setText(frame.value, this.state.duration);
+    this._date.setText(frame.value, this.state.duration);
   }
 
   _updateSize() {
     this.services.layout.size;
 
-    if (this._year) {
-      this._year.resizeText(this.DOM.content.style("width"), this.DOM.content.style("height"));
+    if (this._date) {
+      this._date.resizeText(this.DOM.content.style("width"), this.DOM.content.style("height"));
     }
   }
 }
