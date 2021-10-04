@@ -1102,7 +1102,7 @@ export class TreeMenu extends BaseComponent {
   }
 
   _getSourceName(ds) {
-    return ds.id ?? "Unnamed datasource";
+    return `_ds_${ds.id}` ?? "Unnamed datasource";
   }
 
   _getDatasetName(ds) {
@@ -1110,7 +1110,7 @@ export class TreeMenu extends BaseComponent {
       const meta = ds.reader.getDatasetInfo();
       return meta.name + (meta.version ? " " + meta.version : "");
     }
-    return this._getSourceName(ds);
+    return ds.id ?? "Unnamed datasource";
   }
 
   _getDataModels(dsConfig) {
