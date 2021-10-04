@@ -28,6 +28,10 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   }
 };
 
+function getTagNameForDs(ds){
+  return "dataset " + ds.id;
+}
+
 function getItemName(item){
   if (item.type == "indicator"){
     return item.byDataSources.map(m => m.name_catalog)
@@ -175,11 +179,12 @@ export class TreeMenu extends BaseComponent {
 
     //put the dataset folders where they should be: either in root or in specific folders or ==root in case of spreading
     const folderStrategies = {};
-    dataModels.forEach((m) => {
-      const mName = this._getSourceName(m);// + mIndex; TODO
+    dataModels.forEach((ds) => {
+      //special ds tag id is needed to prevent a situation when DS id happens to be equal to ID of one of the tags
+      const dsTag = getTagNameForDs(ds);
 
       //figure out the folder strategy
-      let strategy = utils.getProp(this.ui, ["folderStrategyByDataset", mName]);
+      let strategy = utils.getProp(this.ui, ["folderStrategyByDataset", ds.id]);
       let folder = null;
       if (!strategy) strategy = FOLDER_STRATEGY_DEFAULT;
 
@@ -189,17 +194,17 @@ export class TreeMenu extends BaseComponent {
       }
 
       //add the dataset's folder to the tree
-      tags[mName] = { id: mName, name: this._getDatasetName(m), type: "dataset", children: [] };
+      tags[dsTag] = { id: ds.id, name: this._getDatasetName(ds), type: "dataset", children: [] };
 
       if (strategy == FOLDER_STRATEGY_FOLDER && tags[folder]) {
-        tags[folder].children.push(tags[mName]);
+        tags[folder].children.push(tags[dsTag]);
       } else if (strategy == FOLDER_STRATEGY_SPREAD) {
-        tags[mName] = tags[ROOT];
+        tags[dsTag] = tags[ROOT];
       } else {
-        tags[ROOT].children.push(tags[mName]);
+        tags[ROOT].children.push(tags[dsTag]);
       }
 
-      folderStrategies[mName] = strategy;
+      folderStrategies[ds.id] = strategy;
     });
 
     //populate the tag tree
@@ -214,13 +219,13 @@ export class TreeMenu extends BaseComponent {
       } else {
 
         //if parent is missing add a tag either to dataset's own folder or to the root if spreading them
-        if (folderStrategies[tag.dataSourceName] == FOLDER_STRATEGY_SPREAD) {
+        if (folderStrategies[tag.datasource.id] == FOLDER_STRATEGY_SPREAD) {
           tags[ROOT].children.push(tags[tag.tag]);
         } else {
-          if (tags[tag.dataSourceName])
-            tags[tag.dataSourceName].children.push(tags[tag.tag]);
+          if (tags[getTagNameForDs(tag.datasource)])
+            tags[getTagNameForDs(tag.datasource)].children.push(tags[tag.tag]);
           else
-            utils.warn(`Tags request to the datasource ${tag.dataSourceName} probably didn't succeed`);
+            utils.warn(`Tags request to the datasource ${tag.datasource.id} probably didn't succeed`);
         }
       }
     });
@@ -289,7 +294,7 @@ export class TreeMenu extends BaseComponent {
 
         } else {
           //regulat indicators
-          const conceptTags = concept.tags || this._getSourceName(source) || "_root";
+          const conceptTags = concept.tags || getTagNameForDs(source) || "_root";
           conceptTags.split(",").forEach(tag => {
             tag = tag.trim();
             if (tags[tag]) {
@@ -1101,16 +1106,12 @@ export class TreeMenu extends BaseComponent {
     if (!this.height || !this.width) return "TreeMenu _updateProfile() abort: container is too little or has display:none";
   }
 
-  _getSourceName(ds) {
-    return ds.id ?? "Unnamed datasource";
-  }
-
   _getDatasetName(ds) {
     if (ds.reader.getDatasetInfo) {
       const meta = ds.reader.getDatasetInfo();
       return meta.name + (meta.version ? " " + meta.version : "");
     }
-    return this._getSourceName(ds);
+    return ds.id ?? "Unnamed datasource";
   }
 
   _getDataModels(dsConfig) {
@@ -1191,9 +1192,8 @@ export class TreeMenu extends BaseComponent {
 
     return dataSourcesWithTags.length ? Promise.all(dataSourcesWithTags
       .map(([ds, query]) => ds.query(query).then(result => {
-        const dataSourceName = this._getSourceName(ds);
         return [...result.forQueryKey().values()].map(r => {
-          r.dataSourceName = dataSourceName;
+          r.datasource = ds;
           return r;
         });
       })))
