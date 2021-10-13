@@ -289,7 +289,7 @@ class _SpaceConfig extends BaseComponent {
             .attr("for", "vzb-spaceconfig-enc-space-current")
             .text("current space: " + encoding.data.space.join() + (isSpaceSet? " (set)" : " (inherited)") );
 
-          if(status.status == "alreadyInSpace") {
+          if(status.status == "alreadyInSpace" || status.status == "entityPropertyDataConfig") {
             view.append("div")
               .attr("for", "vzb-spaceconfig-enc-space-new")
               .text("new space: will reset to marker space if set");
@@ -369,6 +369,7 @@ class _SpaceConfig extends BaseComponent {
       true: "⚫",
       constant: "✳️",
       alreadyInSpace: "♻️", //reset filter on enc
+      entityPropertyDataConfig: "🏷", //reset filter on enc
       matchingSpaceAvailable: "➡️",
       subspaceAvailable: "↘️",
       superspaceAvailable: "↗️", //request connstants 
@@ -384,6 +385,9 @@ class _SpaceConfig extends BaseComponent {
 
     if (!proposedSpace) return {status: true, spaces: []};
     if (encoding.data.isConstant) return {status: "constant"};
+
+    if (encoding.data.config.modelType == "entityPropertyDataConfig")
+      return {status: "entityPropertyDataConfig", spaces: [proposedSpace]};
 
     if (spacesAreEqual(encoding.data.space, proposedSpace)) 
       return {status: "alreadyInSpace", spaces: [proposedSpace]};
