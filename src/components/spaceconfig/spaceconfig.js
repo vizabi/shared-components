@@ -268,7 +268,7 @@ class _SpaceConfig extends BaseComponent {
 
         view.append("div")
           .attr("class", "vzb-spaceconfig-enc-status")
-          .attr("title", status)
+          .attr("title", status.status)
           .text(_this.statusIcons(status));
 
         view.append("div")
