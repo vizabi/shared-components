@@ -248,7 +248,7 @@ class Find extends Dialog {
     if (typeof d.label == "object") {
       return Object.entries(d.label)
         .filter(entry => entry[0] != this.MDL.frame.data.concept)
-        .map(entry => entry[1])
+        .map(entry => utils.isNumber(entry[1]) ? (entry[0] + ": " + entry[1]) : entry[1])
         .join(", ");
     }
     if (d.label != null) return "" + d.label;
