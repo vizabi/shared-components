@@ -63,7 +63,7 @@ class DateTimeBackground extends BaseComponent {
   }
 
   draw() {
-    this.localise = this.services.locale.auto();
+    this.localise = this.services.locale.auto(this.MDL.frame.interval);
   }
 
   resizeText(width, height, topOffset, leftOffset) {
@@ -86,7 +86,7 @@ class DateTimeBackground extends BaseComponent {
       sampleTextEl
     } = this.DOM;
 
-    text = this.localise(text, this.MDL.frame.interval);
+    text = this.localise(text);
 
     const callback = () => {
       sampleTextEl.text(text);

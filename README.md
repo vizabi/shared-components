@@ -50,7 +50,7 @@ locale.getFormattedDate(new Date()) //"2019"
 locale.getUIstring("buttons/apply") //"Apply"
   
 //convenience method
-locale.auto();
+locale.auto(this.MDL.frame.interval);
 
 
 ### Layout service

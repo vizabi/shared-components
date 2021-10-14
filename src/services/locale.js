@@ -161,8 +161,8 @@ class _LocaleService extends BaseService {
     return this.stringF(arg);
   }
 
-  auto(){
-    return (function(arg, dateIntervalSize = "year"){
+  auto(dateIntervalSize = "year"){
+    return (function(arg){
       // null, NaN and undefined are bypassing any formatter
       if (!arg && arg !== 0 && arg !== "") return arg;
       if (typeof arg === "number") return this.getFormattedNumber(arg);

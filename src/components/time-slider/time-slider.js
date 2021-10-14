@@ -155,7 +155,7 @@ class TimeSlider extends BaseComponent {
   }
 
   draw() {
-    this.localise = this.services.locale.auto();
+    this.localise = this.services.locale.auto(this.MDL.frame.interval);
     
     this.element.classed(class_loading, false);
 
@@ -379,7 +379,7 @@ class TimeSlider extends BaseComponent {
       //set handle position
       handle.attr("cx", posX);
       valueText.attr("transform", "translate(" + posX + "," + (this.sliderHeight / 2) + ")");
-      valueText.text(this.localise(value, this.MDL.frame.interval));
+      valueText.text(this.localise(value));
     }
 
     //set time according to dragged position
@@ -428,7 +428,7 @@ class TimeSlider extends BaseComponent {
       valueText//.attr("transform", "translate(" + _this.prevPosition + "," + (this.height / 2) + ")")
         .transition("text")
         .delay(delayAnimations)
-        .text(this.localise(value, this.MDL.frame.interval));
+        .text(this.localise(value));
       valueText
         .transition()
         .duration(delayAnimations)
@@ -447,7 +447,7 @@ class TimeSlider extends BaseComponent {
         .transition("text");
       valueText
         .attr("transform", "translate(" + newPos + "," + (this.sliderHeight / 2) + ")")
-        .text(this.localise(value, this.MDL.frame.interval));
+        .text(this.localise(value));
     }
     //_this.prevPosition = newPos;
 
