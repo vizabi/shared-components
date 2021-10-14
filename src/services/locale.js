@@ -134,8 +134,8 @@ class _LocaleService extends BaseService {
       year: d3.timeFormat("%Y"),
       month: d3.timeFormat("%Y-%m"),
       day: d3.timeFormat("%Y-%m-%d"),
-      quater: d3.timeFormat("%Yw%V"),
-      week: d3.timeFormat("%Yq%q")
+      week: d3.timeFormat("%Yw%V"),
+      quarter: d3.timeFormat("%Yq%q")
     };
 
     this.stringF = function(string){
