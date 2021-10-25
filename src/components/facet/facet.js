@@ -1,25 +1,46 @@
 import {BaseComponent} from "../base-component.js";
 import {decorate, computed} from "mobx";
-import "./repeater.scss";
+import "./facet.scss";
 
-class _Repeater extends BaseComponent {
+function getFacetId(d){
+  return d;
+}
+class _Facet extends BaseComponent {
 
   get MDL(){
     return {
-      repeat: this.model.encoding.repeat
+      facet: this.model.encoding.facet
     };
   }
 
 
   loading(){
-    this.addReaction(this.addRemoveSubcomponents, true);
+    //this.addReaction(this.addRemoveSubcomponents, true);
+  }
+
+  draw(){
+      this.addReaction(this.addRemoveSubcomponents);
+  }
+
+  update(){
+      console.log(this.model.dataMap);
+  }
+
+  getDataForSubcomponent(id){
+    return [...this.data.get(id).values()];
+  }
+
+  get data() {
+    return this.model.dataMap.groupBy(this.MDL.facet.row);
   }
 
 
   addRemoveSubcomponents(){
     const {componentCssName} = this.options;
-    const {rowcolumn, ncolumns, nrows} = this.MDL.repeat;
-    const repeat = this.MDL.repeat;
+
+    const facetKeys = [...this.data.keys() ].sort(d3.ascending);
+    const ncolumns = 1;
+    const nrows = facetKeys.length;
 
     //The fr unit sets size of track as a fraction of the free space of grid container
     //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
@@ -27,34 +48,35 @@ class _Repeater extends BaseComponent {
       .style("grid-template-rows", "1fr ".repeat(nrows))
       .style("grid-template-columns", "1fr ".repeat(ncolumns));
 
-    let sections = this.element.selectAll(".vzb-repeat-inner")
-      .data(rowcolumn, d => repeat.getName(d));
+    let sections = this.element.selectAll(".vzb-facet-inner")
+      .data(facetKeys, getFacetId);
 
     sections.exit()
       .each(d => this.removeSubcomponent(d))
       .remove();      
 
     sections.enter().append("div")
-      .attr("class", "vzb-repeat-inner")
+      .attr("class", d => "vzb-facet-inner")
       //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
       //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
       .each(function(d){
         d3.select(this).append("div")
           .datum(null)
-          .attr("class", () => `${componentCssName} vzb-${repeat.getName(d)}`);
+          .attr("class", () => `${componentCssName} vzb-${getFacetId(d)}`);
       })
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
-      .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
-      .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1);
+      .style("grid-row-start", (d) => facetKeys.indexOf(d) + 1)
+      .style("grid-column-start", (_, i) => 0 + 1);
 
     this.services.layout._resizeHandler();
   }
 
 
   addSubcomponent(d){
+    console.log("adding", d)
     const {ComponentClass} = this.options;
-    const name = this.MDL.repeat.getName(d);
+    const name = getFacetId(d);
 
     const subcomponent = new ComponentClass({
       placeholder: ".vzb-" + name,
@@ -62,9 +84,8 @@ class _Repeater extends BaseComponent {
       name,
       parent: this,
       root: this.root,
-      state: {alias: d},
+      state: {alias: this.state.alias},
       services: this.services,
-      options: this.options.componentOptions,
       ui: this.ui,
       default_ui: this.DEFAULT_UI
     });
@@ -73,16 +94,18 @@ class _Repeater extends BaseComponent {
 
 
   removeSubcomponent(d){
-    const subcomponent = this.findChild({name: this.MDL.repeat.getName(d)});
+    console.log("removing", d)
+    const subcomponent = this.findChild({name: getFacetId(d)});
     if(subcomponent) {
       subcomponent.deconstruct();
     }
   }
 }
 
-_Repeater.DEFAULT_UI = {
+_Facet.DEFAULT_UI = {
 };
 
-export const Repeater = decorate(_Repeater, {
-  "MDL": computed
+export const Facet = decorate(_Facet, {
+  "MDL": computed,
+  "data": computed
 });
