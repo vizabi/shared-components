@@ -27,7 +27,7 @@ class _Repeater extends BaseComponent {
       .style("grid-template-rows", "1fr ".repeat(nrows))
       .style("grid-template-columns", "1fr ".repeat(ncolumns));
 
-    let sections = this.element.selectAll("div." + componentCssName)
+    let sections = this.element.selectAll(".vzb-repeat-inner")
       .data(rowcolumn, d => repeat.getName(d));
 
     sections.exit()
@@ -35,7 +35,14 @@ class _Repeater extends BaseComponent {
       .remove();      
 
     sections.enter().append("div")
-      .attr("class", d => `${componentCssName} vzb-${repeat.getName(d)}`)
+      .attr("class", "vzb-repeat-inner")
+      //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
+      //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
+      .each(function(d){
+        d3.select(this).append("div")
+          .datum(null)
+          .attr("class", () => `${componentCssName} vzb-${repeat.getName(d)}`);
+      })
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
