@@ -121,7 +121,7 @@ class BrushSlider extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-
+    if(this.element.classed("vzb-hidden")) return;
     if(this._updateLayoutProfile()) return;
 
     this.addReaction(this._updateSize);
