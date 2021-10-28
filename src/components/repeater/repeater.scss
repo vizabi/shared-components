@@ -1,6 +1,12 @@
 .vzb-tool {
-  .vzb-repeater {
+  .vzb-repeater,
+  .vzb-repeat-inner {
     display: grid;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .vzb-repeater {
     grid-column-start: 1;
     grid-column-end: 1;
     grid-row-start: 1;
