@@ -2,6 +2,10 @@ import {BaseComponent} from "../base-component.js";
 import {decorate, computed} from "mobx";
 import "./repeater.scss";
 
+function firstLastOrMiddle(index, total){
+  return {first: index === 0, last: index + 1 === total};
+}
+
 class _Repeater extends BaseComponent {
 
   get MDL(){
@@ -46,11 +50,23 @@ class _Repeater extends BaseComponent {
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
-      .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1);
+      .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
+      .each((d,i) => {
+        this.findChild({name: repeat.getName(d)}).state.positionInRepeat = this.getPosition(i)
+      });
 
     this.services.layout._resizeHandler();
   }
 
+  getPosition(i){
+    const repeat = this.MDL.repeat;
+    const {ncolumns, nrows} = repeat;
+
+    return {
+      row: firstLastOrMiddle(repeat.getRowIndex(i), nrows),
+      column: firstLastOrMiddle(repeat.getColumnIndex(i), ncolumns)
+    }
+  }
 
   addSubcomponent(d){
     const {repeatedComponent} = this.options;

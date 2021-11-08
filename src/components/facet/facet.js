@@ -5,6 +5,10 @@ import "./facet.scss";
 function getFacetId(d){
   return d;
 }
+
+function firstLastOrMiddle(index, total){
+  return {first: index === 0, last: index + 1 === total};
+}
 class _Facet extends BaseComponent {
 
   get MDL(){
@@ -19,11 +23,12 @@ class _Facet extends BaseComponent {
   }
 
   draw(){
-      this.addReaction(this.addRemoveSubcomponents);
+    this.addReaction(this.addRemoveSubcomponents);
+    this.addReaction(this.updatePositionInRepeat);
   }
 
-  update(){
-      console.log(this.model.dataMap);
+  updatePositionInRepeat(){
+    this.children.forEach(child => child.state.positionInRepeat = this.state.positionInRepeat);
   }
 
   getDataForSubcomponent(id){
@@ -45,7 +50,7 @@ class _Facet extends BaseComponent {
     //The fr unit sets size of track as a fraction of the free space of grid container
     //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
     this.element
-      .style("grid-template-rows", "1fr ".repeat(nrows))
+      .style("grid-template-rows", "30px " + "1fr ".repeat(nrows) + "35px")
       .style("grid-template-columns", "1fr ".repeat(ncolumns));
 
     let sections = this.element.selectAll(".vzb-facet-inner")
@@ -66,12 +71,35 @@ class _Facet extends BaseComponent {
       })
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
-      .style("grid-row-start", (d) => facetKeys.indexOf(d) + 1)
-      .style("grid-column-start", (_, i) => 0 + 1);
+      .style("grid-row-start", (d) => this.getPosition(facetKeys.indexOf(d)).row.start)
+      .style("grid-row-end", (d) => this.getPosition(facetKeys.indexOf(d)).row.end)
+      .style("grid-column-start", (_, i) => 0 + 1)
+
+      .classed("vzb-facet-row-first", d => this.getPosition(facetKeys.indexOf(d)).row.first)
+      .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
+      .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
+      .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
+ 
+      .each((d,i) => {
+        this.findChild({name: getFacetId(d)}).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
+      });
 
     this.services.layout._resizeHandler();
   }
 
+  getPosition(i){
+    const nrows = [...this.data.keys() ].length;
+    const ncolumns = 1;
+    const result = {
+      row: firstLastOrMiddle(i, nrows),
+      column: firstLastOrMiddle(0, ncolumns)
+    }
+
+    result.row.start = (result.row.first ? 0 : (i + 1)) + 1; //+1 is correction for 1-based numbers in css vs 0-based in array index
+    result.row.end = (result.row.last ? (nrows + 2) : (i + 2)) + 1;
+
+    return result;
+  }
 
   addSubcomponent(d){
     console.log("adding", d)
@@ -84,7 +112,10 @@ class _Facet extends BaseComponent {
       name,
       parent: this,
       root: this.root,
-      state: {alias: this.state.alias},
+      state: {
+        alias: this.state.alias, 
+        positionInRepeat: this.state.positionInRepeat
+      },
       services: this.services,
       ui: this.ui,
       default_ui: this.DEFAULT_UI
