@@ -17,7 +17,7 @@ class _Repeater extends BaseComponent {
 
 
   addRemoveSubcomponents(){
-    const {componentCssName} = this.options;
+    const {repeatedComponentCssClass} = this.options;
     const {rowcolumn, ncolumns, nrows} = this.MDL.repeat;
     const repeat = this.MDL.repeat;
 
@@ -41,7 +41,7 @@ class _Repeater extends BaseComponent {
       .each(function(d){
         d3.select(this).append("div")
           .datum(null)
-          .attr("class", () => `${componentCssName} vzb-${repeat.getName(d)}`);
+          .attr("class", () => `${repeatedComponentCssClass} vzb-${repeat.getName(d)}`);
       })
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
@@ -53,10 +53,10 @@ class _Repeater extends BaseComponent {
 
 
   addSubcomponent(d){
-    const {ComponentClass} = this.options;
+    const {repeatedComponent} = this.options;
     const name = this.MDL.repeat.getName(d);
 
-    const subcomponent = new ComponentClass({
+    const subcomponent = new repeatedComponent({
       placeholder: ".vzb-" + name,
       model: this.model,
       name,
@@ -64,7 +64,7 @@ class _Repeater extends BaseComponent {
       root: this.root,
       state: {alias: d},
       services: this.services,
-      options: this.options.componentOptions,
+      options: this.options.repeatedComponentOptions,
       ui: this.ui,
       default_ui: this.DEFAULT_UI
     });

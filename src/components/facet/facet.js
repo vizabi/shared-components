@@ -36,7 +36,7 @@ class _Facet extends BaseComponent {
 
 
   addRemoveSubcomponents(){
-    const {componentCssName} = this.options;
+    const {facetedComponentCssClass} = this.options;
 
     const facetKeys = [...this.data.keys() ].sort(d3.ascending);
     const ncolumns = 1;
@@ -62,7 +62,7 @@ class _Facet extends BaseComponent {
       .each(function(d){
         d3.select(this).append("div")
           .datum(null)
-          .attr("class", () => `${componentCssName} vzb-${getFacetId(d)}`);
+          .attr("class", () => `${facetedComponentCssClass} vzb-${getFacetId(d)}`);
       })
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
@@ -75,10 +75,10 @@ class _Facet extends BaseComponent {
 
   addSubcomponent(d){
     console.log("adding", d)
-    const {ComponentClass} = this.options;
+    const {facetedComponent} = this.options;
     const name = getFacetId(d);
 
-    const subcomponent = new ComponentClass({
+    const subcomponent = new facetedComponent({
       placeholder: ".vzb-" + name,
       model: this.model,
       name,
