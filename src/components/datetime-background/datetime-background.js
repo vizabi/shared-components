@@ -1,12 +1,17 @@
 import {BaseComponent} from "../base-component.js";
+import * as utils from "../../legacy/base/utils.js";
+import "./datetime-background.scss";
+
 import {decorate, computed} from "mobx";
 class DateTimeBackground extends BaseComponent {
 
   setup(conditions) {
     this.DOM = {
-      textEl: this.element.append("text").style("font-size", "20px"),
-      sampleTextEl: this.element.append("text").style("font-size", "20px").style("opacity", 0)
+      svg: this.element.append("svg"),
     };
+    this.DOM.group = this.DOM.svg.append("g");
+    this.DOM.textEl = this.DOM.group.append("text").style("font-size", "20px");
+    this.DOM.sampleTextEl = this.DOM.group.append("text").style("font-size", "20px").style("opacity", 0);
     
     this.element.classed("vzb-datetime-background", true);
 
@@ -23,36 +28,44 @@ class DateTimeBackground extends BaseComponent {
     this.xAlign = "center";
     this.yAlign = "center";
 
-    if (conditions) {
-      this.setConditions(conditions);
-    }
+    if (conditions) this.setConditions(conditions);
+  }
+
+  updateLayoutProfile(){
+    this.services.layout.size; //watch
+
+    //this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR, this.state.positionInFacet);
+    this.height = this.element.node().clientHeight || 0;
+    this.width = this.element.node().clientWidth || 0;
+
+    if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
   }
 
   setConditions(conditions) {
-    if (!isNaN(parseFloat(conditions.rightOffset)) && isFinite(conditions.rightOffset)) {
+    if (!isNaN(parseFloat(conditions.rightOffset)) && isFinite(conditions.rightOffset))
       this.rightOffset = conditions.rightOffset;
-    }
-    if (!isNaN(parseFloat(conditions.leftOffset)) && isFinite(conditions.leftOffset)) {
+    
+    if (!isNaN(parseFloat(conditions.leftOffset)) && isFinite(conditions.leftOffset))
       this.leftOffset = conditions.leftOffset;
-    }
-    if (!isNaN(parseFloat(conditions.topOffset)) && isFinite(conditions.topOffset)) {
+    
+    if (!isNaN(parseFloat(conditions.topOffset)) && isFinite(conditions.topOffset))
       this.topOffset = conditions.topOffset;
-    }
-    if (!isNaN(parseFloat(conditions.bottomOffset)) && isFinite(conditions.bottomOffset)) {
+    
+    if (!isNaN(parseFloat(conditions.bottomOffset)) && isFinite(conditions.bottomOffset))
       this.bottomOffset = conditions.bottomOffset;
-    }
-    if (conditions.xAlign) {
+    
+    if (conditions.xAlign)
       this.xAlign = conditions.xAlign;
-    }
-    if (conditions.yAlign) {
+    
+    if (conditions.yAlign)
       this.yAlign = conditions.yAlign;
-    }
-    if (!isNaN(parseFloat(conditions.widthRatio)) && conditions.widthRatio > 0 && conditions.widthRatio <= 1) {
+    
+    if (!isNaN(parseFloat(conditions.widthRatio)) && conditions.widthRatio > 0 && conditions.widthRatio <= 1)
       this.widthRatio = conditions.widthRatio;
-    }
-    if (!isNaN(parseFloat(conditions.heightRatio)) && conditions.heightRatio > 0 && conditions.heightRatio <= 1) {
+    
+    if (!isNaN(parseFloat(conditions.heightRatio)) && conditions.heightRatio > 0 && conditions.heightRatio <= 1)
       this.heightRatio = conditions.heightRatio;
-    }
+    
     return this;
   }
 
@@ -62,8 +75,30 @@ class DateTimeBackground extends BaseComponent {
     };
   }
 
+  get duration(){
+    //smooth animation is needed when playing, except for the case when time jumps from end to start
+    if(!this.MDL.frame || !this.MDL.frame.playing) return 0;
+    this.frameValue_1 = this.frameValue;
+    this.frameValue = this.MDL.frame.value;
+    return this.frameValue > this.frameValue_1 ? this.MDL.frame.speed : 0;
+  }
+
   draw() {
     this.localise = this.services.locale.auto(this.MDL.frame.interval);
+
+    if (this.updateLayoutProfile()) return; //return if exists with error
+
+    this.addReaction(this.updateText);
+    this.addReaction(this.updateSize);
+  }
+
+  updateText() {
+    this.setText(this.MDL.frame.value, this.duration);    
+  }
+
+  updateSize() {
+    this.services.layout.size; //watch
+    this._resizeText();
   }
 
   resizeText(width, height, topOffset, leftOffset) {
@@ -146,7 +181,7 @@ class DateTimeBackground extends BaseComponent {
     case "top": textEl.attr("dy", "0"); break;
     }
 
-    this.element.attr("transform", "translate(" + this._getLeftOffset() + "," + this._getTopOffset() + ")");
+    this.DOM.group.attr("transform", "translate(" + this._getLeftOffset() + "," + this._getTopOffset() + ")");
 
     return this;
   }
@@ -176,6 +211,7 @@ class DateTimeBackground extends BaseComponent {
 }
 
 const decorated = decorate(DateTimeBackground, {
-  "MDL": computed
+  "MDL": computed,
+  "duration": computed
 });
 export { decorated as DateTimeBackground };
