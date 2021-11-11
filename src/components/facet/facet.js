@@ -23,6 +23,8 @@ class _Facet extends BaseComponent {
   }
 
   draw(){
+
+    if (this.updateLayoutProfile()) return; //return if exists with error
     this.addReaction(this.addRemoveSubcomponents);
     this.addReaction(this.updatePositionInRepeat);
   }
@@ -39,6 +41,42 @@ class _Facet extends BaseComponent {
     return this.model.dataMap.groupBy(this.MDL.facet.row);
   }
 
+  get maxValues() {
+    const result = {};
+    [...this.data.keys() ].sort(d3.ascending).forEach(key => result[key] = this.model.dataMap.get(key).max)
+    return result;
+  }
+
+  get scaleDomainRange(){
+    return {
+      domain: d3.sum(Object.values(this.maxValues)),
+      range: this.height - 30 - 35
+    }
+  }
+
+  updateLayoutProfile(){
+    this.services.layout.size; //watch
+
+    //this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR, this.state.positionInFacet);
+    this.height = this.element.node().clientHeight || 0;
+    this.width = this.element.node().clientWidth || 0;
+
+    if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
+  }
+
+  _setProportions(){
+    const sumtotal = d3.sum(Object.values(this.maxValues));
+    const proportions = {};
+    Object.keys(this.maxValues).forEach(m => proportions[m] = this.maxValues[m]/sumtotal);
+
+    const templateString = [...this.data.keys() ].sort(d3.ascending).map(m => proportions[m] + "fr").join(" ");
+    console.log(templateString);
+    //The fr unit sets size of track as a fraction of the free space of grid container
+    //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
+    this.element
+      .style("grid-template-rows", "30px " + templateString + " 35px")
+      .style("grid-template-columns", "1fr ".repeat(1));
+  }
 
   addRemoveSubcomponents(){
     const {facetedComponentCssClass} = this.options;
@@ -47,11 +85,7 @@ class _Facet extends BaseComponent {
     const ncolumns = 1;
     const nrows = facetKeys.length;
 
-    //The fr unit sets size of track as a fraction of the free space of grid container
-    //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
-    this.element
-      .style("grid-template-rows", "30px " + "1fr ".repeat(nrows) + "35px")
-      .style("grid-template-columns", "1fr ".repeat(ncolumns));
+    this._setProportions();
 
     let sections = this.element.selectAll(".vzb-facet-inner")
       .data(facetKeys, getFacetId);
@@ -138,5 +172,7 @@ _Facet.DEFAULT_UI = {
 
 export const Facet = decorate(_Facet, {
   "MDL": computed,
-  "data": computed
+  "data": computed,
+  "maxValues": computed,
+  "scaleDomainRange": computed
 });
