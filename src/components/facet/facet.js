@@ -1,39 +1,39 @@
-import {BaseComponent} from "../base-component.js";
-import {decorate, computed} from "mobx";
+import { BaseComponent } from "../base-component.js";
+import { decorate, computed } from "mobx";
 import "./facet.scss";
 
-function getFacetId(d){
+function getFacetId(d) {
   return d;
 }
 
-function firstLastOrMiddle(index, total){
-  return {first: index === 0, last: index + 1 === total};
+function firstLastOrMiddle(index, total) {
+  return { first: index === 0, last: index + 1 === total };
 }
 class _Facet extends BaseComponent {
 
-  get MDL(){
+  get MDL() {
     return {
       facet: this.model.encoding.facet
     };
   }
 
 
-  loading(){
+  loading() {
     //this.addReaction(this.addRemoveSubcomponents, true);
   }
 
-  draw(){
+  draw() {
 
     if (this.updateLayoutProfile()) return; //return if exists with error
     this.addReaction(this.addRemoveSubcomponents);
     this.addReaction(this.updatePositionInRepeat);
   }
 
-  updatePositionInRepeat(){
+  updatePositionInRepeat() {
     this.children.forEach(child => child.state.positionInRepeat = this.state.positionInRepeat);
   }
 
-  getDataForSubcomponent(id){
+  getDataForSubcomponent(id) {
     return [...this.data.get(id).values()];
   }
 
@@ -43,18 +43,18 @@ class _Facet extends BaseComponent {
 
   get maxValues() {
     const result = {};
-    [...this.data.keys() ].sort(d3.ascending).forEach(key => result[key] = this.model.dataMap.get(key).max)
+    [...this.data.keys()].sort(d3.ascending).forEach(key => result[key] = this.model.dataMap.get(key).max)
     return result;
   }
 
-  get scaleDomainRange(){
+  get scaleDomainRange() {
     return {
       domain: d3.sum(Object.values(this.maxValues)),
       range: this.height - 30 - 35
     }
   }
 
-  updateLayoutProfile(){
+  updateLayoutProfile() {
     this.services.layout.size; //watch
 
     //this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR, this.state.positionInFacet);
@@ -64,12 +64,12 @@ class _Facet extends BaseComponent {
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
   }
 
-  _setProportions(){
+  _setProportions() {
     const sumtotal = d3.sum(Object.values(this.maxValues));
     const proportions = {};
-    Object.keys(this.maxValues).forEach(m => proportions[m] = this.maxValues[m]/sumtotal);
+    Object.keys(this.maxValues).forEach(m => proportions[m] = this.maxValues[m] / sumtotal);
 
-    const templateString = [...this.data.keys() ].sort(d3.ascending).map(m => proportions[m] + "fr").join(" ");
+    const templateString = [...this.data.keys()].sort(d3.ascending).map(m => proportions[m] + "fr").join(" ");
     console.log(templateString);
     //The fr unit sets size of track as a fraction of the free space of grid container
     //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
@@ -78,10 +78,10 @@ class _Facet extends BaseComponent {
       .style("grid-template-columns", "1fr ".repeat(1));
   }
 
-  addRemoveSubcomponents(){
-    const {facetedComponentCssClass} = this.options;
+  addRemoveSubcomponents() {
+    const { facetedComponentCssClass } = this.options;
 
-    const facetKeys = [...this.data.keys() ].sort(d3.ascending);
+    const facetKeys = [...this.data.keys()].sort(d3.ascending);
     const ncolumns = 1;
     const nrows = facetKeys.length;
 
@@ -92,19 +92,19 @@ class _Facet extends BaseComponent {
 
     sections.exit()
       .each(d => this.removeSubcomponent(d))
-      .remove();      
+      .remove();
 
     sections.enter().append("div")
       .attr("class", d => "vzb-facet-inner")
       //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
       //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
-      .each(function(d){
+      .each(function (d) {
         d3.select(this).append("div")
           .datum(null)
           .attr("class", () => `${facetedComponentCssClass} vzb-${getFacetId(d)}`);
       })
       .each(d => this.addSubcomponent(d))
-      .merge(sections)      
+      .merge(sections)
       .style("grid-row-start", (d) => this.getPosition(facetKeys.indexOf(d)).row.start)
       .style("grid-row-end", (d) => this.getPosition(facetKeys.indexOf(d)).row.end)
       .style("grid-column-start", (_, i) => 0 + 1)
@@ -113,16 +113,16 @@ class _Facet extends BaseComponent {
       .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
       .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
       .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
- 
-      .each((d,i) => {
-        this.findChild({name: getFacetId(d)}).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
+
+      .each((d, i) => {
+        this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
       });
 
     this.services.layout._resizeHandler();
   }
 
-  getPosition(i){
-    const nrows = [...this.data.keys() ].length;
+  getPosition(i) {
+    const nrows = [...this.data.keys()].length;
     const ncolumns = 1;
     const result = {
       row: firstLastOrMiddle(i, nrows),
@@ -135,9 +135,9 @@ class _Facet extends BaseComponent {
     return result;
   }
 
-  addSubcomponent(d){
+  addSubcomponent(d) {
     console.log("adding", d)
-    const {facetedComponent} = this.options;
+    const { facetedComponent } = this.options;
     const name = getFacetId(d);
 
     const subcomponent = new facetedComponent({
@@ -147,7 +147,7 @@ class _Facet extends BaseComponent {
       parent: this,
       root: this.root,
       state: {
-        alias: this.state.alias, 
+        alias: this.state.alias,
         positionInRepeat: this.state.positionInRepeat
       },
       services: this.services,
@@ -158,10 +158,10 @@ class _Facet extends BaseComponent {
   }
 
 
-  removeSubcomponent(d){
+  removeSubcomponent(d) {
     console.log("removing", d)
-    const subcomponent = this.findChild({name: getFacetId(d)});
-    if(subcomponent) {
+    const subcomponent = this.findChild({ name: getFacetId(d) });
+    if (subcomponent) {
       subcomponent.deconstruct();
     }
   }
