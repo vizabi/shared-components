@@ -6,6 +6,9 @@
     position: absolute;
     width: 100%;
     height: 100%;
+    -webkit-touch-callout: none;
+    user-select: none;
+    pointer-events: none;
     svg {
       width: 100%;
       height: 100%;
@@ -13,9 +16,6 @@
         @include opacity(.3);
         fill: $vzb-color-primary;
         text-anchor: middle;
-        -webkit-touch-callout: none;
-        user-select: none;
-        pointer-events: none;
       }
     }
   }
