@@ -2,6 +2,10 @@ import {BaseComponent} from "../base-component.js";
 import {decorate, computed} from "mobx";
 import "./repeater.scss";
 
+function firstLastOrMiddle(index, total){
+  return {first: index === 0, last: index + 1 === total};
+}
+
 class _Repeater extends BaseComponent {
 
   get MDL(){
@@ -17,7 +21,7 @@ class _Repeater extends BaseComponent {
 
 
   addRemoveSubcomponents(){
-    const {componentCssName} = this.options;
+    const {repeatedComponentCssClass} = this.options;
     const {rowcolumn, ncolumns, nrows} = this.MDL.repeat;
     const repeat = this.MDL.repeat;
 
@@ -41,22 +45,34 @@ class _Repeater extends BaseComponent {
       .each(function(d){
         d3.select(this).append("div")
           .datum(null)
-          .attr("class", () => `${componentCssName} vzb-${repeat.getName(d)}`);
+          .attr("class", () => `${repeatedComponentCssClass} vzb-${repeat.getName(d)}`);
       })
       .each(d => this.addSubcomponent(d))
       .merge(sections)      
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
-      .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1);
+      .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
+      .each((d,i) => {
+        this.findChild({name: repeat.getName(d)}).state.positionInRepeat = this.getPosition(i)
+      });
 
     this.services.layout._resizeHandler();
   }
 
+  getPosition(i){
+    const repeat = this.MDL.repeat;
+    const {ncolumns, nrows} = repeat;
+
+    return {
+      row: firstLastOrMiddle(repeat.getRowIndex(i), nrows),
+      column: firstLastOrMiddle(repeat.getColumnIndex(i), ncolumns)
+    }
+  }
 
   addSubcomponent(d){
-    const {ComponentClass} = this.options;
+    const {repeatedComponent} = this.options;
     const name = this.MDL.repeat.getName(d);
 
-    const subcomponent = new ComponentClass({
+    const subcomponent = new repeatedComponent({
       placeholder: ".vzb-" + name,
       model: this.model,
       name,
@@ -64,6 +80,7 @@ class _Repeater extends BaseComponent {
       root: this.root,
       state: {alias: d},
       services: this.services,
+      options: this.options.repeatedComponentOptions,
       ui: this.ui,
       default_ui: this.DEFAULT_UI
     });

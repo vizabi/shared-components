@@ -2,18 +2,13 @@
   .vzb-dialogs-dialog {
     &[data-dlg="timedisplay"] {
       min-height: 128px;
-      .vzb-dialog-content.vzb-dialog-content-fixed {
-        max-height: 128px;
-        padding: 0;
-        fill: $vzb-color-primary-strong;
-        opacity: 0.5;
-
-        svg {
-          height: 120px;
-          width: 100%;
-        }
-        .vzb-timedisplay {
-          text-anchor: middle;
+      .vzb-dialog-modal{
+        height: 100%;
+        .vzb-dialog-content.vzb-dialog-content-fixed {
+          fill: $vzb-color-primary-strong;
+          padding: 0;
+          height: 128px;
+          overflow: hidden;
         }
       }
     }

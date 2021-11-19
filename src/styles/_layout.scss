@@ -12,6 +12,17 @@
   grid-template-columns: auto $size-button-list;
   grid-template-rows: auto $size-animation;
 
+  .vzb-chart {
+    display: grid;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    grid-column-start: 1;
+    grid-column-end: 1;
+    grid-row-start: 1;
+    grid-row-end: 1;
+  }
+
   .vzb-animationcontrols {
     direction: ltr;
     
