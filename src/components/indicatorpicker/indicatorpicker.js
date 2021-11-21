@@ -96,8 +96,12 @@ export class IndicatorPicker extends BaseComponent {
           // entity domain or set and may gave an extra model to resolve names from  
           if (this.state.hoverKeyLabels && this.state.hoverKeyLabels[hoverKey] != null)
             selectText = this.state.hoverKeyLabels[hoverKey];
-          else
+          else if (hoverKey[0] && hoverKey[0] == "<") {
+            //case if entity data is <svg>...</svg>
+            selectText = Utils.getConceptShortName(this.MDL.model, this.localise);
+          } else {
             selectText = this.localise(hoverKey);
+          }
         } else {        
           selectText = this.localise(hoverKey);
         }
