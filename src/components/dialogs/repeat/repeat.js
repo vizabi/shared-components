@@ -97,11 +97,11 @@ class Repeat extends Dialog {
       .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
       .html(() => ncolumns == 1 && nrows == 1 ? localise("hint/repeat/pressplus") : "")
       .on("mouseover", (event, d) => {
-        d3.select(".vzb-" + repeat.getName(d))
+        this.root.element.select(".vzb-" + repeat.getName(d))
           .classed("vzb-chart-highlight", true);
       })
       .on("mouseout", (event, d) => {
-        d3.select(".vzb-" + repeat.getName(d))
+        this.root.element.select(".vzb-" + repeat.getName(d))
           .classed("vzb-chart-highlight", false);
       });
 
@@ -119,7 +119,7 @@ class Repeat extends Dialog {
         .on("mouseover", (_, i) => {
           rowcolumn.forEach((d, index) => {
             if (index % ncolumns == i)
-              d3.select(".vzb-" + repeat.getName(d))
+              this.root.element.select(".vzb-" + repeat.getName(d))
                 .classed("vzb-chart-removepreview", true);
           });
         })
@@ -142,7 +142,7 @@ class Repeat extends Dialog {
         .on("mouseover", (_, i) => {
           rowcolumn.forEach((d, index) => {
             if (Math.floor(index / ncolumns) == i)
-              d3.select(".vzb-" + repeat.getName(d))
+              this.root.element.select(".vzb-" + repeat.getName(d))
                 .classed("vzb-chart-removepreview", true);
           });
         })
@@ -164,7 +164,7 @@ class Repeat extends Dialog {
       .on("mouseover", () => {
         rowcolumn.forEach((d, i) => {
           if ((i + 1) % ncolumns == 0)
-            d3.select(".vzb-" + repeat.getName(d))
+            this.root.element.select(".vzb-" + repeat.getName(d))
               .classed("vzb-chart-addrightpreview", true);
         });
       })
@@ -185,7 +185,7 @@ class Repeat extends Dialog {
       .on("mouseover", () => {
         rowcolumn.forEach((d, i) => {
           if (Math.floor(i / ncolumns) + 1 == nrows)
-            d3.select(".vzb-" + repeat.getName(d))
+            this.root.element.select(".vzb-" + repeat.getName(d))
               .classed("vzb-chart-addbelowpreview", true);
         });
       })
@@ -196,7 +196,7 @@ class Repeat extends Dialog {
 
   _clearHoverClasses(array, cssclass){
     array.forEach(d => {
-      const selection = d3.select(".vzb-" + this.MDL.repeat.getName(d));
+      const selection = this.root.element.select(".vzb-" + this.MDL.repeat.getName(d));
 
       if(!cssclass || cssclass == "vzb-chart-highlight")
         selection.classed("vzb-chart-highlight", false);

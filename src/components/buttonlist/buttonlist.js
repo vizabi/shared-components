@@ -465,7 +465,7 @@ export class ButtonList extends BaseComponent {
 
   scrollToEnd() {
     let target = 0;
-    const parent = d3.select(".vzb-tool");
+    const parent = this.root.element;
 
     if (parent.classed("vzb-portrait") && parent.classed("vzb-small")) {
       if (this.model.state.marker.select.length > 0) target = this.element.node().scrollWidth;

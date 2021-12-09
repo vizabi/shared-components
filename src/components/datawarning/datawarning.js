@@ -29,7 +29,7 @@ class _DataWarning extends BaseComponent {
       close: this.element.select(".vzb-data-warning-close"),
       title: this.element.select(".vzb-data-warning-title"),
       body: this.element.select(".vzb-data-warning-body"),
-      button: d3.select(this.options.button)
+      button: this.root.element.select(this.options.button)
     };
     
     this.element.classed("vzb-hidden", true);
