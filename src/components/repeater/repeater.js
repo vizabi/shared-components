@@ -47,7 +47,7 @@ class _Repeater extends BaseComponent {
           .datum(null)
           .attr("class", () => `${repeatedComponentCssClass} vzb-${repeat.getName(d)}`);
       })
-      .each(d => this.addSubcomponent(d))
+      .each((d,i) => this.addSubcomponent(d,i))
       .merge(sections)      
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
       .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
@@ -68,11 +68,12 @@ class _Repeater extends BaseComponent {
     }
   }
 
-  addSubcomponent(d){
+  addSubcomponent(d, index){
     const {repeatedComponent} = this.options;
     const name = this.MDL.repeat.getName(d);
 
     const subcomponent = new repeatedComponent({
+      id: this.id + "-" + index,
       placeholder: ".vzb-" + name,
       model: this.model,
       name,
