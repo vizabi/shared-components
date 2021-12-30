@@ -107,7 +107,7 @@ class Repeat extends Dialog {
 
     if (ncolumns > 1) {
       this.DOM.grid.selectAll("div.vzb-repeat-removecolumn")
-        .data(Array(ncolumns))
+        .data(d3.range(ncolumns))
         .enter().append("div")
         .attr("class", "vzb-repeat-removecolumn")
         .html("✖︎")
@@ -130,7 +130,7 @@ class Repeat extends Dialog {
 
     if (nrows > 1) {
       this.DOM.grid.selectAll("div.vzb-repeat-removerow")
-        .data(Array(nrows))
+        .data(d3.range(nrows))
         .enter().append("div")
         .attr("class", "vzb-repeat-removerow")
         .html("✖︎")
