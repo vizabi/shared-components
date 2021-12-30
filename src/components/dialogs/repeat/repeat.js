@@ -238,7 +238,7 @@ class Repeat extends Dialog {
     runInAction(() => {
       if(useConnectedRowsAndColumns) {
         const newEncName = this._generateEncodingNames(direction);
-        this.model.config.encoding[newEncName] = {data: {concept: this._getConceptOfLast(direction)}};
+        this.model.config.encoding[newEncName] = {data: this._getConceptAndSourceAndSpaceOfLast(direction)};
         this.MDL.repeat.config[direction].push(newEncName);
       } else {
         this.MDL.repeat.config.rowcolumn = this.MDL.repeat.rowcolumn;
@@ -246,7 +246,7 @@ class Repeat extends Dialog {
           for (let i = 1; i <= nrows; i++) {
             const newEncNames = this._generateEncodingNames();
             allowEnc.forEach(e => {
-              this.model.config.encoding[newEncNames[e]] = {data: {concept: this._getConceptOfLast(e)}};
+              this.model.config.encoding[newEncNames[e]] = {data: this._getConceptAndSourceAndSpaceOfLast(e)};
             });
             this.MDL.repeat.config.rowcolumn.splice(i * ncolumns, 0, newEncNames);
           }
@@ -256,7 +256,7 @@ class Repeat extends Dialog {
           for (let i = 1; i <= ncolumns; i++) {
             const newEncNames = this._generateEncodingNames();
             allowEnc.forEach(e => {
-              this.model.config.encoding[newEncNames[e]] = {data: {concept: this._getConceptOfLast(e)}};
+              this.model.config.encoding[newEncNames[e]] = {data: this._getConceptAndSourceAndSpaceOfLast(e)};
             });
             this.MDL.repeat.config.rowcolumn.push(newEncNames);
           }
@@ -265,7 +265,7 @@ class Repeat extends Dialog {
     });
   }
 
-  _getConceptOfLast(arg){
+  _getConceptAndSourceAndSpaceOfLast(arg){
     const {rowcolumn, allowEnc} = this.MDL.repeat;
 
     let alias = arg;
@@ -277,10 +277,12 @@ class Repeat extends Dialog {
       alias = allowEnc[1];
 
     return rowcolumn
-      .map(d => this.model.encoding[d[alias]]?.data?.concept)
-      .filter(f => f)
-      .at(-1) || "population_total";
+      .map(d => this.model.encoding[d[alias]]?.data)
+      .filter(f => f?.concept)
+      .map(d => Object.assign({ concept: d.concept }, d.config.source ? { source: d.config.source } : {}, d.config.space ? { space: d.config.space.slice(0) } : {}))
+      .at(-1) || { concept: "population_total" };
   }
+
   _generateEncodingNames(direction){
     const {allowEnc} = this.MDL.repeat;
 
