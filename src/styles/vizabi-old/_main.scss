@@ -478,6 +478,7 @@ $vzb-button-expand-width: 290px;
 
   //Data warning
   .vzb-datawarning-button {
+    pointer-events: visible;
     cursor: pointer;
     fill: $vzb-color-accent-orange;
 
