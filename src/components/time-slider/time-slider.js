@@ -196,7 +196,7 @@ class TimeSlider extends BaseComponent {
 
   _configEndBeforeForecast() {
     const frame = this.MDL.frame;
-    const { offset, floor } = this.services.Vizabi.Vizabi.utils.interval(frame.data.concept);
+    const { offset, floor } = this.services.Vizabi.Vizabi.utils.interval(frame.interval);
     if (!this.root.ui.chart.endBeforeForecast) {
       const stepBack = floor(offset(new Date(), -1));
       this.root.ui.chart.endBeforeForecast = frame.formatValue(stepBack);
