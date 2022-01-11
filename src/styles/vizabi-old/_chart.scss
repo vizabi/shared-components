@@ -85,7 +85,7 @@
   }
   .tick line,
   .tick-minor {
-    stroke-dasharray: 1 3;
+    stroke: $vzb-color-grey-light;
   }
   text {
     @extend %vzb-chart-ticks;
@@ -94,22 +94,19 @@
 %vzb-chart-axis-medium {
   .tick line,
   .tick-minor {
-    stroke: $vzb-color-primary-black;
-    stroke-dasharray: 1 6;
+    stroke: $vzb-color-grey-light;
   }
 }
 %vzb-chart-axis-large {
   .tick line,
   .tick-minor {
     stroke: $vzb-color-grey-light;
-    stroke-dasharray: none;
   }
 }
 %vzb-chart-axis-presentation {
   .tick line,
   .tick-minor {
     stroke: none;
-    stroke-dasharray: none;
   }
 }
 
