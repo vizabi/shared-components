@@ -350,7 +350,7 @@ function dialogDrag(element, container, xOffset) {
         posX = evt.sourceEvent.clientX;
         posY = evt.sourceEvent.clientY;
       } else {
-        const touchCoord = d3.pointer(container.node());
+        const touchCoord = d3.pointer(evt, container.node());
         posX = touchCoord[0][0];
         posY = touchCoord[0][1];
       }
@@ -373,7 +373,7 @@ function dialogDrag(element, container, xOffset) {
         posX = evt.sourceEvent.clientX;
         posY = evt.sourceEvent.clientY;
       } else {
-        const touchCoord = d3.pointer(container.node());
+        const touchCoord = d3.pointer(evt, container.node());
         posX = touchCoord[0][0];
         posY = touchCoord[0][1];
       }

@@ -13,7 +13,7 @@ export default class TextEllipsis {
     const _this = this;
     return {
       mouseOver(event) {
-        const mouse = d3.pointer(event);
+        const mouse = d3.pointer(event, _this.context.element.node());
         _this._setTooltip(d3.select(event.target).attr("data-text"), mouse[0], mouse[1]);
       },
       mouseOut() {
