@@ -1,5 +1,6 @@
 import { Dialog } from "../dialog";
 import {decorate, computed, runInAction} from "mobx";
+import { SimpleCheckbox } from "../../simplecheckbox/simplecheckbox";
 
 /*
  * Repeat dialog
@@ -18,7 +19,9 @@ class Repeat extends Dialog {
         </div>
 
         <div class="vzb-dialog-content">
-          <div class="vzb-repeat-header"></div>
+          <div class="vzb-repeat-header">
+            <div class="vzb-useConnectedRowsAndColumns-switch"></div>
+          </div>
           <div class="vzb-repeat-body">
             <div class="vzb-repeat-grid"></div>
           </div>
@@ -31,6 +34,16 @@ class Repeat extends Dialog {
         </div>
       </div>
     `;
+
+    config.subcomponents = [{
+      type: SimpleCheckbox,
+      placeholder: ".vzb-useConnectedRowsAndColumns-switch",
+      options: {
+        checkbox: "useConnectedRowsAndColumns",
+        submodelFunc: () => this.MDL.repeat,
+        setCheckboxFunc: (value) => this.MDL.repeat.config.useConnectedRowsAndColumns = value
+      }
+    }];
 
     super(config);
   }
@@ -60,14 +73,16 @@ class Repeat extends Dialog {
   drawHeader(){
     const header = this.DOM.header;
     const localise = this.services.locale.auto();
-    const {allowEnc, useConnectedRowsAndColumns} = this.MDL.repeat;
+    const {allowEnc, row, column, useConnectedRowsAndColumns} = this.MDL.repeat;
 
     header.selectAll("p").remove();
-    header.append("p")
-      .attr("class", "vzb-repeat-experimental")
-      .html(localise("hint/experimentalfeature"));
-    header.append("p")
+
+    header.insert("p", "div")
+      .attr("class", "vzb-dialog-sublabel")
       .html(localise("hint/repeat/addremovecharts"));
+
+    header.select(".vzb-useConnectedRowsAndColumns-switch")
+      .classed("vzb-hidden", !(row && row.length && column && column.length && allowEnc.length === 2))
 
     if (useConnectedRowsAndColumns) {
       header.append("p")
