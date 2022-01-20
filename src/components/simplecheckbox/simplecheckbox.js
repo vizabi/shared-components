@@ -74,7 +74,7 @@ export class SimpleCheckbox extends BaseComponent {
 
   _setModel(value) {
     if (this.options.setCheckboxFunc) {
-      this.MDL.model[this.options.setCheckboxFunc](value);
+      this.options.setCheckboxFunc(value);
     } else {
       this.MDL.model[this.options.checkbox] = value;
     }
