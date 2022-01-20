@@ -41,7 +41,6 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
   }
 };
 
-
 const OPTIONS = {
   LABELS_CONTAINER_CLASS: "",
   LINES_CONTAINER_CLASS: "",
@@ -91,50 +90,11 @@ class Labels extends BaseComponent {
 
   draw() {
     this.addReaction(this._updateLayoutProfile);
-
-    //this._clearInitialFontSize();
     this.addReaction(this.selectDataPoints);
     this.addReaction(this.updateSizeTextScale);
     this.addReaction(this.updateLabelSizeLimits);
     this.addReaction(this.updateLabelsOnlyTextSize);
   }
-
-  readyOnce() {
-    //const _this = this;
-
-    // this.model.on("change:marker.select", (evt, path) => {
-    //   if (!_this.context._readyOnce) return;
-    //   if (path.indexOf("select.labelOffset") !== -1) return;
-
-    //   //console.log("EVENT change:entities:select");
-    //   _this.selectDataPoints();
-    // });
-
-    // if (this.model.marker.size_label)
-    //   this.model.on("change:marker.size_label.extent", (evt, path) => {
-    //     //console.log("EVENT change:marker:size:max");
-    //     if (!_this.context._readyOnce) return;
-    //     _this.updateLabelSizeLimits();
-    //     if (_this.model.time.splash) return;
-    //     _this.updateLabelsOnlyTextSize();
-    //   });
-
-    // if (this.model.ui.chart.labels.hasOwnProperty("removeLabelBox"))
-    //   this.model.on("change:ui.chart.labels.removeLabelBox", (evt, path) => {
-    //     //console.log("EVENT change:marker:size:max");
-    //     if (!_this.context._readyOnce) return;
-    //     _this.updateLabelsOnlyTextSize();
-    //   });
-
-    // if (this.model.ui.chart.labels.hasOwnProperty("enabled"))
-    //   this.model.on("change:ui.chart.labels.enabled", (evt, path) => {
-    //     if (!_this.context._readyOnce) return;
-    //     _this.selectDataPoints();
-    //   });
-    
-  }
-
-
 
   updateLabelSizeLimits() {
     if (!this.MDL.size_label) return;
@@ -406,7 +366,7 @@ class Labels extends BaseComponent {
     if (!cached.textWidth || cached.textWidth != contentBBox.width) {
       cached.textWidth = contentBBox.width;
 
-      const labelCloseHeight = _this._closeCrossHeight || contentBBox.height;//_this.profileConstants.infoElHeight * 1.2;//contentBBox.height;
+      const labelCloseHeight = _this._closeCrossHeight || contentBBox.height;
 
       const isRTL = _this.services.locale.isRTL();
       const labelCloseGroup = labelGroup.select("." + _cssPrefix + "-label-x")
@@ -436,14 +396,6 @@ class Labels extends BaseComponent {
     if (glowRect.attr("stroke") !== cached.scaledC0) {
       glowRect.attr("stroke", cached.scaledC0);
     }
-  }
-
-  _clearInitialFontSize() {
-    utils.forEach(this.cached, cache => {
-      if (!cache) return;
-      cache.initFontSize = null;
-      cache.initTextBBox = null;
-    });
   }
 
   updateLabelCloseGroupSize(labelCloseGroup, labelCloseHeight) {
