@@ -10,18 +10,21 @@ const PROFILE_CONSTANTS = {
     minLabelTextSize: 7,
     maxLabelTextSize: 21,
     defaultLabelTextSize: 12,
+    closeCrossSize: 16 * 1.2,
     labelLeashCoeff: 0.4
   },
   MEDIUM: {
     minLabelTextSize: 7,
     maxLabelTextSize: 30,
     defaultLabelTextSize: 15,
+    closeCrossSize: 20 * 1.2,
     labelLeashCoeff: 0.3
   },
   LARGE: {
     minLabelTextSize: 6,
     maxLabelTextSize: 48,
     defaultLabelTextSize: 20,
+    closeCrossSize: 22 * 1.2,
     labelLeashCoeff: 0.2
   }
 };
@@ -31,12 +34,14 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
     minLabelTextSize: 15,
     maxLabelTextSize: 35,
     defaultLabelTextSize: 15,
+    closeCrossSize: 26 * 1.2,
     labelLeashCoeff: 0.3
   },
   LARGE: {
     minLabelTextSize: 20,
     maxLabelTextSize: 55,
     defaultLabelTextSize: 20,
+    closeCrossSize: 32 * 1.2,
     labelLeashCoeff: 0.2
   }
 };
@@ -94,6 +99,8 @@ class Labels extends BaseComponent {
     this.addReaction(this.updateSizeTextScale);
     this.addReaction(this.updateLabelSizeLimits);
     this.addReaction(this.updateLabelsOnlyTextSize);
+    this.addReaction(this.updateCloseCrossHeight);
+    this.addReaction(this.updateTooltipFontSize);
   }
 
   updateLabelSizeLimits() {
@@ -139,10 +146,14 @@ class Labels extends BaseComponent {
     this._yScale = yScale;
   }
 
-  setCloseCrossHeight(closeCrossHeight) {
+  updateCloseCrossHeight() {
+    this.services.layout.size;
+    const closeCrossHeight = this.profileConstants.closeCrossSize;
+
     if (this._closeCrossHeight != closeCrossHeight) {
       this._closeCrossHeight = closeCrossHeight;
-      this.updateLabelCloseGroupSize(this.entityLabels.selectAll("." + this.options.CSS_PREFIX + "-label-x"), this._closeCrossHeight);
+      if (this.entityLabels)
+        this.updateLabelCloseGroupSize(this.entityLabels.selectAll("." + this.options.CSS_PREFIX + "-label-x"), this._closeCrossHeight);
     }
   }
 
@@ -215,6 +226,7 @@ class Labels extends BaseComponent {
 
   highlight(d, highlight) {
     let labels = this.entityLabels;
+    if (!labels) return;
     if (d) {
       labels = labels.filter(f => d ? key(f) == key(d) : true);
     }
@@ -310,8 +322,9 @@ class Labels extends BaseComponent {
     }
   }
 
-  setTooltipFontSize(fontSize) {
-    this.tooltipEl.style("font-size", fontSize);
+  updateTooltipFontSize() {
+    this.services.layout.size;
+    this.tooltipEl.style("font-size", this.profileConstants.defaultLabelTextSize);
   }
 
   _updateLabelSize(d, cache, labelGroup, valueLST, text) {
