@@ -136,7 +136,7 @@ class ColorLegend extends BaseComponent {
     if (this._legendHasOwnModel() && !this._isLegendModelReady()) return;
 
     const individualColors = false;
-    this._updateListLegend(this.MDL.color.scale.isDiscrete() && !this.canShowMap && !individualColors);
+    this._updateListLegend(this.MDL.color.scale.isDiscrete() && !this.canShowMap && !individualColors && !this.MDL.color.scale.isPattern);
     this._updateMinimapLegend(this.MDL.color.scale.isDiscrete() && this.canShowMap);
     updateRainbowLegend.bind(this)(!this.MDL.color.scale.isDiscrete());
   }
