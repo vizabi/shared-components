@@ -87,7 +87,7 @@ export class IndicatorPicker extends BaseComponent {
         const constant = this.MDL.model.data.constant;
         const scaleModelType = this.MDL.model.scale.config.modelType;
         selectText = this.localise("indicator/" + constant + (scaleModelType ? "/" + scaleModelType : ""));
-      } else if (this.showHoverValues && this.MDL.highlighted.data.filter.any()) {
+      } else if (this.showHoverValues && this.MDL.highlighted.data.filter.any() && !this.MDL.model.scale.isPattern) {
         const highlightedMarkers = this.MDL.highlighted.data.filter.markers;
         const [key, payload] = highlightedMarkers.entries().next().value;
         const hoverKey = (this.model.dataMap.getByStr(key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
@@ -96,12 +96,8 @@ export class IndicatorPicker extends BaseComponent {
           // entity domain or set and may gave an extra model to resolve names from  
           if (this.state.hoverKeyLabels && this.state.hoverKeyLabels[hoverKey] != null)
             selectText = this.state.hoverKeyLabels[hoverKey];
-          else if (hoverKey[0] && hoverKey[0] == "<") {
-            //case if entity data is <svg>...</svg>
-            selectText = Utils.getConceptShortName(this.MDL.model, this.localise);
-          } else {
-            selectText = this.localise(hoverKey);
-          }
+          else
+            selectText = this.localise(hoverKey);          
         } else {        
           selectText = this.localise(hoverKey);
         }
