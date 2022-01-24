@@ -687,6 +687,7 @@ export class TreeMenu extends BaseComponent {
 
         const allowedTypes = _this._targetModel.scale.allowedTypes;
         const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
+        const isString = indicatorsDB[f].concept_type == "string";
         const isMeasure = indicatorsDB[f].concept_type == "measure";
         const isTime = indicatorsDB[f].concept_type == "time";
         const isConstant = f === "_default"; //TODO: refactor constants
@@ -708,6 +709,9 @@ export class TreeMenu extends BaseComponent {
           if (allowedTypes.includes("ordinal")) return true;
         } else if (isConstant) {
           //for constants need a ordinal scale to be allowed
+          if (allowedTypes.includes("ordinal")) return true;
+        } else if (isString) {
+          //for strings need a ordinal scale to be allowed
           if (allowedTypes.includes("ordinal")) return true;
         } else if (isMeasure){
           // for measures need linear or log or something
