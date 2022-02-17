@@ -13,7 +13,8 @@ class _Facet extends BaseComponent {
 
   get MDL() {
     return {
-      facet: this.model.encoding.facet
+      facet_row: this.model.encoding.facet_row,
+      facet_column: this.model.encoding.facet_column
     };
   }
 
@@ -38,12 +39,12 @@ class _Facet extends BaseComponent {
   }
 
   get data() {
-    return this.model.dataMap.groupBy(this.MDL.facet.row);
+    return this.model.dataMap.order("facet_row").groupBy("facet_row");
   }
 
   get maxValues() {
     const result = {};
-    [...this.data.keys()].sort(d3.ascending).forEach(key => result[key] = this.model.dataMap.get(key).max)
+    [...this.data.keys()].forEach(key => result[key] = this.model.dataMap.get(key)?.maxheight)
     return result;
   }
 
@@ -65,11 +66,11 @@ class _Facet extends BaseComponent {
   }
 
   _setProportions() {
-    const sumtotal = d3.sum(Object.values(this.maxValues));
+    const sumtotal = d3.sum(Object.values(this.maxValues)) || Object.values(this.maxValues).length;
     const proportions = {};
-    Object.keys(this.maxValues).forEach(m => proportions[m] = this.maxValues[m] / sumtotal);
+    Object.keys(this.maxValues).forEach(m => proportions[m] = (this.maxValues[m] || 1) / sumtotal);
 
-    const templateString = [...this.data.keys()].sort(d3.ascending).map(m => proportions[m] + "fr").join(" ");
+    const templateString = [...this.data.keys()].map(m => proportions[m] + "fr").join(" ");
     console.log(templateString);
     //The fr unit sets size of track as a fraction of the free space of grid container
     //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
@@ -81,7 +82,7 @@ class _Facet extends BaseComponent {
   addRemoveSubcomponents() {
     const { facetedComponentCssClass } = this.options;
 
-    const facetKeys = [...this.data.keys()].sort(d3.ascending);
+    const facetKeys = [...this.data.keys()];
     const ncolumns = 1;
     const nrows = facetKeys.length;
 
