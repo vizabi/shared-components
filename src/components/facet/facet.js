@@ -14,7 +14,8 @@ class _Facet extends BaseComponent {
   get MDL() {
     return {
       facet_row: this.model.encoding.facet_row,
-      facet_column: this.model.encoding.facet_column
+      facet_column: this.model.encoding.facet_column,
+      maxheight: this.model.encoding.maxheight
     };
   }
 
@@ -44,7 +45,11 @@ class _Facet extends BaseComponent {
 
   get maxValues() {
     const result = {};
-    [...this.data.keys()].forEach(key => result[key] = this.model.dataMap.get(key)?.maxheight)
+    [...this.data.keys()].forEach(key => {
+      const sum = d3.sum([...this.data.get(key).values()].map(m=>m.maxheight));
+      const limit = this.MDL.maxheight.config.limit;
+      result[key] = (sum > limit ? limit : sum);
+    })
     return result;
   }
 
