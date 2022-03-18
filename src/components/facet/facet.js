@@ -40,7 +40,7 @@ class _Facet extends BaseComponent {
   }
 
   get data() {
-    return this.model.dataMap.order("facet_row").groupBy("facet_row");
+    return this.model.dataMap.order("facet_row").groupByWithMultiGroupMembership("facet_row");
   }
 
   get maxValues() {
