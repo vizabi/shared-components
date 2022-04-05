@@ -128,15 +128,19 @@ export function clearEmpties(obj) {
   return obj;
 }
 
-export function mergeInTarget(target, source) {
+export function mergeInTarget(target, source, blocks = [], keystack = "") {
   for (const key in source) {
     if (typeof source[key] === "object" && !Array.isArray(source[key]) && source[key] !== null) {
-      if (target[key]) {
-        mergeInTarget(target[key], source[key]);
+      //if an object exists in target and it's not declared a block
+      if ( target[key] && !blocks.some(s => (keystack + "." + key).endsWith(s)) ) {
+        //recursively merge that object in target, pass on possible blocks and increment the keystack
+        mergeInTarget(target[key], source[key], blocks, keystack + "." + key);
       } else {
+        //create new object by cloning from source
         target[key] = deepExtend({}, source[key]);
       }
     } else {
+      //replace target prop with one from the source
       target[key] = source[key];
     }
   }
