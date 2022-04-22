@@ -239,7 +239,11 @@ export class ButtonList extends BaseComponent {
     this._addButtons(button_list, button_expand);
     this.addReaction(this._localiseButtons);
     this.addReaction(this._toggleButtons);
+    this.addReaction(this._bindButtonState);
 
+  }
+
+  _bindButtonState() {
     this.root.ui.buttons.buttons.forEach(buttonId => {
       const button = this._available_buttons[buttonId];
       if (button) {
@@ -259,7 +263,8 @@ export class ButtonList extends BaseComponent {
         }
       }
     });
-
+    //dispose reaction
+    this.reactions.get(this._bindButtonState)();
   }
 
   proceedClick(id) {
