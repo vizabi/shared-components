@@ -1,5 +1,6 @@
 import { BaseComponent } from "../base-component.js";
 import { decorate, computed } from "mobx";
+import * as utils from "../../legacy/base/utils.js"
 import "./facet.scss";
 
 function getFacetId(d) {
@@ -169,6 +170,8 @@ class _Facet extends BaseComponent {
     const subcomponent = this.findChild({ name: getFacetId(d) });
     if (subcomponent) {
       subcomponent.deconstruct();
+      const index = this.children.indexOf(subcomponent);
+      if (index >= 0) this.children.splice(index, 1);
     }
   }
 }
