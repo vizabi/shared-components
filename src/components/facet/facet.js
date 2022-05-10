@@ -44,6 +44,10 @@ class _Facet extends BaseComponent {
     return this.model.dataMap.order("facet_row").groupByWithMultiGroupMembership("facet_row");
   }
 
+  howManyFacets() {
+    return this.data.size;
+  }
+
   get maxValues() {
     const result = {};
     [...this.data.keys()].forEach(key => {
@@ -77,7 +81,7 @@ class _Facet extends BaseComponent {
     Object.keys(this.maxValues).forEach(m => proportions[m] = (this.maxValues[m] || 1) / sumtotal);
 
     const templateString = [...this.data.keys()].map(m => proportions[m] + "fr").join(" ");
-    console.log(templateString);
+    
     //The fr unit sets size of track as a fraction of the free space of grid container
     //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
     this.element
