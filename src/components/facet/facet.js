@@ -82,6 +82,10 @@ class _Facet extends BaseComponent {
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
   }
 
+  propagateInteractivity(callback){
+    this.children.forEach(chart => callback(chart));
+  }
+
   _setProportions() {
     const sumtotal = d3.sum(Object.values(this.maxValues)) || Object.values(this.maxValues).length;
     const proportions = {};
