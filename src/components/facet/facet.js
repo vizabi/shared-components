@@ -56,26 +56,27 @@ class _Facet extends BaseComponent {
   }
 
   get maxValues() {
-    const result = {};
-    [...this.data.keys()].forEach(key => {
+    return [...this.data.keys()].map(key => {
       const sum = d3.sum([...this.data.get(key).values()].map(m=>m.maxheight));
       const limit = this.MDL.maxheight.config.limit;
-      result[key] = (sum > limit ? limit : sum);
+      return {k: key, v: sum > limit ? limit : sum};
     })
-    return result;
   }
 
   get scaleDomainRange() {
     return {
-      domain: d3.sum(Object.values(this.maxValues)),
-      range: this.height - 30 - 35
+      domain: d3.sum(this.maxValues.map(m => m.v)),
+      range: this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom - (this.wastedHeight || 0)
     }
   }
 
   updateLayoutProfile() {
     this.services.layout.size; //watch
 
-    //this.profileConstants = this.services.layout.getProfileConstants(PROFILE_CONSTANTS, PROFILE_CONSTANTS_FOR_PROJECTOR, this.state.positionInFacet);
+    this.profileConstants = this.services.layout.getProfileConstants(
+      this.options.facetedComponent.PROFILE_CONSTANTS , 
+      this.options.facetedComponent.PROFILE_CONSTANTS_FOR_PROJECTOR
+    );
     this.height = this.element.node().clientHeight || 0;
     this.width = this.element.node().clientWidth || 0;
 
@@ -87,16 +88,23 @@ class _Facet extends BaseComponent {
   }
 
   _setProportions() {
-    const sumtotal = d3.sum(Object.values(this.maxValues)) || Object.values(this.maxValues).length;
-    const proportions = {};
-    Object.keys(this.maxValues).forEach(m => proportions[m] = (this.maxValues[m] || 1) / sumtotal);
+    const minHeight = this.profileConstants.minHeight;
+    let height = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
+    const sumtotal = d3.sum(this.maxValues.map(m => m.v)) || this.maxValues.length;
+    const proportions = this.maxValues.map(m => (m.v || 1) / sumtotal);
+    let heights = proportions.map(m => (height * m) < minHeight ? minHeight : (height * m));
 
-    const templateString = [...this.data.keys()].map(m => proportions[m] + "fr").join(" ");
+    this.wastedHeight = d3.sum(heights) - height;
+    heights = proportions.map(m => (height * m) < minHeight ? minHeight : ((height - this.wastedHeight) * m));
+
+    const templateString = heights.map(m => Math.floor(m) + "px").join(" ");
+
+    //const templateString = [...this.data.keys()].map(m => `minmax(${this.profileConstants.minHeight}px, ${proportions[m]}fr)`).join(" ");
     
     //The fr unit sets size of track as a fraction of the free space of grid container
     //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
     this.element
-      .style("grid-template-rows", "30px " + templateString + " 35px")
+      .style("grid-template-rows", `${this.profileConstants.margin.top}px ${templateString} ${this.profileConstants.margin.bottom}px`)
       .style("grid-template-columns", "1fr ".repeat(1));
   }
 
