@@ -15,9 +15,9 @@
 $vzb-font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 $vzb-font-family-alt: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 $vzb-font-size-base: 16px;
-$vzb-font-size-regular: 1em;
 $vzb-font-size-tiny: 0.625em;
 $vzb-font-size-small: 0.8em;
+$vzb-font-size-regular: 1em;
 $vzb-font-size-medium: 1.24em;
 $vzb-font-size-large: 1.38em;
 $vzb-font-size-larger: 1.6em;
@@ -115,4 +115,84 @@ $vzb-loader-bgcolor: $vzb-color-white;
   display: inline-block;
   margin: -1 * $vzb-loader-size * 0.5;
   z-index: 9999;
+}
+
+%vzb-input-text-and-search{
+
+  @include border-radius(4px);
+  @include box-sizing(border-box);
+  font-size: 1em; //inherit from dialog content
+  border: 1px solid rgba($vzb-color-grey, 0.4);
+  padding: 9px;
+  display: block;
+  width: 100%;
+  outline: none;
+  font-family: $vzb-font-family-alt;
+
+  &:focus {
+    border: 1px solid rgba($vzb-color-grey, 0.6);
+  }
+}
+
+
+%vzb-input-search{
+  @include rtl {
+    padding-left: 14px;
+    padding-right: 9px;
+  }
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: inline-block;
+  padding-right: 14px;
+  box-shadow: none;
+
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  &::-webkit-search-cancel-button {
+    margin: 0;
+  }
+
+  &::-ms-clear {
+    display: none;
+    margin: 0;
+  }
+
+  &:not(:focus) ~ button[type=reset] {
+    visibility: hidden;
+  }
+
+  ~ button[type=reset] {
+    @include rtl {
+      margin-left: 0;
+      margin-right: -18px;
+    }
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 10px;
+    margin-left: -18px;
+    padding: 3px 1px;
+    border: 0;
+    outline: none;
+    color: $vzb-color-primary-dark;
+    background: $vzb-color-white;
+    transition: visibility 0.1s;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: 0.7;
+    &:hover {
+      opacity: 1;
+      visibility: visible;
+    }
+    &::after {
+      content: "✕";
+      position: relative;
+    }
+  }
+
+  &:not(:valid) ~ button[type=reset] {
+    visibility: hidden;
+  }
 }
