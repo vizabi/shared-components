@@ -1,21 +1,31 @@
 
 
 import { BaseComponent } from "../base-component";
+import {runInAction, decorate, computed, toJS} from "mobx";
+
 import "./addgeo.scss";
 
 function compareConfigs(source, target) {
-  let score = 0;
-  for (const key in source) {
-     if (typeof source[key] === "object" && !Array.isArray(source[key]) && source[key] != null && target[key] != null) {
-       score += compareConfigs(source[key], target[key], score);
-     } else {
-       if (source[key] == target[key]) score++;
-     }
+  function compare(source, target) {
+      let score = 0;
+      let total = 0;
+      for (const key in source) {
+        if (typeof source[key] === "object" && !Array.isArray(source[key]) && source[key] != null && target[key] != null) {
+          const deeper = compare(source[key], target[key], score);
+          score += deeper.score;
+          total += deeper.total;
+        } else {
+          if (source[key] == target[key]) score++;
+          total++;
+        }
+      }
+      return {score, total};
   }
-  return score;
+  const result = compare(source, target);
+  return result.score / result.total;
 }
 
-export class AddGeo extends BaseComponent {
+export class _AddGeo extends BaseComponent {
 
   constructor(config){
     config.template = `
@@ -77,7 +87,7 @@ export class AddGeo extends BaseComponent {
   }
   
   redraw(){
-    this.element.classed("vzb-hidden", this.getActiveConfig().mode !== "show");
+    this.element.classed("vzb-hidden", this.activePreset.mode !== "show");
     this.DOM.button.text(this.localise("buttons/addgeo"));
     this.DOM.searchbox.attr("placeholder", this.localise("buttons/addgeo"));
   }
@@ -100,12 +110,12 @@ export class AddGeo extends BaseComponent {
     this.element.style("right", this.xAlign == "right" ? margin.right + (dx||0) + "px" : null);
   }
 
-  getActiveConfig(){
-    const PRESETS = this.root.model.config.presets || PRESETS_DEFAULT;
+  get activePreset(){
+    const PRESETS = toJS(this.root.model.config.presets) || PRESETS_DEFAULT;
 
     PRESETS.flat().forEach(p => {
-      p.score = compareConfigs(p.config, this.model.config); 
-    })
+      p.score = compareConfigs(p.config, toJS(this.model.config)); 
+    })      
     const topScore = d3.max(PRESETS.flat(), d => d.score);
     return PRESETS.flat().find(f => f.score === topScore);
   }
@@ -159,9 +169,13 @@ export class AddGeo extends BaseComponent {
         return d.name + d.isness.map(m => `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale(m.id)}">${m.name}</span>`).join("");
       })
       .on("click", (event, d) => {
-        this.model.data.filter.addToDimensionsFirstINstatement(d, this.getActiveConfig().loosePath);
+        this.model.data.filter.addToDimensionsFirstINstatement(d, this.activePreset.loosePath);
         this.cancelSearch();
       });
   }
 
 }
+
+export const AddGeo = decorate(_AddGeo, {
+  "activePreset": computed
+});
