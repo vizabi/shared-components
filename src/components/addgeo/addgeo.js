@@ -113,7 +113,8 @@ export class AddGeo extends BaseComponent {
   buildList(){
     this.model.data.spaceCatalog.then(spaceCatalog => {
       for (const dim in spaceCatalog) {
-        if (spaceCatalog[dim].entities) this.catalog = [...spaceCatalog[dim].entities.values()];
+        const filterSpec = this.model.encoding.show.data.filter.dimensions[dim];
+        if (spaceCatalog[dim].entities) this.catalog = [...spaceCatalog[dim].entities.filter(filterSpec).values()];
       };
     });
   }
