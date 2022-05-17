@@ -64,15 +64,17 @@ export class Show extends BaseComponent {
   }
 
   _updateView() {
+    const _this = this;
     if (this.parent._getPanelMode() !== "show") return;
 
     
     function addCategory(catalog, dim) {
       if (catalog.entities) {
+        const filterSpec = _this.model.encoding.show?.data.filter.dimensions[dim];
         categories.push({
           dim,
           key: catalog.concept.concept,
-          entities: catalog.entities,
+          entities: catalog.entities.filter(filterSpec),
           name: catalog.concept.name
         });
       }
@@ -105,13 +107,6 @@ export class Show extends BaseComponent {
         }))
         //sort data alphabetically
         .sort((a, b) => (a.name < b.name) ? -1 : 1);
-    
-      //TODO: HACK remove this UN state filter when we will be able to request entity properties separately
-      if (this.model.encoding.unstate && key == this.model.encoding.unstate.data.space[0]){
-        const response = this.model.encoding.unstate.data.response;
-        entities = entities
-          .filter(entity => response.get(entity).un_state);
-      }
       
       const section = this.DOM.list.append("div")
         .attr("class", "vzb-accordion-section")
