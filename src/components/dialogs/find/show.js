@@ -244,7 +244,7 @@ export class Show extends BaseComponent {
     let showEquals = true;
     const space = this.model.data.space;
     utils.forEach(space, key => {
-      showEquals = utils.comparePlainObjects(this.resetFilter[key] || {}, this.model.data.filter.dimensions[key]);
+      showEquals = utils.comparePlainObjects(this.resetFilter[key] || {}, this.model.data.filter.dimensions[key] || {});
       return showEquals;
     });
 
