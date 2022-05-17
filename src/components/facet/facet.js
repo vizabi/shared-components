@@ -40,15 +40,15 @@ class _Facet extends BaseComponent {
     return [...this.data.get(id).values()];
   }
 
-  sendItemsWithIsInKeysToBottom(map){
+  sortFacets(map){
     return new Map([...map].sort((a, b) => {
-      if (a[0].includes("is--")) return 1;
-      if (b[0].includes("is--")) return -1;
+      if (a[0].includes("is--")) return -1;
+      if (b[0].includes("is--")) return 1;
     })) 
   }
 
   get data() {
-    return this.sendItemsWithIsInKeysToBottom(this.model.dataMap.order("facet_row").groupByWithMultiGroupMembership("facet_row"));
+    return this.sortFacets(this.model.dataMap.order("facet_row").groupByWithMultiGroupMembership("facet_row"));
   }
 
   howManyFacets() {
