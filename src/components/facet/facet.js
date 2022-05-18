@@ -2,6 +2,7 @@ import { BaseComponent } from "../base-component.js";
 import { decorate, computed } from "mobx";
 import * as utils from "../../legacy/base/utils.js"
 import "./facet.scss";
+import { runInAction } from "mobx";
 
 function getFacetId(d) {
   return d;
@@ -63,11 +64,8 @@ class _Facet extends BaseComponent {
     })
   }
 
-  get scaleDomainRange() {
-    return {
-      domain: d3.sum(this.maxValues.map(m => m.v)),
-      range: this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom - (this.wastedHeight || 0)
-    }
+  get scaleDomain() {
+    return d3.sum(this.maxValues.map(m => m.v));
   }
 
   updateLayoutProfile() {
@@ -81,6 +79,11 @@ class _Facet extends BaseComponent {
     this.width = this.element.node().clientWidth || 0;
 
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
+
+    runInAction(() => {
+      this._setProportions();
+      this.scaleRange = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom - (this.wastedHeight || 0);
+    });
   }
 
   propagateInteractivity(callback){
@@ -111,44 +114,46 @@ class _Facet extends BaseComponent {
   addRemoveSubcomponents() {
     const { facetedComponentCssClass } = this.options;
 
-    const facetKeys = [...this.data.keys()];
-    const ncolumns = 1;
-    const nrows = facetKeys.length;
+      const facetKeys = [...this.data.keys()];
+      const ncolumns = 1;
+      const nrows = facetKeys.length;
 
-    this._setProportions();
+      //this._setProportions();
 
-    let sections = this.element.selectAll(".vzb-facet-inner")
-      .data(facetKeys, getFacetId);
+    runInAction(() => {
+      let sections = this.element.selectAll(".vzb-facet-inner")
+        .data(facetKeys, getFacetId);
 
-    sections.exit()
-      .each(d => this.removeSubcomponent(d))
-      .remove();
+      sections.exit()
+        .each(d => this.removeSubcomponent(d))
+        .remove();
 
-    sections.enter().append("div")
-      .attr("class", d => "vzb-facet-inner")
-      //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
-      //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
-      .each(function (d) {
-        d3.select(this).append("div")
-          .datum(null)
-          .attr("class", () => `${facetedComponentCssClass} vzb-${getFacetId(d)}`);
-      })
-      .each(d => this.addSubcomponent(d))
-      .merge(sections)
-      .style("grid-row-start", (d) => this.getPosition(facetKeys.indexOf(d)).row.start)
-      .style("grid-row-end", (d) => this.getPosition(facetKeys.indexOf(d)).row.end)
-      .style("grid-column-start", (_, i) => 0 + 1)
+      sections.enter().append("div")
+        .attr("class", d => "vzb-facet-inner")
+        //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
+        //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
+        .each(function (d) {
+          d3.select(this).append("div")
+            .datum(null)
+            .attr("class", () => `${facetedComponentCssClass} vzb-${getFacetId(d)}`);
+        })
+        .each(d => this.addSubcomponent(d))
+        .merge(sections)
+        .style("grid-row-start", (d) => this.getPosition(facetKeys.indexOf(d)).row.start)
+        .style("grid-row-end", (d) => this.getPosition(facetKeys.indexOf(d)).row.end)
+        .style("grid-column-start", (_, i) => 0 + 1)
 
-      .classed("vzb-facet-row-first", d => this.getPosition(facetKeys.indexOf(d)).row.first)
-      .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
-      .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
-      .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
+        .classed("vzb-facet-row-first", d => this.getPosition(facetKeys.indexOf(d)).row.first)
+        .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
+        .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
+        .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
 
-      .each((d, i) => {
-        this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
-      });
+        .each((d, i) => {
+          this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
+        });
 
-    this.services.layout._resizeHandler();
+      this.services.layout._resizeHandler();
+    });
   }
 
   getPosition(i) {
@@ -206,5 +211,5 @@ export const Facet = decorate(_Facet, {
   "MDL": computed,
   "data": computed,
   "maxValues": computed,
-  "scaleDomainRange": computed
+  "scaleDomain": computed
 });
