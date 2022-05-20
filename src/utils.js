@@ -185,7 +185,7 @@ export function replaceProps(target, source) {
           score += deeper.score;
           total += deeper.total;
         } else {
-          if (a[key] == b[key]) {score ++; console.log(key)}
+          if (a[key] == b[key]) score ++;
           else if (a[key] != null && b[key] != null) score += 0.5;
           else if (isThereASpecialKeySubstringInBoth(a, b, specialKeySubstring)) score += 0.1;
           total++;
