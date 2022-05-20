@@ -161,3 +161,38 @@ export function replaceProps(target, source) {
   }
   return target;
 }
+
+/**
+ * Recursively walks through forConfig and tries to match corresponding parts of againstConfig
+ * Returns a value from 0 to 1 that shows how similar are the two given configs
+ * @param {Object} forConfig 
+ * @param {Object} againstConfig 
+ * @param {String} specialKeySubstring 
+ * @returns {Number} similaryty score from 0 to 1
+ */
+ export function computeObjectsSimilarityScore(forConfig, againstConfig, specialKeySubstring = ""){
+  function isThereASpecialKeySubstringInBoth(a, b, specialKeySubstring) {
+    return specialKeySubstring
+      && Object.keys(a).find(f => f.includes(specialKeySubstring))
+      && Object.keys(b).find(f => f.includes(specialKeySubstring));
+  }
+  function compare(a, b) {
+      let score = 0;
+      let total = 0;
+      for (const key in a) {
+        if (typeof a[key] === "object" && !Array.isArray(a[key]) && a[key] != null && b[key] != null) {
+          const deeper = compare(a[key], b[key], score);
+          score += deeper.score;
+          total += deeper.total;
+        } else {
+          if (a[key] == b[key]) {score ++; console.log(key)}
+          else if (a[key] != null && b[key] != null) score += 0.5;
+          else if (isThereASpecialKeySubstringInBoth(a, b, specialKeySubstring)) score += 0.1;
+          total++;
+        }
+      }
+      return {score, total};
+  }
+  const result = compare(forConfig, againstConfig);
+  return result.score / result.total;
+}

@@ -1,30 +1,10 @@
 
 
 import { BaseComponent } from "../base-component";
+import * as Utils from "../../utils.js"; 
 import {runInAction, decorate, computed, toJS} from "mobx";
 
 import "./addgeo.scss";
-
-function compareConfigs(source, target) {
-  function compare(source, target) {
-      let score = 0;
-      let total = 0;
-      for (const key in source) {
-        if (typeof source[key] === "object" && !Array.isArray(source[key]) && source[key] != null && target[key] != null) {
-          const deeper = compare(source[key], target[key], score);
-          score += deeper.score;
-          total += deeper.total;
-        } else {
-          if (source[key] == target[key]) score++;
-          total++;
-        }
-      }
-      return {score, total};
-  }
-  const result = compare(source, target);
-  return result.score / result.total;
-}
-
 export class _AddGeo extends BaseComponent {
 
   constructor(config){
@@ -114,7 +94,7 @@ export class _AddGeo extends BaseComponent {
     const PRESETS = toJS(this.root.model.config.presets) || PRESETS_DEFAULT;
 
     PRESETS.flat().forEach(p => {
-      p.score = compareConfigs(p.config, toJS(this.model.config)); 
+      p.score = Utils.computeObjectsSimilarityScore(p.config, toJS(this.model.config), "is--"); 
     })      
     const topScore = d3.max(PRESETS.flat(), d => d.score);
     return PRESETS.flat().find(f => f.score === topScore);
