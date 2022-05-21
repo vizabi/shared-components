@@ -82,7 +82,8 @@ class _Facet extends BaseComponent {
 
     runInAction(() => {
       this._setProportions();
-      this.scaleRange = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom - (this.wastedHeight || 0);
+      const correctionMagicNumber = 4 * this.howManyFacets();
+      this.scaleRange = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom - (this.wastedHeight || 0) - correctionMagicNumber;
     });
   }
 
@@ -95,17 +96,17 @@ class _Facet extends BaseComponent {
     let height = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
     const sumtotal = d3.sum(this.maxValues.map(m => m.v)) || this.maxValues.length;
     const proportions = this.maxValues.map(m => (m.v || 1) / sumtotal);
-    let heights = proportions.map(m => (height * m) < minHeight ? minHeight : (height * m));
+    let heights = proportions.map(m => (height * m) < minHeight ? minHeight : Math.ceil(height * m));
 
     this.wastedHeight = d3.sum(heights) - height;
-    heights = proportions.map(m => (height * m) < minHeight ? minHeight : ((height - this.wastedHeight) * m));
+    const largeChartHeight = height - d3.sum(heights.filter(f => f == minHeight));
+    const sumLarge = d3.sum( heights.map((m, i) => m > minHeight ? this.maxValues[i].v : 0) ); 
+
+    //wastedHeight needs to be now substracted and redistributed between large charts
+    heights = heights.map((m, i) => m == minHeight ? minHeight : ((largeChartHeight) * this.maxValues[i].v / sumLarge));
 
     const templateString = heights.map(m => Math.floor(m) + "px").join(" ");
 
-    //const templateString = [...this.data.keys()].map(m => `minmax(${this.profileConstants.minHeight}px, ${proportions[m]}fr)`).join(" ");
-    
-    //The fr unit sets size of track as a fraction of the free space of grid container
-    //We need as many 1fr as rows and columns to have cells equally sized (grid-template-columns: 1fr 1fr 1fr;)
     this.element
       .style("grid-template-rows", `${this.profileConstants.margin.top}px ${templateString} ${this.profileConstants.margin.bottom}px`)
       .style("grid-template-columns", "1fr ".repeat(1));
