@@ -31,6 +31,7 @@ class _Facet extends BaseComponent {
     if (this.updateLayoutProfile()) return; //return if exists with error
     this.addReaction(this.addRemoveSubcomponents);
     this.addReaction(this.updatePositionInRepeat);
+    this.addReaction(this.updateSize);
   }
 
   updatePositionInRepeat() {
@@ -79,34 +80,42 @@ class _Facet extends BaseComponent {
     this.width = this.element.node().clientWidth || 0;
 
     if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
-
-    runInAction(() => {
-      this._setProportions();
-      const correctionMagicNumber = 4 * this.howManyFacets();
-      this.scaleRange = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom - (this.wastedHeight || 0) - correctionMagicNumber;
-    });
   }
 
   propagateInteractivity(callback){
     this.children.forEach(chart => callback(chart));
   }
 
-  _setProportions() {
-    const minHeight = this.profileConstants.minHeight;
-    let height = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
-    const sumtotal = d3.sum(this.maxValues.map(m => m.v)) || this.maxValues.length;
-    const proportions = this.maxValues.map(m => (m.v || 1) / sumtotal);
-    let heights = proportions.map(m => (height * m) < minHeight ? minHeight : Math.ceil(height * m));
+  updateSize() {
+    this.services.layout.size; //watch
+    this.services.layout.projector; //watch
+    const minPx = this.profileConstants.minHeight;
+    const totalPx = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
 
-    this.wastedHeight = d3.sum(heights) - height;
-    const largeChartHeight = height - d3.sum(heights.filter(f => f == minHeight));
-    const sumLarge = d3.sum( heights.map((m, i) => m > minHeight ? this.maxValues[i].v : 0) ); 
+    const facetKeys = [...this.data.keys()];
+    if(JSON.stringify(facetKeys) + minPx + totalPx === this.resizeUpdateString) return;
+    this.resizeUpdateString = JSON.stringify(facetKeys) + minPx + totalPx;
 
-    //wastedHeight needs to be now substracted and redistributed between large charts
-    heights = heights.map((m, i) => m == minHeight ? minHeight : ((largeChartHeight) * this.maxValues[i].v / sumLarge));
+    let rangeParts = this.maxValues.map(m => null);
+    let domainParts = this.maxValues.map(m => m.v);
+    
+    let maxIter = 5;
+    let unallocatedDomain, unallocatedRange, residual = totalPx, allChartsSmall = false;
+    const proportion = i => unallocatedRange * domainParts[i] / unallocatedDomain;   
 
-    const templateString = heights.map(m => Math.floor(m) + "px").join(" ");
+    for(let iterate = 0; iterate < maxIter && residual > 1 && !allChartsSmall; iterate++){
+      unallocatedRange = totalPx - d3.sum(rangeParts.filter(f => f == minPx));
+      unallocatedDomain = d3.sum(domainParts.filter((f, i) => rangeParts[i] != minPx)); 
+      rangeParts = rangeParts.map((r, i) => (r == minPx || proportion(i) < minPx) ? minPx : Math.floor(proportion(i)));
+      allChartsSmall = rangeParts.every(e => e == minPx);
+      residual = d3.sum(rangeParts) - totalPx;
+    }
+    
+    const wastedHelperScale = d3.scaleLinear().domain([0, d3.max(domainParts)]).range([0, d3.max(rangeParts)]);
+    const wastedRange = d3.sum(rangeParts.map((r, i) => r - wastedHelperScale(domainParts[i])));  
+    this.scaleRange = totalPx - wastedRange;
 
+    const templateString = rangeParts.map(m => m + "px").join(" ");
     this.element
       .style("grid-template-rows", `${this.profileConstants.margin.top}px ${templateString} ${this.profileConstants.margin.bottom}px`)
       .style("grid-template-columns", "1fr ".repeat(1));
