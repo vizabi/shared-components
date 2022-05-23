@@ -115,11 +115,10 @@ class _Facet extends BaseComponent {
   addRemoveSubcomponents() {
     const { facetedComponentCssClass } = this.options;
 
-      const facetKeys = [...this.data.keys()];
-      const ncolumns = 1;
-      const nrows = facetKeys.length;
+    const facetKeys = [...this.data.keys()];
 
-      //this._setProportions();
+    if(JSON.stringify(facetKeys) === this.facetKeysString) return;
+    this.facetKeysString = JSON.stringify(facetKeys);
 
     runInAction(() => {
       let sections = this.element.selectAll(".vzb-facet-inner")
