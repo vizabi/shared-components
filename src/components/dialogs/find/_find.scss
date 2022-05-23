@@ -102,6 +102,7 @@
       }
       .vzb-show-list {
         .vzb-accordion-section {
+          pointer-events: all;
           &:not(.vzb-accordion-active) {
             max-height: 2.5em !important;
           }
@@ -116,7 +117,7 @@
             .vzb-show-clear-cross {
               display: block;
             }
-            .vzb-show-category {
+            >.vzb-accordion-section-title>.vzb-show-category {
               font-weight: bold;
             }
           }
@@ -176,6 +177,13 @@
                 content: "➥";
                 position: absolute;
                 transform: translate(-1.25em, 0);
+              }
+              label {
+                margin-top: 3px;
+                width: 20px;
+              }
+              span {
+                margin-left: 25px;
               }
             }
           }

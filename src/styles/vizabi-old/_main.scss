@@ -413,7 +413,7 @@ $vzb-button-expand-width: 290px;
       &.vzb-accordion-active {
         max-height: none;
         transition: max-height 0.3s ease-in-out;
-        .vzb-accordion-section-title>span:first-child::after {
+        >.vzb-accordion-section-title>span:first-child::after {
           @include rotate(135deg);
         }
       }
