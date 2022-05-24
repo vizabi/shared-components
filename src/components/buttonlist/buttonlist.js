@@ -503,6 +503,12 @@ export class ButtonList extends BaseComponent {
     btn.classed(class_active, boolActive);
   }
 
+  setButtonUnavailable(id, boolUnavailable) {
+    const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
+
+    btn.classed(class_unavailable, boolUnavailable);
+  }
+
   toggleSidebarCollapse() {
     this.ui.sidebarCollapse = !this.ui.sidebarCollapse;
     this.setSidebarCollapse();

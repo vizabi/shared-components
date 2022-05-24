@@ -1,6 +1,6 @@
 {
   "name": "@vizabi/shared-components",
-  "version": "1.23.3",
+  "version": "1.24.0",
   "description": "Vizabi shared components",
   "main": "index.js",
   "files": [

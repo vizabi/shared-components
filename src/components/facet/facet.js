@@ -65,8 +65,12 @@ class _Facet extends BaseComponent {
     })
   }
 
-  get scaleDomain() {
-    return d3.sum(this.maxValues.map(m => m.v));
+  getScaleDomainForSubcomponent(id) {
+    if (id) {
+      return this.maxValues.find(m => m.k === id).v;
+    } else {
+      return d3.sum(this.maxValues.map(m => m.v));
+    }
   }
 
   updateLayoutProfile() {
@@ -89,31 +93,38 @@ class _Facet extends BaseComponent {
   updateSize() {
     this.services.layout.size; //watch
     this.services.layout.projector; //watch
+    this.ui.inpercent;
+
     const minPx = this.profileConstants.minHeight;
     const totalPx = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
 
     const facetKeys = [...this.data.keys()];
-    if(JSON.stringify(facetKeys) + minPx + totalPx === this.resizeUpdateString) return;
-    this.resizeUpdateString = JSON.stringify(facetKeys) + minPx + totalPx;
+    if(JSON.stringify(facetKeys) + minPx + totalPx + this.ui.inpercent === this.resizeUpdateString) return;
+    this.resizeUpdateString = JSON.stringify(facetKeys) + minPx + totalPx + this.ui.inpercent;
 
     let rangeParts = this.maxValues.map(m => null);
     let domainParts = this.maxValues.map(m => m.v);
-    
-    let maxIter = 5;
-    let unallocatedDomain, unallocatedRange, residual = totalPx, allChartsSmall = false;
-    const proportion = i => unallocatedRange * domainParts[i] / unallocatedDomain;   
 
-    for(let iterate = 0; iterate < maxIter && residual > 1 && !allChartsSmall; iterate++){
-      unallocatedRange = totalPx - d3.sum(rangeParts.filter(f => f == minPx));
-      unallocatedDomain = d3.sum(domainParts.filter((f, i) => rangeParts[i] != minPx)); 
-      rangeParts = rangeParts.map((r, i) => (r == minPx || proportion(i) < minPx) ? minPx : Math.floor(proportion(i)));
-      allChartsSmall = rangeParts.every(e => e == minPx);
-      residual = d3.sum(rangeParts) - totalPx;
+    if (this.ui.inpercent){
+      this.scaleRange = totalPx / domainParts.length < minPx ? minPx : totalPx / domainParts.length;
+      rangeParts = rangeParts.map(m => this.scaleRange);
+    } else {
+      let maxIter = 5;
+      let unallocatedDomain, unallocatedRange, residual = totalPx, allChartsSmall = false;
+      const proportion = i => unallocatedRange * domainParts[i] / unallocatedDomain;   
+
+      for(let iterate = 0; iterate < maxIter && residual > 1 && !allChartsSmall; iterate++){
+        unallocatedRange = totalPx - d3.sum(rangeParts.filter(f => f == minPx));
+        unallocatedDomain = d3.sum(domainParts.filter((f, i) => rangeParts[i] != minPx)); 
+        rangeParts = rangeParts.map((r, i) => (r == minPx || proportion(i) < minPx) ? minPx : Math.floor(proportion(i)));
+        allChartsSmall = rangeParts.every(e => e == minPx);
+        residual = d3.sum(rangeParts) - totalPx;
+      }
+      
+      const wastedHelperScale = d3.scaleLinear().domain([0, d3.max(domainParts)]).range([0, d3.max(rangeParts)]);
+      const wastedRange = d3.sum(rangeParts.map((r, i) => r - wastedHelperScale(domainParts[i])));  
+      this.scaleRange = totalPx - wastedRange;
     }
-    
-    const wastedHelperScale = d3.scaleLinear().domain([0, d3.max(domainParts)]).range([0, d3.max(rangeParts)]);
-    const wastedRange = d3.sum(rangeParts.map((r, i) => r - wastedHelperScale(domainParts[i])));  
-    this.scaleRange = totalPx - wastedRange;
 
     const templateString = rangeParts.map(m => m + "px").join(" ");
     this.element
@@ -220,5 +231,4 @@ export const Facet = decorate(_Facet, {
   "MDL": computed,
   "data": computed,
   "maxValues": computed,
-  "scaleDomain": computed
 });
