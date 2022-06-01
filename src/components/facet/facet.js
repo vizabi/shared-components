@@ -1,5 +1,5 @@
 import { BaseComponent } from "../base-component.js";
-import { decorate, computed } from "mobx";
+import { decorate, observable, computed } from "mobx";
 import * as utils from "../../legacy/base/utils.js"
 import "./facet.scss";
 import { runInAction } from "mobx";
@@ -231,5 +231,6 @@ _Facet.DEFAULT_UI = {
 export const Facet = decorate(_Facet, {
   "MDL": computed,
   "data": computed,
+  "scaleRange": observable,
   "maxValues": computed,
 });
