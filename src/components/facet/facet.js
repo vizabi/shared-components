@@ -97,10 +97,11 @@ class _Facet extends BaseComponent {
 
     const minPx = this.profileConstants.minHeight;
     const totalPx = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
-
     const facetKeys = [...this.data.keys()];
-    if(JSON.stringify(facetKeys) + minPx + totalPx + this.ui.inpercent === this.resizeUpdateString) return;
-    this.resizeUpdateString = JSON.stringify(facetKeys) + minPx + totalPx + this.ui.inpercent;
+
+    const getUpdateString = () => JSON.stringify(facetKeys) + minPx + totalPx + this.ui.inpercent;
+    if(getUpdateString() === this.resizeUpdateString) return;
+    this.resizeUpdateString = getUpdateString();
 
     let rangeParts = this.maxValues.map(m => null);
     let domainParts = this.maxValues.map(m => m.v);
