@@ -90,6 +90,16 @@ class _Facet extends BaseComponent {
     this.children.forEach(chart => callback(chart));
   }
 
+  get largetstFacetId(){
+    if(this.ui.inpercent){
+      return this.maxValues.at(-1).k;
+    } else {
+      const largest = {k: null, v: 0};
+      this.maxValues.forEach(({k,v}) => {if(v > largest.v) {largest.v = v; largest.k = k}});
+      return largest.k;
+    }
+  }
+
   updateSize() {
     this.services.layout.size; //watch
     this.services.layout.projector; //watch
@@ -233,4 +243,5 @@ export const Facet = decorate(_Facet, {
   "data": computed,
   "scaleRange": observable,
   "maxValues": computed,
+  "largetstFacetId": computed,
 });
