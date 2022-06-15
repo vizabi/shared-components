@@ -21,7 +21,8 @@ export function ui(defaults = {}, config = {}, baseConfig = {}) {
         },
         set(value) {
           if (typeof config[key] !== "undefined" && value == defaults[key]) {
-            delete config[key];
+            if (Object.getOwnPropertyDescriptor(config, key) && Object.getOwnPropertyDescriptor(config, key).configurable) 
+              delete config[key];
           } else {
             config[key] = value;
           }
