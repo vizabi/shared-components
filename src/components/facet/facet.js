@@ -73,6 +73,21 @@ class _Facet extends BaseComponent {
     }
   }
 
+  // get maxValues() {
+  //   const nbrackets = 50;
+  //   const start = 0.0078125;
+  //   const end = 8192.0;
+  //   const step = Math.pow(end/start, 1/nbrackets);
+  //   const mesh = d3.range(nbrackets).map(m => start * Math.pow(step, m + 0.5) );
+
+
+  //   return [...this.data.keys()].map(key => {
+  //     const sum = d3.sum([...this.data.get(key).values()].map(m => d3.max(m.shapedata.split(",").map((p,i) => +p * mesh[i])) ));
+  //     const limit = 28218699436 //this.MDL.maxheight.config.limit;
+  //     return {k: key, v: sum > limit ? limit : sum};
+  //   })
+  // }
+
   updateLayoutProfile() {
     this.services.layout.size; //watch
 
