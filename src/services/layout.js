@@ -108,10 +108,10 @@ class _LayoutService extends BaseService {
       ? utils.deepExtend({}, normalConstants[this.profile] || {}, forProjector[this.profile] || {})
       : utils.deepExtend({}, normalConstants[this.profile] || {});
     if(positionInFacet){
-      if(!positionInFacet.row.first) result.margin.top = 0;
-      if(!positionInFacet.row.last) result.margin.bottom = 2;
-      if(!positionInFacet.column.first) result.margin.left = 0;
-      if(!positionInFacet.column.last) result.margin.right = 0;
+      if(!positionInFacet.row.first) result.margin.top = (result.margin.betweenRow * 0.5) || 0;
+      if(!positionInFacet.row.last) result.margin.bottom = (result.margin.betweenRow * 0.5) || 2;
+      if(!positionInFacet.column.first) result.margin.left = (result.margin.betweenColumn * 0.5) || 0;
+      if(!positionInFacet.column.last) result.margin.right = (result.margin.betweenColumn * 0.5) || 0;
     }
     return result;
   }
