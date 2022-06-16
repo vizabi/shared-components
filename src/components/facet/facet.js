@@ -14,17 +14,12 @@ function firstLastOrMiddle(index, total) {
 class _Facet extends BaseComponent {
 
   setup(options) {
-    this.direction = this.options.direction || "row";
-    this.directionEncName = "facet_" + this.direction;
-    
+    this.direction = this.options.direction || "row";   
     super.setup(options);
   }
 
   get MDL() {
-    return {
-      [this.directionEncName]: this.model.encoding[this.directionEncName],
-      maxheight: this.model.encoding.maxheight
-    };
+    return this.model;
   }
 
 
@@ -56,7 +51,8 @@ class _Facet extends BaseComponent {
   }
 
   get data() {
-    return this.sortFacets(this.model.dataMap.order(this.directionEncName).groupByWithMultiGroupMembership(this.directionEncName));
+    const encoding = "facet_" + this.direction; 
+    return this.sortFacets(this.model.dataMap.order(encoding).groupByWithMultiGroupMembership(encoding));
   }
 
   howManyFacets() {
