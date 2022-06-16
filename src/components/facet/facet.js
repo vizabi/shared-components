@@ -13,12 +13,13 @@ function firstLastOrMiddle(index, total) {
 }
 class _Facet extends BaseComponent {
 
+  setup(options) {
+    this.direction = this.options.direction || "row";   
+    super.setup(options);
+  }
+
   get MDL() {
-    return {
-      facet_row: this.model.encoding.facet_row,
-      facet_column: this.model.encoding.facet_column,
-      maxheight: this.model.encoding.maxheight
-    };
+    return this.model;
   }
 
 
@@ -46,31 +47,35 @@ class _Facet extends BaseComponent {
     return new Map([...map].sort((a, b) => {
       if (a[0].includes("is--")) return -1;
       if (b[0].includes("is--")) return 1;
-    })) 
+    }));
   }
 
   get data() {
-    return this.sortFacets(this.model.dataMap.order("facet_row").groupByWithMultiGroupMembership("facet_row"));
+    const encoding = "facet_" + this.direction; 
+    return this.sortFacets(this.model.dataMap.order(encoding).groupByWithMultiGroupMembership(encoding));
   }
 
   howManyFacets() {
     return this.data.size;
   }
 
+  isRowDirection() {
+    return this.direction == "row";
+  }
+
   get maxValues() {
-    return [...this.data.keys()].map(key => {
-      const sum = d3.sum([...this.data.get(key).values()].map(m=>m.maxheight));
-      const limit = this.MDL.maxheight.config.limit;
-      return {k: key, v: sum > limit ? limit : sum};
-    })
+    let result;
+    runInAction(() => { //prevent observing of this.data
+      result = [...this.data.keys()].map(k => [k, null]);
+    });
+    return observable.map(result);
   }
 
   getScaleDomainForSubcomponent(id) {
-    if (id) {
-      return this.maxValues.find(m => m.k === id).v;
-    } else {
-      return d3.sum(this.maxValues.map(m => m.v));
-    }
+    if (id)
+      return this.maxValues.get(id) || 0;
+    else
+      return d3.sum(this.maxValues.values());
   }
 
   updateLayoutProfile() {
@@ -105,16 +110,24 @@ class _Facet extends BaseComponent {
     this.services.layout.projector; //watch
     this.ui.inpercent;
 
-    const minPx = this.profileConstants.minHeight;
-    const totalPx = this.height - this.profileConstants.margin.top - this.profileConstants.margin.bottom;
-    const facetKeys = [...this.data.keys()];
+    const isRowDirection = this.isRowDirection();
+    const facetKeys = [...this.maxValues.keys()];
+    const domainParts = [...this.maxValues.values()];
+    const {
+      margin,
+      minHeight = 1,
+      minWidth = 1
+    } = this.profileConstants;
 
-    const getUpdateString = () => JSON.stringify(facetKeys) + minPx + totalPx + this.ui.inpercent;
-    if(getUpdateString() === this.resizeUpdateString) return;
-    this.resizeUpdateString = getUpdateString();
+    const minPx = (isRowDirection ? minHeight : minWidth);
+    const betweenPx = (isRowDirection ? margin.betweenRow : margin.betweenColumn) || 0;
+    const totalPx = (isRowDirection ? (this.height - margin.top - margin.bottom) : (this.width - margin.left - margin.right)) - betweenPx * (facetKeys.length - 1);
 
-    let rangeParts = this.maxValues.map(m => null);
-    let domainParts = this.maxValues.map(m => m.v);
+    const getUpdateStr = () => JSON.stringify(facetKeys) + JSON.stringify(domainParts) + minPx + totalPx + this.ui.inpercent;
+    if(getUpdateStr() === this.resizeUpdateString) return;
+    this.resizeUpdateString = getUpdateStr();
+
+    let rangeParts = domainParts.map(m => null);
 
     if (this.ui.inpercent){
       this.scaleRange = totalPx / domainParts.length < minPx ? minPx : totalPx / domainParts.length;
@@ -137,10 +150,25 @@ class _Facet extends BaseComponent {
       this.scaleRange = totalPx - wastedRange;
     }
 
-    const templateString = rangeParts.map(m => m + "px").join(" ");
+    const last = this.howManyFacets() - 1;
+    const first = 0;
+    const templateString = {
+      dominant: rangeParts
+        .map((m, i) => ""
+          + `[start_${i}]` 
+          + (i == first ? (isRowDirection ? ` ${margin.top}px ` : ` ${margin.left}px `) : ` ${betweenPx * 0.5}px `)
+          + ` ${m || 1}px `
+          + (i == last ? (isRowDirection ? ` ${margin.bottom}px ` : ` ${margin.right}px `) : ` ${betweenPx * 0.5}px `)
+          + `[end_${i}]`
+        )
+        .join(" 0px "),
+      non_dominant: " 1fr"
+    };
     this.element
-      .style("grid-template-rows", `${this.profileConstants.margin.top}px ${templateString} ${this.profileConstants.margin.bottom}px`)
-      .style("grid-template-columns", "1fr ".repeat(1));
+      .style("grid-template-columns", templateString[isRowDirection ? "non_dominant" : "dominant"])
+      .style("grid-template-rows", templateString[isRowDirection ? "dominant" : "non_dominant"]);
+
+    this.rangePartsHash = rangeParts.join(",");
   }
 
   addRemoveSubcomponents() {
@@ -150,6 +178,8 @@ class _Facet extends BaseComponent {
 
     if(JSON.stringify(facetKeys) === this.facetKeysString) return;
     this.facetKeysString = JSON.stringify(facetKeys);
+
+    const isRowDirection = this.isRowDirection();
 
     runInAction(() => {
       let sections = this.element.selectAll(".vzb-facet-inner")
@@ -170,15 +200,15 @@ class _Facet extends BaseComponent {
         })
         .each(d => this.addSubcomponent(d))
         .merge(sections)
-        .style("grid-row-start", (d) => this.getPosition(facetKeys.indexOf(d)).row.start)
-        .style("grid-row-end", (d) => this.getPosition(facetKeys.indexOf(d)).row.end)
-        .style("grid-column-start", (_, i) => 0 + 1)
+        .style("grid-row-start", (d, i) => "start_" + (isRowDirection ? i : 0))
+        .style("grid-row-end", (d, i) => "end_" + (isRowDirection ? i : 0))
+        .style("grid-column-start", (d, i) => "start_" + (isRowDirection ? 0 : i))
+        .style("grid-column-end", (d, i) => "end_" + (isRowDirection ? 0 : i))
 
         .classed("vzb-facet-row-first", d => this.getPosition(facetKeys.indexOf(d)).row.first)
         .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
         .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
         .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
-
         .each((d, i) => {
           this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
         });
@@ -188,15 +218,18 @@ class _Facet extends BaseComponent {
   }
 
   getPosition(i) {
-    const nrows = [...this.data.keys()].length;
-    const ncolumns = 1;
+    const isRowDirection = this.isRowDirection();
+    const ncolumns = isRowDirection ? 1 : [...this.data.keys()].length;
+    const nrows =  isRowDirection ? [...this.data.keys()].length : 1;
     const result = {
-      row: firstLastOrMiddle(i, nrows),
-      column: firstLastOrMiddle(0, ncolumns)
+      row: firstLastOrMiddle(isRowDirection ? i : 0, nrows),
+      column: firstLastOrMiddle(isRowDirection ? 0 : i, ncolumns)
     }
 
     result.row.start = (result.row.first ? 0 : (i + 1)) + 1; //+1 is correction for 1-based numbers in css vs 0-based in array index
     result.row.end = (result.row.last ? (nrows + 2) : (i + 2)) + 1;
+    result.column.start = (result.column.first ? 0 : (i + 1)) + 1; //+1 is correction for 1-based numbers in css vs 0-based in array index
+    result.column.end = (result.column.last ? (ncolumns + 2) : (i + 2)) + 1;
 
     return result;
   }
@@ -244,4 +277,5 @@ export const Facet = decorate(_Facet, {
   "scaleRange": observable,
   "maxValues": computed,
   "largetstFacetId": computed,
+  "rangePartsHash": observable
 });
