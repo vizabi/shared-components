@@ -64,19 +64,12 @@ class _Facet extends BaseComponent {
   }
 
   get maxValues() {
-    if (this.MDL.maxheight) {
-      return observable.map([...this.data.keys()].map(key => {
-        const sum = d3.sum([...this.data.get(key).values()].map(m=>m.maxheight));
-        const limit = this.MDL.maxheight.config.limit;
-        return [key, sum > limit ? limit : sum];
-      }))
-    } else {
-      let result;
-      runInAction(() => {
-        result = [...this.data.keys()].map(k => [k, null]);
-      });
-      return observable.map(result);
-    }
+    let result;
+    //runInAction is used to prevent observing of this.data
+    runInAction(() => {
+      result = [...this.data.keys()].map(k => [k, null]);
+    });
+    return observable.map(result);
   }
 
   getScaleDomainForSubcomponent(id) {
