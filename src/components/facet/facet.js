@@ -97,10 +97,10 @@ class _Facet extends BaseComponent {
 
   get largetstFacetId(){
     if(this.ui.inpercent){
-      return this.maxValues.at(-1).k;
+      return [...this.maxValues.keys()].at(-1);
     } else {
       const largest = {k: null, v: 0};
-      this.maxValues.forEach(({k,v}) => {if(v > largest.v) {largest.v = v; largest.k = k}});
+      [...this.maxValues.entries()].forEach(([k,v]) => {if(v > largest.v) {largest.v = v; largest.k = k}});
       return largest.k;
     }
   }
@@ -152,18 +152,33 @@ class _Facet extends BaseComponent {
 
     const last = this.howManyFacets() - 1;
     const first = 0;
+    const dominantMargin = {
+      first: isRowDirection ? margin.top : margin.left,
+      last: isRowDirection ? margin.bottom : margin.right
+    }
+    const non_dominantMargin = {
+      first: !isRowDirection ? margin.top : margin.left,
+      last: !isRowDirection ? margin.bottom : margin.right
+    }
+    
     const templateString = {
       dominant: rangeParts
-        .map((m, i) => ""
+        .map((rangePart, i) => ""
           + `[start_${i}]` 
-          + (i == first ? (isRowDirection ? ` ${margin.top}px ` : ` ${margin.left}px `) : ` ${betweenPx * 0.5}px `)
-          + ` ${m || 1}px `
-          + (i == last ? (isRowDirection ? ` ${margin.bottom}px ` : ` ${margin.right}px `) : ` ${betweenPx * 0.5}px `)
+          + (i == first ? ` ${dominantMargin.first}px ` : ` ${betweenPx * 0.5}px `)
+          + ` ${rangePart || 1}px `
+          + (i == last ? ` ${dominantMargin.last}px ` : ` ${betweenPx * 0.5}px `)
           + `[end_${i}]`
         )
         .join(" 0px "),
-      non_dominant: " 1fr"
+      non_dominant: ""
+        + `[start_0]`
+        + ` ${non_dominantMargin.first}px `
+        + ` 1fr `
+        + ` ${non_dominantMargin.last}px `
+        + `[end_0]`
     };
+
     this.element
       .style("grid-template-columns", templateString[isRowDirection ? "non_dominant" : "dominant"])
       .style("grid-template-rows", templateString[isRowDirection ? "dominant" : "non_dominant"]);
