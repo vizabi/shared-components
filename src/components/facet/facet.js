@@ -65,19 +65,17 @@ class _Facet extends BaseComponent {
 
   get maxValues() {
     let result;
-    //runInAction is used to prevent observing of this.data
-    runInAction(() => {
+    runInAction(() => { //prevent observing of this.data
       result = [...this.data.keys()].map(k => [k, null]);
     });
     return observable.map(result);
   }
 
   getScaleDomainForSubcomponent(id) {
-    if (id) {
+    if (id)
       return this.maxValues.get(id) || 0;
-    } else {
+    else
       return d3.sum(this.maxValues.values());
-    }
   }
 
   updateLayoutProfile() {
@@ -107,16 +105,17 @@ class _Facet extends BaseComponent {
     const domainParts = [...this.maxValues.values()];
     const {
       margin,
-      minHeight = 0,
-      minWidth = 0
+      minHeight = 1,
+      minWidth = 1
     } = this.profileConstants;
 
-    const minPx = (isRowDirection ? minHeight : minWidth) || 1;
+    const minPx = (isRowDirection ? minHeight : minWidth);
     const betweenPx = (isRowDirection ? margin.betweenRow : margin.betweenColumn) || 0;
-    const totalPx = (isRowDirection ? this.height - margin.top - margin.bottom : (this.width - margin.left - margin.right)) - betweenPx * (facetKeys.length - 1);
+    const totalPx = (isRowDirection ? (this.height - margin.top - margin.bottom) : (this.width - margin.left - margin.right)) - betweenPx * (facetKeys.length - 1);
 
-    if(JSON.stringify(facetKeys) + JSON.stringify(domainParts) + minPx + totalPx + this.ui.inpercent === this.resizeUpdateString) return;
-    this.resizeUpdateString = JSON.stringify(facetKeys) + JSON.stringify(domainParts) + minPx + totalPx + this.ui.inpercent;
+    const getUpdateStr = () => JSON.stringify(facetKeys) + JSON.stringify(domainParts) + minPx + totalPx + this.ui.inpercent;
+    if(getUpdateStr() === this.resizeUpdateString) return;
+    this.resizeUpdateString = getUpdateStr();
 
     let rangeParts = domainParts.map(m => null);
 
@@ -141,12 +140,24 @@ class _Facet extends BaseComponent {
       this.scaleRange = totalPx - wastedRange;
     }
 
-    const rangePartsLastIndex = rangeParts.length - 1;
-    const templateStringMain = rangeParts.map((m, i) => `${i ? `[start_${i}] ${betweenPx * 0.5}px` : ""} ${m||1}px ${i != rangePartsLastIndex ? `${betweenPx * 0.5}px [end_${i}]` : ""}`).join(" 0px ");
-    const templateStringCross = " 1fr".repeat(1);
+    const last = this.howManyFacets() - 1;
+    const first = 0;
+    const templateString = {
+      dominant: rangeParts
+        .map((m, i) => ""
+          + `[start_${i}]` 
+          + (i == first ? (isRowDirection ? ` ${margin.top}px ` : ` ${margin.left}px `) : ` ${betweenPx * 0.5}px `)
+          + ` ${m || 1}px `
+          + (i == last ? (isRowDirection ? ` ${margin.bottom}px ` : ` ${margin.right}px `) : ` ${betweenPx * 0.5}px `)
+          + `[end_${i}]`
+        )
+        .join(" 0px "),
+      non_dominant: " 1fr"
+    };
     this.element
-      .style("grid-template-columns", `[start_0] ${margin.left}px${isRowDirection ? templateStringCross : templateStringMain} ${margin.right}px [end_${rangePartsLastIndex}]`)
-      .style("grid-template-rows", `[start_0] ${margin.top}px${isRowDirection ? templateStringMain : templateStringCross} ${margin.bottom}px [end_${rangePartsLastIndex}]`);
+      .style("grid-template-columns", templateString[isRowDirection ? "non_dominant" : "dominant"])
+      .style("grid-template-rows", templateString[isRowDirection ? "dominant" : "non_dominant"]);
+
     this.rangePartsHash = rangeParts.join(",");
   }
 
@@ -179,10 +190,10 @@ class _Facet extends BaseComponent {
         })
         .each(d => this.addSubcomponent(d))
         .merge(sections)
-        .style("grid-row-start", (d, i) => "start_" + (isRowDirection ? i : 0))//(d) => this.getPosition(facetKeys.indexOf(d)).row.start)
-        .style("grid-row-end", (d, i) => "end_" + (isRowDirection ? i : 0))//this.getPosition(facetKeys.indexOf(d)).row.end)
-        .style("grid-column-start", (d, i) => "start_" + (isRowDirection ? 0 : i))//"f_" + this.getPosition(facetKeys.indexOf(d)).column.start)
-        .style("grid-column-end", (d, i) => "end_" + (isRowDirection ? 0 : i))//this.getPosition(facetKeys.indexOf(d)).column.end)
+        .style("grid-row-start", (d, i) => "start_" + (isRowDirection ? i : 0))
+        .style("grid-row-end", (d, i) => "end_" + (isRowDirection ? i : 0))
+        .style("grid-column-start", (d, i) => "start_" + (isRowDirection ? 0 : i))
+        .style("grid-column-end", (d, i) => "end_" + (isRowDirection ? 0 : i))
 
         .classed("vzb-facet-row-first", d => this.getPosition(facetKeys.indexOf(d)).row.first)
         .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
