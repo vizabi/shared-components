@@ -43,7 +43,7 @@ export class SingleHandleSlider extends BrushSlider {
 
   _setDomain(domain){
     this.options.EXTENT_MIN = this.options.domain[0];
-    this.options.EXTENT_MAX = this.options.domain[1];
+    this.options.EXTENT_MAX = this.options.domain[this.options.domain.length - 1];
     this.rescaler.domain(domain);
   }
 
@@ -68,19 +68,25 @@ export class SingleHandleSlider extends BrushSlider {
     return {
       start: _superListeners.start,
       brush: (event, d) => {
-        if (_this.nonBrushChange || !event.sourceEvent) return;
-        if (!_this.options.suppressInput) {
-          _superListeners.brush(event, d);
+        if (this.nonBrushChange || !event.sourceEvent) return;
+
+        if (!this.options.suppressInput) {
+          _superListeners.brush.call(this, event, d);
         } else {
-          _this._snap(event.selection);
-        }
-      },
-      end: (event) => {
-        if (_this.nonBrushChange || !event.sourceEvent) return;
-        if (_this.options.snapValue) {
+          this._savedSelection = event.selection;
           this._snap(event.selection);
         }
-        _this._setFromExtent(true, true); // force a persistent change
+      },
+      end:(event, d) => {
+        if (this.nonBrushChange || !event.sourceEvent) return;
+
+        if (this.options.snapValue) {
+          this._snap(event.selection || this._savedSelection);
+        } else {
+          this.DOM.slider.call(this.brush.move, [this.rescaler.range()[0], this._savedSelection[1]]);
+        }
+        this._setFromExtent(true, true); // force a persistent change
+        this._savedSelection = void 0;
       }
     };
   }

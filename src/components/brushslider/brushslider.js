@@ -167,23 +167,24 @@ class BrushSlider extends BaseComponent {
     return {
       start: (event) => {
         if (_this.nonBrushChange || !event.sourceEvent) return;
-        if (event.selection && event.selection[0] == event.selection[1]) {
-          const brushDatum = _this.DOM.slider.node().__brush;
-          brushDatum.selection[1][0] += 0.01;
-        }
-        _this._setFromExtent(false, false, false);
+
+        this._savedSelection = event.selection;
+        this._setFromExtent(false, false, false);
       },
       brush: (event) => {
-        if (_this.nonBrushChange || !event.sourceEvent) return;
-        if (event.selection && event.selection[0] == event.selection[1]) {
-          const brushDatum = _this.DOM.slider.node().__brush;
-          brushDatum.selection[1][0] += 0.01;
-        }
-        _this._setFromExtent(true, false, false); // non persistent change
+        if (this.nonBrushChange || !event.sourceEvent) return;
+
+        this._savedSelection = event.selection;
+        this._setFromExtent(true, false, false); // non persistent change
       },
       end: (event) => {
-        if (_this.nonBrushChange || !event.sourceEvent) return;
-        _this._setFromExtent(true, true); // force a persistent change
+        if (this.nonBrushChange || !event.sourceEvent) return;
+
+        if (event.selection === null) {
+          this.DOM.slider.call(this.brush.move, this._savedSelection);
+        }
+        this._setFromExtent(true, true); // force a persistent change
+        this._savedSelection = void 0;
       }
     };
   }
@@ -246,7 +247,7 @@ class BrushSlider extends BaseComponent {
   _moveBrush(s) {
     const _s = s.map(this.rescaler);
     this.nonBrushChange = true;
-    this.DOM.slider.call(this.brush.move, [_s[0], _s[1] + 0.01]);
+    this.DOM.slider.call(this.brush.move, [_s[0], _s[1]]);
     this.nonBrushChange = false;
     this._setFromExtent(false, false, false);
   }
@@ -268,7 +269,7 @@ class BrushSlider extends BaseComponent {
   _setFromExtent(setModel, force, persistent) {
     let s = d3.brushSelection(this.DOM.slider.node());
     if (!s) return;
-    s = [this.rescaler.invert(s[0]), this.rescaler.invert(+s[1].toFixed(1))];
+    s = [this.rescaler.invert(s[0]), this.rescaler.invert(s[1])];
     this._updateThumbs(s);
     if (setModel) this._setModel(s, force, persistent);
   }
