@@ -130,8 +130,9 @@ class _Facet extends BaseComponent {
     let rangeParts = domainParts.map(m => null);
 
     if (this.ui.inpercent){
+      const domainPartsSum = d3.sum(domainParts);
       this.scaleRange = totalPx / domainParts.length < minPx ? minPx : totalPx / domainParts.length;
-      rangeParts = rangeParts.map(m => this.scaleRange);
+      rangeParts = domainParts.map(domain => Math.round(totalPx * domain / domainPartsSum));
     } else {
       let maxIter = 5;
       let unallocatedDomain, unallocatedRange, residual = totalPx, allChartsSmall = false;
