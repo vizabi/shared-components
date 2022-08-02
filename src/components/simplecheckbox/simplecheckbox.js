@@ -61,13 +61,14 @@ export class SimpleCheckbox extends BaseComponent {
     const model = this.MDL.model;
     const {
       checkbox,
-      prefix
+      prefix,
+      labelText
     } = this.options;
     const modelExists = model && (model[checkbox] || model[checkbox] === false);
 
     this.DOM.label.classed("vzb-hidden", !modelExists);
     if (modelExists) {
-      this.DOM.label.text(this.localise("check/" + (prefix ? prefix + "/" : "") + checkbox));
+      this.DOM.label.html(this.localise(labelText ? labelText : ("check/" + (prefix ? prefix + "/" : "") + checkbox)));
       this.DOM.check.property("checked", !!model[checkbox]);
     }
   }
