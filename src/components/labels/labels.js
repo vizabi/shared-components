@@ -1,6 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import {BaseComponent} from "../base-component.js";
-import {decorate, computed} from "mobx";
+import {decorate, computed, runInAction} from "mobx";
 import { ICON_CLOSE as iconClose } from "../../icons/iconset.js";
 
 function key(d) {return d[Symbol.for("key")];}
@@ -430,11 +430,13 @@ class Labels extends BaseComponent {
     this.MDL.size_label.scale.extent;
     this.services.layout.size;
 
-    this.entityLabels.each(function(d) {
-      _this._updateLabelSize(d, null, d3.select(this), _this.model.dataMap.getByStr(d[Symbol.for("key")]).size_label);
-      if (_this.cached[key(d)]._new) return;
-      const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
-      _this.positionLabel(d, null, this, 0, null, lineGroup);
+    runInAction(() => {
+      this.entityLabels.each(function(d) {
+        _this._updateLabelSize(d, null, d3.select(this), _this.model.dataMap.getByStr(d[Symbol.for("key")]).size_label);
+        if (_this.cached[key(d)]._new) return;
+        const lineGroup = _this.entityLines.filter(f => key(f) == key(d));
+        _this.positionLabel(d, null, this, 0, null, lineGroup);
+      });
     });
   }
 
@@ -880,11 +882,22 @@ class Labels extends BaseComponent {
         const longerSideCoeff = Math.abs(diffX1) > Math.abs(diffY1) ? Math.abs(diffX1) : Math.abs(diffY1);
         lineGroup.select("line").style("stroke-dasharray", "0 " + (cache.scaledS0) + " " + ~~(longerSideCoeff) * 2);
 
-        lineGroup.selectAll("line")
-          .attr("x1", diffX1)
-          .attr("y1", diffY1)
-          .attr("x2", diffX2)
-          .attr("y2", diffY2);
+        if (duration) {
+          lineGroup.selectAll("line")
+            .transition().duration(duration).ease(d3.easeLinear)
+            .attr("x1", diffX1)
+            .attr("y1", diffY1)
+            .attr("x2", diffX2)
+            .attr("y2", diffY2);
+        } else {
+          lineGroup.selectAll("line")
+            .interrupt()
+            .attr("x1", diffX1)
+            .attr("y1", diffY1)
+            .attr("x2", diffX2)
+            .attr("y2", diffY2)
+            .transition();
+        }
 
       }
 
