@@ -47,7 +47,7 @@ export class Colors extends Dialog {
       //model: config.root.model.stores.markers.get("legend")
       state: {
         get hoverKeyLabels() {
-          const legendMarker = config.root.model.markers?.legend;
+          const legendMarker = config.root.model.markers?.[config.root.options?.markerNames?.legend || "legend"];
           if (!legendMarker) return null;
           if (legendMarker.state === STATUS.READY) {
             //TODO: fix on multi dimensions config
@@ -66,7 +66,7 @@ export class Colors extends Dialog {
       placeholder: ".vzb-clegend-container",
       options: {
         colorModelName: "color",
-        legendModelName: config.root.options.legendMarkerName || "legend"
+        legendModelName: config.root.options?.markerNames?.legend || "legend"
       }
     }];
     
