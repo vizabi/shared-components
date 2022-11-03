@@ -131,10 +131,8 @@ class Find extends Dialog {
       this.MDL.selected.data.filter.clear();
     });
 
-
-
-
-
+    const closeButton = this.DOM.buttons.select(".vzb-dialog-button[data-click='closeDialog']");
+    closeButton.on("click.panel", () => this.panelComps[this._getPanelMode()]._closeClick());
 
     this.panelComps = { find: this, show: this.findChild({ type: "Show" }) };
   }
@@ -322,6 +320,8 @@ class Find extends Dialog {
       });
     }
   }
+
+  _closeClick() {}
 }
 
 Find.DEFAULT_UI = {
