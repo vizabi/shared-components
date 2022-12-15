@@ -130,6 +130,12 @@ class _LocaleService extends BaseService {
       return (formatted + suffix + (options === PERCENT || options === SHARE ? "%" : ""));
     };
 
+    this.longNumberF = d3.formatLocale({
+      decimal: ".",
+      thousands: " ", //short space
+      grouping: [3],
+    }).format(',.2r');
+
     this.dateF = {
       year: d3.timeFormat("%Y"),
       month: d3.timeFormat("%Y-%m"),
