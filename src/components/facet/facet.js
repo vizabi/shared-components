@@ -52,7 +52,7 @@ class _Facet extends BaseComponent {
 
   get data() {
     const encoding = "facet_" + this.direction; 
-    return this.sortFacets(this.model.dataMap.order(encoding).groupByWithMultiGroupMembership(encoding));
+    return this.sortFacets(this.model.dataMap.groupByWithMultiGroupMembership(encoding));
   }
 
   howManyFacets() {
