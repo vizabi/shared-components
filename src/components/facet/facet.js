@@ -214,7 +214,7 @@ class _Facet extends BaseComponent {
             .datum(null)
             .attr("class", () => `${facetedComponentCssClass} vzb-${getFacetId(d)}`);
         })
-        .each(d => this.addSubcomponent(d))
+        .each((d, i) => this.addSubcomponent(d, i))
         .merge(sections)
         .style("grid-row-start", (d, i) => "start_" + (isRowDirection ? i : 0))
         .style("grid-row-end", (d, i) => "end_" + (isRowDirection ? i : 0))
@@ -250,12 +250,13 @@ class _Facet extends BaseComponent {
     return result;
   }
 
-  addSubcomponent(d) {
+  addSubcomponent(d, index) {
     console.log("adding", d)
     const { facetedComponent } = this.options;
     const name = getFacetId(d);
 
     const subcomponent = new facetedComponent({
+      id: this.id + "-" + index,
       placeholder: ".vzb-" + name,
       model: this.model,
       name,
