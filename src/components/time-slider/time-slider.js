@@ -499,7 +499,6 @@ class TimeSlider extends BaseComponent {
       fitIntoScale: "optimistic"
     });
     this.DOM.axis
-      .classed("vzb-hidden", this.services.layout.projector)
       .call(this.xAxis);
 
     this.element.classed("vzb-ts-disabled", this._isDomainNotVeryGood());
