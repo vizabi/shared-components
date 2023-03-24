@@ -132,7 +132,9 @@ class MinMaxInputs extends BaseComponent {
 
   _setModel(what, index, value) {
     const newWhatArray = this.MDL.model[what].slice(0);
-    newWhatArray[index] = value;
+    const sanitizedValue = parseFloat(value.replace("−", "-")); //replace the bourjois minus sign &#8722 to the proletarian &#45
+    if(!sanitizedValue && sanitizedValue !== 0) return;
+    newWhatArray[index] = sanitizedValue;
     this.MDL.model.config[what] = newWhatArray;
   }
 }
