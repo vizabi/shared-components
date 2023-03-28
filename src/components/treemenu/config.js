@@ -7,6 +7,7 @@ export const MENU_VERTICAL = 2;
 //css custom classes
 export const css = {
   wrapper: "vzb-treemenu-wrap",
+  wrapper_header: "vzb-treemenu-wrap-header",
   wrapper_outer: "vzb-treemenu-wrap-outer",
   background: "vzb-treemenu-background",
   close: "vzb-treemenu-close",

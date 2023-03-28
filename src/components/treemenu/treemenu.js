@@ -415,7 +415,7 @@ export class TreeMenu extends BaseComponent {
         } else {
           maxHeight = this.height - wrapperOuter.node().offsetTop;
         }
-        wrapper.style("max-height", (maxHeight - 10) + "px");
+        wrapper.style("max-height", (maxHeight - wrapper.node().offsetTop - 10) + "px");
 
         wrapperOuter.classed(css.alignXc, this._alignX === "center");
         wrapperOuter.style("margin-left", this._alignX === "center" ? "-" + containerWidth / 2 + "px" : null);
@@ -588,7 +588,7 @@ export class TreeMenu extends BaseComponent {
   _enableSearch() {
     const _this = this;
 
-    const input = this.DOM.wrapper.select("." + css.search);
+    const input = this.DOM.wrapperHeader.select("." + css.search);
 
     //it forms the array of possible queries
     const getMatches = function(value) {
@@ -735,7 +735,7 @@ export class TreeMenu extends BaseComponent {
       this.dataFiltered = dataFiltered;
     }
 
-    const { wrapper } = this.DOM;
+    const { wrapper, wrapperOuter, wrapperHeader } = this.DOM;
     wrapper.classed("vzb-hidden", !useDataFiltered).select("ul").remove();
 
     let title = "";
@@ -744,10 +744,10 @@ export class TreeMenu extends BaseComponent {
     } else {
       title = this.localise("buttons/" + targetModelName);
     }
-    this.element.select("." + css.title).select("span")
+    wrapperHeader.select("." + css.title).select("span")
       .text(title);
 
-    this.element.select("." + css.search)
+    wrapperHeader.select("." + css.search)
       .attr("placeholder", this.localise("placeholder/search") + "...");
 
     this._maxChildCount = 0;
@@ -919,7 +919,7 @@ export class TreeMenu extends BaseComponent {
     if (!this._targetModel) return;
     if (!this._indicatorsTree) return console.error("Tree menu: indicator tree has not been constructed (yet?)");
 
-    const { wrapper, wrapperOuter } = this.DOM;
+    const { wrapperHeader, wrapperOuter } = this.DOM;
 
     wrapperOuter.classed(css.absPosVert, this._top);
     wrapperOuter.classed(css.alignYt, this._alignY === "top");
@@ -932,13 +932,13 @@ export class TreeMenu extends BaseComponent {
 
     if (this._showWhenReady) this.setHiddenOrVisible(false).showWhenReady(false);
 
-    wrapper.select("." + css.search).node().value = "";
+    wrapperHeader.select("." + css.search).node().value = "";
 
     return this;
   }
 
   _focusSearch(focus = true) {
-    const searchInput = this.DOM.wrapper.select("." + css.search).node();
+    const searchInput = this.DOM.wrapperHeader.select("." + css.search).node();
 
     if (focus) {
       searchInput.focus();
@@ -1019,23 +1019,16 @@ export class TreeMenu extends BaseComponent {
         this.toggle();
       });
 
-    this.DOM.wrapperOuter = this.element
+    const wrapperOuter = this.DOM.wrapperOuter = this.element
       .append("div")
       .classed(css.wrapper_outer, true)
       .classed(css.noTransition, true);
 
-    const wrapper = this.DOM.wrapper = this.DOM.wrapperOuter
+    const wrapperHeader = this.DOM.wrapperHeader = wrapperOuter
       .append("div")
-      .classed(css.wrapper, true)
-      .classed(css.noTransition, true)
-      .classed("vzb-dialog-scrollable", true);
+      .classed(css.wrapper_header, true)
 
-    wrapper
-      .on("click", (event) => {
-        event.stopPropagation();
-      });
-
-    wrapper.append("div")
+    wrapperHeader.append("div")
       .attr("class", css.close)
       .html(iconClose)
       .on("click", (event) => {
@@ -1047,20 +1040,31 @@ export class TreeMenu extends BaseComponent {
       .attr("height", "0px")
       .attr("class", css.close + "-icon");
 
-    wrapper.append("div")
+    wrapperHeader.append("div")
       .classed(css.scaletypes, true)
       .append("span");
 
-    wrapper.append("div")
+    wrapperHeader.append("div")
       .classed(css.title, true)
       .append("span");
 
-    wrapper.append("div")
+    wrapperHeader.append("div")
       .classed(css.search_wrap, true)
       .append("input")
       .classed(css.search, true)
       .attr("type", "search")
       .attr("id", css.search);
+
+    const wrapper = this.DOM.wrapper = wrapperOuter
+      .append("div")
+      .classed(css.wrapper, true)
+      .classed(css.noTransition, true)
+      .classed("vzb-dialog-scrollable", true);
+
+    wrapper
+      .on("click", (event) => {
+        event.stopPropagation();
+      });
 
     wrapper.on("mouseleave", () => {
       //if(_this.menuEntity.direction != MENU_VERTICAL) _this.menuEntity.closeAllChildren();
