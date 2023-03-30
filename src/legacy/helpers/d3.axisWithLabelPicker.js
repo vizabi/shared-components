@@ -1,5 +1,6 @@
 import * as utils from "../base/utils";
 //d3.axisSmart
+import * as d3 from "d3";
 
 export default function axisSmart(_orient) {
 
@@ -23,7 +24,7 @@ export default function axisSmart(_orient) {
       const checkRng = axis.scale().range();
       if (!checkDmn.length || !checkRng.length || [...checkDmn, ...checkRng].some(s => s == null || isNaN(s))) {    
         //this catches null, undefined, NaN, Invalid date, but accepts 0 and ""
-        return utils.warn(`d3.axisSmart() skips action because of bad domain ${checkDmn} or range ${checkRng} of the attached scale`);
+        return utils.warn(`axisSmart() skips action because of bad domain ${checkDmn} or range ${checkRng} of the attached scale`);
       }
 
       if (highlightValue != null) {

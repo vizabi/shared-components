@@ -1,5 +1,6 @@
 import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
+import * as d3 from "d3";
 
 import "./simplecheckbox.scss";
 

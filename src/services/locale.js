@@ -2,6 +2,7 @@ import { BaseService } from "./base-service.js";
 import { observable, decorate, autorun, computed, runInAction } from "mobx";
 import { STATUS } from "../utils.js";
 import * as utils from "../legacy/base/utils";
+import * as d3 from "d3";
 
 const FALLBACK_PATH = "./assets/locale/";
 const FALLBACK_ID = "en";

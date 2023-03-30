@@ -2,6 +2,7 @@ import { transform, deepExtend } from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
 import "./stepped-slider.scss";
 import { computed, decorate } from "mobx";
+import * as d3 from "d3";
 
 const CONFIG = {
   triangleWidth: 10,

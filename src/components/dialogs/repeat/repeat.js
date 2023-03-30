@@ -1,6 +1,7 @@
 import { Dialog } from "../dialog";
 import {decorate, computed, runInAction} from "mobx";
 import { SimpleCheckbox } from "../../simplecheckbox/simplecheckbox";
+import * as d3 from "d3";
 
 /*
  * Repeat dialog

@@ -1,4 +1,5 @@
 import { ButtonList } from "../buttonlist";
+import * as d3 from "d3";
 
 /*!
  * VIZABI OPTIONSBUTTONLIST

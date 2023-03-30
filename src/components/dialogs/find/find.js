@@ -4,6 +4,7 @@ import { Show } from "./show";
 import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singlehandleslider";
 import { runInAction } from "mobx";
 import {decorate, computed} from "mobx";
+import * as d3 from "d3";
 /*!
  * VIZABI FIND CONTROL
  * Reusable find dialog

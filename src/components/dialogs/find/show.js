@@ -1,6 +1,7 @@
 import * as utils from "../../../legacy/base/utils";
 import { BaseComponent } from "../../base-component";
 import { runInAction } from "mobx";
+import * as d3 from "d3";
 
 /*!
  * VIZABI SHOW PANEL CONTROL

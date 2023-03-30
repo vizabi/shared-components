@@ -3,6 +3,7 @@ import { css } from "./config";
 import { runInAction } from "mobx";
 import * as utils from "../../legacy/base/utils";
 import * as Utils from "../../utils";
+import * as d3 from "d3";
 
 function spacesAreEqual(a, b){
   return a.concat().sort().join() === b.concat().sort().join();

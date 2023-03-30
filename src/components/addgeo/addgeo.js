@@ -3,6 +3,7 @@
 import { BaseComponent } from "../base-component";
 import * as Utils from "../../utils.js"; 
 import {runInAction, decorate, computed, toJS} from "mobx";
+import * as d3 from "d3";
 
 import "./addgeo.scss";
 export class _AddGeo extends BaseComponent {

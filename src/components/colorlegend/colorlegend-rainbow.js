@@ -1,6 +1,7 @@
 import axisSmart from "../../legacy/helpers/d3.axisWithLabelPicker";
 import * as utils from "../../legacy/base/utils";
 import { runInAction } from "mobx";
+import * as d3 from "d3";
 
 const CIRCLE_RADIUS = 6;
 

@@ -1,3 +1,5 @@
+import * as d3 from "d3";
+
 function detectTouchEvent(element, onTap, onLongTap) {
   var start;
   var coordX;

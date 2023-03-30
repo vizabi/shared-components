@@ -2,6 +2,7 @@ import * as utils from "../../legacy/base/utils";
 import {BaseComponent} from "../base-component.js";
 import {decorate, computed, runInAction} from "mobx";
 import { ICON_CLOSE as iconClose } from "../../icons/iconset.js";
+import * as d3 from "d3";
 
 function key(d) {return d[Symbol.for("key")];}
 

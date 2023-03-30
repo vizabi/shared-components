@@ -2,6 +2,7 @@ import * as utils from "../../legacy/base/utils";
 import { BaseComponent } from "../base-component";
 import {decorate, computed} from "mobx";
 import { ICON_DRAG as iconDrag, ICON_PIN as iconPin } from "../../icons/iconset";
+import * as d3 from "d3";
 //import requireAll from "helpers/requireAll";
 //const dialogTemplates = requireAll(require.context("components/dialogs/", true, /\.html$/));
 import "./dialog.scss";

@@ -30,10 +30,11 @@ export default {
     banner: copyright,
     sourcemap: true,
     globals: {
-      "mobx": "mobx"
+      "mobx": "mobx",
+      "d3": "d3"
     }
   },
-  external: ["mobx"],
+  external: ["mobx", "d3"],
   plugins: [
     trash({
       targets: ["build/*"]

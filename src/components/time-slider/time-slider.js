@@ -4,6 +4,7 @@ import axisSmart from "../../legacy/helpers/d3.axisWithLabelPicker";
 import * as utils from "../../legacy/base/utils";
 import "./time-slider.scss";
 import {decorate, computed} from "mobx";
+import * as d3 from "d3";
 
 const PROFILE_CONSTANTS = {
   SMALL: {

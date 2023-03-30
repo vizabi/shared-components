@@ -1,4 +1,5 @@
 import { autorun, decorate, observable, computed } from "mobx";
+import * as d3 from "d3";
 import { STATUS } from "../utils.js";
 import { ui as _ui} from "../ui.js";
 import * as utils from "../legacy/base/utils";

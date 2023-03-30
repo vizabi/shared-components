@@ -1,6 +1,7 @@
 import {BaseComponent} from "../base-component.js";
 import {decorate, computed} from "mobx";
 import "./repeater.scss";
+import * as d3 from "d3";
 
 function firstLastOrMiddle(index, total){
   return {first: index === 0, last: index + 1 === total};
