@@ -86,6 +86,7 @@ class BrushSlider extends BaseComponent {
     this.brushEventListeners = this._getBrushEventListeners();
 
     this.brush = d3.brushX()
+      .extent([[0, 0], [0, 0]])
       .handleSize(this._getHandleSize())
       .on("start", this.brushEventListeners.start)
       .on("brush", this.brushEventListeners.brush)
