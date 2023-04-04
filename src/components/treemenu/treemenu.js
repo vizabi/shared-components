@@ -39,7 +39,7 @@ function getItemName(item){
       .concat(item.byDataSources.map(m => m.name))
       .concat(item.id)
       .filter(f => f)
-      [0]
+      [0];
   } else {
     return item.name_catalog || item.name || item.id;
   }
@@ -729,7 +729,7 @@ export class TreeMenu extends BaseComponent {
         let spacesFromAllDS = [];
         item.byDataSources.forEach(item => spacesFromAllDS = spacesFromAllDS.concat(item.spaces));
         return spacesFromAllDS.some(space => this._targetModel.data.allow.space.filter(space));          
-      }
+      };
       dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && satisfiesAllowedSpaces(f));
 
       this.dataFiltered = dataFiltered;
@@ -1026,7 +1026,7 @@ export class TreeMenu extends BaseComponent {
 
     const wrapperHeader = this.DOM.wrapperHeader = wrapperOuter
       .append("div")
-      .classed(css.wrapper_header, true)
+      .classed(css.wrapper_header, true);
 
     wrapperHeader.append("div")
       .attr("class", css.close)

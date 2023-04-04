@@ -1,6 +1,6 @@
 import { BaseComponent } from "../base-component.js";
 import { decorate, observable, computed } from "mobx";
-import * as utils from "../../legacy/base/utils.js"
+import * as utils from "../../legacy/base/utils.js";
 import "./facet.scss";
 import { runInAction } from "mobx";
 import * as d3 from "d3";
@@ -101,7 +101,7 @@ class _Facet extends BaseComponent {
       return [...this.maxValues.keys()].at(-1);
     } else {
       const largest = {k: null, v: 0};
-      [...this.maxValues.entries()].forEach(([k,v]) => {if(v > largest.v) {largest.v = v; largest.k = k}});
+      [...this.maxValues.entries()].forEach(([k,v]) => {if(v > largest.v) {largest.v = v; largest.k = k;}});
       return largest.k;
     }
   }
@@ -157,11 +157,11 @@ class _Facet extends BaseComponent {
     const dominantMargin = {
       first: isRowDirection ? margin.top : margin.left,
       last: isRowDirection ? margin.bottom : margin.right
-    }
+    };
     const non_dominantMargin = {
       first: !isRowDirection ? margin.top : margin.left,
       last: !isRowDirection ? margin.bottom : margin.right
-    }
+    };
     
     const templateString = {
       dominant: rangeParts
@@ -241,7 +241,7 @@ class _Facet extends BaseComponent {
     const result = {
       row: firstLastOrMiddle(isRowDirection ? i : 0, nrows),
       column: firstLastOrMiddle(isRowDirection ? 0 : i, ncolumns)
-    }
+    };
 
     result.row.start = (result.row.first ? 0 : (i + 1)) + 1; //+1 is correction for 1-based numbers in css vs 0-based in array index
     result.row.end = (result.row.last ? (nrows + 2) : (i + 2)) + 1;

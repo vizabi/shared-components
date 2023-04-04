@@ -15,7 +15,7 @@ export class _AddGeo extends BaseComponent {
       <input class="vzb-addgeo-searchbox vzb-hidden" type="search" required="" placeholder="Search...">
       <ul class="vzb-addgeo-matches vzb-hidden"></ul>
       </div>
-    `
+    `;
     config.subcomponents = [];
    
     super(config);
@@ -41,12 +41,12 @@ export class _AddGeo extends BaseComponent {
       _this.root.children.forEach(c => {
         c.element.classed("vzb-blur", c != _this);
       });
-    })
+    });
 
     this.DOM.searchbox.on("keyup", function(event){
       _this.search(this.value);
       if(event.key === "Escape") {
-        _this.cancelSearch()
+        _this.cancelSearch();
       }
     });
 
@@ -96,7 +96,7 @@ export class _AddGeo extends BaseComponent {
 
     PRESETS.flat().forEach(p => {
       p.score = Utils.computeObjectsSimilarityScore(p.config, toJS(this.model.config), "is--"); 
-    })      
+    });
     const topScore = d3.max(PRESETS.flat(), d => d.score);
     return PRESETS.flat().find(f => f.score === topScore);
   }
@@ -106,7 +106,7 @@ export class _AddGeo extends BaseComponent {
       for (const dim in spaceCatalog) {
         const filterSpec = this.model.encoding.show.data.filter.dimensions[dim];
         if (spaceCatalog[dim].entities) this.catalog = [...spaceCatalog[dim].entities.filter(filterSpec).values()];
-      };
+      }
     });
   }
 
@@ -135,7 +135,7 @@ export class _AddGeo extends BaseComponent {
           return {
             id: m,
             name: this.model.data.source.getConcept(m.replace("is--",""))?.name
-          }
+          };
         });
         return d;
       })

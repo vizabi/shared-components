@@ -53,7 +53,7 @@ class _Repeater extends BaseComponent {
       .style("grid-row-start", (_, i) => repeat.getRowIndex(i) + 1)
       .style("grid-column-start", (_, i) => repeat.getColumnIndex(i) + 1)
       .each((d,i) => {
-        this.findChild({name: repeat.getName(d)}).state.positionInRepeat = this.getPosition(i)
+        this.findChild({name: repeat.getName(d)}).state.positionInRepeat = this.getPosition(i);
       });
 
     this.services.layout._resizeHandler();
@@ -66,7 +66,7 @@ class _Repeater extends BaseComponent {
     return {
       row: firstLastOrMiddle(repeat.getRowIndex(i), nrows),
       column: firstLastOrMiddle(repeat.getColumnIndex(i), ncolumns)
-    }
+    };
   }
 
   addSubcomponent(d, index){

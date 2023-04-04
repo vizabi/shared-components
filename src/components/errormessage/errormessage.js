@@ -41,7 +41,7 @@ class _ErrorMessage extends BaseComponent {
       this.toggle(true);
     });
     this.DOM.expand.on("click", () => {
-      this.DOM.details.classed("vzb-hidden", !this.DOM.details.classed("vzb-hidden"))
+      this.DOM.details.classed("vzb-hidden", !this.DOM.details.classed("vzb-hidden"));
     });
   }
 
@@ -55,10 +55,10 @@ class _ErrorMessage extends BaseComponent {
   rethrow(err){
     setTimeout(function(){
       throw(err);
-    }, 1)
+    }, 1);
     setTimeout(function(){
       throw("ERROR REACHED USER");
-    }, 1)
+    }, 1);
   }
 
   toggle(arg) {
