@@ -1462,10 +1462,12 @@ export function transform(node) {
   const {a, b, c, d, e, f} = node.transform.baseVal.consolidate().matrix;
 
   return (function (a, b, c, d, e, f) {
-    let scaleX, scaleY, skewX;
-    if (scaleX = Math.sqrt(a * a + b * b)) a /= scaleX, b /= scaleX;
-    if (skewX = a * c + b * d) c -= a * skewX, d -= b * skewX;
-    if (scaleY = Math.sqrt(c * c + d * d)) c /= scaleY, d /= scaleY, skewX /= scaleY;
+    let scaleX = Math.sqrt(a * a + b * b);
+    let scaleY = Math.sqrt(c * c + d * d);
+    let skewX = a * c + b * d;
+    if (scaleX) a /= scaleX, b /= scaleX;
+    if (skewX) c -= a * skewX, d -= b * skewX;
+    if (scaleY) c /= scaleY, d /= scaleY, skewX /= scaleY;
     if (a * d < b * c) a = -a, b = -b, skewX = -skewX, scaleX = -scaleX;
     return {
       translateX: e,
