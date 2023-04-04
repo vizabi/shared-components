@@ -38,8 +38,7 @@ function getItemName(item){
     return item.byDataSources.map(m => m.name_catalog)
       .concat(item.byDataSources.map(m => m.name))
       .concat(item.id)
-      .filter(f => f)
-      [0];
+      .filter(f => f)[0];
   } else {
     return item.name_catalog || item.name || item.id;
   }

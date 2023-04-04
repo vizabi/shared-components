@@ -17,6 +17,7 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-prototype-builtins": "off",
         "no-console": [
             "warn", { "allow": ["warn", "error", "groupCollapsed", "groupEnd", "info", "timeStamp"] }
         ],
