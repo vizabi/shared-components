@@ -72,7 +72,7 @@ divSelection
 ```  
 
 ```
-import { Icons } from "VizabiSharedComponents";
+import { Icons } from "@vizabi/shared-components";
 const {ICON_LOCK, ICON_UNLOCK} = Icons;
 divSelection
   .html(iconset[locked ? "ICON_LOCK" : "ICON_UNLOCK"]);
