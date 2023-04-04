@@ -252,7 +252,6 @@ class _Facet extends BaseComponent {
   }
 
   addSubcomponent(d, index) {
-    console.log("adding", d)
     const { facetedComponent } = this.options;
     const name = getFacetId(d);
 
@@ -276,7 +275,6 @@ class _Facet extends BaseComponent {
 
 
   removeSubcomponent(d) {
-    console.log("removing", d)
     const subcomponent = this.findChild({ name: getFacetId(d) });
     if (subcomponent) {
       subcomponent.deconstruct();

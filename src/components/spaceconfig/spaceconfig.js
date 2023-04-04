@@ -250,7 +250,6 @@ class _SpaceConfig extends BaseComponent {
     const nest = this._nestAvailabilityByConcepts(this._getAvailability());
     //const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
     this.concepts = this._convertConceptMapToArray(nest);
-    console.log(this.concepts);
     this.encNewConfig = {};
 
     this.DOM.encodings
