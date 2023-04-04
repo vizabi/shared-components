@@ -35,7 +35,7 @@ class _LocaleService extends BaseService {
   set id(id) {
     runInAction(() => {
       this.config.id = id;
-      Vizabi.stores.dataSources.getAll().forEach(e => e.config.locale = id);
+      this.config.Vizabi.stores.dataSources.getAll().forEach(e => e.config.locale = id);
     });
   }
 
@@ -145,7 +145,7 @@ class _LocaleService extends BaseService {
       decimal: ".",
       thousands: " ", //short space
       grouping: [3],
-    }).format(',.2r');
+    }).format(",.2r");
 
     this.dateF = {
       year: d3.timeFormat("%Y"),

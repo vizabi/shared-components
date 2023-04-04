@@ -90,12 +90,12 @@ export class DeepLeaf{
         //.text(v => v.dataSource.config.name)
         .text(v => v.dataSource.id)
         .on("mouseenter", function(event, v) {
-          d3.select(this).style("background-color", getDSColorLight(v))
+          d3.select(this).style("background-color", getDSColorLight(v));
           _this.updateNameSection(v);
           _this.updateDescrSection(v);
         })
         .on("mouseout", function(event, v) {
-          d3.select(this).style("background-color", paintBackground(v) ? getDSColorLight(v) : null)
+          d3.select(this).style("background-color", paintBackground(v) ? getDSColorLight(v) : null);
           _this.updateNameSection();
           _this.updateDescrSection();
         })

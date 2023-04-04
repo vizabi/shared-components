@@ -963,7 +963,7 @@ export default function axisSmart(_orient) {
 
     function meow() {
       if (!axis.labelerOptions().isDevMode) return;
-      console.log(...arguments);
+      console.info(...arguments);
     }
 
   })(d3["axis" + utils.capitalize(_orient)]());

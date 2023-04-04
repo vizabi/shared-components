@@ -1,6 +1,6 @@
 import * as utils from "../../legacy/base/utils.js";
 import { BaseComponent } from "../base-component.js";
-import {decorate, observable, computed, runInAction} from "mobx";
+import {decorate, computed, runInAction} from "mobx";
 import "./spaceconfig.scss";
 import * as d3 from "d3";
 
@@ -250,7 +250,6 @@ class _SpaceConfig extends BaseComponent {
     const nest = this._nestAvailabilityByConcepts(this._getAvailability());
     //const filtervl = this._conceptsCompatibleWithMarkerSpace(nest, this.model.data.space);
     this.concepts = this._convertConceptMapToArray(nest);
-    console.log(this.concepts);
     this.encNewConfig = {};
 
     this.DOM.encodings

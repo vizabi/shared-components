@@ -154,76 +154,15 @@ export class ButtonList extends BaseComponent {
 
     this._active_comp = false;
 
-    // this.model_binds = {
-    //   "change:state.marker.select": function(evt, path) {
-    //     if (!_this._readyOnce) return;
-    //     if (path.indexOf("select.labelOffset") !== -1) return;
-
-    //     _this.setBubbleTrails();
-    //     _this.setBubbleLock();
-    //     _this._toggleButtons();
-
-
-    //     //scroll button list to end if bottons appeared or disappeared
-    //     // if(_this.entitiesSelected_1 !== (_this.model.state.marker.select.length > 0)) {
-    //     //   _this.scrollToEnd();
-    //     // }
-    //     // _this.entitiesSelected_1 = _this.model.state.marker.select.length > 0;
-    //   },
-    //   "change:ui.chart": function(evt, path) {
-    //     if (!_this._readyOnce) return;
-
-    //     if (path.indexOf("lockActive") > -1 || path.indexOf("lockUnavailable") > -1) {
-    //       _this.setBubbleLock();
-    //     }
-    //   }
-    // };
-
-    // config.ui is same as this.model.ui here but this.model.ui is not yet available because constructor hasn't been called.
-    // can't call constructor earlier because this.model_binds needs to be complete before calling constructor
-    // builds model
-    //this._super(config, context);
-
     this.validatePopupButtons(this.root.ui.buttons.buttons, this.root.ui.dialogs.dialogs);
 
     this.element.selectAll("div").remove();
-
-    // // // // this.root.findChildByName("gapminder-dialogs").on("close", (evt, params) => {
-    // // // //   _this.setButtonActive(params.id, false);
-    // // // // });
-
-
-    // // if button_expand has been passed in with boolean param or array must check and covert to array
-    // if (button_expand){
-    //   this.model.ui.dialogs.sidebar = (button_expand === true) ? this.model.ui.buttons : button_expand;
-    // }
-
-    // if (button_expand && button_expand.length !== 0) {
-    //     d3.select(this.root.element).classed("vzb-dialog-expand-true", true);
-    // }
-
-
-    // (button_expand||[]).forEach(function(button) {
-    //   if (button_list.indexOf(button) === -1) {
-    //     button_list.push(button);
-    //   }
-    // });
-
-    //this.model.ui.buttons = button_list;
-
-    //add buttons and render components
 
     //store body overflow
     this._prev_body_overflow = document.body.style.overflow;
 
     //TODO: maybe do the initial state setting here for all buttons
     if(this.root.ui.buttons.buttons.includes("sidebarcollapse")) this.setSidebarCollapse();
-
-    // this.setBubbleTrails();
-    // this.setTimeForecast();
-    // this.setBubbleLock();
-    // this.setInpercent();
-    // this.setPresentationMode();
   }
 
   draw() {
@@ -250,8 +189,6 @@ export class ButtonList extends BaseComponent {
       if (button) {
         if (button.statebind) {
           this.addReaction(() => {
-            //_this.model_binds["change:" + button.statebind] = function(evt) {
-            //if (!_this._readyOnce) return;
             button.statebindfunc(buttonId, utils.getProp(this, button.statebind.split(".")));
           });
         } else {

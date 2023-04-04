@@ -63,7 +63,6 @@ export class SingleHandleSlider extends BrushSlider {
   }
 
   _getBrushEventListeners() {
-    const _this = this;
     const _superListeners = super._getBrushEventListeners();
 
     return {
@@ -78,7 +77,7 @@ export class SingleHandleSlider extends BrushSlider {
           this._snap(event.selection);
         }
       },
-      end:(event, d) => {
+      end:(event) => {
         if (this.nonBrushChange || !event.sourceEvent) return;
 
         if (this.options.snapValue) {

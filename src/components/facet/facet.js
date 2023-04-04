@@ -1,6 +1,6 @@
 import { BaseComponent } from "../base-component.js";
 import { decorate, observable, computed } from "mobx";
-import * as utils from "../../legacy/base/utils.js"
+import * as utils from "../../legacy/base/utils.js";
 import "./facet.scss";
 import { runInAction } from "mobx";
 import * as d3 from "d3";
@@ -101,7 +101,7 @@ class _Facet extends BaseComponent {
       return [...this.maxValues.keys()].at(-1);
     } else {
       const largest = {k: null, v: 0};
-      [...this.maxValues.entries()].forEach(([k,v]) => {if(v > largest.v) {largest.v = v; largest.k = k}});
+      [...this.maxValues.entries()].forEach(([k,v]) => {if(v > largest.v) {largest.v = v; largest.k = k;}});
       return largest.k;
     }
   }
@@ -128,7 +128,7 @@ class _Facet extends BaseComponent {
     if(getUpdateStr() === this.resizeUpdateString) return;
     this.resizeUpdateString = getUpdateStr();
 
-    let rangeParts = domainParts.map(m => null);
+    let rangeParts = domainParts.map(() => null);
 
     if (this.ui.inpercent){
       const domainPartsSum = d3.sum(domainParts);
@@ -157,11 +157,11 @@ class _Facet extends BaseComponent {
     const dominantMargin = {
       first: isRowDirection ? margin.top : margin.left,
       last: isRowDirection ? margin.bottom : margin.right
-    }
+    };
     const non_dominantMargin = {
       first: !isRowDirection ? margin.top : margin.left,
       last: !isRowDirection ? margin.bottom : margin.right
-    }
+    };
     
     const templateString = {
       dominant: rangeParts
@@ -207,7 +207,7 @@ class _Facet extends BaseComponent {
         .remove();
 
       sections.enter().append("div")
-        .attr("class", d => "vzb-facet-inner")
+        .attr("class", "vzb-facet-inner")
         //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
         //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
         .each(function (d) {
@@ -226,8 +226,8 @@ class _Facet extends BaseComponent {
         .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
         .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
         .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
-        .each((d, i) => {
-          this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
+        .each((d) => {
+          this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d));
         });
 
       this.services.layout._resizeHandler();
@@ -241,7 +241,7 @@ class _Facet extends BaseComponent {
     const result = {
       row: firstLastOrMiddle(isRowDirection ? i : 0, nrows),
       column: firstLastOrMiddle(isRowDirection ? 0 : i, ncolumns)
-    }
+    };
 
     result.row.start = (result.row.first ? 0 : (i + 1)) + 1; //+1 is correction for 1-based numbers in css vs 0-based in array index
     result.row.end = (result.row.last ? (nrows + 2) : (i + 2)) + 1;
@@ -252,7 +252,6 @@ class _Facet extends BaseComponent {
   }
 
   addSubcomponent(d, index) {
-    console.log("adding", d)
     const { facetedComponent } = this.options;
     const name = getFacetId(d);
 
@@ -276,7 +275,6 @@ class _Facet extends BaseComponent {
 
 
   removeSubcomponent(d) {
-    console.log("removing", d)
     const subcomponent = this.findChild({ name: getFacetId(d) });
     if (subcomponent) {
       subcomponent.deconstruct();

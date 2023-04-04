@@ -1,9 +1,6 @@
-import * as utils from "../../legacy/base/utils.js";
 import { BaseComponent } from "../base-component.js";
-import {decorate, observable, computed, runInAction} from "mobx";
+import {decorate, computed} from "mobx";
 import "./errormessage.scss";
-
-import { ICON_ELLIPSIS_V, ICON_CLOSE } from "../../icons/iconset.js";
 
 let hidden = true;
 class _ErrorMessage extends BaseComponent {
@@ -41,7 +38,7 @@ class _ErrorMessage extends BaseComponent {
       this.toggle(true);
     });
     this.DOM.expand.on("click", () => {
-      this.DOM.details.classed("vzb-hidden", !this.DOM.details.classed("vzb-hidden"))
+      this.DOM.details.classed("vzb-hidden", !this.DOM.details.classed("vzb-hidden"));
     });
   }
 
@@ -55,10 +52,10 @@ class _ErrorMessage extends BaseComponent {
   rethrow(err){
     setTimeout(function(){
       throw(err);
-    }, 1)
+    }, 1);
     setTimeout(function(){
       throw("ERROR REACHED USER");
-    }, 1)
+    }, 1);
   }
 
   toggle(arg) {

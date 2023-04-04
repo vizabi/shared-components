@@ -83,7 +83,7 @@ class Repeat extends Dialog {
       .html(localise("hint/repeat/addremovecharts"));
 
     header.select(".vzb-useConnectedRowsAndColumns-switch")
-      .classed("vzb-hidden", !(row && row.length && column && column.length && allowEnc.length === 2))
+      .classed("vzb-hidden", !(row && row.length && column && column.length && allowEnc.length === 2));
 
     if (useConnectedRowsAndColumns) {
       header.append("p")

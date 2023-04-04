@@ -38,8 +38,7 @@ function getItemName(item){
     return item.byDataSources.map(m => m.name_catalog)
       .concat(item.byDataSources.map(m => m.name))
       .concat(item.id)
-      .filter(f => f)
-      [0]
+      .filter(f => f)[0];
   } else {
     return item.name_catalog || item.name || item.id;
   }
@@ -729,13 +728,13 @@ export class TreeMenu extends BaseComponent {
         let spacesFromAllDS = [];
         item.byDataSources.forEach(item => spacesFromAllDS = spacesFromAllDS.concat(item.spaces));
         return spacesFromAllDS.some(space => this._targetModel.data.allow.space.filter(space));          
-      }
+      };
       dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && satisfiesAllowedSpaces(f));
 
       this.dataFiltered = dataFiltered;
     }
 
-    const { wrapper, wrapperOuter, wrapperHeader } = this.DOM;
+    const { wrapper, wrapperHeader } = this.DOM;
     wrapper.classed("vzb-hidden", !useDataFiltered).select("ul").remove();
 
     let title = "";
@@ -1026,7 +1025,7 @@ export class TreeMenu extends BaseComponent {
 
     const wrapperHeader = this.DOM.wrapperHeader = wrapperOuter
       .append("div")
-      .classed(css.wrapper_header, true)
+      .classed(css.wrapper_header, true);
 
     wrapperHeader.append("div")
       .attr("class", css.close)
@@ -1197,7 +1196,7 @@ export class TreeMenu extends BaseComponent {
         dataSources.get(av.source).select.value.push(av.value.concept);
       });
 
-    const dataSourcesWithTags = [...dataSources].filter(([ds, query]) => query.select.value.length);
+    const dataSourcesWithTags = [...dataSources].filter(([, query]) => query.select.value.length);
 
     return dataSourcesWithTags.length ? Promise.all(dataSourcesWithTags
       .map(([ds, query]) => ds.query(query).then(result => {
