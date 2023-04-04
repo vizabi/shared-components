@@ -62,7 +62,7 @@
     "cssnano": "4.1.10",
     "eslint": "^6.6.0",
     "postcss": "7.0.27",
-    "rollup": "^2.18.1",
+    "rollup": "^2.79.1",
     "rollup-plugin-copy": "^3.1.0",
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-eslint": "^7.0.0",

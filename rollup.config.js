@@ -29,6 +29,7 @@ export default {
     format: "umd",
     banner: copyright,
     sourcemap: true,
+    interop: "esModule",
     globals: {
       "mobx": "mobx",
       "d3": "d3"
