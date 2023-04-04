@@ -35,7 +35,7 @@ class _LocaleService extends BaseService {
   set id(id) {
     runInAction(() => {
       this.config.id = id;
-      Vizabi.stores.dataSources.getAll().forEach(e => e.config.locale = id);
+      this.config.Vizabi.stores.dataSources.getAll().forEach(e => e.config.locale = id);
     });
   }
 
