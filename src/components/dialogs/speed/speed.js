@@ -3,6 +3,7 @@ import { Dialog } from "../dialog";
 import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singlehandleslider";
 import { SimpleCheckbox } from "../../simplecheckbox/simplecheckbox";
 import {decorate, computed} from "mobx";
+import * as d3 from "d3";
 
 class Speed extends Dialog {
   constructor(config) {

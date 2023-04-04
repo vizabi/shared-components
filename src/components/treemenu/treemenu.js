@@ -6,6 +6,7 @@ import * as utils from "../../legacy/base/utils";
 import { ICON_CLOSE as iconClose } from "../../icons/iconset";
 import "./treemenu.scss";
 import {runInAction} from "mobx";
+import * as d3 from "d3";
 
 const PROFILE_CONSTANTS = {
   SMALL: {

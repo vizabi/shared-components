@@ -2,6 +2,7 @@ import { BaseService } from "./base-service.js";
 import { observable, action, decorate, autorun, computed } from "mobx";
 import { STATUS } from "../utils.js";
 import * as utils from "../legacy/base/utils";
+import * as d3 from "d3";
 
 const PROFILES = [
   {

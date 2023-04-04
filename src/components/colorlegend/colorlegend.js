@@ -6,6 +6,7 @@ import { STATUS, isEntityConcept } from "../../utils.js";
 import "./colorlegend.scss";
 import { runInAction } from "mobx";
 import {decorate, computed} from "mobx";
+import * as d3 from "d3";
 
 /*!
  * VIZABI BUBBLE COLOR LEGEND COMPONENT

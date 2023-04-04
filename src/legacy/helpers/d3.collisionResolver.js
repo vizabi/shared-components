@@ -1,4 +1,5 @@
 //d3.svg.collisionResolver
+import * as d3 from "d3";
 
 export default function collisionResolver() {
   return (function collision_resolver() {

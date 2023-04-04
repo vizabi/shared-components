@@ -1,6 +1,8 @@
 import { BaseService } from "./base-service.js";
 import { observable, decorate, autorun, computed, runInAction } from "mobx";
 import { STATUS } from "../utils.js";
+import * as utils from "../legacy/base/utils";
+import * as d3 from "d3";
 
 const FALLBACK_PATH = "./assets/locale/";
 const FALLBACK_ID = "en";
@@ -17,6 +19,7 @@ class _LocaleService extends BaseService {
   setup(){
     this.status = STATUS.INIT;
     this.path = this.config.path || this.constructor.DEFAULTS.path;
+    this.resolve = this.config.resolve;
     this.placeholder = this.config.placeholder || this.constructor.DEFAULTS.placeholder;
     this.element = d3.select(this.placeholder);
     this.content = {};
@@ -46,12 +49,20 @@ class _LocaleService extends BaseService {
     this.element.classed(RTL_CSS_CLASS, this.isRTL());
   }
 
+  _resolveReader(id) {
+    if (this.resolve?.[id] && utils.isObject(this.resolve?.[id])) {
+      return Promise.resolve(this.resolve?.[id]);
+    }
+    const path = this.resolve?.[id] ? this.resolve?.[id] : (this.path + id + ".json");
+    return d3.json(path);
+  }
+
   _loadFile(){
     this.status = STATUS.PENDING;
 
-    const readers = [d3.json(this.path + this.id + ".json")];
+    const readers = [this._resolveReader(this.id)];
     if (this.id != FALLBACK_ID && !this.content[FALLBACK_ID]) {
-      readers.push(d3.json(this.path + FALLBACK_ID + ".json"));
+      readers.push(this._resolveReader(FALLBACK_ID));
     }
     Promise.all(readers)
       .then((content) => {

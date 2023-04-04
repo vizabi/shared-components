@@ -3,6 +3,7 @@ import { decorate, observable, computed } from "mobx";
 import * as utils from "../../legacy/base/utils.js"
 import "./facet.scss";
 import { runInAction } from "mobx";
+import * as d3 from "d3";
 
 function getFacetId(d) {
   return d;

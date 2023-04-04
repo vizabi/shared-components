@@ -1,6 +1,7 @@
 import { css, MENU_HORIZONTAL, MENU_VERTICAL } from "./config";
 import {DeepLeaf} from "./deepleaf.js";
 import * as utils from "../../legacy/base/utils";
+import * as d3 from "d3";
 export class Menu {
   constructor(context, parent, menu, options) {
     const _this = this;

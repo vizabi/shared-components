@@ -1,4 +1,5 @@
 /* eslint no-prototype-builtins: "off" */
+import * as d3 from "d3";
 
 export const d3json = function (path, callback) {
   d3.json(path)

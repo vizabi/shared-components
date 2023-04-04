@@ -2,6 +2,7 @@ import * as utils from "../../legacy/base/utils";
 import * as iconset from "../../icons/iconset";
 import { BaseComponent } from "../base-component";
 import "./buttonlist.scss";
+import * as d3 from "d3";
 
 /*!
  * VIZABI BUTTONLIST

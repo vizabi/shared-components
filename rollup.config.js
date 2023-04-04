@@ -29,11 +29,13 @@ export default {
     format: "umd",
     banner: copyright,
     sourcemap: true,
+    interop: "esModule",
     globals: {
-      "mobx": "mobx"
+      "mobx": "mobx",
+      "d3": "d3"
     }
   },
-  external: ["mobx"],
+  external: ["mobx", "d3"],
   plugins: [
     trash({
       targets: ["build/*"]
