@@ -2,7 +2,7 @@
 
 import { BaseComponent } from "../base-component";
 import * as Utils from "../../utils.js"; 
-import {runInAction, decorate, computed, toJS} from "mobx";
+import {decorate, computed, toJS} from "mobx";
 import * as d3 from "d3";
 
 import "./addgeo.scss";
@@ -92,7 +92,7 @@ export class _AddGeo extends BaseComponent {
   }
 
   get activePreset(){
-    const PRESETS = toJS(this.root.model.config.presets) || PRESETS_DEFAULT;
+    const PRESETS = toJS(this.root.model.config.presets);
 
     PRESETS.flat().forEach(p => {
       p.score = Utils.computeObjectsSimilarityScore(p.config, toJS(this.model.config), "is--"); 

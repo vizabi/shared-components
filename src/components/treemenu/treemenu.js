@@ -735,7 +735,7 @@ export class TreeMenu extends BaseComponent {
       this.dataFiltered = dataFiltered;
     }
 
-    const { wrapper, wrapperOuter, wrapperHeader } = this.DOM;
+    const { wrapper, wrapperHeader } = this.DOM;
     wrapper.classed("vzb-hidden", !useDataFiltered).select("ul").remove();
 
     let title = "";
@@ -1197,7 +1197,7 @@ export class TreeMenu extends BaseComponent {
         dataSources.get(av.source).select.value.push(av.value.concept);
       });
 
-    const dataSourcesWithTags = [...dataSources].filter(([ds, query]) => query.select.value.length);
+    const dataSourcesWithTags = [...dataSources].filter(([, query]) => query.select.value.length);
 
     return dataSourcesWithTags.length ? Promise.all(dataSourcesWithTags
       .map(([ds, query]) => ds.query(query).then(result => {

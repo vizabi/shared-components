@@ -1,6 +1,6 @@
 import * as utils from "../../legacy/base/utils.js";
 import { BaseComponent } from "../base-component.js";
-import {decorate, observable, computed, runInAction} from "mobx";
+import {decorate, computed, runInAction} from "mobx";
 import "./spaceconfig.scss";
 import * as d3 from "d3";
 

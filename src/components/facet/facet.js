@@ -128,7 +128,7 @@ class _Facet extends BaseComponent {
     if(getUpdateStr() === this.resizeUpdateString) return;
     this.resizeUpdateString = getUpdateStr();
 
-    let rangeParts = domainParts.map(m => null);
+    let rangeParts = domainParts.map(() => null);
 
     if (this.ui.inpercent){
       const domainPartsSum = d3.sum(domainParts);
@@ -207,7 +207,7 @@ class _Facet extends BaseComponent {
         .remove();
 
       sections.enter().append("div")
-        .attr("class", d => "vzb-facet-inner")
+        .attr("class", "vzb-facet-inner")
         //add an intermediary div with null datum to prevent unwanted data inheritance to subcomponent
         //https://stackoverflow.com/questions/17846806/preventing-unwanted-data-inheritance-with-selection-select
         .each(function (d) {
@@ -226,8 +226,8 @@ class _Facet extends BaseComponent {
         .classed("vzb-facet-row-last", d => this.getPosition(facetKeys.indexOf(d)).row.last)
         .classed("vzb-facet-column-first", d => this.getPosition(facetKeys.indexOf(d)).column.first)
         .classed("vzb-facet-column-last", d => this.getPosition(facetKeys.indexOf(d)).column.last)
-        .each((d, i) => {
-          this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d))
+        .each((d) => {
+          this.findChild({ name: getFacetId(d) }).state.positionInFacet = this.getPosition(facetKeys.indexOf(d));
         });
 
       this.services.layout._resizeHandler();

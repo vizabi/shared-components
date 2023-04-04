@@ -1,19 +1,9 @@
 import { ButtonList } from "../buttonlist";
-import * as d3 from "d3";
 
 /*!
  * VIZABI OPTIONSBUTTONLIST
  * Reusable optionsbuttonlist component
  */
-
-//default existing buttons
-const class_active = "vzb-active";
-// var class_active_locked = "vzb-active-locked";
-// var class_hide_btn = "vzb-dialog-side-btn";
-// var class_unavailable = "vzb-unavailable";
-// var class_vzb_fullscreen = "vzb-force-fullscreen";
-// var class_container_fullscreen = "vzb-container-fullscreen";
-
 
 export class OptionsButtonList extends ButtonList {
   setup() {

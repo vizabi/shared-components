@@ -1,9 +1,6 @@
-import * as utils from "../../legacy/base/utils.js";
 import { BaseComponent } from "../base-component.js";
-import {decorate, observable, computed, runInAction} from "mobx";
+import {decorate, computed} from "mobx";
 import "./errormessage.scss";
-
-import { ICON_ELLIPSIS_V, ICON_CLOSE } from "../../icons/iconset.js";
 
 let hidden = true;
 class _ErrorMessage extends BaseComponent {
