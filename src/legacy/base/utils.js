@@ -297,18 +297,6 @@ export const getViewportPosition = function (element) {
 };
 
 
-export const findScrollableAncestor = function (node) {
-  const scrollable = ["scroll", "auto"];
-  while (node = node.parentNode) {
-    const scrollHeight = node.scrollHeight;
-    const height = node.clientHeight;
-    if (scrollHeight > height && scrollable.indexOf(d3.select(node).style("overflow")) !== -1) {
-      return node;
-    }
-  }
-  return null;
-};
-
 /*
  * transforms a string into a validated fload value
  * @param {string} string to be transformed
