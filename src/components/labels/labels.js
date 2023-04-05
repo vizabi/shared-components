@@ -639,7 +639,7 @@ class Labels extends BaseComponent {
 
             view.append("rect")
               .attr("class", "vzb-label-glow")
-              .attr("filter", `url(#vzb-glow-filter-${parent.id}})`);
+              .attr("filter", `url(#vzb-glow-filter-${_this.parent.id})`);
             view.append("rect")
               .attr("class", "vzb-label-fill vzb-tooltip-border");
             //          .on("click", function(event, d) {
