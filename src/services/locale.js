@@ -13,7 +13,8 @@ class _LocaleService extends BaseService {
   static DEFAULTS = {
     id: FALLBACK_ID,
     path: FALLBACK_PATH,
-    placeholder: "body"
+    placeholder: "body",
+    shortNumberFormat: true
   }
 
   setup(){
@@ -32,11 +33,19 @@ class _LocaleService extends BaseService {
     return this.config.id || this.constructor.DEFAULTS.id;
   }
 
+  get shortNumberFormat() {
+    return this.config.shortNumberFormat ?? this.constructor.DEFAULTS.shortNumberFormat;
+  }
+
   set id(id) {
     runInAction(() => {
       this.config.id = id;
       this.config.Vizabi.stores.dataSources.getAll().forEach(e => e.config.locale = id);
     });
+  }
+
+  set shortNumberFormat(shortNumberFormat) {
+    this.config.shortNumberFormat = shortNumberFormat;
   }
 
   deconstruct(){
@@ -165,7 +174,7 @@ class _LocaleService extends BaseService {
   }
   
   getFormattedNumber(arg) {
-    return this.numberF(arg);
+    return this.shortNumberFormat ? this.numberF(arg) : this.longNumberF(arg);
   }
 
   getFormattedDate(arg, dateIntervalSize) {
@@ -193,5 +202,6 @@ class _LocaleService extends BaseService {
 
 export const LocaleService = decorate(_LocaleService, {
   "id": computed,
+  "shortNumberFormat": computed,
   "status": observable
 });

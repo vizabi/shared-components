@@ -56,8 +56,8 @@ export class Presentation extends Dialog {
       type: SimpleCheckbox,
       placeholder: ".vzb-format-si-prefix-switch",
       options: {
-        checkbox: "numberFormatSIPrefix",
-        submodel: "root.ui.chart"
+        checkbox: "shortNumberFormat",
+        submodel: "root.services.locale"
       }
     }];
 

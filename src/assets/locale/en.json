@@ -57,7 +57,7 @@
         "check/flipSides": "Flip sides",
         "check/timeInBackground": "Time in background",
         "check/timeInTrails": "Time in trails label",
-        "check/numberFormatSIPrefix": "SI suffix in numbers",
+        "check/shortNumberFormat": "Short number format (420k, 69M)",
         "check/rbh/enabled": "Enable Robinhood plugin",
         "dialogs/color/select-all": "Select all in that group",
         "dialogs/color/remove-else": "Remove everything else",
