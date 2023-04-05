@@ -91,7 +91,7 @@ class _LocaleService extends BaseService {
   
       if (Math.abs(x) < EPSILON) return "0";
   
-      const format = "r"; //rounded format. use "f" for fixed
+      const format = "~r"; //rounded format. use "f" for fixed, ~ trims insignificant trailing zeros
       const prec = 3; //round to so many significant digits
   
       let suffix = "";
@@ -134,8 +134,6 @@ class _LocaleService extends BaseService {
       /* eslint-enable */
   
       let formatted = d3.format("." + prec + format)(x);
-      //remove trailing zeros if dot exists to avoid numbers like 1.0M, 3.0B, 1.500, 0.9700, 0.0
-      if (formatted.indexOf(".") > -1) formatted = formatted.replace(/0+$/, "").replace(/\.$/, "");
   
       // use manual formatting for the cases above
       return (formatted + suffix + (options === PERCENT || options === SHARE ? "%" : ""));
@@ -145,7 +143,7 @@ class _LocaleService extends BaseService {
       decimal: ".",
       thousands: " ", //short space
       grouping: [3],
-    }).format(",.2r");
+    }).format(",.3~r");
 
     this.dateF = {
       year: d3.timeFormat("%Y"),
