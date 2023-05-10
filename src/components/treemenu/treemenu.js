@@ -240,7 +240,7 @@ export class TreeMenu extends BaseComponent {
       existing.byDataSources.push(item);
     } else {
       //create a new item group
-      folder.children.push({ id: id, type: "indicator", byDataSources: [item] });
+      folder.children.push({ id: id, concept_type: item.concept_type, type: "indicator", byDataSources: [item] });
     }
     return folder;
   }
@@ -266,11 +266,12 @@ export class TreeMenu extends BaseComponent {
           concept: this.model.data.source.getConcept(d)
         }; 
       }))
-      .filter(f => !f.concept.tags || f.concept.tags !== "_none")
+      .filter(f =>(!f.concept.tags || f.concept.tags !== "_none") && f.concept.concept.slice(0,4) !== "is--")
       .forEach(({concept, spaces, source}) => {
 
         const id = concept.concept;
         const props = {
+          concept_type: concept.concept_type,
           dataSource: source,
           spaces,
           name: concept.name,
@@ -640,7 +641,7 @@ export class TreeMenu extends BaseComponent {
       searchValueNonEmpty = value != "";
 
       if (value.length >= _this.OPTIONS.SEARCH_MIN_STR) {
-        _this.redraw(getMatches(value), true);
+        _this.redraw(getMatches(value));
       } else {
         _this.redraw();
       }
@@ -656,86 +657,59 @@ export class TreeMenu extends BaseComponent {
   }
 
 
-  //function is redrawing data and built structure
-  redraw(data, useDataFiltered) {
+  _getFilteredTree() {
     const _this = this;
 
-    let dataFiltered, allowedIDs;
+    const conceptFilter = function conceptFilter(concept) {
+      return _this._targetModel.data.allow.concept.filter(concept);
+    };
 
-    const indicatorsDB = { _default:{} };
-    utils.forEach(this.services.Vizabi.Vizabi.stores.dataSources.getAll(), m => {
-      m.concepts.forEach(c => {
-        indicatorsDB[c.concept] = c;
-      });
-    });
+    const scaleTypeFilter = function scaleTypeFilter(concept) {
+      const allowedTypes = _this._targetModel.scale.allowedTypes;
 
-    const targetModelName = _this._targetModel.name || _this._targetModel.config.type;
-
-    if (useDataFiltered) {
-      dataFiltered = data;
-    } else {
-      if (data == null) data = this._indicatorsTree;
-
-      allowedIDs = utils.keys(indicatorsDB).filter(f => {
-
-        //check if indicator is denied to show with allow->names->!indicator
-        if (_this._targetModel.data.allow && _this._targetModel.data.allow.names) {
-          if (_this._targetModel.data.allow.names.indexOf("!" + f) != -1) return false;
-          if (_this._targetModel.data.allow.names.indexOf(f) != -1) return true;
-          if (_this._targetModel.data.allow.namesOnlyThese) return false;
+      //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
+      if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
+      
+      //match specific scale types if defined
+      const indicatorScales = JSON.parse(concept.scales || null);
+      if(indicatorScales) {
+        for (let i = indicatorScales.length - 1; i >= 0; i--) {
+          if (allowedTypes.includes(indicatorScales[i])) return true;
         }
+      }
 
-        const allowedTypes = _this._targetModel.scale.allowedTypes;
-        const isEntity = indicatorsDB[f].concept_type == "entity_domain" || indicatorsDB[f].concept_type == "entity_set";
-        const isString = indicatorsDB[f].concept_type == "string";
-        const isMeasure = indicatorsDB[f].concept_type == "measure";
-        const isTime = indicatorsDB[f].concept_type == "time";
-        const isConstant = f === "_default"; //TODO: refactor constants
-        const indicatorScales = JSON.parse(indicatorsDB[f].scales || null);
+      //otherwise go by concept types
+      const ctype = concept.concept_type;
 
-        //keep indicator if nothing is specified in tool properties or if any scale is allowed explicitly
-        if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
+      return 0
+        //for entities, strings, constants need an ordinal scale to be allowed
+        || allowedTypes.includes("ordinal") && (["entity_domain", "entity_set", "string"].includes(ctype) || concept.id === "_default")
+        // for measures need linear or log or something
+        || ctype === "measure" && d3.intersection(allowedTypes, ["linear", "log", "genericLog", "pow"]).size 
+        // special case for time
+        || (ctype === "time" && allowedTypes.includes("time"));
+    };
 
-        //match specific scale types if defined
-        if(indicatorScales) {
-          for (let i = indicatorScales.length - 1; i >= 0; i--) {
-            if (allowedTypes.includes(indicatorScales[i])) return true;
-          }
-        }
+    const satisfiesAllowedSpaces = (item) => {
+      //optionally check if at least one space in at least one space of at least one DS of a menu item satisfies the "allow.space" filter
+      let spacesFromAllDS = [];
+      item.byDataSources.forEach(item => spacesFromAllDS = spacesFromAllDS.concat(item.spaces));
+      return spacesFromAllDS.some(space => this._targetModel.data.allow.space.filter(space));          
+    };
+    return utils.pruneTree(this._indicatorsTree, f => conceptFilter(f) && scaleTypeFilter(f)  && f.type == "indicator" && satisfiesAllowedSpaces(f));
+  }
 
-        //otherwise go by concept types
-        if (isEntity){
-          //for entities need an ordinal scale to be allowed at this point
-          if (allowedTypes.includes("ordinal")) return true;
-        } else if (isConstant) {
-          //for constants need a ordinal scale to be allowed
-          if (allowedTypes.includes("ordinal")) return true;
-        } else if (isString) {
-          //for strings need a ordinal scale to be allowed
-          if (allowedTypes.includes("ordinal")) return true;
-        } else if (isMeasure){
-          // for measures need linear or log or something
-          if (allowedTypes.includes("linear") || allowedTypes.includes("log")
-            || allowedTypes.includes("genericLog") || allowedTypes.includes("pow")) return true;
-        } else if (isTime) {
-          if (allowedTypes.includes("time")) return true;
-        }
+  //function is redrawing data and built structure
+  redraw(data) {
+    const _this = this;
 
-        return false;
-      });
-      const satisfiesAllowedSpaces = (item) => {
-        //optionally check if at least one space in at least one space of at least one DS of a menu item satisfies the "allow.space" filter
-        let spacesFromAllDS = [];
-        item.byDataSources.forEach(item => spacesFromAllDS = spacesFromAllDS.concat(item.spaces));
-        return spacesFromAllDS.some(space => this._targetModel.data.allow.space.filter(space));          
-      };
-      dataFiltered = utils.pruneTree(data, f => allowedIDs.includes(f.id) && f.type == "indicator" && satisfiesAllowedSpaces(f));
+    const searchApplied = !!data;
 
-      this.dataFiltered = dataFiltered;
-    }
+    if (!searchApplied) this.dataFiltered = data = this._getFilteredTree();
 
     const { wrapper, wrapperHeader } = this.DOM;
-    wrapper.classed("vzb-hidden", !useDataFiltered).select("ul").remove();
+    const targetModelName = _this._targetModel.name || _this._targetModel.config.type;
+    wrapper.classed("vzb-hidden", !searchApplied).select("ul").remove();
 
     let title = "";
     if (this._title || this._title === "") {
@@ -752,7 +726,7 @@ export class TreeMenu extends BaseComponent {
     this._maxChildCount = 0;
     let selected = utils.getProp(_this._targetModel, _this._targetProp);
     const selectedPath = [];
-    utils.eachTree(dataFiltered, (f, parent) => {
+    utils.eachTree(data, (f, parent) => {
       if (f.children && f.children.length > _this._maxChildCount) _this._maxChildCount = f.children.length;
       if (f.id === selected && parent) {
         selectedPath.unshift(f.id);
@@ -770,17 +744,14 @@ export class TreeMenu extends BaseComponent {
     this.OPTIONS.COL_WIDTH = this.profileConstants.col_width;
 
     this.selectedNode = null;
-    wrapper.datum(dataFiltered);
+    wrapper.datum(data);
     this.menuEntity = new Menu(this, null, wrapper, this.OPTIONS);
     wrapper.classed("vzb-hidden", false);
 
     this._setHorizontalMenuHeight();
 
-    if (!useDataFiltered) {
-      let pointer = "_default";
-      if (allowedIDs.indexOf(utils.getProp(this._targetModel, this._targetProp)) > -1) pointer = utils.getProp(this._targetModel, this._targetProp);
-      const concept = indicatorsDB[pointer];
-      if (!concept) utils.error("Concept properties of " + pointer + " are missing from the set, or the set is empty. Put a breakpoint here and check what you have in indicatorsDB");
+    if (!searchApplied) {
+      const concept = this._targetModel.data.conceptProps || {};
 
       const scaleTypesData = resolveDefaultScales(concept).filter(f => {
         if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
