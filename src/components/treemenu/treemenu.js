@@ -266,7 +266,7 @@ export class TreeMenu extends BaseComponent {
           concept: this.model.data.source.getConcept(d)
         }; 
       }))
-      .filter(f =>(!f.concept.tags || f.concept.tags !== "_none") && f.concept.concept.slice(0,4) !== "is--")
+      .filter(f =>  (!f.concept.tags || f.concept.tags !== "_none") && f.concept.concept && f.concept.concept.slice(0,4) !== "is--" )
       .forEach(({concept, spaces, source}) => {
 
         const id = concept.concept;
@@ -274,7 +274,7 @@ export class TreeMenu extends BaseComponent {
           concept_type: concept.concept_type,
           dataSource: source,
           spaces,
-          name: concept.name,
+          name: concept.name || concept.concept,
           name_catalog: concept.name_catalog,
           description: concept.description
         };
@@ -288,7 +288,7 @@ export class TreeMenu extends BaseComponent {
           const keyConcept = source.getConcept(spaces[0][0]);
           const folderName = keyConcept.concept + "_properties";
           if (!tags[folderName]) {
-            tags[folderName] = { id: folderName, name: keyConcept.name + " properties", type: "folder", children: [] };
+            tags[folderName] = { id: folderName, name: (keyConcept.name || keyConcept.concept) + " properties", type: "folder", children: [] };
             tagsRoot.children.push(tags[folderName]);
           }
           this._addIndicatorToTheTree(id, props, tags[folderName]);
