@@ -75,9 +75,10 @@ export class About extends Dialog {
     ];
 
     const readerData = this.services.Vizabi.Vizabi.stores.dataSources.getAll().map(dataSource => {
+      const datasetInfo = dataSource.reader.getDatasetInfo ? dataSource.reader.getDatasetInfo() : {};
       return {
-        name: dataSource.config.name,
-        service: dataSource.config.service,
+        name: dataSource.config.name || datasetInfo.name,
+        url: dataSource.config.path,
         type: dataSource.config.modelType
       };
     }); 
@@ -93,7 +94,7 @@ export class About extends Dialog {
     this.DOM.body.append("div").selectAll("p")
       .data(readerData)
       .enter().append("p")
-      .html(d => url(d.type + " " + d.name, d.service));
+      .html(d =>  url(d.type + " " + d.name, d.url));
   }
 
 
