@@ -394,9 +394,9 @@ class TimeSlider extends BaseComponent {
    * @returns {Function} brushedEnd function
    */
   _brushedEnd() {
-    this.element.classed(class_dragging, this.ui.dragging);
     this.MDL.frame.snap();
     this.ui.dragging = false;
+    this.element.classed(class_dragging, this.ui.dragging);
   }
 
   _setHandle() {
