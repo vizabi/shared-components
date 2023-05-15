@@ -7,23 +7,10 @@ import "./minmaxinputs.scss";
 /*!
  * VIZABI MIN MAX INPUT FIELDS
  */
-
-const DOMAIN = "domain";
-const ZOOMED = "zoomed";
-const MIN = 0;
-const MAX = 1;
-
 class MinMaxInputs extends BaseComponent {
   constructor(config) {
     config.template = `
       <div class="vzb-mmi-holder">
-
-        <span class="vzb-mmi-domainmin-label"></span>
-        <input type="text" class="vzb-mmi-domainmin" name="min">
-        <span class="vzb-mmi-domainmax-label"></span>
-        <input type="text" class="vzb-mmi-domainmax" name="max">
-
-        <br class="vzb-mmi-break"/>
 
         <span class="vzb-mmi-zoomedmin-label"></span>
         <input type="text" class="vzb-mmi-zoomedmin" name="min">
@@ -38,32 +25,14 @@ class MinMaxInputs extends BaseComponent {
 
   setup() {
     this.DOM = {
-      domain_labelMin: this.element.select(".vzb-mmi-domainmin-label"),
-      domain_labelMax: this.element.select(".vzb-mmi-domainmax-label"),
-      domain_fieldMin: this.element.select(".vzb-mmi-domainmin"),
-      domain_fieldMax: this.element.select(".vzb-mmi-domainmax"),
-      break: this.element.select(".vzb-mmi-break"),
       zoomed_labelMin: this.element.select(".vzb-mmi-zoomedmin-label"),
       zoomed_labelMax: this.element.select(".vzb-mmi-zoomedmax-label"),
       zoomed_fieldMin: this.element.select(".vzb-mmi-zoomedmin"),
       zoomed_fieldMax: this.element.select(".vzb-mmi-zoomedmax")
     };
 
-    const _this = this;
-
-    this.DOM.domain_fieldMin.on("change", function() {
-      _this._setModel(DOMAIN, MIN, this.value);
-    });
-    this.DOM.domain_fieldMax.on("change", function() {
-      _this._setModel(DOMAIN, MAX, this.value);
-    });
-
-    this.DOM.zoomed_fieldMin.on("change", function() {
-      _this._setModel(ZOOMED, MIN, this.value);
-    });
-    this.DOM.zoomed_fieldMax.on("change", function() {
-      _this._setModel(ZOOMED, MAX, this.value);
-    });
+    this.DOM.zoomed_fieldMin.on("change", this._setModel.bind(this));
+    this.DOM.zoomed_fieldMax.on("change", this._setModel.bind(this));
 
     this.element.selectAll("input")
       .on("keypress", (event) => {
@@ -85,6 +54,7 @@ class MinMaxInputs extends BaseComponent {
     this.formatter = function(n) {
       if (!n && n !== 0) return n;
       if (utils.isDate(n)) return _this.localise(n);
+      if (this.MDL.model.type === "time") return n;
       return d3.format(".2r")(n);
     };
 
@@ -93,31 +63,11 @@ class MinMaxInputs extends BaseComponent {
   }
 
   _updateView() {
-    this.DOM.domain_labelMin.text(this.localise("hints/min") + ":");
-    this.DOM.domain_labelMax.text(this.localise("hints/max") + ":");
     this.DOM.zoomed_labelMin.text(this.localise("hints/min") + ":");
     this.DOM.zoomed_labelMax.text(this.localise("hints/max") + ":");
 
-    this.DOM.domain_labelMin.classed("vzb-hidden", !this.ui.selectDomainMinMax);
-    this.DOM.domain_labelMax.classed("vzb-hidden", !this.ui.selectDomainMinMax);
-    this.DOM.domain_fieldMin.classed("vzb-hidden", !this.ui.selectDomainMinMax);
-    this.DOM.domain_fieldMax.classed("vzb-hidden", !this.ui.selectDomainMinMax);
-
-    this.DOM.break.classed("vzb-hidden", !(this.ui.selectDomainMinMax && this.ui.selectZoomedMinMax));
-
-    this.DOM.zoomed_labelMin.classed("vzb-hidden", !this.ui.selectZoomedMinMax);
-    this.DOM.zoomed_labelMax.classed("vzb-hidden", !this.ui.selectZoomedMinMax);
-    this.DOM.zoomed_fieldMin.classed("vzb-hidden", !this.ui.selectZoomedMinMax);
-    this.DOM.zoomed_fieldMax.classed("vzb-hidden", !this.ui.selectZoomedMinMax);
-
-    const {
-      domain,
-      zoomed
-    } = this.MDL.model;
-    this.DOM.domain_fieldMin.property("value", this.formatter(d3.min(domain)));
-    this.DOM.domain_fieldMax.property("value", this.formatter(d3.max(domain)));
-    this.DOM.zoomed_fieldMin.property("value", this.formatter(d3.min(zoomed)));
-    this.DOM.zoomed_fieldMax.property("value", this.formatter(d3.max(zoomed)));
+    this.DOM.zoomed_fieldMin.property("value", this.formatter(this.MDL.model.zoomed[0]));
+    this.DOM.zoomed_fieldMax.property("value", this.formatter(this.MDL.model.zoomed[1]));
   }
 
   _getModel() {
@@ -131,18 +81,22 @@ class MinMaxInputs extends BaseComponent {
     return this.state.submodelFunc ? this.state.submodelFunc() : utils.getProp(this, this.state.submodel.split("."));
   }
 
-  _setModel(what, index, value) {
-    const newWhatArray = this.MDL.model[what].slice(0);
-    const sanitizedValue = parseFloat(value.replace("−", "-")); //replace the bourjois minus sign &#8722 to the proletarian &#45
-    if(!sanitizedValue && sanitizedValue !== 0) return;
-    newWhatArray[index] = sanitizedValue;
-    this.MDL.model.config[what] = newWhatArray;
+  _setModel() {
+    const valueMin = this.DOM.zoomed_fieldMin.property("value");
+    const valueMax = this.DOM.zoomed_fieldMax.property("value");
+    let values = [valueMin, valueMax].map(m => m.replace("−", "-")); //replace the bourjois minus sign &#8722 to the proletarian &#45
+    if (!this.MDL.model.type === "time") 
+      values = values.map(m => parseFloat(m)); //replace the bourjois minus sign &#8722 to the proletarian &#45
+
+    if(values.some(f => !f && f!==0)) {
+      this._updateView();
+    } else {
+      this.MDL.model.config.zoomed = values;
+    }
   }
 }
 
 MinMaxInputs.DEFAULT_UI = {
-  selectDomainMinMax: false,
-  selectZoomedMinMax: true
 };
 
 const decorated = decorate(MinMaxInputs, {
