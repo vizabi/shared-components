@@ -155,11 +155,11 @@ class _LocaleService extends BaseService {
     }).format(",.3~r");
 
     this.dateF = {
-      year: d3.timeFormat("%Y"),
-      month: d3.timeFormat("%Y-%m"),
-      day: d3.timeFormat("%Y-%m-%d"),
-      week: d3.timeFormat("%Yw%V"),
-      quarter: d3.timeFormat("%Yq%q")
+      year: d3.utcFormat("%Y"),
+      month: d3.utcFormat("%Y-%m"),
+      day: d3.utcFormat("%Y-%m-%d"),
+      week: d3.utcFormat("%Yw%V"),
+      quarter: d3.utcFormat("%Yq%q")
     };
 
     this.stringF = function(string){
