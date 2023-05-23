@@ -256,7 +256,6 @@ class ColorLegend extends BaseComponent {
       mouseover(d) {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", false);
 
-        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
         const concept = _this.MDL.color.data.concept;
         const colorMdlName = _this.MDL.color.name;
         
@@ -272,7 +271,6 @@ class ColorLegend extends BaseComponent {
       mouseout() {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", true);
 
-        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
         _this.root.ui?.chart?.superhighlightOnMinimapHover && _this.MDL.superHighlighted ?
           _this.MDL.superHighlighted.data.filter.clear() :
           _this.MDL.highlighted.data.filter.clear();
