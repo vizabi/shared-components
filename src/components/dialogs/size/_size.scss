@@ -39,6 +39,32 @@
           display: none;
         }
   	  }
+
+      .vzb-dialog-modal {        
+        display: grid;
+        grid-template-rows: 40px 175px;
+
+        .vzb-dialog-title {
+          .vzb-saxis-selector {
+            .vzb-ip-select {
+              background-color: $vzb-color-white;
+              &:hover {
+                background-color: $vzb-color-grey-light;
+              }
+            }
+          }
+
+          .vzb-dialog-bubblesize {
+            position: absolute;
+            top: 40px;
+          }
+        }
+
+        .vzb-dialog-subtitle {
+          position: absolute;
+          bottom: 0px;
+        }
+      }
     }
   }
 }

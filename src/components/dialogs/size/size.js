@@ -15,10 +15,10 @@ export class Size extends Dialog {
         <span class="thumb-tack-class thumb-tack-class-ico-drag fa" data-dialogtype="size" data-click="dragDialog"></span>
         <div class="vzb-dialog-title"> 
           <span data-localise="buttons/size"></span>
+          <div class="vzb-dialog-bubblesize"></div>
           <span class="vzb-saxis-selector"></span>
         </div>
         <div class="vzb-dialog-content">
-          <div class="vzb-dialog-bubblesize"></div>
           <span class="vzb-dialog-subtitle"></span>
         </div>
         <div class="vzb-dialog-buttons">
