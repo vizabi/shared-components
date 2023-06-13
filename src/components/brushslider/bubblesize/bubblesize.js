@@ -85,16 +85,17 @@ export class BubbleSize extends BrushSlider {
 
   _updateLabels(s) {
     if (s) { this.DOM.sliderLabels.data(s); }
+    const isRTL = this.services.locale.isRTL();
     this.DOM.sliderLabels
       .attr("transform", (d, i) => {
         const textMargin = { v: this.options.TEXT_PARAMS.TOP, h: this.options.TEXT_PARAMS.LEFT };
         const dX = this.rescaler(d);
         //const dX = textMargin.h * (i ? -0.5 : 1.0) + this.rescaler(d);
         const dY = 0;
-        return "translate(" + ((this.services.locale.isRTL() ? -1 : 1) * dX) + "," + (dY) + ")";
+        return "translate(" + ((isRTL ? -1 : 1) * dX) + "," + (dY) + ")";
       })
-      .attr("text-anchor", (d, i) => (d < this.__labelSideSwitchEdge) ? "start" : "end")
-      .attr("dx", (d, i) => (d < this.__labelSideSwitchEdge) ? i ? "0.3em" : "0.1em" : i ? "-0.3em" : "-0.4em");
+      .attr("text-anchor", (d, i) => !isRTL && (d < this.__labelSideSwitchEdge) || isRTL && (d >= this.__labelSideSwitchEdge) ? "start" : "end")
+      .attr("dx", (d, i) => ((isRTL ? -1 : 1) * ((d < this.__labelSideSwitchEdge) ? i ? 0.3 : 0.1 : i ? -0.3 : -0.4 )) + "em");
   }
 
   _setLabelsText() {
@@ -124,7 +125,7 @@ export class BubbleSize extends BrushSlider {
     this.__labelSideSwitchEdge = this.rescaler.invert(this._getComponentWidth()) * 0.75;
 
     this.DOM.sliderLabelsWrapper
-      .attr("transform", this.isRTL ? "scale(-1,1)" : null);
+      .attr("transform", this.services.locale.isRTL() ? "scale(-1,1)" : null);
   }
 
   _setBrushExtent() {

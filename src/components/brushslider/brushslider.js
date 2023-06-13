@@ -210,7 +210,7 @@ class BrushSlider extends BaseComponent {
       .attr("height", this._getComponentHeight() + this.padding.top + this.padding.bottom)
       .attr("width", svgWidth);
     this.DOM.sliderWrap
-      .attr("transform", this.isRTL ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)" :
+      .attr("transform", this.services.locale.isRTL() ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)" :
         "translate(" + this.padding.left + "," + this.padding.top + ")");
   
     this._updateRescaler();
