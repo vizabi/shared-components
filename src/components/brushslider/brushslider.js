@@ -210,7 +210,7 @@ class BrushSlider extends BaseComponent {
       .attr("height", this._getComponentHeight() + this.padding.top + this.padding.bottom)
       .attr("width", svgWidth);
     this.DOM.sliderWrap
-      .attr("transform", this.isRTL ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)" :
+      .attr("transform", this.services.locale.isRTL() ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)" :
         "translate(" + this.padding.left + "," + this.padding.top + ")");
   
     this._updateRescaler();
@@ -233,6 +233,10 @@ class BrushSlider extends BaseComponent {
     }
   }
 
+  _setBrushExtent() {
+    return this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]])
+  }
+
   _updateView() {
     this.services.layout.size;
     const value = this.MDL.model[this.value];
@@ -240,7 +244,7 @@ class BrushSlider extends BaseComponent {
     if (!value && value!==0 && value!==false) 
       console.error(`Slider inside ${this.parent.name || this.parent.constructor.name} was unable to access value ${this.value} in its model`);
 
-    this.DOM.slider.call(this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]));
+    this.DOM.slider.call(this._setBrushExtent());
     const extent = this._valueToExtent(value) || [this.options.EXTENT_MIN, this.options.EXTENT_MAX];
     this._moveBrush(extent);
     this._updateThumbs(extent);

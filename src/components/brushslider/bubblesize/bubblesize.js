@@ -9,8 +9,11 @@ import "./bubblesize.scss";
  */
 
 const OPTIONS = {
+  PADDING: { TOP: 132, BOTTOM: 50, LEFT: 20, RIGHT: 20 },
+  BAR_WIDTH: 3,
   TEXT_PARAMS: { TOP: 11, LEFT: 10, MAX_WIDTH: 42, MAX_HEIGHT: 16 },
-  THUMB_STROKE_WIDTH: 4,
+  THUMB_STROKE_WIDTH: 2,
+  THUMB_HEIGHT: 15,
   labelsValue: "domain",
 
   PROFILE_CONSTANTS: {
@@ -29,20 +32,22 @@ export class BubbleSize extends BrushSlider {
 
     super.setup(options);
 
+    this.rescaler.clamp(false);
+
     this.showArcs = this.options.showArcs;
 
     if (this.showArcs) {
       this.DOM.sliderArcs = this.DOM.slider.selectAll(".vzb-bs-slider-thumb-arc").data([0, 0]).enter()
         .append("path")
-        .attr("class", "vzb-bs-slider-thumb-arc");
+        .attr("class", (d, i) => `vzb-bs-slider-thumb-arc vzb-bs-slider-thumb-arc-${i ? "max": "min"}`)
+        .lower();
     }
 
     this.DOM.sliderLabelsWrapper = this.DOM.slider.append("g");
     this.DOM.sliderLabels = this.DOM.sliderLabelsWrapper.selectAll("text").data([0, 0]).enter()
       .append("text")
       .attr("class", "vzb-bs-slider-thumb-label")
-      .attr("text-anchor", (d, i) => i ? "start" : "end")
-      .attr("dy", (d, i) => i ? "-0.7em" : "1.4em");
+      .attr("dy", (d, i) => i ? "-0.5em" : "1.9em");
   }
 
   draw() { 
@@ -53,7 +58,10 @@ export class BubbleSize extends BrushSlider {
 
   _getPadding() {
     const padding = super._getPadding();
-    padding.bottom = this.options.BAR_WIDTH + this.options.TEXT_PARAMS.MAX_HEIGHT;
+    padding.top = this.options.PADDING.TOP;
+    padding.left = this.options.PADDING.LEFT;
+    padding.right = this.options.PADDING.RIGHT;
+    padding.bottom = this.options.PADDING.BOTTOM;
     return padding;
   }
 
@@ -66,24 +74,28 @@ export class BubbleSize extends BrushSlider {
     if (!this.showArcs) return;
     const _this = this;
     const valueArc = d3.arc()
-      .outerRadius(d => _this.rescaler(d) * 0.5)
-      .innerRadius(d => _this.rescaler(d) * 0.5)
-      .startAngle(-Math.PI * 0.5)
-      .endAngle(Math.PI * 0.5);
+      .outerRadius(d => _this.rescaler(d))
+      .innerRadius(0)
+      .startAngle(-0.5*Math.PI)
+      .endAngle(1.5*Math.PI);
     this.DOM.sliderArcs.data(s)
       .attr("d", valueArc)
-      .attr("transform", d => "translate(" + (_this.rescaler(d) * 0.5) + ",0)");
+      .attr("transform", d => "translate(0,0)");
   }
 
   _updateLabels(s) {
     if (s) { this.DOM.sliderLabels.data(s); }
+    const isRTL = this.services.locale.isRTL();
     this.DOM.sliderLabels
       .attr("transform", (d, i) => {
         const textMargin = { v: this.options.TEXT_PARAMS.TOP, h: this.options.TEXT_PARAMS.LEFT };
-        const dX = textMargin.h * (i ? 0.5 : -1.0) + this.rescaler(d);
+        const dX = this.rescaler(d);
+        //const dX = textMargin.h * (i ? -0.5 : 1.0) + this.rescaler(d);
         const dY = 0;
-        return "translate(" + ((this.services.locale.isRTL() ? -1 : 1) * dX) + "," + (dY) + ")";
-      });
+        return "translate(" + ((isRTL ? -1 : 1) * dX) + "," + (dY) + ")";
+      })
+      .attr("text-anchor", (d, i) => !isRTL && (d < this.__labelSideSwitchEdge) || isRTL && (d >= this.__labelSideSwitchEdge) ? "start" : "end")
+      .attr("dx", (d, i) => ((isRTL ? -1 : 1) * ((d < this.__labelSideSwitchEdge) ? i ? 0.3 : 0.1 : i ? -0.3 : -0.4 )) + "em");
   }
 
   _setLabelsText() {
@@ -107,27 +119,22 @@ export class BubbleSize extends BrushSlider {
   }
 
   _updateSize() {
-    const minMaxBubbleRadius = this._getMinMaxBubbleRadius();
-    const padding = this.element.node().offsetWidth - minMaxBubbleRadius.max * 2;
-    this.padding.top = minMaxBubbleRadius.max + this.options.BAR_WIDTH,
-    this.padding.left = padding * 0.5;
-    this.padding.right = padding * 0.5;
 
     super._updateSize();
 
+    this.__labelSideSwitchEdge = this.rescaler.invert(this._getComponentWidth()) * 0.75;
+
     this.DOM.sliderLabelsWrapper
-      .attr("transform", this.isRTL ? "scale(-1,1)" : null);
-    this.DOM.sliderLabels
-      .attr("text-anchor", (d, i) => (this.isRTL ? !i : i) ? "start" : "end");
+      .attr("transform", this.services.locale.isRTL() ? "scale(-1,1)" : null);
+  }
+
+  _setBrushExtent() {
+    return this.brush.extent([[this.rescaler.range()[0], 0], [this._getComponentWidth(), this._getComponentHeight()]])
   }
 
   _updateRescaler() {
     const minMaxBubbleRadius = this._getMinMaxBubbleRadius();
-    this.rescaler.range([minMaxBubbleRadius.min * 2, minMaxBubbleRadius.max * 2]);
-  }
-
-  _getComponentWidth() {
-    return this._getMinMaxBubbleRadius().max * 2;
+    this.rescaler.range([minMaxBubbleRadius.min, minMaxBubbleRadius.max]);
   }
 
 }

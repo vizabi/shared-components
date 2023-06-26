@@ -2,6 +2,8 @@ import * as utils from "../../../legacy/base/utils";
 import { BrushSlider } from "../brushslider";
 import * as d3 from "d3";
 
+import "./sizeslider.scss";
+
 /*!
  * VIZABI BUBBLE SIZE slider
  * Reusable bubble size slider

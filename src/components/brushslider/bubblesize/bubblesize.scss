@@ -11,7 +11,19 @@
         stroke: rgba($vzb-color-primary, 1);
         stroke-width: 2px;
       }
+      
+      .vzb-bs-slider-thumb-arc-min {
+        fill: rgba($vzb-color-accent-orange, .5);
+      }
 
+      .vzb-bs-slider-thumb-arc-max {
+        fill: rgba($vzb-gapminder-main, .5);
+      }
+
+      .vzb-slider-thumb-badge {
+        stroke-width: 0;
+      }
+      
       .vzb-bs-slider-thumb-label {
         direction: ltr;
         pointer-events: none;
