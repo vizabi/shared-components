@@ -369,7 +369,8 @@ class Labels extends BaseComponent {
     };
     //}
 
-    const scale = cached.fontSize / cached.initFontSize;
+    const scale = 1;//cached.fontSize / cached.initFontSize;
+
     cached.textBBox.width = cached.initTextBBox.width * scale;
     cached.textBBox.height = cached.initTextBBox.height * scale;
 
