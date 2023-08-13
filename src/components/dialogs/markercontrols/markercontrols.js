@@ -1,10 +1,9 @@
-import * as utils from "../../../legacy/base/utils";
 import { Dialog } from "../dialog";
 import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singlehandleslider";
 import { SectionFind } from "./section-find.js";
 import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
-import {runInAction, decorate, computed} from "mobx";
+import {runInAction} from "mobx";
 import * as d3 from "d3";
 
 
@@ -75,66 +74,49 @@ class MarkerControls extends Dialog {
     this.DOM.input_search = this.element.select(".vzb-find-search");
     this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
-    this.DOM.sectionFind = this.element.select(".vzb-find");
 
-    this.getSearchText = () => this.DOM.input_search.node().value;
-    this.clearSearchText = () => {this.DOM.input_search.node().value = ""};
+    this._getSearchText = () => this.DOM.input_search.node().value.trim().toLowerCase();
+    this._clearSearchText = () => {this.DOM.input_search.node().value = "";};
+    this._getAllSections = () => this.children.filter(f => Object.getPrototypeOf(f.constructor).name === "MarkerControlsSection" );
 
+    this.DOM.input_search
+      .on("keyup", event => {
+        if (event.keyCode == 13) {
+          this.concludeSearch();
+          this._clearSearchText();
+        }
+      })
+      .on("input", () => {
+        this.updateSearch()
+      });
 
-    this.DOM.input_search.on("keyup", event => {
-      if (event.keyCode == 13 && this.getSearchText() == "select all") {
-        this.clearSearchText();
-
-        //TODO: select all markers
-
-        // //clear highlight so it doesn't get in the way when selecting an entity        
-        // if (!utils.isTouchDevice()) _this.model.state.marker.clearHighlighted();
-        // _this.model.state.marker.selectAll();
-        // utils.defer(() => _this.panelComps[_this.getPanelMode()].showHideSearch());
-      }
-    });
-
-    this.DOM.input_search.on("input", () => {
-      this.panelComps[this._getPanelMode()]._showHideSearch();
-    });
-
+    //is this needed?
     d3.select(this.DOM.input_search.node().parentNode)
       .on("reset", () => {
-        utils.defer(() => this.panelComps[this._getPanelMode()]._showHideSearch());
+        this.updateSearch();
       })
       .on("submit", event => {
         event.preventDefault();
         return false;
       });
 
-    this.DOM.deselect_all.on("click", () => {
-      this.MDL.selected.data.filter.clear();
-    });
-
-    // const closeButton = this.DOM.buttons.select(".vzb-dialog-button[data-click='closeDialog']");
-    // closeButton.on("click.panel", () => this.panelComps[this._getPanelMode()]._closeClick());
-
-    // this.panelComps = { find: this, show: this.findChild({ type: "Show" }) };
-  }
-
-  get MDL() {
-    return {
-      frame: this.model.encoding.frame,
-      selected: this.model.encoding.selected,
-      highlighted: this.model.encoding.highlighted
-    };
+    this.DOM.deselect_all.on("click", this.MDL.selected.data.filter.clear);
   }
 
   draw() {
     super.draw();
-
-
     this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
-
     this.addReaction(this.showHideButtons);
+    this.addReaction(this.updateSearch);
   }
 
+  updateSearch(text = this._getSearchText()) {
+    this._getAllSections().forEach(section => section.updateSearch(text));
+  }
 
+  concludeSearch(text = this._getSearchText()) {
+    this._getAllSections().forEach(section => section.concludeSearch(text));
+  }
 
 
   showHideButtons() {
@@ -157,9 +139,5 @@ MarkerControls.DEFAULT_UI = {
   
 };
 
-const decorated = decorate(MarkerControls, {
-  "MDL": computed
-});
-
-Dialog.add("markercontrols", decorated);
-export { decorated as MarkerControls};
+Dialog.add("markercontrols", MarkerControls);
+export { MarkerControls };
