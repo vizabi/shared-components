@@ -57,7 +57,35 @@
           }
         }
         
+      }
 
+      .vzb-add {
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+        li {
+          cursor: pointer;
+          padding-top: 2px;
+          padding-bottom: 3px;
+          .vzb-dialog-isness {
+            font-size: $vzb-font-size-tiny;
+            background-color: $vzb-color-accent-yellow;
+            border: 1px solid $vzb-color-grey-light;
+            border-radius: 2px;
+            padding: 1px 3px 1px 3px;
+            margin-left: 4px;
+          }
+          &:hover {
+              background-color: $vzb-color-primary-lightest;
+          }
+          &::before {
+            content: "❇️";
+            margin-right: 5px;
+          }
+        }
+    
       }
     }
   }
