@@ -1,7 +1,9 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
-import {decorate, computed, extendObservable} from "mobx";
+import {decorate, computed} from "mobx";
 import * as d3 from "d3";
+
+const KEY = Symbol.for("key");
 
 class SectionFind extends MarkerControlsSection {
   constructor(config) {
@@ -11,15 +13,13 @@ class SectionFind extends MarkerControlsSection {
   setup(options) {
     super.setup(options);
     this.DOM.title.text("Find");
-    this.DOM.findList = this.DOM.content.append("div").attr("class", "vzb-find-list");
+    this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
   }
 
   draw() {
-    this.KEY = Symbol.for("key");
-
     this.localise = this.services.locale.auto();
 
-    this.addReaction(this.createFindList);
+    this.addReaction(this.createList);
     this.addReaction(this.updateBrokenData);
     this.addReaction(this._selectDataPoints);
   }
@@ -34,7 +34,6 @@ class SectionFind extends MarkerControlsSection {
 
 
   _processFramesData() {
-    const KEY = this.KEY;
     const data = new Map();
     this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
       if (!data.has(key)) data.set(key, { 
@@ -45,26 +44,24 @@ class SectionFind extends MarkerControlsSection {
     return data;
   }
 
-  createFindList() {
-    const findList = this.DOM.findList;
-    const KEY = this.KEY;
+  createList() {
+    const list = this.DOM.list;
 
     const data = [...this._processFramesData().values()];
 
     //sort data alphabetically
     data.sort((a, b) => (a.name < b.name) ? -1 : 1);
 
-    this.DOM.findListItems = findList.text("").selectAll("div")
+    this.DOM.listItems = list.text("").selectAll("div")
       .data(data, function(d) { return d[KEY]; })
       .join("div")
-      .attr("class", "vzb-find-item vzb-dialog-checkbox")
+      .attr("class", "vzb-item vzb-dialog-checkbox")
       .call(this._createListItem.bind(this));
   }
 
   _createListItem(listItem) {
     listItem.append("input")
       .attr("type", "checkbox")
-      .attr("class", "vzb-find-item")
       .attr("id", (d, i) => "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
         //clear highlight so it doesn't get in the way when selecting an entity
@@ -94,15 +91,14 @@ class SectionFind extends MarkerControlsSection {
         .join(", ");
     }
     if (d.label != null) return "" + d.label;
-    return d[Symbol.for("key")];
+    return d[KEY];
   }
 
   updateBrokenData() {
     const currentDataMap = this.model.dataMap;
-    const findListItems = this.DOM.findListItems;
-    const KEY = this.KEY;
+    const listItems = this.DOM.listItems;
 
-    findListItems.data().forEach(d => {
+    listItems.data().forEach(d => {
       d.brokenData = !currentDataMap.hasByStr(d[KEY]);
     });
 
@@ -111,32 +107,30 @@ class SectionFind extends MarkerControlsSection {
 
   _updateLabelTitle() {
     const noDataSubstr = this.localise(this.MDL.frame.value) + ": " + this.localise("hints/nodata");
-    this.DOM.findListItems.select("label")
+    this.DOM.listItems.select("label")
       .classed("vzb-find-item-brokendata", d => d.brokenData)
-      .attr("title", d => d.nameIfEllipsis + (d.brokenData ? (d.nameIfEllipsis ? " | " : "") + noDataSubstr : ""));
+      .attr("title", d => "key: " + d[KEY] + (d.brokenData ? ", " + noDataSubstr : ""));
   }
 
 
 
   _selectDataPoints() {
-    //    const selected = this.model.state.marker.getSelected(KEY);
     const selected = this.MDL.selected.data.filter;
-    this.DOM.findListItems.order().select("input")
-    //      .property("checked", d => (selected.indexOf(d[KEY]) !== -1));
+    this.DOM.listItems.order().select("input")
       .property("checked", function(d) {
         const isSelected = selected.has(d);
         d3.select(this.parentNode).classed("vzb-checked", isSelected);
         return isSelected;
       });
     
-    const checkedItems = this.DOM.findList.selectAll(".vzb-checked");
+    const checkedItems = this.DOM.list.selectAll(".vzb-checked");
     checkedItems
       .lower()
       .classed("vzb-separator", (d, i) => !i);    
   }
 
   updateSearch(text = "") {
-    this.DOM.findList.selectAll(".vzb-find-item")
+    this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
         const lower = (d.name || "").toString().toLowerCase();
         return !lower.includes(text);
