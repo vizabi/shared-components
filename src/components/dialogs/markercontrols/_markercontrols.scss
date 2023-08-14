@@ -9,10 +9,20 @@
         }
       }
 
+      input, label {
+        cursor: pointer;
+      }
+
+      &.vzb-fullscreenish .vzb-dialog-header {
+        display: none;
+      }
+      &:not(.vzb-fullscreenish) .vzb-back {
+        display: none;
+      }
+
       .vzb-dialog-header {
         display: flex;
         
-
         .vzb-dialog-title {
           text-transform: capitalize;
         }
@@ -31,6 +41,11 @@
           margin-bottom: 5px;
           padding-bottom: 5px;
           border-bottom: 1px solid $vzb-color-grey-light;
+
+          .vzb-back{
+            cursor: pointer;
+            font-size: 1.2em;
+          }
         }
       }
 
@@ -42,21 +57,14 @@
         }
       }
 
-      .vzb-slice {
-        .vzb-list .vzb-item {
-          input {
-            display: none;
-            cursor: pointer;
-          }
-          label {
-            cursor: pointer;
-          }
-          label::before {
-            content: "🧩";
-            margin-right: 5px;
-          }
+      &:not(.vzb-fullscreenish) .vzb-slice .vzb-list .vzb-item{
+        input {
+          display: none;
         }
-        
+        label::before {
+          content: "🧩";
+          margin-right: 5px;
+        }
       }
 
       .vzb-add {
@@ -85,7 +93,6 @@
             margin-right: 5px;
           }
         }
-    
       }
     }
   }

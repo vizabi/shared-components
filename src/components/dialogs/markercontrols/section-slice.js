@@ -69,8 +69,9 @@ class SectionSlice extends MarkerControlsSection {
   }
 
   _proposeSpace(space) {
-    this.updateEncodigns();
-    this.updateApplyCancelButtons();
+    if(!this.parent.isFullscreenish()) this.parent.toggleFullscreenish(this);
+    // this.updateEncodigns();
+    // this.updateApplyCancelButtons();
     //_this.model.config.data.space = space;
   }
 
@@ -114,7 +115,7 @@ class SectionSlice extends MarkerControlsSection {
     this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
         return 0
-          || spacesAreEqual(d, this.model.data.space)
+          || spacesAreEqual(d, this.model.data.space) && !this.parent.isFullscreenish()
           || text && !this._getText(d).toString().toLowerCase().includes(text) && !d.includes(text);
       });
   }

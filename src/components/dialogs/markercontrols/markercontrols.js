@@ -134,6 +134,17 @@ class MarkerControls extends Dialog {
     });
   }
 
+  toggleFullscreenish(section) {
+    const isFS = this.isFullscreenish();
+    this.element.classed("vzb-fullscreenish", !isFS);
+    this._clearSearch();
+    this.updateSearch({command: section?.magicCommand});
+  }
+
+  isFullscreenish(){
+    return this.element.classed("vzb-fullscreenish");
+  }
+
   concludeSearch({command, arg} = this._getSearchTerm()) {
     this.sections.forEach(section => section.concludeSearch(arg));
   }

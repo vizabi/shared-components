@@ -5,6 +5,7 @@ export class MarkerControlsSection extends BaseComponent {
   constructor(config) {
     config.template = `
       <div class = "vzb-header">
+        <span class = "vzb-back">⬅</span>
         <span class = "vzb-title"></span>
         <span class = "vzb-threedots"></span>
         <span class = "vzb-enterhint"></span>
@@ -18,11 +19,14 @@ export class MarkerControlsSection extends BaseComponent {
 
   setup() {
     this.DOM = {
+      back: this.element.select(".vzb-back"),
       title: this.element.select(".vzb-title"),
       threedots: this.element.select(".vzb-threedots"),
       enterhint: this.element.select(".vzb-enterhint"),
       content: this.element.select(".vzb-content"),
     };
+
+    this.DOM.back.on("click", () => this.parent.toggleFullscreenish());
   }
 
   hide(arg) {
