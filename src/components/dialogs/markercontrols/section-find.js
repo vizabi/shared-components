@@ -136,16 +136,6 @@ class SectionFind extends MarkerControlsSection {
   }
 
   updateSearch(text = "") {
-    this.element.classed("vzb-hidden", false);
-    if (text.includes(" ")) {
-      const command = text.substring(0, text.indexOf(" "));
-      if (command !== "find") {
-        this.element.classed("vzb-hidden", true);
-        return;
-      }
-      text = text.substring(text.indexOf(" ") + 1); 
-    }
-
     this.DOM.findList.selectAll(".vzb-find-item")
       .classed("vzb-hidden", d => {
         const lower = (d.name || "").toString().toLowerCase();

@@ -6,7 +6,6 @@ import { SectionRemove } from "./section-remove.js";
 import {runInAction} from "mobx";
 import * as d3 from "d3";
 
-
 class MarkerControls extends Dialog {
   constructor(config) {
     config.template = `
@@ -75,15 +74,22 @@ class MarkerControls extends Dialog {
     this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
 
-    this._getSearchText = () => this.DOM.input_search.node().value.trim().toLowerCase();
-    this._clearSearchText = () => {this.DOM.input_search.node().value = "";};
-    this._getAllSections = () => this.children.filter(f => Object.getPrototypeOf(f.constructor).name === "MarkerControlsSection" );
+    this.sections = this.children.filter(f => Object.getPrototypeOf(f.constructor).name === "MarkerControlsSection");
+    this.magicCommands = this.sections.map(section => section.magicCommand);
+    this._getSearchTerm = () => {
+      const text = this.DOM.input_search.node().value.trim().toLowerCase();
+      const command = this.magicCommands.find(f => text === f || text.indexOf(f + " ") === 0) || false;
+      const arg = command ? text.replace(command, "").trim() : text;
+      return {command, arg};
+    }
+    this._clearSearch = () => {this.DOM.input_search.node().value = "";};
+
 
     this.DOM.input_search
       .on("keyup", event => {
         if (event.keyCode == 13) {
           this.concludeSearch();
-          this._clearSearchText();
+          this._clearSearch();
         }
       })
       .on("input", () => {
@@ -110,12 +116,15 @@ class MarkerControls extends Dialog {
     this.addReaction(this.updateSearch);
   }
 
-  updateSearch(text = this._getSearchText()) {
-    this._getAllSections().forEach(section => section.updateSearch(text));
+  updateSearch({command, arg} = this._getSearchTerm()) {
+    this.sections.forEach(section => {
+      section.hide(command && section.magicCommand !== command);
+      section.updateSearch(arg);
+    });
   }
 
-  concludeSearch(text = this._getSearchText()) {
-    this._getAllSections().forEach(section => section.concludeSearch(text));
+  concludeSearch({command, arg} = this._getSearchTerm()) {
+    this.sections.forEach(section => section.concludeSearch(arg));
   }
 
 

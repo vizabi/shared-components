@@ -13,6 +13,7 @@ export class MarkerControlsSection extends BaseComponent {
 
     `;
     super(config);
+    this.magicCommand = this.constructor.name.replace("Section","").toLowerCase();
   }
 
   setup() {
@@ -22,6 +23,10 @@ export class MarkerControlsSection extends BaseComponent {
       enterhint: this.element.select(".vzb-enterhint"),
       content: this.element.select(".vzb-content"),
     };
+  }
+
+  hide(arg) {
+    this.element.classed("vzb-hidden", arg);
   }
 
   updateSearch() {
