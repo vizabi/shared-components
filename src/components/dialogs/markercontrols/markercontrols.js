@@ -11,14 +11,14 @@ class MarkerControls extends Dialog {
   constructor(config) {
     config.template = `
       <div class='vzb-dialog-modal'>
-        <span class="thumb-tack-class thumb-tack-class-ico-pin fa" data-dialogtype="find" data-click="pinDialog"></span>
-        <span class="thumb-tack-class thumb-tack-class-ico-drag fa" data-dialogtype="find" data-click="dragDialog"></span>
+        <span class="thumb-tack-class thumb-tack-class-ico-pin fa" data-dialogtype="markercontrols" data-click="pinDialog"></span>
+        <span class="thumb-tack-class thumb-tack-class-ico-drag fa" data-dialogtype="markercontrols" data-click="dragDialog"></span>
         <div class="vzb-dialog-header">
           <span class="vzb-dialog-title"></span>
 
-          <span class="vzb-dialog-content vzb-find-filter">
+          <span class="vzb-dialog-content vzb-filter">
             <form novalidate>
-              <input class="vzb-find-search" type="search" required/>
+              <input class="vzb-search" type="search" required/>
               <button class="vzb-cancel-button" type="reset"></button>
             </form>
           </span>
@@ -26,7 +26,7 @@ class MarkerControls extends Dialog {
         </div>
 
         <div class="vzb-dialog-content vzb-dialog-content-fixed vzb-dialog-scrollable">
-          <div class="vzb-dialog-content vzb-dialog-scrollable vzb-dialog-panel vzb-dialog-panel-find vzb-active">
+          <div class="vzb-dialog-content vzb-dialog-scrollable vzb-dialog-panel vzb-dialog-panel-markercontrols vzb-active">
             <div class="vzb-section vzb-find"></div>
             <div class="vzb-section vzb-add"></div>
             <div class="vzb-section vzb-remove"></div>
@@ -35,12 +35,12 @@ class MarkerControls extends Dialog {
         </div>
 
         <div class="vzb-dialog-buttons">
-          <div class="vzb-dialog-bubbleopacity vzb-dialog-control" data-panel="find"></div>
-          <div class="vzb-dialog-button vzb-find-deselect" data-panel="find">
+          <div class="vzb-dialog-bubbleopacity vzb-dialog-control" data-panel="markercontrols"></div>
+          <div class="vzb-dialog-button vzb-deselect" data-panel="markercontrols">
             <span data-localise="buttons/deselect"></span>
           </div>
 
-          <div data-dialogtype="find" data-click="closeDialog" class="vzb-dialog-button vzb-label-primary">
+          <div data-dialogtype="markercontrols" data-click="closeDialog" class="vzb-dialog-button vzb-label-primary">
             <span data-localise="buttons/ok"></span>
           </div>
         </div>  
@@ -75,8 +75,8 @@ class MarkerControls extends Dialog {
   setup(options) {
     super.setup(options);
 
-    this.DOM.input_search = this.element.select(".vzb-find-search");
-    this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
+    this.DOM.input_search = this.element.select(".vzb-search");
+    this.DOM.deselect_all = this.element.select(".vzb-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
     this.DOM.title = this.element.select(".vzb-dialog-title");
 

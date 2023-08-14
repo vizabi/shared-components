@@ -1,9 +1,64 @@
 .vzb-dialogs {
-    .vzb-dialogs-dialog {
-      &[data-dlg="markercontrols"] {
-  
-  
+  .vzb-dialogs-dialog {
+    &[data-dlg="markercontrols"] {
+      > .vzb-dialog-modal {
+        >.vzb-dialog-content {
+          margin: 0;
+          padding: 0;
+          font-size: 1em;
+        }
+      }
+
+      .vzb-dialog-header {
+        display: flex;
+        
+
+        .vzb-dialog-title {
+          text-transform: capitalize;
+        }
+
+        .vzb-filter {
+          display: inline-block;
+          position: relative;
+          max-width: 170px;
+          padding: 0 10px;
+        }
+      }
+
+      .vzb-section {
+        margin-bottom: 20px;
+        .vzb-header {
+          margin-bottom: 5px;
+          padding-bottom: 5px;
+          border-bottom: 1px solid $vzb-color-grey-light;
+        }
+      }
+
+      .vzb-list .vzb-item { 
+        padding-bottom: 3px;
+        padding-top: 2px;
+        &:hover {
+          background-color: $vzb-color-primary-lightest;
+        }
+      }
+
+      .vzb-slice {
+        .vzb-list .vzb-item {
+          input {
+            display: none;
+            cursor: pointer;
+          }
+          label {
+            cursor: pointer;
+          }
+          label::before {
+            content: "🧩";
+            margin-right: 5px;
+          }
+        }
+        
+
       }
     }
   }
-  
+}
