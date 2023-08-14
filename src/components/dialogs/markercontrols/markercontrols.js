@@ -12,8 +12,8 @@ class MarkerControls extends Dialog {
       <div class='vzb-dialog-modal'>
         <span class="thumb-tack-class thumb-tack-class-ico-pin fa" data-dialogtype="find" data-click="pinDialog"></span>
         <span class="thumb-tack-class thumb-tack-class-ico-drag fa" data-dialogtype="find" data-click="dragDialog"></span>
-        <div class="vzb-dialog-title">
-          <span data-localise="buttons/asfassf"></span>
+        <div class="vzb-dialog-header">
+          <span class="vzb-dialog-title"></span>
 
           <span class="vzb-dialog-content vzb-find-filter">
             <form novalidate>
@@ -73,6 +73,7 @@ class MarkerControls extends Dialog {
     this.DOM.input_search = this.element.select(".vzb-find-search");
     this.DOM.deselect_all = this.element.select(".vzb-find-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
+    this.DOM.title = this.element.select(".vzb-dialog-title");
 
     this.sections = this.children.filter(f => Object.getPrototypeOf(f.constructor).name === "MarkerControlsSection");
     this.magicCommands = this.sections.map(section => section.magicCommand);
@@ -111,9 +112,14 @@ class MarkerControls extends Dialog {
 
   draw() {
     super.draw();
-    this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
     this.addReaction(this.showHideButtons);
     this.addReaction(this.updateSearch);
+    this.addReaction(this.updateUIStrings);
+  }
+  
+  updateUIStrings() {
+    this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
+    this.DOM.title.text(this.localise("marker-plural/" + this.model.id));
   }
 
   updateSearch({command, arg} = this._getSearchTerm()) {
