@@ -3,6 +3,7 @@ import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singleh
 import { SectionFind } from "./section-find.js";
 import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
+import { SectionSlice } from "./section-slice.js";
 import {runInAction} from "mobx";
 import * as d3 from "d3";
 
@@ -29,6 +30,7 @@ class MarkerControls extends Dialog {
             <div class="vzb-section vzb-find"></div>
             <div class="vzb-section vzb-add"></div>
             <div class="vzb-section vzb-remove"></div>
+            <div class="vzb-section vzb-slice"></div>
           </div>
         </div>
 
@@ -62,6 +64,9 @@ class MarkerControls extends Dialog {
     },{
       type: SectionRemove,
       placeholder: ".vzb-remove"
+    },{
+      type: SectionSlice,
+      placeholder: ".vzb-slice"
     }];
 
     super(config);
