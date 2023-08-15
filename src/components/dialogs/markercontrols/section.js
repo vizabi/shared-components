@@ -14,7 +14,7 @@ export class MarkerControlsSection extends BaseComponent {
 
     `;
     super(config);
-    this.magicCommand = this.constructor.name.replace("Section","").toLowerCase();
+    this.magicCommand = this.constructor.name.replace("_","").replace("Section","").toLowerCase();
   }
 
   setup() {

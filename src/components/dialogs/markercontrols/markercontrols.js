@@ -128,8 +128,9 @@ class MarkerControls extends Dialog {
   }
 
   updateSearch({command, arg} = this._getSearchTerm()) {
+    this.element.classed("vzb-clean-search", this.isCleanSearch()); 
     this.sections.forEach(section => {
-      section.hide(command && section.magicCommand !== command);
+      section.hide(command && section.magicCommand !== command || !command && !arg && section.magicCommand !== "find");
       section.updateSearch(arg);
     });
   }
@@ -147,6 +148,10 @@ class MarkerControls extends Dialog {
 
   concludeSearch({command, arg} = this._getSearchTerm()) {
     this.sections.forEach(section => section.concludeSearch(arg));
+  }
+
+  isCleanSearch({command, arg} = this._getSearchTerm()){
+    return !command && !arg;
   }
 
 

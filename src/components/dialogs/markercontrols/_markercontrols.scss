@@ -20,6 +20,10 @@
         display: none;
       }
 
+      &:not(.vzb-fullscreenish).vzb-clean-search .vzb-section .vzb-header {
+        display: none;
+      }
+
       .vzb-dialog-header {
         display: flex;
         
