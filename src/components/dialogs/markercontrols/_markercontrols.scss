@@ -83,6 +83,43 @@
         }
       }
 
+      .vzb-slice {
+        .vzb-spaceconfig-encodings {
+          >div {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            .vzb-spaceconfig-enc-status {
+              margin-right: 10px;
+              display: inline;
+            }
+            .vzb-spaceconfig-enc-name {
+              display: inline;
+            }
+            .vzb-spaceconfig-enc-concept {}
+          }
+        }
+
+        .vzb-spaceconfig-buttons {
+          .vzb-spaceconfig-button-apply {
+            color: darkgreen;
+            display: inline;
+            float: right;
+            margin-left: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+          }
+          .vzb-spaceconfig-button-cancel {
+            color: darkred;
+            display: inline;
+            float: right;
+            margin-left: 10px;
+            margin-right: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+          }
+        }
+      }
+
       .vzb-add {
         ul {
           list-style-type: none;
