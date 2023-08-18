@@ -73,6 +73,10 @@
         }
       }
 
+      &:not(.vzb-fullscreenish) .vzb-slice .vzb-spaceconfig-showallencs {
+        display: none;
+      }
+
       &.vzb-fullscreenish .vzb-slice .vzb-header {
         .vzb-title {
           margin-left: 20px;

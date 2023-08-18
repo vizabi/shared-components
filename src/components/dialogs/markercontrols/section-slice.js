@@ -1,5 +1,5 @@
 import { MarkerControlsSection } from "./section.js";
-import {decorate, computed, runInAction} from "mobx";
+import {decorate, computed, runInAction, observable} from "mobx";
 import * as d3 from "d3";
 
 function spacesAreEqual(a, b){
@@ -40,23 +40,34 @@ function removeDulicates(array){
 class SectionSlice extends MarkerControlsSection {
   constructor(config) {
     super(config);
+
+    this.showAllEncs = false;
+    this.proposedSpace = null;
   }
 
   setup(options) {
     super.setup(options);
     this.DOM.title.text("Slice");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
+    
+    this.DOM.actionSummary = this.DOM.content.append("div").attr("class", "vzb-spaceconfig-actionsummary");
+
     this.DOM.encodings = this.DOM.content.append("div").attr("class", "vzb-spaceconfig-encodings");
 
+    this.DOM.buttonShowAllEncs = this.DOM.content.append("div").attr("class", "vzb-spaceconfig-showallencs")
+      .text("•••")
+      .on("click", () => { this.showAllEncs = !this.showAllEncs; });
+
     this.DOM.buttons = this.DOM.content.append("div").attr("class", "vzb-spaceconfig-buttons");
-    this.DOM.buttoncancel = this.DOM.buttons.append("div").attr("class", "vzb-spaceconfig-button-cancel");
     this.DOM.buttonapply = this.DOM.buttons.append("div").attr("class", "vzb-spaceconfig-button-apply");
+    this.DOM.buttoncancel = this.DOM.buttons.append("div").attr("class", "vzb-spaceconfig-button-cancel");
   }
 
   draw() {
     this.localise = this.services.locale.auto();
 
     this.addReaction(this.createList);
+    this.addReaction(this.updateEncodigns);
     this.addReaction(this.updateUIstrings);
     this.addReaction(this.updateApplyCancelButtons);
   }
@@ -67,11 +78,32 @@ class SectionSlice extends MarkerControlsSection {
     };
   }
 
+
   updateUIstrings(){
     this.DOM.buttoncancel.text("Cancel");
     this.DOM.buttonapply.text("Apply");
   }
 
+  _getMarkerSpaceAvailability(){
+    const items = [];
+    const allowedConcetTypes = ["entity_set", "entity_domain", "time"];
+    this._getAllDataSources().forEach(ds => {
+      ds.availability.keyLookup.forEach(space => {
+        if (space.every(f => allowedConcetTypes.includes(ds.getConcept(f).concept_type))) items.push(space);
+      });
+    });
+    const currentSpace = this.model.data.space;
+    const frameConcept = this.MDL.frame.data.concept;
+
+    return items.map(space => space.toSorted((a) => {
+      //first element in current space will be listed first
+      if (currentSpace.indexOf(a) === 0) return -1;
+      //elements missing from current space will be listed in the middle
+      if (currentSpace.indexOf(a) === -1) return 0;
+      //time concepts go last
+      if (a === frameConcept) return 1;
+    }));
+  }
 
   createList() {      
     const frameConcept = this.MDL.frame.data.concept;
@@ -103,9 +135,7 @@ class SectionSlice extends MarkerControlsSection {
 
   _proposeSpace(proposedSpace) {
     if(!this.parent.isFullscreenish()) this.parent.toggleFullscreenish(this);
-    this.updateEncodigns(proposedSpace);
-    this.updateApplyCancelButtons(proposedSpace);
-    // this.updateApplyCancelButtons();
+    this.proposedSpace = proposedSpace;
   }
 
   getEncodings(){
@@ -133,14 +163,16 @@ class SectionSlice extends MarkerControlsSection {
 
   //returns concepts and their spaces (availbility keys), 
   //such that only strict superspaces, strict subspaces and matching spaces remain
-  _conceptsCompatibleWithMarkerSpace(availabilityMapByConcepts, markerSpace){
+  _conceptsCompatibleWithMarkerSpace(availabilityMapByConcepts, markerSpace, strict){
     const filteredValueLookup = new Map();
     const markerSpaceSet = new Set(markerSpace);
     const intersect = (a,b) => a.filter(e => b.has(e));
     for (const [concept, {source, spaces}] of availabilityMapByConcepts) {  
       const filteredSpaces = [...spaces].filter(space => {
         const intersection = intersect(space, markerSpaceSet);
-        return intersection.length == markerSpaceSet.size || intersection.length == space.length;
+        const fullOverlap = space.length == markerSpaceSet.size;
+        const partialOverlap = intersection.length == markerSpaceSet.size || intersection.length == space.length;
+        return strict && fullOverlap || !strict && partialOverlap;
       });
       if (filteredSpaces.length) filteredValueLookup.set(concept, {source, spaces: filteredSpaces});
     }
@@ -161,7 +193,7 @@ class SectionSlice extends MarkerControlsSection {
     }, new Map());
   }
 
-  updateEncodigns(proposedSpace){
+  updateEncodigns(proposedSpace = this.proposedSpace){
     const _this = this;
     const encs = this.model.encoding;
 
@@ -170,16 +202,33 @@ class SectionSlice extends MarkerControlsSection {
     this.concepts = this._convertConceptMapToArray(nest);
     this.encNewConfig = {};
 
+    const encodingStatus = this.getEncodings().map(enc => ({
+      enc,
+      status: _this.getSpaceCompatibilityStatus(encs[enc], proposedSpace)
+    }));
+
+    const isRequired = (enc) => !this.model.requiredEncodings || this.model.requiredEncodings.includes(enc);
+    const allRequiredAreInSubspace = encodingStatus.every(({enc, status}) => status.status === "subspaceAvailable" || !isRequired(enc));
+    this.DOM.actionSummary
+      .classed("vzb-hidden", !proposedSpace)
+      .text(
+        encodingStatus.some(({enc, status}) => status.actionReqired)
+          ? "Pls review the following:"
+          : allRequiredAreInSubspace 
+            ? "Fix at lease one of these:"
+            : "Good to go!"
+      );
+
     this.DOM.encodings
       .html("")
       .selectAll("div")
-      .data(this.getEncodings(), d=>d)
+      .data(encodingStatus, d => d.enc)
       .enter().append("div")
-      .each(function(enc){
+      .attr("class", "vzb-spaceconfig-enc")
+      .each(function({enc, status}){
         const view = d3.select(this);
 
         const encoding = encs[enc];
-        const status = _this.getSpaceCompatibilityStatus(encoding, proposedSpace);
         const concept = _this.concepts.find(f => f.concept.concept == encoding.data.concept);
         const isSpaceSet = encoding.data.config.space;
         const newConfig = _this.encNewConfig[enc] = {};
@@ -210,7 +259,7 @@ class SectionSlice extends MarkerControlsSection {
           if(status.status == "alreadyInSpace" || status.status == "entityPropertyDataConfig") {
             view.append("div")
               .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("new space: will reset to marker space if set");
+              .text("new space: " + (isSpaceSet ? " will reset to marker space" : "no change"));
 
             if(isSpaceSet) newConfig["space"] = null;
             if(encoding.data.config.filter) newConfig["filter"] = {};
@@ -247,7 +296,7 @@ class SectionSlice extends MarkerControlsSection {
           }  
 
 
-          if(status.status == "patialOverlap" || status.status == "noOverlap") {
+          if(status.status == "patialOverlap" || status.status == "noOverlap" || allRequiredAreInSubspace && isRequired(enc)) {
             view.append("div")
               .attr("for", "vzb-spaceconfig-enc-space-new")
               .text("new space: not avaiable");
@@ -256,7 +305,7 @@ class SectionSlice extends MarkerControlsSection {
               .attr("for", "vzb-spaceconfig-enc-space-select")
               .text("select concept:");
 
-            const filtervl = _this._conceptsCompatibleWithMarkerSpace(nest, _this.proposedSpace);
+            const filtervl = _this._conceptsCompatibleWithMarkerSpace(nest, proposedSpace, allRequiredAreInSubspace && isRequired(enc));
             const concepts = _this._convertConceptMapToArray(filtervl);
   
             const select = view.append("select")
@@ -266,7 +315,9 @@ class SectionSlice extends MarkerControlsSection {
                 newConfig["concept"] = d3.select(this).property("value");
                 newConfig["space"] = null;
                 newConfig["filter"] = {};
-              })
+              });
+
+            select
               .selectAll("option")
               .data(concepts)
               .enter().append("option")
@@ -277,8 +328,9 @@ class SectionSlice extends MarkerControlsSection {
             
   
           }  
-
         }
+
+        view.classed("vzb-hidden", !status.actionReqired && !_this.showAllEncs && !(allRequiredAreInSubspace && isRequired(enc)));
       });
   }
 
@@ -307,9 +359,9 @@ class SectionSlice extends MarkerControlsSection {
 
     const partialOverlap = getPartiallyOverlappingSpaces(spaces, proposedSpace);
     if (partialOverlap.length > 0) 
-      return {status: "patialOverlap", spaces: []};
+      return {status: "patialOverlap", actionReqired: true, spaces: []};
     if (partialOverlap.length == 0) 
-      return {status: "noOverlap", spaces: []};
+      return {status: "noOverlap", actionReqired: true, spaces: []};
 
     return {status: false, spaces: []};
   }
@@ -318,11 +370,11 @@ class SectionSlice extends MarkerControlsSection {
     return {
       true: "⚫",
       constant: "✳️",
-      alreadyInSpace: "♻️", //reset filter on enc
+      alreadyInSpace: "✅", //reset filter on enc
       entityPropertyDataConfig: "🏷", //reset filter on enc
-      matchingSpaceAvailable: "➡️",
-      subspaceAvailable: "↘️",
-      superspaceAvailable: "↗️", //request connstants 
+      matchingSpaceAvailable: "⏩",
+      subspaceAvailable: "🔽",
+      superspaceAvailable: "🔼", //request connstants 
       patialOverlap: "🚧", //request another concept
       noOverlap: "🚧", //request another concept
       false: "❌"
@@ -330,7 +382,7 @@ class SectionSlice extends MarkerControlsSection {
   }
 
 
-  updateApplyCancelButtons(proposedSpace){
+  updateApplyCancelButtons(proposedSpace = this.proposedSpace){
     const hide = !proposedSpace || spacesAreEqual(proposedSpace, this.model.data.space);
     this.DOM.buttoncancel.classed("vzb-hidden", hide)
       .on("click", () => {this.cancelChanges();});
@@ -339,6 +391,8 @@ class SectionSlice extends MarkerControlsSection {
   }
   cancelChanges(){
     this.parent.toggleFullscreenish();
+    this.proposedSpace = null;
+    this.showAllEncs = false;
   }
 
   applyChanges(proposedSpace){
@@ -348,8 +402,14 @@ class SectionSlice extends MarkerControlsSection {
       Object.keys(this.encNewConfig).forEach(enc => {
         const newConfig = this.encNewConfig[enc];
 
-        if (newConfig.concept)
+        if (newConfig.concept) {
           this.model.encoding[enc].config.data.concept = newConfig.concept;
+
+          this.model.encoding[enc].config.scale.domain = null;
+          this.model.encoding[enc].config.scale.type = null;
+          this.model.encoding[enc].config.scale.zoomed = null;
+          this.model.encoding[enc].config.scale.palette = {};
+        }
 
         if (newConfig.space)
           this.model.encoding[enc].config.data.space = newConfig.space;
@@ -364,6 +424,8 @@ class SectionSlice extends MarkerControlsSection {
       });
     });
     this.parent.toggleFullscreenish();
+    this.proposedSpace = null;
+    this.showAllEncs = false;
   }  
 
   _getItemId(space) {
@@ -381,27 +443,6 @@ class SectionSlice extends MarkerControlsSection {
     return Object.keys(dsConfig).map(dsName => this.services.Vizabi.Vizabi.stores.dataSources.get(dsName));
   }
 
-  _getMarkerSpaceAvailability(){
-    const items = [];
-    const allowedConcetTypes = ["entity_domain", "time"];
-    this._getAllDataSources().forEach(ds => {
-      ds.availability.keyLookup.forEach(space => {
-        if (space.every(f => allowedConcetTypes.includes(ds.getConcept(f).concept_type))) items.push(space);
-      });
-    });
-    const currentSpace = this.model.data.space;
-    const frameConcept = this.MDL.frame.data.concept;
-
-    return items.map(space => space.toSorted((a) => {
-      //first element in current space will be listed first
-      if (currentSpace.indexOf(a) === 0) return -1;
-      //elements missing from current space will be listed in the middle
-      if (currentSpace.indexOf(a) === -1) return 0;
-      //time concepts go last
-      if (a === frameConcept) return 1;
-    }));
-  }
-
   updateSearch(text = "") {
     this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
@@ -413,7 +454,9 @@ class SectionSlice extends MarkerControlsSection {
 }
 
 const decorated = decorate(SectionSlice, {
-  "MDL": computed
+  "MDL": computed,
+  "showAllEncs": observable,
+  "proposedSpace": observable
 });
 
 export {decorated as SectionSlice};
