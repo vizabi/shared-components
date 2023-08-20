@@ -19,6 +19,7 @@ export class MarkerControlsSection extends BaseComponent {
 
   setup() {
     this.DOM = {
+      header: this.element.select(".vzb-header"),
       back: this.element.select(".vzb-back"),
       title: this.element.select(".vzb-title"),
       threedots: this.element.select(".vzb-threedots"),
@@ -29,12 +30,17 @@ export class MarkerControlsSection extends BaseComponent {
     this.DOM.back.on("click", () => this.parent.toggleFullscreenish());
   }
 
+  showHideHeader(showHide){
+    this.DOM.header.classed("vzb-hidden", !showHide);
+  }
+
   hide(arg) {
     this.element.classed("vzb-hidden", arg);
   }
 
   updateSearch() {
     console.warn("updateSearch(text) function is not implemented in " + this.constructor.name);
+    this.showHideHeader();
   }
 
   concludeSearch() {

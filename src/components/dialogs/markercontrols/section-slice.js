@@ -444,12 +444,16 @@ class SectionSlice extends MarkerControlsSection {
   }
 
   updateSearch(text = "") {
-    this.DOM.list.selectAll(".vzb-item")
+    let hiddenItems = 0;
+    const items = this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
-        return 0
+        const hidden = 0
           || spacesAreEqual(d, this.model.data.space) && !this.parent.isFullscreenish()
           || text && !this._getText(d).toString().toLowerCase().includes(text) && !d.includes(text);
+        hiddenItems += hidden;
+        return hidden;
       });
+    this.showHideHeader(items.size() - hiddenItems);
   }
 }
 

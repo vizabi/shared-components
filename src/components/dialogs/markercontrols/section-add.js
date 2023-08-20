@@ -55,6 +55,7 @@ class _SectionAdd extends MarkerControlsSection {
     if(!string || string.length < 3) {
       this.DOM.matches.selectAll("li").remove();
       this.DOM.matches.classed("vzb-hidden", true);
+      this.showHideHeader();
       return;
     }
 
@@ -82,6 +83,8 @@ class _SectionAdd extends MarkerControlsSection {
         this.model.data.filter.addToDimensionsFirstINstatement(d, this.activePreset.loosePath);
         this.cancelSearch();
       });
+
+    this.showHideHeader(matches.length);
   }
 }
 

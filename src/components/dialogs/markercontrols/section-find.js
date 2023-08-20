@@ -130,11 +130,14 @@ class SectionFind extends MarkerControlsSection {
   }
 
   updateSearch(text = "") {
-    this.DOM.list.selectAll(".vzb-item")
+    let hiddenItems = 0;
+    const items = this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
-        const lower = (d.name || "").toString().toLowerCase();
-        return !lower.includes(text);
+        const hide = !(d.name || "").toString().toLowerCase().includes(text);
+        hiddenItems += hide;
+        return hide;
       });
+    this.showHideHeader(items.size() - hiddenItems);
   }
 
   concludeSearch(text = "") {
