@@ -1,13 +1,16 @@
+import * as utils from "../../../legacy/base/utils.js";
 import { Dialog } from "../dialog";
 import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singlehandleslider";
 import { SectionFind } from "./section-find.js";
 import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
 import { SectionSlice } from "./section-slice.js";
-import {runInAction} from "mobx";
+import {computed, decorate, runInAction} from "mobx";
 import * as d3 from "d3";
 
-class MarkerControls extends Dialog {
+const KEY = Symbol.for("key");
+
+class _MarkerControls extends Dialog {
   constructor(config) {
     config.template = `
       <div class='vzb-dialog-modal'>
@@ -169,11 +172,39 @@ class MarkerControls extends Dialog {
   }
 
   _closeClick() {}
+
+  _getCompoundLabelText(d) {
+    if (typeof d.label == "object") {
+      return Object.entries(d.label)
+        .filter(entry => entry[0] != this.MDL.frame.data.concept)
+        .map(entry => utils.isNumber(entry[1]) ? (entry[0] + ": " + entry[1]) : entry[1])
+        .join(", ");
+    }
+    if (d.label != null) return "" + d.label;
+    return d[KEY];
+  }
+
+  get markersData() {
+    const data = new Map();
+    this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
+      if (!data.has(key)) data.set(key, { 
+        [KEY]: key, 
+        name: this._getCompoundLabelText(valuesObj)
+      });
+    }));
+    return data;
+  }
+
 }
 
-MarkerControls.DEFAULT_UI = {
+_MarkerControls.DEFAULT_UI = {
   
 };
+
+const MarkerControls = decorate(_MarkerControls, {
+  "markersData": computed
+});
+
 
 Dialog.add("markercontrols", MarkerControls);
 export { MarkerControls };

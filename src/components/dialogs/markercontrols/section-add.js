@@ -17,8 +17,6 @@ class _SectionAdd extends MarkerControlsSection {
   }
 
   draw() {
-    this.KEY = Symbol.for("key");
-
     this.localise = this.services.locale.auto();
 
     this.addReaction(this.buildList);
@@ -32,21 +30,20 @@ class _SectionAdd extends MarkerControlsSection {
     this.search();
   }
 
-  get activePreset(){
-    const PRESETS = toJS(this.root.model.config.presets);
-
-    PRESETS.flat().forEach(p => {
-      p.score = Utils.computeObjectsSimilarityScore(p.config, toJS(this.model.config), "is--"); 
-    });
-    const topScore = d3.max(PRESETS.flat(), d => d.score);
-    return PRESETS.flat().find(f => f.score === topScore);
-  }
-
   buildList(){
     this.model.data.spaceCatalog.then(spaceCatalog => {
       for (const dim in spaceCatalog) {
         const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
-        if (spaceCatalog[dim].entities) this.catalog = [...spaceCatalog[dim].entities.filter(filterSpec).values()];
+        if (spaceCatalog[dim].entities) {
+          const dimOrAndIn = this.model.data.filter.dimensions?.[dim]?.$or?.[0]?.$and?.[dim]?.$in || [];
+          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.[1]?.[dim]?.$in || [];
+          this.catalog = [...spaceCatalog[dim].entities.filter(filterSpec).values()].filter(f => {
+            return !this.parent.markersData.has(f[Symbol.for("key")]) &&
+              !dimOrAndIn.includes(f[Symbol.for("key")]) &&
+              !dimOrIn.includes(f[Symbol.for("key")]);
+          });
+          this.dim = dim;
+        }
       }
     });
   }
@@ -80,8 +77,8 @@ class _SectionAdd extends MarkerControlsSection {
         return d.name + d.isness.map(m => `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale(m.id)}">${m.name}</span>`).join("");
       })
       .on("click", (event, d) => {
-        this.model.data.filter.addToDimensionsFirstINstatement(d, this.activePreset.loosePath);
-        this.cancelSearch();
+        this.model.data.filter.addToDimensionsFirstINstatement(d, [this.dim, "$or", 1, this.dim, "$in"]);
+        this.concludeSearch();
       });
 
     this.showHideHeader(matches.length);
@@ -89,5 +86,4 @@ class _SectionAdd extends MarkerControlsSection {
 }
 
 export const SectionAdd = decorate(_SectionAdd, {
-  "activePreset": computed
 });
