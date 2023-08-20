@@ -1,6 +1,6 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
-import {decorate, computed} from "mobx";
+import {decorate, computed, runInAction} from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
@@ -32,22 +32,10 @@ class SectionFind extends MarkerControlsSection {
     };
   }
 
-
-  _processFramesData() {
-    const data = new Map();
-    this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
-      if (!data.has(key)) data.set(key, { 
-        [KEY]: key, 
-        name: this._getCompoundLabelText(valuesObj)
-      });
-    }));
-    return data;
-  }
-
   createList() {
     const list = this.DOM.list;
 
-    const data = [...this._processFramesData().values()];
+    const data = [...this.parent.markersData.values()];
 
     //sort data alphabetically
     data.sort((a, b) => (a.name < b.name) ? -1 : 1);
@@ -81,17 +69,6 @@ class SectionFind extends MarkerControlsSection {
       .on("mouseout", (event, d) => {
         if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
       });
-  }
-
-  _getCompoundLabelText(d) {
-    if (typeof d.label == "object") {
-      return Object.entries(d.label)
-        .filter(([k, v]) => k != this.MDL.frame.data.concept)
-        .map(([k, v]) => utils.isNumber(v) ? (k + ": " + v) : v)
-        .join(", ");
-    }
-    if (d.label != null) return "" + d.label;
-    return d[KEY];
   }
 
   updateBrokenData() {
@@ -141,13 +118,14 @@ class SectionFind extends MarkerControlsSection {
   }
 
   concludeSearch(text = "") {
-
-    const data = [...this._processFramesData().values()];
-    const filtered = data.filter(f => (f.name || "").toString().toLowerCase().includes(text));
-    if (filtered.length === 1) {
-      this.MDL.selected.data.filter.toggle(filtered[0]);
-      this.updateSearch();
-    }
+    runInAction(() => {
+      const data = [...this.parent.markersData.values()];
+      const filtered = data.filter(f => (f.name || "").toString().toLowerCase().includes(text));
+      if (filtered.length === 1) {
+        this.MDL.selected.data.filter.toggle(filtered[0]);
+        this.updateSearch();
+      }
+    });
   }
 
 }
