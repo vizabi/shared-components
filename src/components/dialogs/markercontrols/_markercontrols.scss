@@ -8,7 +8,7 @@
           font-size: 1em;
         }
       }
-
+      
       input, label {
         cursor: pointer;
       }
@@ -88,6 +88,14 @@
       }
 
       .vzb-slice {
+        div {
+          white-space: normal;
+        }
+        .vzb-spaceconfig-actionsummary {
+          margin-top: 20px;
+          margin-bottom: 10px;
+          line-height: 1.5em;
+        }
         .vzb-spaceconfig-encodings {
           >div {
             margin-top: 10px;
@@ -99,7 +107,11 @@
             .vzb-spaceconfig-enc-name {
               display: inline;
             }
-            .vzb-spaceconfig-enc-concept {}
+            .vzb-spaceconfig-enc-concept-new {
+              margin-top: 5px;
+              display: block;
+              width: 100%;
+            }
           }
         }
 

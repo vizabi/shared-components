@@ -86,7 +86,7 @@ class SectionSlice extends MarkerControlsSection {
 
   _getMarkerSpaceAvailability(){
     const items = [];
-    const allowedConcetTypes = ["entity_set", "entity_domain", "time"];
+    const allowedConcetTypes = ["entity_domain", "time"];
     this._getAllDataSources().forEach(ds => {
       ds.availability.keyLookup.forEach(space => {
         if (space.every(f => allowedConcetTypes.includes(ds.getConcept(f).concept_type))) items.push(space);
@@ -215,8 +215,11 @@ class SectionSlice extends MarkerControlsSection {
         encodingStatus.some(({enc, status}) => status.actionReqired)
           ? "Pls review the following:"
           : allRequiredAreInSubspace 
-            ? "Fix at lease one of these:"
-            : "Good to go!"
+            ? "Not all data is available " + _this._getText(proposedSpace)
+                + ". Switch at least one of the visual encodings below to a different measure:"
+            : proposedSpace && spacesAreEqual(proposedSpace, this.model.data.space) 
+              ? "This is the current setting"
+              : "Good to go!"
       );
 
     this.DOM.encodings
@@ -233,80 +236,71 @@ class SectionSlice extends MarkerControlsSection {
         const isSpaceSet = encoding.data.config.space;
         const newConfig = _this.encNewConfig[enc] = {};
 
-        view.append("div")
-          .attr("class", "vzb-spaceconfig-enc-status")
-          .attr("title", status.status)
-          .text(_this.statusIcons(status));
+        const DOM = {
+          status: view.append("div")
+            .attr("class", "vzb-spaceconfig-enc-status")
+            .attr("title", status.status)
+            .text(_this.statusIcons(status)),
 
-        view.append("div")
-          .attr("class", "vzb-spaceconfig-enc-name")
-          .text(enc);
+          name: view.append("div")
+            .attr("class", "vzb-spaceconfig-enc-name")
+            .text(enc),
+          concept: view.append("div")
+            .attr("class", "vzb-spaceconfig-enc-concept"),
+          spaceCurrent: view.append("div")
+            .attr("for", "vzb-spaceconfig-enc-space-current")
+            .classed("vzb-hidden", !_this.showAllEncs),
+          spaceNew: view.append("div")
+            .attr("for", "vzb-spaceconfig-enc-space-new")
+            .classed("vzb-hidden", !_this.showAllEncs),
+        };
+        
 
+        
         if(status.status == "constant"){
-          view.append("div")
-            .attr("class", "vzb-spaceconfig-enc-concept")
-            .text("constant: " + encoding.data.constant);
+          DOM.concept.text("constant: " + encoding.data.constant);
+
         }else{
 
-          view.append("div")
-            .attr("class", "vzb-spaceconfig-enc-concept")
+          DOM.concept
             .text(concept.concept.name);
-
-          view.append("div")
-            .attr("for", "vzb-spaceconfig-enc-space-current")
+          DOM.spaceCurrent
             .text("current space: " + encoding.data.space.join() + (isSpaceSet? " (set)" : " (inherited)") );
-
+          
           if(status.status == "alreadyInSpace" || status.status == "entityPropertyDataConfig") {
-            view.append("div")
-              .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("new space: " + (isSpaceSet ? " will reset to marker space" : "no change"));
+            DOM.spaceNew.text("new space: " + (isSpaceSet ? " will reset to marker space" : "no change"));
 
             if(isSpaceSet) newConfig["space"] = null;
             if(encoding.data.config.filter) newConfig["filter"] = {};
           }
 
           if(status.status == "matchingSpaceAvailable") {
-            view.append("div")
-              .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("new space: " + status.spaces[0].join() + (isSpaceSet? " (set)" : " (inherited)"));
+            DOM.spaceNew.text("new space: " + status.spaces[0].join() + (isSpaceSet? " (set)" : " (inherited)"));
 
             if(isSpaceSet) newConfig["space"] = null;
             if(encoding.data.config.filter) newConfig["filter"] = {};
           }     
           
           if(status.status == "subspaceAvailable") {
-            view.append("div")
-              .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("new space: " + status.spaces[0].join() + " (set)");
+            DOM.spaceNew.text("new space: " + status.spaces[0].join() + " (set)");
 
             newConfig["space"] = status.spaces[0];
             if(encoding.data.config.filter) newConfig["filter"] = {};
           }  
 
           if(status.status == "superspaceAvailable") {
-            view.append("div")
-              .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("new space: " + status.spaces[0].join() + " (set)");
-            view.append("div")
-              .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("suggest constants for compliment dimensions!");
+            DOM.spaceNew.text("new space: " + status.spaces[0].join() + " (set)");
 
             newConfig["space"] = status.spaces[0];
             if(encoding.data.config.filter) newConfig["filter"] = {};
           }  
 
-
           if(status.status == "patialOverlap" || status.status == "noOverlap" || allRequiredAreInSubspace && isRequired(enc)) {
-            view.append("div")
-              .attr("for", "vzb-spaceconfig-enc-space-new")
-              .text("new space: not avaiable");
-
-            view.append("label")
-              .attr("for", "vzb-spaceconfig-enc-space-select")
-              .text("select concept:");
+            DOM.concept.classed("vzb-hidden", true);
+            DOM.spaceNew.text("new space: not avaiable");
 
             const filtervl = _this._conceptsCompatibleWithMarkerSpace(nest, proposedSpace, allRequiredAreInSubspace && isRequired(enc));
-            const concepts = _this._convertConceptMapToArray(filtervl);
+            const concepts = [concept].concat(_this._convertConceptMapToArray(filtervl));
   
             const select = view.append("select")
               .attr("class", "vzb-spaceconfig-enc-concept-new")
@@ -316,16 +310,15 @@ class SectionSlice extends MarkerControlsSection {
                 newConfig["space"] = null;
                 newConfig["filter"] = {};
               });
-
+              
             select
               .selectAll("option")
               .data(concepts)
               .enter().append("option")
+              .property("selected", option => option.concept.concept === concept.concept.concept)
+              .property("disabled", option => option.concept.concept === concept.concept.concept)
               .attr("value", option => option.concept.concept)
               .text(option => option.concept.name);
-
-            select.property("selectedIndex", -1);
-            
   
           }  
         }
@@ -433,10 +426,12 @@ class SectionSlice extends MarkerControlsSection {
   }
   _getText(space) {
     const dataSources = this._getAllDataSources();
-    
-    return space      
+    const ELLIPSIS = 10;
+
+    return "by " + space      
       .map(d => dataSources.find(ds => ds.getConcept(d)).getConcept(d)?.name || d)
-      .join(", ") || "";
+      .map(m => m.length > ELLIPSIS ? m.substring(0, ELLIPSIS) + "…" : m)
+      .join(", ");
   }
 
   _getAllDataSources(dsConfig = this.root.model.config.dataSources) {
