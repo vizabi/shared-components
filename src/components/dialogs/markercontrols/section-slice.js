@@ -43,6 +43,7 @@ class SectionSlice extends MarkerControlsSection {
 
     this.showAllEncs = false;
     this.proposedSpace = null;
+    this.goodToGo = false;
   }
 
   setup(options) {
@@ -209,18 +210,24 @@ class SectionSlice extends MarkerControlsSection {
 
     const isRequired = (enc) => !this.model.requiredEncodings || this.model.requiredEncodings.includes(enc);
     const allRequiredAreInSubspace = encodingStatus.every(({enc, status}) => status.status === "subspaceAvailable" || !isRequired(enc));
+
+    const someActionRequired = encodingStatus.some(({enc, status}) => status.actionReqired)
+    const alreadyInSpace = proposedSpace && spacesAreEqual(proposedSpace, this.model.data.space);
+
     this.DOM.actionSummary
       .classed("vzb-hidden", !proposedSpace)
       .text(
-        encodingStatus.some(({enc, status}) => status.actionReqired)
+        someActionRequired
           ? "Pls review the following:"
           : allRequiredAreInSubspace 
             ? "Not all data is available " + _this._getText(proposedSpace)
                 + ". Switch at least one of the visual encodings below to a different measure:"
-            : proposedSpace && spacesAreEqual(proposedSpace, this.model.data.space) 
+            : alreadyInSpace
               ? "This is the current setting"
               : "Good to go!"
       );
+
+    this.goodToGo = !someActionRequired && !allRequiredAreInSubspace && !alreadyInSpace;
 
     this.DOM.encodings
       .html("")
@@ -306,6 +313,7 @@ class SectionSlice extends MarkerControlsSection {
               .attr("class", "vzb-spaceconfig-enc-concept-new")
               .attr("id", "vzb-spaceconfig-enc-space-select")
               .on("change", function(){
+                _this.goodToGo = true;
                 newConfig["concept"] = d3.select(this).property("value");
                 newConfig["space"] = null;
                 newConfig["filter"] = {};
@@ -380,6 +388,7 @@ class SectionSlice extends MarkerControlsSection {
     this.DOM.buttoncancel.classed("vzb-hidden", hide)
       .on("click", () => {this.cancelChanges();});
     this.DOM.buttonapply.classed("vzb-hidden", hide)
+      .classed("vzb-disabled", !this.goodToGo)
       .on("click", () => {this.applyChanges(proposedSpace);});
   }
   cancelChanges(){
@@ -455,7 +464,8 @@ class SectionSlice extends MarkerControlsSection {
 const decorated = decorate(SectionSlice, {
   "MDL": computed,
   "showAllEncs": observable,
-  "proposedSpace": observable
+  "proposedSpace": observable,
+  "goodToGo": observable,
 });
 
 export {decorated as SectionSlice};

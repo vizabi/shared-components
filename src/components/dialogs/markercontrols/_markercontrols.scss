@@ -123,6 +123,12 @@
             margin-left: 10px;
             text-transform: uppercase;
             cursor: pointer;
+
+            &.vzb-disabled {
+              color: lightgray;
+              pointer-events: none;
+              cursor: default;
+            }
           }
           .vzb-spaceconfig-button-cancel {
             color: darkred;
