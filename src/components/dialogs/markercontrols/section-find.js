@@ -86,8 +86,8 @@ class SectionFind extends MarkerControlsSection {
   _getCompoundLabelText(d) {
     if (typeof d.label == "object") {
       return Object.entries(d.label)
-        .filter(entry => entry[0] != this.MDL.frame.data.concept)
-        .map(entry => utils.isNumber(entry[1]) ? (entry[0] + ": " + entry[1]) : entry[1])
+        .filter(([k, v]) => k != this.MDL.frame.data.concept)
+        .map(([k, v]) => utils.isNumber(v) ? (k + ": " + v) : v)
         .join(", ");
     }
     if (d.label != null) return "" + d.label;
