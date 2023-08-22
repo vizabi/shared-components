@@ -28,10 +28,10 @@ function getPartiallyOverlappingSpaces(spaces, targetSpace){
     .toSorted(shortestFirst);
 }
 
-function removeDulicates(array){
+function removeDulicates(space){
   const result = [];
-  array.forEach(space => {
-    if(!result.some(s => spacesAreEqual(s, space)))
+  space.forEach(space => {
+    if(!result.some(s => spacesAreEqual(s.space, space.space)))
       result.push(space);
   });
   return result;
@@ -90,25 +90,28 @@ class SectionSlice extends MarkerControlsSection {
     const allowedConcetTypes = ["entity_domain", "time"];
     this._getAllDataSources().forEach(ds => {
       ds.availability.keyLookup.forEach(space => {
-        if (space.every(f => allowedConcetTypes.includes(ds.getConcept(f).concept_type))) items.push(space);
+        if (space.every(f => allowedConcetTypes.includes(ds.getConcept(f).concept_type))) items.push({space, dsId: ds.id});
       });
     });
     const currentSpace = this.model.data.space;
     const frameConcept = this.MDL.frame.data.concept;
 
-    return items.map(space => space.toSorted((a) => {
-      //first element in current space will be listed first
-      if (currentSpace.indexOf(a) === 0) return -1;
-      //elements missing from current space will be listed in the middle
-      if (currentSpace.indexOf(a) === -1) return 0;
-      //time concepts go last
-      if (a === frameConcept) return 1;
+    return items.map(item => ({
+      dsId: item.dsId,
+      space: item.space.toSorted((a) => {
+        //first element in current space will be listed first
+        if (currentSpace.indexOf(a) === 0) return -1;
+        //elements missing from current space will be listed in the middle
+        if (currentSpace.indexOf(a) === -1) return 0;
+        //time concepts go last
+        if (a === frameConcept) return 1;
+      })
     }));
   }
 
   createList() {      
     const frameConcept = this.MDL.frame.data.concept;
-    const spaceAvailability = removeDulicates(this._getMarkerSpaceAvailability().filter(f => f.includes(frameConcept)));
+    const spaceAvailability = removeDulicates(this._getMarkerSpaceAvailability().filter(f => f.space.includes(frameConcept)));
     
     this.DOM.list.selectAll("div")
       .data(spaceAvailability, this._getItemId)
@@ -128,7 +131,7 @@ class SectionSlice extends MarkerControlsSection {
               .text(this._getText.bind(this));
           }),
         update => update.select("input")
-          .property("checked", d => spacesAreEqual(d, this.model.data.space))
+          .property("checked", d => spacesAreEqual(d.space, this.model.data.space))
         //   .
       )
       .attr("class", "vzb-item");
@@ -205,14 +208,14 @@ class SectionSlice extends MarkerControlsSection {
 
     const encodingStatus = this.getEncodings().map(enc => ({
       enc,
-      status: _this.getSpaceCompatibilityStatus(encs[enc], proposedSpace)
+      status: _this.getSpaceCompatibilityStatus(encs[enc], proposedSpace?.space)
     }));
 
     const isRequired = (enc) => !this.model.requiredEncodings || this.model.requiredEncodings.includes(enc);
     const allRequiredAreInSubspace = encodingStatus.every(({enc, status}) => status.status === "subspaceAvailable" || !isRequired(enc));
 
     const someActionRequired = encodingStatus.some(({enc, status}) => status.actionReqired)
-    const alreadyInSpace = proposedSpace && spacesAreEqual(proposedSpace, this.model.data.space);
+    const alreadyInSpace = proposedSpace?.space && spacesAreEqual(proposedSpace.space, this.model.data.space);
 
     this.DOM.actionSummary
       .classed("vzb-hidden", !proposedSpace)
@@ -306,7 +309,7 @@ class SectionSlice extends MarkerControlsSection {
             DOM.concept.classed("vzb-hidden", true);
             DOM.spaceNew.text("new space: not avaiable");
 
-            const filtervl = _this._conceptsCompatibleWithMarkerSpace(nest, proposedSpace, allRequiredAreInSubspace && isRequired(enc));
+            const filtervl = _this._conceptsCompatibleWithMarkerSpace(nest, proposedSpace.space, allRequiredAreInSubspace && isRequired(enc));
             const concepts = [concept].concat(_this._convertConceptMapToArray(filtervl));
   
             const select = view.append("select")
@@ -335,30 +338,30 @@ class SectionSlice extends MarkerControlsSection {
       });
   }
 
-  getSpaceCompatibilityStatus(encoding, proposedSpace){
+  getSpaceCompatibilityStatus(encoding, space){
     const spaces = this.concepts.find(f => f.concept.concept == encoding.data.concept)?.spaces;
 
-    if (!proposedSpace) return {status: true, spaces: []};
+    if (!space) return {status: true, spaces: []};
     if (encoding.data.isConstant) return {status: "constant"};
 
     if (encoding.data.config.modelType == "entityPropertyDataConfig")
-      return {status: "entityPropertyDataConfig", spaces: [proposedSpace]};
+      return {status: "entityPropertyDataConfig", spaces: [space]};
 
-    if (spacesAreEqual(encoding.data.space, proposedSpace)) 
-      return {status: "alreadyInSpace", spaces: [proposedSpace]};
+    if (spacesAreEqual(encoding.data.space, space)) 
+      return {status: "alreadyInSpace", spaces: [space]};
 
-    if (getMatchingSpace(spaces, proposedSpace)) 
-      return {status: "matchingSpaceAvailable", spaces: [proposedSpace]};
+    if (getMatchingSpace(spaces, space)) 
+      return {status: "matchingSpaceAvailable", spaces: [space]};
 
-    const subspaces = getSubspaces(spaces, proposedSpace);
+    const subspaces = getSubspaces(spaces, space);
     if (subspaces.length > 0) 
       return {status: "subspaceAvailable", spaces: subspaces};
 
-    const superspaces = getSuperspaces(spaces, proposedSpace);
+    const superspaces = getSuperspaces(spaces, space);
     if (superspaces.length > 0) 
       return {status: "superspaceAvailable", spaces: superspaces};
 
-    const partialOverlap = getPartiallyOverlappingSpaces(spaces, proposedSpace);
+    const partialOverlap = getPartiallyOverlappingSpaces(spaces, space);
     if (partialOverlap.length > 0) 
       return {status: "patialOverlap", actionReqired: true, spaces: []};
     if (partialOverlap.length == 0) 
@@ -384,7 +387,7 @@ class SectionSlice extends MarkerControlsSection {
 
 
   updateApplyCancelButtons(proposedSpace = this.proposedSpace){
-    const hide = !proposedSpace || spacesAreEqual(proposedSpace, this.model.data.space);
+    const hide = !proposedSpace || spacesAreEqual(proposedSpace.space, this.model.data.space);
     this.DOM.buttoncancel.classed("vzb-hidden", hide)
       .on("click", () => {this.cancelChanges();});
     this.DOM.buttonapply.classed("vzb-hidden", hide)
@@ -400,7 +403,8 @@ class SectionSlice extends MarkerControlsSection {
   applyChanges(proposedSpace){
     if (!proposedSpace) return;
     runInAction(()=>{
-      this.model.config.data.space = proposedSpace;
+      this.model.config.data.space = proposedSpace.space;
+      this.model.encoding["label"].data.config.source = proposedSpace.dsId;
       Object.keys(this.encNewConfig).forEach(enc => {
         const newConfig = this.encNewConfig[enc];
 
@@ -431,13 +435,13 @@ class SectionSlice extends MarkerControlsSection {
   }  
 
   _getItemId(space) {
-    return this.id + "--radioitem--" + space.toSorted().join("-");
+    return this.id + "--radioitem--" + space.space.toSorted().join("-");
   }
   _getText(space) {
     const dataSources = this._getAllDataSources();
     const ELLIPSIS = 10;
 
-    return "by " + space      
+    return "by " + space.space      
       .map(d => dataSources.find(ds => ds.getConcept(d)).getConcept(d)?.name || d)
       .map(m => m.length > ELLIPSIS ? m.substring(0, ELLIPSIS) + "…" : m)
       .join(", ");
@@ -452,8 +456,8 @@ class SectionSlice extends MarkerControlsSection {
     const items = this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
         const hidden = 0
-          || spacesAreEqual(d, this.model.data.space) && !this.parent.isFullscreenish()
-          || text && !this._getText(d).toString().toLowerCase().includes(text) && !d.includes(text);
+          || spacesAreEqual(d.space, this.model.data.space) && !this.parent.isFullscreenish()
+          || text && !this._getText(d).toString().toLowerCase().includes(text) && !d.space.includes(text);
         hiddenItems += hidden;
         return hidden;
       });
