@@ -174,10 +174,15 @@ class _MarkerControls extends Dialog {
   _closeClick() {}
 
   _getCompoundLabelText(d) {
+    const markerSpace = this.model.data.space;
+
     if (typeof d.label == "object") {
       return Object.entries(d.label)
-        .filter(entry => entry[0] != this.MDL.frame.data.concept)
-        .map(entry => utils.isNumber(entry[1]) ? (entry[0] + ": " + entry[1]) : entry[1])
+        .filter(([k, v]) => k != this.MDL.frame.data.concept)
+        //sort parts of the name along the marker space array, so we get geo, gender instead of gender, geo
+        .sort(([ak, av], [bk, bv]) => markerSpace.indexOf(ak) - markerSpace.indexOf(bk))
+        //add keys where values are numbers, such as "age: 69"
+        .map(([k, v]) => utils.isNumber(v) ? k + ": " + v : v)
         .join(", ");
     }
     if (d.label != null) return "" + d.label;
