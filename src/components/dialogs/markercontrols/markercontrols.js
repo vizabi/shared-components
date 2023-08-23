@@ -102,12 +102,13 @@ class _MarkerControls extends Dialog {
         }
       })
       .on("input", () => {
-        this.updateSearch()
+        this.updateSearch();
       });
 
     //is this needed?
     d3.select(this.DOM.input_search.node().parentNode)
       .on("reset", () => {
+        this._clearSearch();
         this.updateSearch();
       })
       .on("submit", event => {
@@ -115,7 +116,7 @@ class _MarkerControls extends Dialog {
         return false;
       });
 
-    this.DOM.deselect_all.on("click", this.MDL.selected.data.filter.clear);
+    this.DOM.deselect_all.on("click", () => this.MDL.selected.data.filter.clear());
   }
 
   draw() {

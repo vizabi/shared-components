@@ -27,7 +27,11 @@ export class MarkerControlsSection extends BaseComponent {
       content: this.element.select(".vzb-content"),
     };
 
-    this.DOM.back.on("click", () => this.parent.toggleFullscreenish());
+    this.DOM.back.on("click", () => this.cancelChanges());
+  }
+
+  cancelChanges() {
+    this.parent.toggleFullscreenish();
   }
 
   showHideHeader(showHide){

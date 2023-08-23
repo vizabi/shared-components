@@ -109,7 +109,8 @@ class SectionSlice extends MarkerControlsSection {
     }));
   }
 
-  createList() {      
+  createList() {
+    this.proposedSpace; //watch to successfully reset radiobuttons on cancel/back
     const frameConcept = this.MDL.frame.data.concept;
     const spaceAvailability = removeDulicates(this._getMarkerSpaceAvailability().filter(f => f.space.includes(frameConcept)));
     
@@ -131,7 +132,7 @@ class SectionSlice extends MarkerControlsSection {
               .text(this._getText.bind(this));
           }),
         update => update.select("input")
-          .property("checked", d => spacesAreEqual(d.space, this.model.data.space))
+          .property("checked", d => spacesAreEqual(d.space, this.proposedSpace?.space || this.model.data.space))
         //   .
       )
       .attr("class", "vzb-item");
