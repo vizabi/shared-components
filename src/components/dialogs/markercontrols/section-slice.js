@@ -224,10 +224,12 @@ class SectionSlice extends MarkerControlsSection {
         someActionRequired
           ? "Pls review the following:"
           : allRequiredAreInSubspace 
-            ? "Not all data is available " + _this._getText(proposedSpace)
-                + ". Switch at least one of the visual encodings below to a different measure:"
+            ? "Variables below have no data for the chosen slicing. "
+                + "To proceed, switch at least one of them to a different variable, that has data " 
+                + _this._getText(proposedSpace) 
+                + ":"
             : alreadyInSpace
-              ? "This is the current setting"
+              ? "This is the current configuration"
               : "Good to go!"
       );
 
@@ -251,6 +253,7 @@ class SectionSlice extends MarkerControlsSection {
           status: view.append("div")
             .attr("class", "vzb-spaceconfig-enc-status")
             .attr("title", status.status)
+            .classed("vzb-hidden", !_this.showAllEncs)
             .text(_this.statusIcons(status)),
 
           name: view.append("div")

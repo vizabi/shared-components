@@ -11,6 +11,7 @@
       
       input, label {
         cursor: pointer;
+        font-family: $vzb-font-family-alt;
       }
 
       &.vzb-fullscreenish .vzb-dialog-header {
@@ -111,6 +112,11 @@
               margin-top: 5px;
               display: block;
               width: 100%;
+            }
+            select {
+              padding: 5px;
+              border-radius: 4px;
+              font-family: inherit;
             }
           }
         }
