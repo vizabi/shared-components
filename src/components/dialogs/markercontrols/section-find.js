@@ -1,6 +1,6 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
-import {decorate, computed, runInAction} from "mobx";
+import {decorate, computed, runInAction, observable} from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
@@ -14,14 +14,16 @@ class SectionFind extends MarkerControlsSection {
     super.setup(options);
     this.DOM.title.text("Find");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
+    this.entitiesWithMissingData = [];
   }
 
   draw() {
     this.localise = this.services.locale.auto();
 
     this.addReaction(this.createList);
-    this.addReaction(this.updateBrokenData);
+    this.addReaction(this.updatemissingDataForFrame);
     this.addReaction(this._selectDataPoints);
+    this.addReaction(this.getEntitiesWithMissingData);
   }
 
   get MDL() {
@@ -32,10 +34,38 @@ class SectionFind extends MarkerControlsSection {
     };
   }
 
+  getEntitiesWithMissingData() {
+    const entitiesWithMissingData = [];
+    this.model.data.spaceCatalog.then(spaceCatalog => {
+      for (const dim in spaceCatalog) {
+        const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
+        if (spaceCatalog[dim].entities) {
+          const dimOrAndIn = this.model.data.filter.dimensions?.[dim]?.$or?.[0]?.$and?.[dim]?.$in || [];
+          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.[1]?.[dim]?.$in || [];
+          [...spaceCatalog[dim].entities.filter(filterSpec).values()].forEach(entity => {
+            if ((dimOrAndIn.includes(entity[KEY]) || dimOrIn.includes(entity[KEY])) && ![...this.parent.markersData.values()].some(s => s[dim] === entity[dim])){
+
+              const push = {
+                [KEY]: entity[KEY],
+                [dim]: entity[dim], 
+                name: entity.name, 
+                missingData: true
+              };
+              entitiesWithMissingData.push(push);
+            }
+            
+          });
+        }
+      }
+
+      this.entitiesWithMissingData = entitiesWithMissingData;
+    });
+  }
+
   createList() {
     const list = this.DOM.list;
 
-    const data = [...this.parent.markersData.values()];
+    const data = [...this.parent.markersData.values()].concat(this.entitiesWithMissingData);
 
     //sort data alphabetically
     data.sort((a, b) => (a.name < b.name) ? -1 : 1);
@@ -57,36 +87,36 @@ class SectionFind extends MarkerControlsSection {
         this.MDL.selected.data.filter.toggle(d);
         //this.DOM.panelFind.node().scrollTop = 0;
         //return to highlighted state
-        if (!utils.isTouchDevice() && !d.brokenData) this.MDL.highlighted.data.filter.set(d);
+        if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
       });
 
     listItem.append("label")
       .attr("for", (d, i) => "-find-" + i + "-" + this.id)
       .text(d => d.name)
       .on("mouseover", (event, d) => {
-        if (!utils.isTouchDevice() && !d.brokenData) this.MDL.highlighted.data.filter.set(d);
+        if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
       })
       .on("mouseout", (event, d) => {
         if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
       });
   }
 
-  updateBrokenData() {
+  updatemissingDataForFrame() {
+    this.entitiesWithMissingData;
     const currentDataMap = this.model.dataMap;
     const listItems = this.DOM.listItems;
 
     listItems.data().forEach(d => {
-      d.brokenData = !currentDataMap.hasByStr(d[KEY]);
+      d.missingDataForFrame = !currentDataMap.hasByStr(d[KEY]) && !d.missingData;
     });
 
-    this._updateLabelTitle();
-  }
-
-  _updateLabelTitle() {
-    const noDataSubstr = this.localise(this.MDL.frame.value) + ": " + this.localise("hints/nodata");
+    const frame = this.localise(this.MDL.frame.value);
+    const noDataSubstr = frame + ": " + this.localise("hints/nodata");
     this.DOM.listItems.select("label")
-      .classed("vzb-find-item-brokendata", d => d.brokenData)
-      .attr("title", d => "key: " + d[KEY] + (d.brokenData ? ", " + noDataSubstr : ""));
+      .classed("vzb-find-item-missingDataForFrame", d => d.missingDataForFrame)
+      .classed("vzb-find-item-missingData", d => d.missingData)
+      .html(d => d.missingDataForFrame ? `<span>${d.name}</span> <span class=vzb-frame>${frame}</span>` : d.name)
+      .attr("title", d => "key: " + d[KEY] + (d.missingDataForFrame ? ", " + noDataSubstr : ""));
   }
 
 
@@ -131,7 +161,8 @@ class SectionFind extends MarkerControlsSection {
 }
 
 const decorated = decorate(SectionFind, {
-  "MDL": computed
+  "MDL": computed,
+  "entitiesWithMissingData": observable
 });
 
 export {decorated as SectionFind};

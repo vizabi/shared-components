@@ -192,11 +192,16 @@ class _MarkerControls extends Dialog {
 
   get markersData() {
     const data = new Map();
+    const space = this.model.data.space.filter(f => f !== this.model.encoding.frame.data.concept);
     this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
-      if (!data.has(key)) data.set(key, { 
-        [KEY]: key, 
-        name: this._getCompoundLabelText(valuesObj)
-      });
+      if (!data.has(key)) {
+        const newItem = { 
+          [KEY]: key,
+          name: this._getCompoundLabelText(valuesObj)
+        };
+        space.forEach(dim => newItem[dim] = valuesObj[dim]);
+        data.set(key, newItem);
+      }
     }));
     return data;
   }
