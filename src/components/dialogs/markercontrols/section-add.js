@@ -2,6 +2,8 @@ import { computed, decorate, toJS } from "mobx";
 import { MarkerControlsSection } from "./section.js";
 import * as d3 from "d3";
 
+const KEY = Symbol.for("key");
+
 class _SectionAdd extends MarkerControlsSection {
   constructor(config) {
     super(config);
@@ -30,8 +32,8 @@ class _SectionAdd extends MarkerControlsSection {
     this.search();
   }
 
-  buildList(){
-    this.model.data.spaceCatalog.then(spaceCatalog => {
+  buildList() {
+    this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
       for (const dim in spaceCatalog) {
         const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
         if (spaceCatalog[dim].entities) {
@@ -77,7 +79,12 @@ class _SectionAdd extends MarkerControlsSection {
         return d.name + d.isness.map(m => `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale(m.id)}">${m.name}</span>`).join("");
       })
       .on("click", (event, d) => {
-        this.model.data.filter.addToDimensionsFirstINstatement(d, [this.dim, "$or", 1, this.dim, "$in"]);
+        const dimOrAndNin = this.model.data.filter.dimensions?.[this.dim]?.$or?.[0]?.$and?.[0]?.[this.dim]?.$nin || [];
+        if (dimOrAndNin.includes(d[KEY])) {
+          this.model.data.filter.deleteFromDimensionsAllINstatements(d, "$nin");
+        } else {
+          this.model.data.filter.addToDimensionsFirstINstatement(d, [this.dim, "$or", 1, this.dim, "$in"]);
+        }
         this.concludeSearch();
       });
 
