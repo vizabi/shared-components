@@ -119,7 +119,11 @@ class SectionFind extends MarkerControlsSection {
       .attr("title", d => "key: " + d[KEY] + (d.missingDataForFrame ? ", " + noDataSubstr : ""));
   }
 
-
+  example() {
+    const data = [...this.parent.markersData.values()];
+    const randomItem = data[Math.floor(Math.random() * data.length)];
+    return randomItem.name;
+  }
 
   _selectDataPoints() {
     const selected = this.MDL.selected.data.filter;

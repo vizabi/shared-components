@@ -5,7 +5,8 @@ import { SectionFind } from "./section-find.js";
 import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
 import { SectionSlice } from "./section-slice.js";
-import {computed, decorate, runInAction} from "mobx";
+import {computed, decorate, runInAction, _allowStateChangesInsideComputed} from "mobx";
+import { ICON_QUESTION } from "../../../icons/iconset.js";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
@@ -25,6 +26,8 @@ class _MarkerControls extends Dialog {
               <button class="vzb-cancel-button" type="reset"></button>
             </form>
           </span>
+
+          <span class="vzb-info"></span>
 
         </div>
 
@@ -47,6 +50,8 @@ class _MarkerControls extends Dialog {
             <span data-localise="buttons/ok"></span>
           </div>
         </div>  
+
+        <div class="vzb-info-popup vzb-hidden"></div>
 
       </div>      
     `;
@@ -82,6 +87,8 @@ class _MarkerControls extends Dialog {
     this.DOM.deselect_all = this.element.select(".vzb-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
     this.DOM.title = this.element.select(".vzb-dialog-title");
+    this.DOM.info = this.element.select(".vzb-info");
+    this.DOM.infoPopup = this.element.select(".vzb-info-popup");
 
     this.sections = this.children.filter(f => Object.getPrototypeOf(f.constructor).name === "MarkerControlsSection");
     this.magicCommands = this.sections.map(section => section.magicCommand);
@@ -116,6 +123,17 @@ class _MarkerControls extends Dialog {
         return false;
       });
 
+
+    utils.setIcon(this.DOM.info, ICON_QUESTION)
+      .on("click", (event) => {
+        this.toggleInfoPopup();
+        event.stopPropagation();
+      });
+
+    this.DOM.infoPopup.on("click", () => {this.toggleInfoPopup(false);});
+
+    this.DOM.dialog.on("click", () => {this.toggleInfoPopup(false);});
+    
     this.DOM.deselect_all.on("click", () => this.MDL.selected.data.filter.clear());
   }
 
@@ -156,6 +174,38 @@ class _MarkerControls extends Dialog {
 
   isCleanSearch({command, arg} = this._getSearchTerm()){
     return !command && !arg;
+  }
+
+  toggleInfoPopup(showhide = this.DOM.infoPopup.classed("vzb-hidden")){
+    
+    this.DOM.infoPopup.classed("vzb-hidden", !showhide);
+    if (!showhide) return;
+
+    const oneExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,10);
+    const infoHints = [
+      {text: "Examples and tips.", instruction: true},
+      {text: "Type what you are looking after like:", instruction: true},
+      {action: oneExample},
+      {text: "or use a specific command:", instruction: true},
+      {icon: "👀", action: "find", example: this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,10)},
+      {icon: "❇️", action: "add"},
+      {icon: "🧩", action: "slice", example: this.findChild({type: "SectionSlice"}).example().toLowerCase()},
+    ];
+    
+    
+
+    this.DOM.infoPopup.selectAll("div")
+      .data(infoHints, (d, i) => i).join("div")
+      .attr("class", d => d.instruction ? "vzb-instruction" : "vzb-clickable")
+      .html(d => `<span>${d.icon||""}</span> <span class="vzb-action">${d.action || d.text ||""}</span> <span class="vzb-example">${d.example||""}</span>`)
+      .on("click", (e, d) => {
+        if(!d.action) return;
+        this.DOM.input_search.node().value = d.action + " ";
+        this.toggleInfoPopup();
+        this.updateSearch();
+        this.DOM.input_search.node().focus();
+      });
+
   }
 
 

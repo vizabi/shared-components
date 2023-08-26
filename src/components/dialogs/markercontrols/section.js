@@ -30,6 +30,10 @@ export class MarkerControlsSection extends BaseComponent {
     this.DOM.back.on("click", () => this.cancelChanges());
   }
 
+  example() {
+    return "";
+  }
+
   cancelChanges() {
     this.parent.toggleFullscreenish();
   }

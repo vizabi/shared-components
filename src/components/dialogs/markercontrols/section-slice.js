@@ -390,6 +390,15 @@ class SectionSlice extends MarkerControlsSection {
   }
 
 
+  example() {
+    const frameConcept = this.MDL.frame.data.concept;
+    const spaceAvailability = removeDulicates(this._getMarkerSpaceAvailability().filter(f => f.space.includes(frameConcept)));
+    const currentSpace = this.model.data.space;
+
+    const examples = spaceAvailability.map(m => m.space).flat().filter(f => !currentSpace.includes(f));
+    return examples[0] || "";
+  }
+
   updateApplyCancelButtons(proposedSpace = this.proposedSpace){
     const hide = !proposedSpace || spacesAreEqual(proposedSpace.space, this.model.data.space);
     this.DOM.buttoncancel.classed("vzb-hidden", hide)
