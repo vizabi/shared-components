@@ -48,7 +48,7 @@ class SectionSlice extends MarkerControlsSection {
 
   setup(options) {
     super.setup(options);
-    this.DOM.title.text("Slice");
+    this.DOM.title.text("Slice by");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     
     this.DOM.actionSummary = this.DOM.content.append("div").attr("class", "vzb-spaceconfig-actionsummary");
@@ -118,6 +118,7 @@ class SectionSlice extends MarkerControlsSection {
       .data(spaceAvailability, this._getItemId)
       .join(
         enter => enter.append("div")
+          .attr("class", "vzb-item")
           .call(view => {
             view.append("input")
               .attr("type", "radio")
@@ -134,8 +135,7 @@ class SectionSlice extends MarkerControlsSection {
         update => update.select("input")
           .property("checked", d => spacesAreEqual(d.space, this.proposedSpace?.space || this.model.data.space))
         //   .
-      )
-      .attr("class", "vzb-item");
+      );
   }
 
   _proposeSpace(proposedSpace) {
@@ -454,7 +454,7 @@ class SectionSlice extends MarkerControlsSection {
     const dataSources = this._getAllDataSources();
     const ELLIPSIS = 10;
 
-    return "by " + space.space      
+    return space.space
       .map(d => dataSources.find(ds => ds.getConcept(d)).getConcept(d)?.name || d)
       .map(m => m.length > ELLIPSIS ? m.substring(0, ELLIPSIS) + "…" : m)
       .join(", ");
