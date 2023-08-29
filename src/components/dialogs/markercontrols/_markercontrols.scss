@@ -115,6 +115,16 @@
         }
       }
 
+      &:not(.vzb-fullscreenish) .vzb-switch .vzb-list .vzb-item{
+        input {
+          display: none;
+        }
+        label::before {
+          content: "➡️";
+          margin-right: 5px;
+        }
+      }
+
       &:not(.vzb-fullscreenish) .vzb-slice .vzb-spaceconfig-showallencs {
         display: none;
       }

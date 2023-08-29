@@ -4,6 +4,7 @@ import { SingleHandleSlider } from "../../brushslider/singlehandleslider/singleh
 import { SectionFind } from "./section-find.js";
 import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
+import { SectionSwitch } from "./section-switch.js";
 import { SectionSlice } from "./section-slice.js";
 import {computed, decorate, runInAction, _allowStateChangesInsideComputed} from "mobx";
 import { ICON_QUESTION } from "../../../icons/iconset.js";
@@ -36,6 +37,7 @@ class _MarkerControls extends Dialog {
             <div class="vzb-section vzb-find"></div>
             <div class="vzb-section vzb-add"></div>
             <div class="vzb-section vzb-remove"></div>
+            <div class="vzb-section vzb-switch"></div>
             <div class="vzb-section vzb-slice"></div>
           </div>
         </div>
@@ -72,6 +74,9 @@ class _MarkerControls extends Dialog {
     },{
       type: SectionRemove,
       placeholder: ".vzb-remove"
+    },{
+      type: SectionSwitch,
+      placeholder: ".vzb-switch"
     },{
       type: SectionSlice,
       placeholder: ".vzb-slice"
@@ -184,6 +189,7 @@ class _MarkerControls extends Dialog {
     const globalExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,5);
     const sectionFindRemoveExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,7) + "...";
     const sectionAddExample = this.findChild({type: "SectionAdd"}).example().toLowerCase().substr(0,7) + "...";
+    const sectionSwitchExample = this.findChild({type: "SectionSwitch"}).example().toLowerCase();
     const sectionSliceExample = this.findChild({type: "SectionSlice"}).example().toLowerCase();
     const infoHints = [
       {text: "Examples and tips", instruction: true},
@@ -193,6 +199,7 @@ class _MarkerControls extends Dialog {
       {icon: "👀", action: "find", example: sectionFindRemoveExample},
       {icon: "❇️", action: "add", example: sectionAddExample},
       {icon: "❌", action: "remove", example: sectionFindRemoveExample},
+      {icon: "➡️", action: "switch", example: sectionSwitchExample},
       {icon: "🧩", action: "slice", example: sectionSliceExample},
     ];
     
