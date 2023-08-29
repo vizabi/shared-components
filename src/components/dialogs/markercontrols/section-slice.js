@@ -213,7 +213,8 @@ class SectionSlice extends MarkerControlsSection {
     }));
 
     const isRequired = (enc) => !this.model.requiredEncodings || this.model.requiredEncodings.includes(enc);
-    const allRequiredAreInSubspace = encodingStatus.every(({enc, status}) => status.status === "subspaceAvailable" || !isRequired(enc));
+    const allRequiredAreInSubspace = this.model.requiredEncodings && this.model.requiredEncodings.length > 0 
+      && encodingStatus.every(({enc, status}) => status.status === "subspaceAvailable" || !isRequired(enc));
 
     const someActionRequired = encodingStatus.some(({enc, status}) => status.actionReqired)
     const alreadyInSpace = proposedSpace?.space && spacesAreEqual(proposedSpace.space, this.model.data.space);
@@ -471,7 +472,7 @@ class SectionSlice extends MarkerControlsSection {
         const hidden = 0
           || spacesAreEqual(d.space, this.model.data.space) && !this.parent.isFullscreenish()
           || text && !this._getText(d).toString().toLowerCase().includes(text) && !d.space.includes(text);
-        hiddenItems += hidden;
+        hiddenItems += +hidden;
         return hidden;
       });
     this.showHideHeader(items.size() - hiddenItems);
