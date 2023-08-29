@@ -30,6 +30,11 @@ export class ButtonList extends BaseComponent {
         icon: "search",
         required: false
       },
+      "markercontrols": {
+        title: "buttons/markercontrols",
+        icon: "search",
+        required: false
+      },
       "show": {
         title: "buttons/show",
         icon: "asterisk",
