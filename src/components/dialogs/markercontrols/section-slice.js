@@ -224,7 +224,7 @@ class SectionSlice extends MarkerControlsSection {
         someActionRequired
           ? "Pls review the following:"
           : allRequiredAreInSubspace 
-            ? "Variables below have no data for the chosen slicing. "
+            ? "Options below have no data for the chosen slicing. "
                 + "To proceed, switch at least one of them to a different variable, that has data " 
                 + _this._getText(proposedSpace) 
                 + ":"

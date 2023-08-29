@@ -181,15 +181,19 @@ class _MarkerControls extends Dialog {
     this.DOM.infoPopup.classed("vzb-hidden", !showhide);
     if (!showhide) return;
 
-    const oneExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,10);
+    const globalExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,5);
+    const sectionFindRemoveExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,7) + "...";
+    const sectionAddExample = this.findChild({type: "SectionAdd"}).example().toLowerCase().substr(0,7) + "...";
+    const sectionSliceExample = this.findChild({type: "SectionSlice"}).example().toLowerCase();
     const infoHints = [
-      {text: "Examples and tips.", instruction: true},
-      {text: "Type what you are looking after like:", instruction: true},
-      {action: oneExample},
+      {text: "Examples and tips", instruction: true},
+      {text: "Search in all commands like so:", instruction: true},
+      {action: globalExample, ellipsis: "..."},
       {text: "or use a specific command:", instruction: true},
-      {icon: "👀", action: "find", example: this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,10)},
-      {icon: "❇️", action: "add"},
-      {icon: "🧩", action: "slice", example: this.findChild({type: "SectionSlice"}).example().toLowerCase()},
+      {icon: "👀", action: "find", example: sectionFindRemoveExample},
+      {icon: "❇️", action: "add", example: sectionAddExample},
+      {icon: "❌", action: "remove", example: sectionFindRemoveExample},
+      {icon: "🧩", action: "slice", example: sectionSliceExample},
     ];
     
     
@@ -197,10 +201,15 @@ class _MarkerControls extends Dialog {
     this.DOM.infoPopup.selectAll("div")
       .data(infoHints, (d, i) => i).join("div")
       .attr("class", d => d.instruction ? "vzb-instruction" : "vzb-clickable")
-      .html(d => `<span>${d.icon||""}</span> <span class="vzb-action">${d.action || d.text ||""}</span> <span class="vzb-example">${d.example||""}</span>`)
+      .html(d => `
+        <span class="vzb-icon">${d.icon||""}</span> 
+        <span class="vzb-action">${d.action || d.text ||""}</span>
+        <span class = "vzb-ellipsis">${d.ellipsis || ""}</span> 
+        <span class="vzb-example">${d.example || ""}</span>`
+      )
       .on("click", (e, d) => {
         if(!d.action) return;
-        this.DOM.input_search.node().value = d.action + " ";
+        this.DOM.input_search.node().value = d.action + (d.example ? " " : "");
         this.toggleInfoPopup();
         this.updateSearch();
         this.DOM.input_search.node().focus();

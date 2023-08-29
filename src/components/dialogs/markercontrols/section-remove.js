@@ -1,9 +1,10 @@
 import { MarkerControlsSection } from "./section.js";
+import { computed, decorate, toJS } from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
 
-export class SectionRemove extends MarkerControlsSection {
+class SectionRemove extends MarkerControlsSection {
   constructor(config) {
     super(config);
   }
@@ -63,7 +64,7 @@ export class SectionRemove extends MarkerControlsSection {
   }
 
   search(string){
-    if(!string || string.length < 3) {
+    if(!string || string.length < 2) {
       this.DOM.matches.selectAll("li").remove();
       this.DOM.matches.classed("vzb-hidden", true);
       this.showHideHeader();
@@ -99,3 +100,8 @@ export class SectionRemove extends MarkerControlsSection {
   }
 
 }
+
+const decorated = decorate(SectionRemove, {
+});
+
+export {decorated as SectionRemove};

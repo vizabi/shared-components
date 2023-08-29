@@ -42,10 +42,13 @@
         .vzb-clickable {
           cursor: pointer;
           color: $vzb-color-primary-dark;
+          .vzb-icon {
+            font-family: $vzb-font-family;
+          }
           .vzb-action {
             text-decoration: underline;
           }
-          .vzb-example {
+          .vzb-example, .vzb-ellipsis {
             color: $vzb-color-primary-light;
           }
         }

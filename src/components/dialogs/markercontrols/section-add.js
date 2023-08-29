@@ -4,7 +4,7 @@ import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
 
-class _SectionAdd extends MarkerControlsSection {
+class SectionAdd extends MarkerControlsSection {
   constructor(config) {
     super(config);
   }
@@ -50,8 +50,14 @@ class _SectionAdd extends MarkerControlsSection {
     });
   }
 
+  example() {
+    const data = this.catalog;
+    const randomItem = data[Math.floor(Math.random() * data.length)];
+    return randomItem.name;
+  }
+
   search(string){
-    if(!string || string.length < 3) {
+    if(!string || string.length < 2) {
       this.DOM.matches.selectAll("li").remove();
       this.DOM.matches.classed("vzb-hidden", true);
       this.showHideHeader();
@@ -92,5 +98,7 @@ class _SectionAdd extends MarkerControlsSection {
   }
 }
 
-export const SectionAdd = decorate(_SectionAdd, {
+const decorated = decorate(SectionAdd, {
 });
+
+export {decorated as SectionAdd};
