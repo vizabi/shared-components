@@ -1,26 +1,39 @@
 .vzb-dialogs {
   .vzb-dialogs-dialog {
     &[data-dlg="markercontrols"] {
+      &.vzb-popup {
+        &.vzb-fullscreenish {
+          .vzb-dialog-content-fixed {
+            margin-top: 38px;
+            height: auto;
+            min-height: 250px;
+          }
+          .vzb-spaceconfig-buttons {
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            width: 100%;
+            margin-left: -20px;
+            align-items: center;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 700;
+            background-color: #fff;
+            z-index: 1;
+
+            .vzb-spaceconfig-button-apply,
+            .vzb-spaceconfig-button-cancel {
+              flex: 1 1 auto;
+              padding: 18px;
+            }
+          }
+        }
+      }
       > .vzb-dialog-modal {
         >.vzb-dialog-content {
           margin: 0;
           padding: 0;
           font-size: 1em;
-        }
-      }
-
-      &.vzb-popup,
-      &.vzb-sidebar {
-        .vzb-dialog-header {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          margin: 20px 0px 10px 20px;
-          
-          >.vzb-dialog-title {
-            margin: 0;
-            padding: 0;
-          }  
         }
       }
 
@@ -85,9 +98,14 @@
 
       .vzb-dialog-header {
         display: flex;
-        
+        flex-direction: row;
+        align-items: center;
+        margin: 48px 20px 15px;
+      
         .vzb-dialog-title {
           text-transform: capitalize;
+          margin: 0;
+          padding: 0;
         }
 
         .vzb-filter {
@@ -273,6 +291,28 @@
   }
 }
 
+&.vzb-small {
+  .vzb-dialogs {
+    .vzb-dialogs-dialog {
+      &.vzb-popup {
+        &[data-dlg="markercontrols"] {
+          &.vzb-fullscreenish {
+            .vzb-dialog-content-fixed {
+              margin-top: 0;
+            }
+          }
+  
+          >.vzb-dialog-modal {
+            >.vzb-dialog-header {
+              padding: 0;
+              margin: 20px 20px 10px;
+            }      
+          }
+        }
+      }
+    }
+  }
+}
 
 //responsiveness
 &.vzb-large {
@@ -303,14 +343,12 @@
             }
           }
 
-          .vzb-dialog-title {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            > span:first-child {
-              display: block;
-              flex: 0 0 auto;
+          .vzb-dialog-header {
+            @include rtl {
+              margin-left: 0;
+              margin-right: 20px;
             }
+            margin: 5px 0 5px 20px;
           }
 
           .vzb-find-filter {
