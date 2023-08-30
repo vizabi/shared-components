@@ -151,7 +151,7 @@ class _MarkerControls extends Dialog {
   
   updateUIStrings() {
     this.DOM.input_search.attr("placeholder", this.localise("placeholder/search") + "...");
-    this.DOM.title.text(this.localise("marker-plural/" + this.model.id));
+    this.DOM.title.text(this.localise("marker-plural/" + this.model.id.replace("-splash", "")));
   }
 
   updateSearch({command, arg} = this._getSearchTerm()) {
