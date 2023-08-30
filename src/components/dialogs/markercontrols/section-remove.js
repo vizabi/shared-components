@@ -64,7 +64,7 @@ class SectionRemove extends MarkerControlsSection {
   }
 
   search(string){
-    if(!string || string.length < 2) {
+    if(string && string.length < 2) {
       this.DOM.matches.selectAll("li").remove();
       this.DOM.matches.classed("vzb-hidden", true);
       this.showHideHeader();
