@@ -37,11 +37,9 @@ class SectionAdd extends MarkerControlsSection {
       for (const dim in spaceCatalog) {
         const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
         if (spaceCatalog[dim].entities) {
-          const dimOrAndIn = this.model.data.filter.dimensions?.[dim]?.$or?.[0]?.$and?.[dim]?.$in || [];
-          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.[1]?.[dim]?.$in || [];
+          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
           this.catalog = [...spaceCatalog[dim].entities.filter(filterSpec).values()].filter(f => {
             return !this.parent.markersData.has(f[Symbol.for("key")]) &&
-              !dimOrAndIn.includes(f[Symbol.for("key")]) &&
               !dimOrIn.includes(f[Symbol.for("key")]);
           });
           this.dim = dim;
@@ -56,7 +54,7 @@ class SectionAdd extends MarkerControlsSection {
     return randomItem.name;
   }
 
-  search(string) {
+  search(string = "") {
     if(string && string.length < 2) {
       this.DOM.matches.selectAll("li").remove();
       this.DOM.matches.classed("vzb-hidden", true);
@@ -85,11 +83,11 @@ class SectionAdd extends MarkerControlsSection {
         return d.name + d.isness.map(m => `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale(m.id)}">${m.name}</span>`).join("");
       })
       .on("click", (event, d) => {
-        const dimOrAndNin = this.model.data.filter.dimensions?.[this.dim]?.$or?.[0]?.$and?.[0]?.[this.dim]?.$nin || [];
-        if (dimOrAndNin.includes(d[KEY])) {
+        const dimNin = this.model.data.filter.dimensions?.[this.dim]?.[this.dim]?.$nin || [];
+        if (dimNin.includes(d[KEY])) {
           this.model.data.filter.deleteFromDimensionsAllINstatements(d, "$nin");
         } else {
-          this.model.data.filter.addToDimensionsFirstINstatement(d, [this.dim, "$or", 1, this.dim, "$in"]);
+          this.model.data.filter.addToDimensionsFirstINstatement(d, [this.dim, "$or", 0, this.dim, "$in"]);
         }
         this.concludeSearch();
       });

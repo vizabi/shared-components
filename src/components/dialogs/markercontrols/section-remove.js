@@ -37,9 +37,8 @@ class SectionRemove extends MarkerControlsSection {
     
     this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
       const dataKeys = [...this.parent.markersData.keys()];
-      const dimOrAndIn = this.model.data.filter.dimensions?.[dim]?.$or?.[0]?.$and?.[0]?.[dim]?.$in || [];
-      const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.[1]?.[dim]?.$in || [];
-      const markersFromIn = [...new Set([...dimOrAndIn, ...dimOrIn])]
+      const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
+      const markersFromIn = dimOrIn
         .filter(d => !dataKeys.includes(d))
         .map(d => {
           for (const dim in spaceCatalog) {
@@ -63,7 +62,7 @@ class SectionRemove extends MarkerControlsSection {
 
   }
 
-  search(string){
+  search(string = ""){
     if(string && string.length < 2) {
       this.DOM.matches.selectAll("li").remove();
       this.DOM.matches.classed("vzb-hidden", true);
@@ -71,7 +70,8 @@ class SectionRemove extends MarkerControlsSection {
       return;
     }
 
-    const matches = this.catalog.filter(f => f.name.toLowerCase().trim().includes(string.toLowerCase().trim()) || f[Symbol.for("key")].includes(string.toLowerCase().trim()));
+    const matches = this.catalog.filter(f => f.name.toLowerCase().trim().includes(string.toLowerCase().trim()) || f[Symbol.for("key")].includes(string.toLowerCase().trim()))
+      .sort((x, y) => d3.ascending(x.name, y.name));
 
     this.DOM.matches.classed("vzb-hidden", !matches.length);
     this.DOM.matches.selectAll("li").remove();
@@ -83,14 +83,12 @@ class SectionRemove extends MarkerControlsSection {
       })
       .on("click", (event, d) => {
         const dim = this.dim;
-        const dimOrAndIn = this.model.data.filter.dimensions?.[dim]?.$or?.[0]?.$and?.[0]?.[dim]?.$in || [];
-        const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.[1]?.[dim]?.$in || [];
+        const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
 
-        const markerIn$In = dimOrIn.includes(d[KEY]) || dimOrAndIn.includes(d[KEY]);
-        if (markerIn$In) {
+        if (dimOrIn.includes(d[KEY])) {
           this.model.data.filter.deleteFromDimensionsAllINstatements(d);
         } else {
-          this.model.data.filter.addToDimensionsFirstINstatement(d, [dim, "$or", 0, "$and", 0, dim, "$nin"]);
+          this.model.data.filter.addToDimensionsFirstINstatement(d, [dim, dim, "$nin"]);
         }
         
         this.concludeSearch();
