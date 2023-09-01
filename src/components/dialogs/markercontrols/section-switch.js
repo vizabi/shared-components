@@ -124,7 +124,11 @@ class SectionSwitch extends MarkerControlsSection {
     if (dim === concept)
       filter[dim] = null;
     else 
-      filter[dim] = {[concept_type === "boolean" ? concept : ("is--" + concept)]: true};
+      filter[dim] = {
+        "$or": [{
+          [concept_type === "boolean" ? concept : ("is--" + concept)]: true
+        }]
+      };
   }
 
   updateSearch(text = "") {
