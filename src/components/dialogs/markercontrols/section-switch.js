@@ -81,10 +81,13 @@ class SectionSwitch extends MarkerControlsSection {
     });
   }
 
-  isCurrentSetting(d) {
-    const filterDim = this.model.data.filter.dimensions[d.dim];
+  isCurrentSetting({dim, concept}) {
+    const filterDim = this.model.data.filter.dimensions[dim];
+    if (!filterDim && dim === concept) return true;
     if (!filterDim) return false;
-    return filterDim[d.concept] || filterDim["is--" + d.concept] || false;
+    return filterDim[concept] || filterDim["is--" + concept] 
+      || filterDim["$or"] && (filterDim["$or"].some(s => s[concept] || s["is--" + concept]))
+      || false;
   }
 
   createList() {
@@ -99,12 +102,12 @@ class SectionSwitch extends MarkerControlsSection {
           .call(view => {
             view.append("input")
               .attr("type", "radio")
-              .attr("id", d => d.concept)
+              .attr("id", d => this.id + "--" + d.concept)
               .attr("name", this.id + "--radiogroup")
               .on("change", (event, d) => this.setFilter(d));
 
             view.append("label")
-              .attr("for", d => d.concept)
+              .attr("for", d => this.id + "--" + d.concept)
               .html(d => `<span>${ellipsis(d.name, 20)}</span> <span class="vzb-hint">${d.availabilitySize ? "(" + d.availabilitySize + ")" : ""}</span>`);
           }),
         update => update.selectAll("input")
