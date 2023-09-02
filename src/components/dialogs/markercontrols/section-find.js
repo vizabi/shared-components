@@ -40,11 +40,9 @@ class SectionFind extends MarkerControlsSection {
       for (const dim in spaceCatalog) {
         const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
         if (spaceCatalog[dim].entities) {
-          const dimOrAndIn = this.model.data.filter.dimensions?.[dim]?.$or?.[0]?.$and?.[dim]?.$in || [];
-          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.[1]?.[dim]?.$in || [];
+          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
           [...spaceCatalog[dim].entities.filter(filterSpec).values()].forEach(entity => {
-            if ((dimOrAndIn.includes(entity[KEY]) || dimOrIn.includes(entity[KEY])) && ![...this.parent.markersData.values()].some(s => s[dim] === entity[dim])){
-
+            if (dimOrIn.includes(entity[KEY]) && ![...this.parent.markersData.values()].some(s => s[dim] === entity[dim])) {
               const push = {
                 [KEY]: entity[KEY],
                 [dim]: entity[dim], 

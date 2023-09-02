@@ -29,7 +29,26 @@
           }
         }
       }
-      > .vzb-dialog-modal {
+      >.vzb-dialog-modal {
+        .vzb-dialog-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          margin: 48px 20px 15px;
+        
+          .vzb-dialog-title {
+            text-transform: capitalize;
+            margin: 0;
+            padding: 0;
+          }
+
+          .vzb-filter {
+            display: inline-block;
+            position: relative;
+            padding: 0 10px;
+          }
+        }
+
         >.vzb-dialog-content {
           margin: 0;
           padding: 0;
@@ -94,26 +113,6 @@
       }
       &.vzb-fullscreenish .vzb-slice .vzb-header {
         font-size: 1.2em;
-      }
-
-      .vzb-dialog-header {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        margin: 48px 20px 15px;
-      
-        .vzb-dialog-title {
-          text-transform: capitalize;
-          margin: 0;
-          padding: 0;
-        }
-
-        .vzb-filter {
-          display: inline-block;
-          position: relative;
-          max-width: 170px;
-          padding: 0 10px;
-        }
       }
 
       .vzb-section {
