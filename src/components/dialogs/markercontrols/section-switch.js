@@ -16,6 +16,7 @@ class SectionSwitch extends MarkerControlsSection {
     super.setup(options);
     this.DOM.title.text("Switch to");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
+    this.DOM.hint = this.DOM.content.append("div").attr("class", "vzb-hint");
     this.items = [];
   }
 
@@ -104,11 +105,13 @@ class SectionSwitch extends MarkerControlsSection {
 
             view.append("label")
               .attr("for", d => d.concept)
-              .html(d => `<span>${ellipsis(d.name, 20)}</span> <span>${d.availabilitySize ? "(" + d.availabilitySize + ")" : ""}</span>`);
+              .html(d => `<span>${ellipsis(d.name, 20)}</span> <span class="vzb-hint">${d.availabilitySize ? "(" + d.availabilitySize + ")" : ""}</span>`);
           }),
         update => update.selectAll("input")
           .property("checked", d => this.isCurrentSetting(d))
       );
+
+    this.DOM.hint.text("number shows how many measures are available in dataset " + this.model.data.source.id + " for each of the options above");
   }
 
 
@@ -142,6 +145,7 @@ class SectionSwitch extends MarkerControlsSection {
         return hidden;
       });
     this.showHideHeader(items.size() - hiddenItems);
+    this.DOM.hint.classed("vzb-hidden", !(items.size() - hiddenItems));
   }
 
   concludeSearch(text = "") {

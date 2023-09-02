@@ -171,6 +171,16 @@
         }
       }
 
+      .vzb-switch .vzb-hint{
+        color: $vzb-color-primary-light;
+        font-size: $vzb-font-size-small;
+      }
+
+      .vzb-switch .vzb-content>.vzb-hint{
+        margin-top: 10px;
+        white-space: normal;
+      }
+
       .vzb-slice {
         div {
           white-space: normal;
