@@ -1,0 +1,385 @@
+.vzb-dialogs {
+  .vzb-dialogs-dialog {
+    &[data-dlg="markercontrols"] {
+      &.vzb-popup {
+        &.vzb-fullscreenish {
+          .vzb-dialog-content-fixed {
+            margin-top: 38px;
+            height: auto;
+            min-height: 250px;
+          }
+          .vzb-spaceconfig-buttons {
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            width: 100%;
+            margin-left: -20px;
+            align-items: center;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 700;
+            background-color: #fff;
+            z-index: 1;
+
+            .vzb-spaceconfig-button-apply,
+            .vzb-spaceconfig-button-cancel {
+              flex: 1 1 auto;
+              padding: 18px;
+            }
+          }
+        }
+      }
+      >.vzb-dialog-modal {
+        .vzb-dialog-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          margin: 48px 20px 15px;
+        
+          .vzb-dialog-title {
+            text-transform: capitalize;
+            margin: 0;
+            padding: 0;
+          }
+
+          .vzb-filter {
+            display: inline-block;
+            position: relative;
+            padding: 0 10px;
+          }
+        }
+
+        >.vzb-dialog-content {
+          margin: 0;
+          padding: 0;
+          font-size: 1em;
+        }
+      }
+
+      input, label, li {
+        cursor: pointer;
+        font-family: $vzb-font-family-alt;
+      }
+
+      .vzb-info {
+        @extend %vzb-chart-info;
+        @extend %vzb-chart-ticks-large;
+        padding: 5px 3px 3px 0px;
+        svg {width: 22px; height: 22px;}
+      }
+
+      .vzb-info-popup {
+        position: absolute;
+        z-index: 9999;
+        background-color: $vzb-color-primary-lightest;
+        border-top: 1px solid #f7f7f7;
+        padding: 5px 15px 15px 25px;
+        @include box-shadow(0, 8px, 15px, rgba(0, 0, 0, 0.24));
+        right: 5px;
+        top: 20px;
+        width: 200px;
+        .vzb-instruction {
+          .vzb-action {
+            white-space: normal;
+          }
+          margin-top: 10px;
+          margin-bottom: 5px;
+        }
+        .vzb-clickable {
+          margin-bottom: 5px;
+          cursor: pointer;
+          color: $vzb-color-primary-dark;
+          .vzb-icon {
+            font-family: $vzb-font-family;
+          }
+          .vzb-action {
+            text-decoration: underline;
+          }
+          .vzb-example, .vzb-ellipsis {
+            color: $vzb-color-primary-light;
+          }
+        }
+      }
+
+      &.vzb-fullscreenish .vzb-dialog-header {
+        display: none;
+      }
+      &:not(.vzb-fullscreenish) .vzb-back {
+        display: none;
+      }
+
+      &:not(.vzb-fullscreenish).vzb-clean-search .vzb-section .vzb-header {
+        display: none;
+      }
+      &.vzb-fullscreenish .vzb-slice .vzb-header {
+        font-size: 1.2em;
+      }
+
+      .vzb-section {
+        margin-bottom: 20px;
+        .vzb-header {
+          margin-top: 5px;
+          margin-bottom: 5px;
+          padding-bottom: 5px;
+          border-bottom: 1px solid $vzb-color-grey-light;
+
+          .vzb-back{
+            cursor: pointer;
+          }
+        }
+      }
+
+      .vzb-list .vzb-item { 
+        padding-bottom: 3px;
+        padding-top: 2px;
+        &:hover {
+          background-color: $vzb-color-primary-lightest;
+        }
+      }
+
+      &:not(.vzb-fullscreenish) .vzb-slice .vzb-list .vzb-item{
+        input {
+          display: none;
+        }
+        label::before {
+          content: "🧩";
+          margin-right: 5px;
+        }
+      }
+
+      &:not(.vzb-fullscreenish) .vzb-switch .vzb-list .vzb-item{
+        input {
+          display: none;
+        }
+        label::before {
+          content: "➡️";
+          margin-right: 5px;
+        }
+      }
+
+      &:not(.vzb-fullscreenish) .vzb-slice .vzb-spaceconfig-showallencs {
+        display: none;
+      }
+
+      &.vzb-fullscreenish .vzb-slice .vzb-header {
+        .vzb-title {
+          margin-left: 20px;
+        }
+        .vzb-title::before {
+          content: "🧩";
+          margin-right: 5px;
+        }
+      }
+
+      .vzb-switch .vzb-hint{
+        color: $vzb-color-primary-light;
+        font-size: $vzb-font-size-small;
+      }
+
+      .vzb-switch .vzb-content>.vzb-hint{
+        margin-top: 10px;
+        white-space: normal;
+      }
+
+      .vzb-slice {
+        div {
+          white-space: normal;
+        }
+        .vzb-spaceconfig-actionsummary {
+          margin-top: 20px;
+          margin-bottom: 10px;
+          line-height: 1.5em;
+        }
+        .vzb-spaceconfig-encodings {
+          >div {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            .vzb-spaceconfig-enc-status {
+              margin-right: 10px;
+              display: inline;
+            }
+            .vzb-spaceconfig-enc-name {
+              display: inline;
+            }
+            .vzb-spaceconfig-enc-concept-new {
+              margin-top: 5px;
+              display: block;
+              width: 100%;
+            }
+            select {
+              padding: 5px;
+              border-radius: 4px;
+              font-family: inherit;
+            }
+          }
+        }
+
+        .vzb-spaceconfig-buttons {
+          .vzb-spaceconfig-button-apply {
+            color: darkgreen;
+            display: inline;
+            float: right;
+            margin-left: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+
+            &.vzb-disabled {
+              color: lightgray;
+              pointer-events: none;
+              cursor: default;
+            }
+          }
+          .vzb-spaceconfig-button-cancel {
+            color: darkred;
+            display: inline;
+            float: right;
+            margin-left: 10px;
+            margin-right: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+          }
+        }
+      }
+
+      .vzb-add {
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+        li {
+          cursor: pointer;
+          padding-top: 2px;
+          padding-bottom: 3px;
+          .vzb-dialog-isness {
+            font-size: $vzb-font-size-tiny;
+            background-color: $vzb-color-accent-yellow;
+            border: 1px solid $vzb-color-grey-light;
+            border-radius: 2px;
+            padding: 1px 3px 1px 3px;
+            margin-left: 4px;
+          }
+          &:hover {
+              background-color: $vzb-color-primary-lightest;
+          }
+          &::before {
+            content: "❇️";
+            margin-right: 5px;
+          }
+        }
+      }
+
+      .vzb-remove {
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+        li {
+          cursor: pointer;
+          padding-top: 2px;
+          padding-bottom: 3px;
+          .vzb-dialog-isness {
+            font-size: $vzb-font-size-tiny;
+            background-color: $vzb-color-accent-yellow;
+            border: 1px solid $vzb-color-grey-light;
+            border-radius: 2px;
+            padding: 1px 3px 1px 3px;
+            margin-left: 4px;
+          }
+          &:hover {
+              background-color: $vzb-color-primary-lightest;
+          }
+          &::before {
+            content: "❌";
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+  }
+}
+
+&.vzb-small {
+  .vzb-dialogs {
+    .vzb-dialogs-dialog {
+      &.vzb-popup {
+        &[data-dlg="markercontrols"] {
+          &.vzb-fullscreenish {
+            .vzb-dialog-content-fixed {
+              margin-top: 0;
+            }
+          }
+  
+          >.vzb-dialog-modal {
+            >.vzb-dialog-header {
+              padding: 0;
+              margin: 20px 20px 10px;
+            }      
+          }
+        }
+      }
+    }
+  }
+}
+
+//responsiveness
+&.vzb-large {
+  &.vzb-dialog-expand-true {
+    .vzb-dialogs-dialog {
+      &.vzb-sidebar {
+        &[data-dlg="markercontrols"] {
+          display: flex;
+          flex-direction: column;
+          flex: auto;
+
+          .vzb-dialog-buttons {
+            display: flex;
+            flex: none;
+          }
+
+          .vzb-dialog-button.vzb-label-primary {
+            display: none;
+          }
+
+          .vzb-dialog-content {
+            flex-grow: 1;
+
+            .vzb-dialog-content-fixed {
+              height: 310px;
+              max-height: 305px;
+              min-width: 140px;
+            }
+          }
+
+          .vzb-dialog-header {
+            @include rtl {
+              margin-left: 0;
+              margin-right: 20px;
+            }
+            margin: 5px 0 5px 20px;
+          }
+
+          .vzb-find-filter {
+            @include rtl {
+              padding-left: 20px;
+              padding-right: 10px;
+            }
+            display: block;
+            flex: 1 1 auto;
+            min-width: 1px;
+            max-width: 260px;
+            padding-right: 20px;
+          }
+
+          .vzb-dialog-content-fixed {
+            min-height: 0;
+            max-height: initial;
+            height: auto;
+            margin-top: 5px;
+          }
+        }
+      }
+    }
+  }
+}

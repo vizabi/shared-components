@@ -44,7 +44,6 @@ $vzb-dialog-content-height: 250px;
 
       .vzb-dialog-content {
         color: $vzb-color-grey-dark;
-        font-family: $vzb-font-family-alt;
         font-size: $vzb-font-size-small;
         //max-height: $vzb-dialog-content-height;
         overflow: hidden;
@@ -227,9 +226,15 @@ $vzb-dialog-content-height: 250px;
           text-overflow: ellipsis;
           transition: color 0.3s;
 
-          &.vzb-find-item-brokendata {
-            color: $vzb-color-primary-light;
+          &.vzb-find-item-missingDataForFrame .vzb-frame {
+            color: $vzb-color-grey-light;
             text-decoration: line-through;
+          }
+
+          &.vzb-find-item-missingData {
+            color: $vzb-color-grey-light;
+            text-decoration: line-through;
+            pointer-events: none;
           }
 
           &::before {
@@ -590,6 +595,7 @@ $vzb-dialog-content-height: 250px;
   @import 'colors/colors';
   @import 'axes/axes';
   @import 'find/find';
+  @import 'markercontrols/markercontrols';
   // @import 'side/side';
   @import 'size/size';
   @import 'speed/speed';

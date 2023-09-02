@@ -19,24 +19,24 @@ export class Technical extends Dialog {
     `;
 
     config.subcomponents = [{
-      type: SimpleCheckbox,
-      placeholder: ".vzb-advancedshowandselect-switch",
-      options: {
-        checkbox: "enableSelectShowSwitch",
-        submodelFunc: () => this.root
-          .findChild({name: "dialogs"})
-          .findChild({name: "find"}).ui
-      }
-    },{
-      type: SimpleCheckbox,
-      placeholder: ".vzb-advancedmarkerspace-switch",
-      options: {
-        checkbox: "enableMarkerSpaceOptions",
-        submodelFunc: () => this.root
-          .findChild({name: "dialogs"})
-          .findChild({name: "find"}).ui
-      }
-    },{
+    //   type: SimpleCheckbox,
+    //   placeholder: ".vzb-advancedshowandselect-switch",
+    //   options: {
+    //     checkbox: "enableSelectShowSwitch",
+    //     submodelFunc: () => this.root
+    //       .findChild({name: "dialogs"})
+    //       .findChild({name: "find"}).ui
+    //   }
+    // },{
+    //   type: SimpleCheckbox,
+    //   placeholder: ".vzb-advancedmarkerspace-switch",
+    //   options: {
+    //     checkbox: "enableMarkerSpaceOptions",
+    //     submodelFunc: () => this.root
+    //       .findChild({name: "dialogs"})
+    //       .findChild({name: "find"}).ui
+    //   }
+    // },{
       type: SimpleCheckbox,
       placeholder: ".vzb-showdatasources-switch",
       options: {
