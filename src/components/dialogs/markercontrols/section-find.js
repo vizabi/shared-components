@@ -149,6 +149,10 @@ class SectionFind extends MarkerControlsSection {
     this.showHideHeader(items.size() - hiddenItems);
   }
 
+  getListItemCount() {
+    return this.DOM.list.selectAll(".vzb-item").size();
+  }
+
   concludeSearch(text = "") {
     runInAction(() => {
       const data = [...this.parent.markersData.values()];

@@ -96,6 +96,7 @@ class _MarkerControls extends Dialog {
     this.DOM.infoPopup = this.element.select(".vzb-info-popup");
 
     this.sections = this.children.filter(f => Object.getPrototypeOf(f.constructor).name === "MarkerControlsSection");
+    this.sectionFind = this.children.find(f => f.constructor.name === "SectionFind");
     this.magicCommands = this.sections.map(section => section.magicCommand);
     this._getSearchTerm = () => {
       const text = this.DOM.input_search.node().value.trim().toLowerCase();
@@ -157,7 +158,14 @@ class _MarkerControls extends Dialog {
   updateSearch({command, arg} = this._getSearchTerm()) {
     this.element.classed("vzb-clean-search", this.isCleanSearch()); 
     this.sections.forEach(section => {
-      section.hide(command && section.magicCommand !== command || !command && !arg && section.magicCommand !== "find");
+      section.hide( 0
+        // when using a specific command hide all irrelevant sections 
+        || command && section.magicCommand !== command 
+        // when clean search, keep only find
+        || !command && !arg && section.magicCommand !== "find" && section.magicCommand !== "add"
+        //hide section "and" when "find" had many items
+        || !command && !arg && section.magicCommand === "add" && this.sectionFind.getListItemCount() > 10
+      );
       section.updateSearch(arg);
     });
   }
