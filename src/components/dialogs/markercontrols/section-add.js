@@ -43,6 +43,7 @@ class SectionAdd extends MarkerControlsSection {
               !dimOrIn.includes(f[Symbol.for("key")]);
           });
           this.dim = dim;
+          this.search();
         }
       }
     });
