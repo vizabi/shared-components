@@ -271,7 +271,8 @@ class _MarkerControls extends Dialog {
       if (!data.has(key)) {
         const newItem = { 
           [KEY]: key,
-          name: this._getCompoundLabelText(valuesObj)
+          name: this._getCompoundLabelText(valuesObj),
+          label: valuesObj.label || {}
         };
         space.forEach(dim => newItem[dim] = valuesObj[dim]);
         data.set(key, newItem);
@@ -280,6 +281,25 @@ class _MarkerControls extends Dialog {
     return data;
   }
 
+  get dimMarkersData() {
+    const data = new Map();
+    const space = this.model.data.space.filter(f => f !== this.model.encoding.frame.data.concept);
+    space.forEach(dim => {
+      this.markersData.forEach(valuesObj => {
+        const key = "" + valuesObj[dim];
+        if (!data.has(key)) {
+          data.set(key, {
+            [KEY]: key,
+            name: valuesObj.label[dim],
+            [dim]: valuesObj[dim],
+            prop: dim,
+            dim
+          });
+        }
+      });
+    })
+    return data;
+  }
 }
 
 _MarkerControls.DEFAULT_UI = {
@@ -287,7 +307,8 @@ _MarkerControls.DEFAULT_UI = {
 };
 
 const MarkerControls = decorate(_MarkerControls, {
-  "markersData": computed
+  "markersData": computed,
+  "dimMarkersData": computed
 });
 
 
