@@ -4,6 +4,7 @@ import {decorate, computed, runInAction, observable} from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
+const mapToArray = m => [...m.entries()].map(([key, values]) => ({[KEY]: key, name: key, children: values}));
 
 class SectionFind extends MarkerControlsSection {
   constructor(config) {
@@ -15,6 +16,7 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.title.text("Find");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.entitiesWithMissingData = [];
+    this.foldListBy = "geo"; //hide age and decile from the list
   }
 
   draw() {
@@ -61,22 +63,52 @@ class SectionFind extends MarkerControlsSection {
   }
 
   createList() {
-    const list = this.DOM.list;
+    let data = [...this.parent.markersData.values()]
+      .concat(this.entitiesWithMissingData)
+      .toSorted((a, b) => (a.name < b.name) ? -1 : 1);
 
-    const data = [...this.parent.markersData.values()].concat(this.entitiesWithMissingData);
+    const spaceWithoutFrame = this.model.data.space.filter(f => f !== this.MDL.frame.data.concept);
+    spaceWithoutFrame.pop();
 
-    //sort data alphabetically
-    data.sort((a, b) => (a.name < b.name) ? -1 : 1);
+    if (spaceWithoutFrame.length) {
+      const args = [
+        data,
+      ].concat(
+        spaceWithoutFrame.map(dim => function(d){return d[dim];})
+      );
+      data = mapToArray(d3.group.apply(this, args));
+    }
+    
+    data.forEach(d => d.show = true);
+    const list = this.DOM.list.text("");
+    this._createGroup(list, data);
+    this.DOM.listItems = list.selectAll(".vzb-item");
+  }
 
-    this.DOM.listItems = list.text("").selectAll("div")
-      .data(data, function(d) { return d[KEY]; })
+  _createGroup(list, data){
+    this.DOM.listItems = list.selectAll("div")
+      .data(data, d => d[KEY] )
       .join("div")
-      .attr("class", "vzb-item vzb-dialog-checkbox")
       .call(this._createListItem.bind(this));
   }
 
+  interact = {
+    mouseover: (d) => {
+      if (!d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
+    },
+    mouseout: (d) => {
+      this.MDL.highlighted.data.filter.delete(d);
+    },
+  }
+
   _createListItem(listItem) {
-    listItem.append("input")
+    const _this = this;
+
+    const checkbox = listItem.append("div")
+      .attr("class", "vzb-item vzb-dialog-checkbox")
+      .classed("vzb-hidden", d => !d.show);
+
+    checkbox.append("input")
       .attr("type", "checkbox")
       .attr("id", (d, i) => "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
@@ -86,17 +118,34 @@ class SectionFind extends MarkerControlsSection {
         //this.DOM.panelFind.node().scrollTop = 0;
         //return to highlighted state
         if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
+        d.children.forEach(f => f.show = true);
+        _this.updateSearch();
       });
 
-    listItem.append("label")
+    checkbox.append("label")
       .attr("for", (d, i) => "-find-" + i + "-" + this.id)
-      .text(d => d.name)
       .on("mouseover", (event, d) => {
-        if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
+        if (utils.isTouchDevice()) return;
+        if (d.children) 
+          runInAction(() => d.children.forEach(child => this.interact.mouseover(child))); 
+        else
+          this.interact.mouseover(d);
       })
       .on("mouseout", (event, d) => {
-        if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
+        if (utils.isTouchDevice()) return;
+        if (d.children) 
+          runInAction(() => d.children.forEach(child => this.interact.mouseout(child))); 
+        else
+          this.interact.mouseout(d);
       });
+
+
+    listItem.each(function(d) {
+      if (d.children) {
+        const view = d3.select(this).append("div").attr("class", "vzb-subset");
+        _this._createGroup(view, d.children);
+      }
+    });
   }
 
   updatemissingDataForFrame() {
@@ -105,7 +154,7 @@ class SectionFind extends MarkerControlsSection {
     const listItems = this.DOM.listItems;
 
     listItems.data().forEach(d => {
-      d.missingDataForFrame = !currentDataMap.hasByStr(d[KEY]) && !d.missingData;
+      d.missingDataForFrame = !currentDataMap.hasByStr(d[KEY]) && !d.missingData && !d.children;
     });
 
     const frame = this.localise(this.MDL.frame.value);
@@ -113,7 +162,7 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.listItems.select("label")
       .classed("vzb-find-item-missingDataForFrame", d => d.missingDataForFrame)
       .classed("vzb-find-item-missingData", d => d.missingData)
-      .html(d => d.missingDataForFrame ? `<span>${d.name}</span> <span class=vzb-frame>${frame}</span>` : d.name)
+      .html(d => d.missingDataForFrame ? `<span>${d.name}</span> <span class=vzb-frame>${frame}</span>` : ((d.children ? "▶" : "") + d.name))
       .attr("title", d => "key: " + d[KEY] + (d.missingDataForFrame ? ", " + noDataSubstr : ""));
   }
 
@@ -140,9 +189,13 @@ class SectionFind extends MarkerControlsSection {
 
   updateSearch(text = "") {
     let hiddenItems = 0;
+
+    const spaceWithoutFrame = this.model.data.space.filter(f => f !== this.MDL.frame.data.concept);
+    spaceWithoutFrame.pop();
+
     const items = this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
-        const hide = !(d.name || "").toString().toLowerCase().includes(text);
+        const hide = !(d.name || "").toString().toLowerCase().includes(text) || spaceWithoutFrame.length && !d.show;
         hiddenItems += hide;
         return hide;
       });
@@ -150,7 +203,7 @@ class SectionFind extends MarkerControlsSection {
   }
 
   getListItemCount() {
-    return this.DOM.list.selectAll(".vzb-item").size();
+    return this.DOM.list.selectAll(".vzb-item:not(.vzb-hidden)").size();
   }
 
   concludeSearch(text = "") {
