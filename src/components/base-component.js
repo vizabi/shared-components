@@ -107,8 +107,12 @@ class _BaseComponent {
   }
 
   findChild({name, id, type}){
-    if (this.name === name || this.id === id || this.constructor.name === type) return this;
-    return this.children.find(c => c.findChild({name, id, type}));
+    if (name && this.name === name || id && this.id === id || type && this.constructor.name === type) return this;
+    for (const c of this.children) {
+      const find = c.findChild({name, id, type});
+      if (find) return find;
+    }
+    return false;
   }
 
   deconstruct(){
