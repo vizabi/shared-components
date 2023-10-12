@@ -4,7 +4,7 @@ import {decorate, computed, runInAction, observable} from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
-const mapToArray = m => [...m.entries()].map(([key, values]) => ({[KEY]: key, name: key, children: values}));
+const mapToArray = (m, dim) => [...m.entries()].map(([key, values]) => ({[KEY]: key, name: values[0].label[dim], children: values}));
 
 class SectionFind extends MarkerControlsSection {
   constructor(config) {
@@ -76,7 +76,7 @@ class SectionFind extends MarkerControlsSection {
       ].concat(
         spaceWithoutFrame.map(dim => function(d){return d[dim];})
       );
-      data = mapToArray(d3.group.apply(this, args));
+      data = mapToArray(d3.group.apply(this, args), spaceWithoutFrame[0]);
     }
     
     data.forEach(d => d.show = true);
@@ -112,13 +112,16 @@ class SectionFind extends MarkerControlsSection {
       .attr("type", "checkbox")
       .attr("id", (d, i) => "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
-        //clear highlight so it doesn't get in the way when selecting an entity
-        if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
-        this.MDL.selected.data.filter.toggle(d);
-        //this.DOM.panelFind.node().scrollTop = 0;
-        //return to highlighted state
-        if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
-        d.children.forEach(f => f.show = true);
+        if (!d.children) {
+          //clear highlight so it doesn't get in the way when selecting an entity
+          if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
+          this.MDL.selected.data.filter.toggle(d);
+          //this.DOM.panelFind.node().scrollTop = 0;
+          //return to highlighted state
+          if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
+        } else {
+          d.children.forEach(f => f.show = true);
+        }
         _this.updateSearch();
       });
 
