@@ -112,7 +112,7 @@ class SectionFind extends MarkerControlsSection {
 
     checkbox.append("input")
       .attr("type", "checkbox")
-      .attr("id", (d, i) => "-find-" + i + "-" + this.id)
+      .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
         if (!d.children) {
           //clear highlight so it doesn't get in the way when selecting an entity
@@ -124,11 +124,11 @@ class SectionFind extends MarkerControlsSection {
         } else {
           d.children.forEach(f => f.show = true);
         }
-        _this.updateSearch();
+        this.updateSearch();
       });
 
     checkbox.append("label")
-      .attr("for", (d, i) => "-find-" + i + "-" + this.id)
+      .attr("for", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("mouseover", (event, d) => {
         if (utils.isTouchDevice()) return;
         if (d.children) 
