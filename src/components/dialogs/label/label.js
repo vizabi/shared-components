@@ -18,6 +18,7 @@ export class Label extends Dialog {
         </div>
 
         <div class="vzb-dialog-content">
+          <div class="vzb-enablelabelbox-switch"></div>
           <span class="vzb-saxis-selector"></span>
           <div class="vzb-dialog-sizeslider"></div>
           <div class="vzb-removelabelbox-switch"></div>
@@ -51,6 +52,13 @@ export class Label extends Dialog {
       placeholder: ".vzb-removelabelbox-switch",
       options: {
         checkbox: "removeLabelBox",
+        submodel: "root.ui.chart.labels"
+      }
+    }, {
+      type: SimpleCheckbox,
+      placeholder: ".vzb-enablelabelbox-switch",
+      options: {
+        checkbox: "enabled",
         submodel: "root.ui.chart.labels"
       }
     }];

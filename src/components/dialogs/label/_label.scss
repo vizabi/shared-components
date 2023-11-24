@@ -1,10 +1,16 @@
 
-.vzb-tool-dialogs {
+.vzb-dialogs {
   .vzb-dialogs-dialog {
     &[data-dlg="label"] {
       .vzb-dialog-content {
         .vzb-dialog-sizeslider {
-          margin-bottom: 15px;
+          margin-bottom: 10px;
+        }
+        .vzb-enablelabelbox-switch {
+          margin-bottom: 20px;
+          span {
+            margin: 0;
+          }
         }
       }
     }
