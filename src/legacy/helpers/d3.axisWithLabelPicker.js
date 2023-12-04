@@ -349,6 +349,17 @@ export default function axisSmart(_orient) {
 
     axis.labelFactory = function(options) {
       if (options == null) options = {};
+
+      //catch explicit tick settings (only used for the swimming lane scale for now)
+      if (options.ticks) 
+        return axis
+          .tickValues(options.ticks)
+          .tickValuesMinor(options.ticksMinor || [])
+          .pivot(options.pivot || false)
+          .tickFormat(options.formatter)
+          .repositionLabels(options.repositionLabels);
+
+      //catch unknown scale type
       if (options.scaleType != "linear" &&
         options.scaleType != "time" &&
         options.scaleType != "genericLog" &&
