@@ -682,8 +682,10 @@ export class TreeMenu extends BaseComponent {
       const ctype = concept.concept_type;
 
       return 0
-        //for entities, strings, constants need an ordinal scale to be allowed
-        || allowedTypes.includes("ordinal") && (["entity_domain", "entity_set", "string"].includes(ctype) || concept.id === "_default")
+        // for constants need linear scale
+        || d3.intersection(allowedTypes, ["ordinal", "point"]).size && concept.id === "_default"
+        //for entities, strings need an ordinal or rank scale to be allowed
+        || d3.intersection(allowedTypes, ["ordinal", "rank"]).size && ["entity_domain", "entity_set", "string"].includes(ctype) 
         // for measures need linear or log or something
         || ctype === "measure" && d3.intersection(allowedTypes, ["linear", "log", "genericLog", "pow"]).size 
         // special case for time
