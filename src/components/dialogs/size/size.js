@@ -57,9 +57,9 @@ export class Size extends Dialog {
 
   _updateSubtitle() {
     const conceptProps = this.model.encoding.size.data.conceptProps;
-    const subtitle = utils.getSubtitle(conceptProps.name, conceptProps.name_short);
+    const subtitle = utils.getSubtitle(conceptProps?.name, conceptProps?.name_short);
 
-    this.element.select(".vzb-dialog-subtitle").text(subtitle);
+    this.element.select(".vzb-dialog-subtitle").text(subtitle || "");
   }
 }
 
