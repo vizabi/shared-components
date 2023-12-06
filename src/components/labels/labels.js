@@ -741,7 +741,8 @@ class Labels extends BaseComponent {
 
         //protect label and line from the broken data
         const brokenInputs = !_X && _X !== 0 || !_Y && _Y !== 0 || !_X0 && _X0 !== 0 || !_Y0 && _Y0 !== 0;
-        if (brokenInputs) {
+        if (cache.brokenInputs || brokenInputs) {
+          cache.brokenInputs = brokenInputs;
           labelGroup.classed("vzb-invisible", brokenInputs);
           lineGroup.classed("vzb-invisible", brokenInputs);
           return;
