@@ -278,7 +278,7 @@ class SectionSlice extends MarkerControlsSection {
         }else{
 
           DOM.concept
-            .text(concept.concept.name);
+            .text(concept.concept?.name);
           DOM.spaceCurrent
             .text("current space: " + encoding.data.space.join() + (isSpaceSet? " (set)" : " (inherited)") );
           
