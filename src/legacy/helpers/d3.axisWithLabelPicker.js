@@ -24,6 +24,7 @@ export default function axisSmart(_orient) {
       const checkRng = axis.scale().range();
       if (!checkDmn.length || !checkRng.length || [...checkDmn, ...checkRng].some(s => s == null || isNaN(s))) {    
         //this catches null, undefined, NaN, Invalid date, but accepts 0 and ""
+        highlightValue = null;
         return utils.warn(`axisSmart() skips action because of bad domain ${checkDmn} or range ${checkRng} of the attached scale`);
       }
 
