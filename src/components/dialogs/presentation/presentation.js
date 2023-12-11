@@ -16,6 +16,7 @@ export class Presentation extends Dialog {
           <div class="vzb-presentationmode-switch"></div>
           <div class="vzb-decorations-switch"></div>
           <div class="vzb-time-background-switch"></div>
+          <div class="vzb-titles-switch"></div>
           <div class="vzb-time-trails-switch"></div>
           <div class="vzb-format-si-prefix-switch"></div>
         </div>
@@ -43,6 +44,13 @@ export class Presentation extends Dialog {
       placeholder: ".vzb-time-background-switch",
       options: {
         checkbox: "timeInBackground",
+        submodel: "root.ui.chart"
+      }
+    }, {
+      type: SimpleCheckbox,
+      placeholder: ".vzb-titles-switch",
+      options: {
+        checkbox: "showTitles",
         submodel: "root.ui.chart"
       }
     }, {
