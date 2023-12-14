@@ -756,6 +756,7 @@ export class TreeMenu extends BaseComponent {
       const concept = this._targetModel.data.conceptProps || {};
 
       const scaleTypesData = resolveDefaultScales(concept).filter(f => {
+        if (_this._targetModel.scale.allowedTypes) return _this._targetModel.scale.allowedTypes.includes(f);
         if (!_this._targetModel.data.allow || !_this._targetModel.data.allow.scales) return true;
         if (_this._targetModel.data.allow.scales[0] == "*") return true;
         return _this._targetModel.data.allow.scales.indexOf(f) > -1;
