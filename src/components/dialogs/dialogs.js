@@ -57,6 +57,11 @@ export class Dialogs extends BaseComponent {
       });
   }
 
+  draw() {
+    this._buttonList = this.root.findChild({type: "ButtonList"});
+    if(!this._buttonList) console.warn("Dialogs was unable to find a subcomponent of type 'ButtonList' in root component. Could be that index.js of a tool is lacking a configuration.");
+  }
+
   resize() {
     const _this = this;
     const profile = this.services.layout.profile;
@@ -66,8 +71,8 @@ export class Dialogs extends BaseComponent {
       let cls = dialogEl.attr("class").replace(" vzb-popup", "").replace(" vzb-sidebar", "");
 
       if (profile === "LARGE" && _this.ui.dialogs.sidebar.indexOf(childComp.name) > -1) {
-        cls += _this.root.ui.buttons.sidebarCollapse ? " vzb-popup" : " vzb-sidebar";
-        if (!_this.root.ui.buttons.sidebarCollapse) dialogEl.style("z-index", null);
+        cls += _this._buttonList.ui.sidebarCollapse ? " vzb-popup" : " vzb-sidebar";
+        if (!_this._buttonList.ui.sidebarCollapse) dialogEl.style("z-index", null);
       } else if (_this.ui.dialogs.popup.indexOf(childComp.name) > -1) {
         cls += " vzb-popup";
       }

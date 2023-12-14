@@ -116,7 +116,7 @@ export class ButtonList extends BaseComponent {
         icon: "angleDoubleLeft",
         func: this.toggleSidebarCollapse.bind(this),
         required: true,
-        statebind: "root.ui.sidebarCollapse",
+        statebind: "root.ui.buttons.sidebarCollapse",
         statebindfunc: this.setSidebarCollapse.bind(this),
         ignoreSize: true
       },
