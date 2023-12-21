@@ -240,7 +240,7 @@ export class TreeMenu extends BaseComponent {
       existing.byDataSources.push(item);
     } else {
       //create a new item group
-      folder.children.push({ id: id, concept_type: item.concept_type, type: "indicator", byDataSources: [item] });
+      folder.children.push({ id: id, concept_type: item.concept_type, type: "indicator", scales: item.scales, byDataSources: [item] });
     }
     return folder;
   }
@@ -276,7 +276,8 @@ export class TreeMenu extends BaseComponent {
           spaces,
           name: concept.name || concept.concept,
           name_catalog: concept.name_catalog,
-          description: concept.description
+          description: concept.description,
+          scales: concept.scales ? JSON.parse(concept.scales) : null
         };
 
         if (concept.concept_type == "time" || concept.concept == "_default"){
@@ -671,23 +672,18 @@ export class TreeMenu extends BaseComponent {
       if (!allowedTypes || !allowedTypes.length || allowedTypes[0] == "*") return true;
       
       //match specific scale types if defined
-      const indicatorScales = JSON.parse(concept.scales || null);
-      if(indicatorScales) {
-        for (let i = indicatorScales.length - 1; i >= 0; i--) {
-          if (allowedTypes.includes(indicatorScales[i])) return true;
-        }
-      }
+      if(concept.scales) return !!d3.intersection(allowedTypes, concept.scales).size;
 
       //otherwise go by concept types
       const ctype = concept.concept_type;
 
       return 0
-        // for constants need linear scale
+        // for constants need ordinal or point scale
         || d3.intersection(allowedTypes, ["ordinal", "point"]).size && concept.id === "_default"
         //for entities, strings need an ordinal or rank scale to be allowed
         || d3.intersection(allowedTypes, ["ordinal", "rank"]).size && ["entity_domain", "entity_set", "string"].includes(ctype) 
         // for measures need linear or log or something
-        || ctype === "measure" && d3.intersection(allowedTypes, ["linear", "log", "genericLog", "pow"]).size 
+        || d3.intersection(allowedTypes, ["linear", "log", "genericLog", "pow"]).size && ["measure"].includes(ctype)
         // special case for time
         || (ctype === "time" && allowedTypes.includes("time"));
     };
