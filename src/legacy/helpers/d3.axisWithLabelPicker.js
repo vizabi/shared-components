@@ -95,7 +95,7 @@ export default function axisSmart(_orient) {
 
           const view = d3.select(this);
           view.attr("transform", "rotate(" + (axis.pivot() ? -90 : 0) + ")");
-          view.style("text-anchor", dimension == X ? "middle" : "end");
+          view.style("text-anchor", options.textAnchor || (dimension == X ? "middle" : "end"));
           view.attr("x", dimension == X ? (orient == VERTICAL ? -padding : 0) : -padding);
           view.attr("y", dimension == X ? (orient == VERTICAL ? 0 : padding) : 0);
           view.attr("dx", dimension == X ? (orient == VERTICAL ? padding : 0) : 0);
