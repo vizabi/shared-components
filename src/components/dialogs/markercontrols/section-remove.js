@@ -58,6 +58,7 @@ class SectionRemove extends MarkerControlsSection {
         });
 
       this.catalog = [...this.parent.markersData.values(), ...markersFromIn];
+      this.search();
     });
 
   }

@@ -278,7 +278,7 @@ class SectionSlice extends MarkerControlsSection {
         }else{
 
           DOM.concept
-            .text(concept.concept?.name);
+            .text(concept?.concept?.name || encoding.data.concept);
           DOM.spaceCurrent
             .text("current space: " + encoding.data.space.join() + (isSpaceSet? " (set)" : " (inherited)") );
           
@@ -344,7 +344,7 @@ class SectionSlice extends MarkerControlsSection {
   }
 
   getSpaceCompatibilityStatus(encoding, space){
-    const spaces = this.concepts.find(f => f.concept.concept == encoding.data.concept)?.spaces;
+    const spaces = this.concepts.find(f => f.concept.concept == encoding.data.concept)?.spaces || [];
 
     if (!space) return {status: true, spaces: []};
     if (encoding.data.isConstant) return {status: "constant"};

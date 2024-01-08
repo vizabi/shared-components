@@ -58,7 +58,7 @@ class SectionSwitch extends MarkerControlsSection {
               dim, 
               concept, 
               concept_type: this.model.data.source.getConcept(concept).concept_type, 
-              name: this.model.data.source.getConcept(concept).name, 
+              name: this.model.data.source.getConcept(concept).name || concept, 
               availabilitySize: getAvailabilitySize(concept, dim, this.model.data.source.getConcept(concept).concept_type)
             }))
             .concat({
