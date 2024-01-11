@@ -74,13 +74,19 @@ class _MarkerControls extends Dialog {
     },{
       type: SectionRemove,
       placeholder: ".vzb-remove"
-    },{
-      type: SectionSwitch,
-      placeholder: ".vzb-switch"
-    },{
-      type: SectionSlice,
-      placeholder: ".vzb-slice"
     }];
+    
+    if (!config.default_ui.disableSwitch)
+      config.subcomponents.push({
+        type: SectionSwitch,
+        placeholder: ".vzb-switch"
+      });
+      
+    if (!config.default_ui.disableSlice)
+      config.subcomponents.push({
+        type: SectionSlice,
+        placeholder: ".vzb-slice"
+      });
 
     super(config);
   }
@@ -197,8 +203,8 @@ class _MarkerControls extends Dialog {
     const globalExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,5);
     const sectionFindRemoveExample = this.findChild({type: "SectionFind"}).example().toLowerCase().substr(0,7) + "...";
     const sectionAddExample = this.findChild({type: "SectionAdd"}).example().toLowerCase().substr(0,7) + "...";
-    const sectionSwitchExample = this.findChild({type: "SectionSwitch"}).example().toLowerCase();
-    const sectionSliceExample = this.findChild({type: "SectionSlice"}).example().toLowerCase();
+    const sectionSwitchExample = this.findChild({type: "SectionSwitch"})?.example?.().toLowerCase();
+    const sectionSliceExample = this.findChild({type: "SectionSlice"})?.example?.().toLowerCase();
     const infoHints = [
       {text: "Examples and tips", instruction: true},
       {text: "Search in all commands like so:", instruction: true},
@@ -209,7 +215,7 @@ class _MarkerControls extends Dialog {
       {icon: "❌", action: "remove", example: sectionFindRemoveExample},
       {icon: "➡️", action: "switch", example: sectionSwitchExample},
       {icon: "🧩", action: "slice", example: sectionSliceExample},
-    ];
+    ].filter(v => !v.icon || v.example);
     
     
 
@@ -283,7 +289,8 @@ class _MarkerControls extends Dialog {
 }
 
 _MarkerControls.DEFAULT_UI = {
-  
+  "disableSwitch": false,
+  "disableSlice": false
 };
 
 const MarkerControls = decorate(_MarkerControls, {
