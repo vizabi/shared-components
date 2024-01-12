@@ -97,6 +97,13 @@ class SectionFind extends MarkerControlsSection {
       .on("mouseout", (event, d) => {
         if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
       });
+
+    listItem.append("span")
+      .attr("class", "vzb-closecross")
+      .text("✖️")
+      .on("click", (event, d) => {
+        this.parent.findChild({type: "SectionRemove"}).setModel(d);
+      });
   }
 
   updatemissingDataForFrame() {

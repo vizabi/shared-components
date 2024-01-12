@@ -83,19 +83,22 @@ class SectionRemove extends MarkerControlsSection {
         return d.name;
       })
       .on("click", (event, d) => {
-        const dim = this.dim;
-        const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
-
-        if (dimOrIn.includes(d[KEY])) {
-          this.model.data.filter.deleteFromDimensionsAllINstatements(d);
-        } else {
-          this.model.data.filter.addToDimensionsFirstINstatement(d, [dim, dim, "$nin"]);
-        }
-        
+        this.setModel(d);        
         this.concludeSearch();
       });
 
     this.showHideHeader(matches.length);
+  }
+
+  setModel(d){
+    const dim = this.dim;
+    const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
+
+    if (dimOrIn.includes(d[KEY])) {
+      this.model.data.filter.deleteFromDimensionsAllINstatements(d);
+    } else {
+      this.model.data.filter.addToDimensionsFirstINstatement(d, [dim, dim, "$nin"]);
+    }
   }
 
 }

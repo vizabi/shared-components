@@ -211,7 +211,7 @@ class _MarkerControls extends Dialog {
       {action: globalExample, ellipsis: "..."},
       {text: "or use a specific command:", instruction: true},
       {icon: "👀", action: "find", example: sectionFindRemoveExample},
-      {icon: "❇️", action: "add", example: sectionAddExample},
+      {icon: "➕", action: "add", example: sectionAddExample},
       {icon: "❌", action: "remove", example: sectionFindRemoveExample},
       {icon: "➡️", action: "switch", example: sectionSwitchExample},
       {icon: "🧩", action: "slice", example: sectionSliceExample},
