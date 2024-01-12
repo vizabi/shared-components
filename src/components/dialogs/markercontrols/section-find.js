@@ -73,6 +73,8 @@ class SectionFind extends MarkerControlsSection {
       .join("div")
       .attr("class", "vzb-item vzb-dialog-checkbox")
       .call(this._createListItem.bind(this));
+
+    this._selectDataPoints();
   }
 
   _createListItem(listItem) {
@@ -102,6 +104,8 @@ class SectionFind extends MarkerControlsSection {
       .attr("class", "vzb-closecross")
       .text("✖️")
       .on("click", (event, d) => {
+        if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
+        this.MDL.selected.data.filter.delete(d);
         this.parent.findChild({type: "SectionRemove"}).setModel(d);
       });
   }
