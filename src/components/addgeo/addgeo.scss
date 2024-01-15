@@ -5,65 +5,18 @@
     position: absolute;
     z-index: 5;
 
-    .vzb-addgeo-background {
-      //position: absolute;
-      background-color: $vzb-color-grey-lightest;
-      opacity: 0.4;
-      width: 100vw;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-    }
     .vzb-addgeo-button {
       &:hover {
         text-decoration: underline;
       }
       &::before {
-        content: "❇️";
+        content: "➕";
         margin: 0.2em;
       }
       position: absolute;
       cursor: pointer;
       color: $vzb-color-primary-darkest;
       right: 0px;
-    }
-    input[type=text],
-    input[type=search] {
-      @extend %vzb-input-text-and-search;
-    }
-
-    input[type=search] {
-      @extend %vzb-input-search;
-      max-width: 200px;
-      position: relative;
-    }
-    ul {
-      background: white;
-      position: absolute;
-      list-style-type: none;
-      padding: 0px 10px 10px 10px;
-      margin-top: 0px;
-      border-radius: 4px;
-      border: 1px solid $vzb-color-grey-light;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-    li {
-      cursor: pointer;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      .vzb-dialog-isness {
-        font-size: $vzb-font-size-tiny;
-        background-color: $vzb-color-accent-yellow;
-        border: 1px solid $vzb-color-grey-light;
-        border-radius: 2px;
-        padding: 1px 3px 1px 3px;
-        margin-left: 4px;
-      }
-      &:hover {
-          background-color: $vzb-color-grey-light;
-      }
     }
   }
 
@@ -85,10 +38,6 @@
     .vzb-addgeo{
       .vzb-addgeo-button{
         font-size: $vzb-font-size-small;
-      }
-      ul {
-        right: 0px;
-        max-width: 90vw;
       }
     }
   }

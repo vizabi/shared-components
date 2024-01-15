@@ -1,19 +1,12 @@
-
-
 import { BaseComponent } from "../base-component";
-import * as Utils from "../../utils.js"; 
-import {decorate, computed, toJS} from "mobx";
-import * as d3 from "d3";
+import { decorate } from "mobx";
 
 import "./addgeo.scss";
 export class _AddGeo extends BaseComponent {
 
   constructor(config){
     config.template = `
-      <div class="vzb-addgeo-background vzb-hidden"></div>
       <div class="vzb-addgeo-button"></div>
-      <input class="vzb-addgeo-searchbox vzb-hidden" type="search" required="" placeholder="Search...">
-      <ul class="vzb-addgeo-matches vzb-hidden"></ul>
       </div>
     `;
     config.subcomponents = [];
@@ -25,33 +18,30 @@ export class _AddGeo extends BaseComponent {
     const _this = this;
 
     this.DOM = {
-      background: this.element.select(".vzb-addgeo-background"),
       button: this.element.select(".vzb-addgeo-button"),
-      searchbox: this.element.select(".vzb-addgeo-searchbox"),
-      matches: this.element.select(".vzb-addgeo-matches")
     };
 
-    this.catalog = [];
-    this.entitySetsColorScale = d3.scaleOrdinal(d3.schemePastel2);
-    this.element.classed("vzb-hidden", true);
-
     this.DOM.button.on("click", () => {
-      _this.DOM.searchbox.classed("vzb-hidden", false).node().focus();
-      _this.DOM.background.classed("vzb-hidden", false);
-      _this.root.children.forEach(c => {
-        c.element.classed("vzb-blur", c != _this);
-      });
-    });
+      const markerControls = _this.root
+        .findChild({name: "markercontrols"});
+      if (!markerControls) return;      
 
-    this.DOM.searchbox.on("keyup", function(event){
-      _this.search(this.value);
-      if(event.key === "Escape") {
-        _this.cancelSearch();
+      if ((_this.root.services.layout.profile !== "LARGE" || _this.root
+        .findChild({name: "buttons"}).ui.sidebarCollapse) && !markerControls.isOpen)
+      {
+        markerControls.parent.toggleDialogOpen("markercontrols");
       }
-    });
 
-    this.DOM.background.on("click", () => {
-      this.cancelSearch();
+      markerControls.element.select(".vzb-search").each(function() {
+        this.value = "add ";
+        this.dispatchEvent(new Event("input"));
+        const _this = this;
+        setTimeout(()=> {
+          _this.setSelectionRange(_this.value.length, _this.value.length);
+          _this.focus();
+        }, 250);
+      });
+            
     });
 
     this.PROFILE_CONSTANTS = options.PROFILE_CONSTANTS;
@@ -62,15 +52,12 @@ export class _AddGeo extends BaseComponent {
 
   draw(){
     this.localise = this.services.locale.auto();
-    this.addReaction(this.buildList);
     this.addReaction(this.updateSize);
     this.addReaction(this.redraw);
   }
   
   redraw(){
-    this.element.classed("vzb-hidden", this.activePreset.mode !== "show");
     this.DOM.button.text(this.localise("buttons/addgeo"));
-    this.DOM.searchbox.attr("placeholder", this.localise("buttons/addgeo"));
   }
 
 
@@ -91,72 +78,7 @@ export class _AddGeo extends BaseComponent {
     this.element.style("right", this.xAlign == "right" ? margin.right + (dx||0) + "px" : null);
   }
 
-  get activePreset(){
-    const PRESETS = toJS(this.root.model.config.presets);
-
-    PRESETS.flat().forEach(p => {
-      p.score = Utils.computeObjectsSimilarityScore(p.config, toJS(this.model.config), "is--"); 
-    });
-    const topScore = d3.max(PRESETS.flat(), d => d.score);
-    return PRESETS.flat().find(f => f.score === topScore);
-  }
-
-  buildList(){
-    this.model.data.spaceCatalog.then(spaceCatalog => {
-      for (const dim in spaceCatalog) {
-        const filterSpec = this.model.encoding.show.data.filter.dimensions[dim];
-        if (spaceCatalog[dim].entities) this.catalog = [...spaceCatalog[dim].entities.filter(filterSpec).values()];
-      }
-    });
-  }
-
-  cancelSearch(){
-    this.DOM.searchbox.classed("vzb-hidden", true);
-    this.DOM.searchbox.node().value = "";
-    this.DOM.matches.selectAll("li").remove();
-    this.DOM.matches.classed("vzb-hidden", true);
-    this.DOM.background.classed("vzb-hidden", true);
-
-    this.root.children.forEach(c => {
-      c.element.classed("vzb-blur", false);
-    });
-  }
-
-  search(string){
-    if(!string || string.length < 3) {
-      this.DOM.matches.selectAll("li").remove();
-      this.DOM.matches.classed("vzb-hidden", true);
-      return;
-    }
-
-    const matches = this.catalog.filter(f => f.name.toLowerCase().trim().includes(string.toLowerCase().trim()) || f[Symbol.for("key")].includes(string.toLowerCase().trim()))
-      .map(d => {
-        d.isness = Object.keys(d).filter(f => f.includes("is--") && d[f]).map(m => {
-          return {
-            id: m,
-            name: this.model.data.source.getConcept(m.replace("is--",""))?.name
-          };
-        });
-        return d;
-      })
-      .sort((x, y) => d3.ascending(x.isness.map(k => k.id).join(), y.isness.map(k => k.id).join()));
-    
-    this.DOM.matches.classed("vzb-hidden", !matches.length);
-    this.DOM.matches.selectAll("li").remove();
-    this.DOM.matches.selectAll("li")
-      .data(matches)
-      .enter().append("li")
-      .html((d) => {
-        return d.name + d.isness.map(m => `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale(m.id)}">${m.name}</span>`).join("");
-      })
-      .on("click", (event, d) => {
-        this.model.data.filter.addToDimensionsFirstINstatement(d, this.activePreset.loosePath);
-        this.cancelSearch();
-      });
-  }
-
 }
 
 export const AddGeo = decorate(_AddGeo, {
-  "activePreset": computed
 });
