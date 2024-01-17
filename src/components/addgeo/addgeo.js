@@ -1,5 +1,6 @@
 import { BaseComponent } from "../base-component";
 import { decorate } from "mobx";
+import * as d3 from "d3";
 
 import "./addgeo.scss";
 export class _AddGeo extends BaseComponent {
@@ -36,6 +37,9 @@ export class _AddGeo extends BaseComponent {
         this.value = "add ";
         this.dispatchEvent(new Event("input"));
         const _this = this;
+        d3.select(this).style("background", "lightgreen")
+          .transition().duration(1000).ease(d3.easeCubicOut)
+          .style("background", "#fff");
         setTimeout(()=> {
           _this.setSelectionRange(_this.value.length, _this.value.length);
           _this.focus();
