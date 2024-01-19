@@ -134,6 +134,10 @@
         }
       }
 
+      .vzb-list .vzb-subset { 
+        margin-left: 20px;
+      }
+
       &:not(.vzb-fullscreenish) .vzb-slice .vzb-list .vzb-item{
         input {
           display: none;
