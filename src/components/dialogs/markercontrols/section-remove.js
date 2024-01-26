@@ -104,7 +104,7 @@ class SectionRemove extends MarkerControlsSection {
         }
       }
 
-      this.allCatalog = allCatalog;
+      if(!this.parent.ui.disableAddRemoveGroups) this.allCatalog = allCatalog;
       this.search();
     });
 

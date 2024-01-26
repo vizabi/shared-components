@@ -84,7 +84,7 @@ class SectionAdd extends MarkerControlsSection {
               !dimOrIn.includes(f[Symbol.for("key")]);
           }));
 
-          allCatalog.push(...entities
+          if(!this.parent.ui.disableAddRemoveGroups) allCatalog.push(...entities
             .reduce((result, entity) => {
               const props = entity.isness.filter(d => d.isProp);
               if (props.length) {
