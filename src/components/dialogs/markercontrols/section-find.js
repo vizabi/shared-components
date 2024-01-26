@@ -67,12 +67,12 @@ class SectionFind extends MarkerControlsSection {
       .concat(this.entitiesWithMissingData)
       .toSorted((a, b) => (a.name < b.name) ? -1 : 1);
 
-    const principalDimension = this.model.data.space[0];
-    data = d3.groups(data, d =>d[principalDimension])
+    const primaryDimension = this.parent.ui.primaryDim ? this.parent.ui.primaryDim : this.model.data.space[0];
+    data = d3.groups(data, d =>d[primaryDimension])
       .map(([key, children]) => ({
         [KEY]: key, 
         children, 
-        name: children[0].label[principalDimension], 
+        name: children[0].label[primaryDimension], 
         missingData: children.every(child => child.missingData)
       }));
   

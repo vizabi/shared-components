@@ -289,7 +289,9 @@ class _MarkerControls extends Dialog {
 
   get dimMarkersData() {
     const data = new Map();
-    const space = this.model.data.space.filter(f => f !== this.model.encoding.frame.data.concept);
+    const space = this.ui.primaryDim 
+      ? [this.ui.primaryDim] 
+      : this.model.data.space.filter(f => f !== this.model.encoding.frame.data.concept);
     space.forEach(dim => {
       this.markersData.forEach(valuesObj => {
         const key = "" + valuesObj[dim];

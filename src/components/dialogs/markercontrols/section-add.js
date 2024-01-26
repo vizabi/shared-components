@@ -44,6 +44,8 @@ class SectionAdd extends MarkerControlsSection {
       const catalog = [];
       const allCatalog = [];
       for (const dim in spaceCatalog) {
+        if(this.parent.ui.primaryDim && dim !== this.parent.ui.primaryDim) continue;
+
         const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
         const dimOr = this.model.data.filter.dimensions?.[dim]?.$or?.[0];
         const dimOrInEntityKeys = [];
