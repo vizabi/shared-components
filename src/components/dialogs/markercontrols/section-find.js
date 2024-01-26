@@ -14,6 +14,7 @@ class SectionFind extends MarkerControlsSection {
     super.setup(options);
     this.DOM.title.text("Find");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
+    this.listReady = false;
     this.entitiesWithMissingData = [];
   }
 
@@ -22,8 +23,8 @@ class SectionFind extends MarkerControlsSection {
 
     this.addReaction(this.createList);
     this.addReaction(this.updatemissingDataForFrame);
-    this.addReaction(this._selectDataPoints);
-    this.addReaction(this.getEntitiesWithMissingData);
+    this.addReaction(this.updateSelection);
+    this.addReaction(this.getEntitiesDeliberatelyAddedInFilterButMissingData);
   }
 
   get MDL() {
@@ -34,7 +35,7 @@ class SectionFind extends MarkerControlsSection {
     };
   }
 
-  getEntitiesWithMissingData() {
+  getEntitiesDeliberatelyAddedInFilterButMissingData() {
     const entitiesWithMissingData = [];
     this.model.data.spaceCatalog.then(spaceCatalog => {
       for (const dim in spaceCatalog) {
@@ -61,62 +62,97 @@ class SectionFind extends MarkerControlsSection {
   }
 
   createList() {
-    const list = this.DOM.list;
+    this.listReady = false;
+    let data = [...this.parent.markersData.values()]
+      .concat(this.entitiesWithMissingData)
+      .toSorted((a, b) => (a.name < b.name) ? -1 : 1);
 
-    const data = [...this.parent.markersData.values()].concat(this.entitiesWithMissingData);
+    const primaryDimension = this.parent.ui.primaryDim ? this.parent.ui.primaryDim : this.model.data.space[0];
+    data = d3.groups(data, d =>d[primaryDimension])
+      .map(([key, children]) => ({
+        [KEY]: key, 
+        children, 
+        name: children[0].label[primaryDimension], 
+        missingData: children.every(child => child.missingData)
+      }));
+  
+    const list = this.DOM.list.text("");
 
-    //sort data alphabetically
-    data.sort((a, b) => (a.name < b.name) ? -1 : 1);
-
-    this.DOM.listItems = list.text("").selectAll("div")
-      .data(data, function(d) { return d[KEY]; })
+    this.DOM.listItems = list.selectAll("div")
+      .data(data, d => d[KEY] )
       .join("div")
       .attr("class", "vzb-item vzb-dialog-checkbox")
-      .call(this._createListItem.bind(this));
+      .call(this._createListItem.bind(this, data.length));
 
-    this._selectDataPoints();
+    this.listReady = true;
   }
 
-  _createListItem(listItem) {
+  _createListItem(dataLength, listItem) {
+
     listItem.append("input")
       .attr("type", "checkbox")
-      .attr("id", (d, i) => "-find-" + i + "-" + this.id)
+      .classed("vzb-hidden", this.parent.ui.disableFindInteractions)
+      .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
-        //clear highlight so it doesn't get in the way when selecting an entity
-        if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
-        this.MDL.selected.data.filter.toggle(d);
-        //this.DOM.panelFind.node().scrollTop = 0;
-        //return to highlighted state
-        if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
+        if(this.parent.ui.disableFindInteractions) return;
+        this.setModel.select(d);
+        this.parent.DOM.content.node().scrollTop = 0;
+        this.parent._clearSearch();
+        this.parent.updateSearch();
       });
 
     listItem.append("label")
-      .attr("for", (d, i) => "-find-" + i + "-" + this.id)
-      .text(d => d.name)
+      .attr("for", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("mouseover", (event, d) => {
-        if (!utils.isTouchDevice() && !d.missingDataForFrame) this.MDL.highlighted.data.filter.set(d);
+        if (utils.isTouchDevice()) return;
+        if(this.parent.ui.disableFindInteractions) return;
+        this.setModel.highlight(d);
       })
       .on("mouseout", (event, d) => {
-        if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
+        if (utils.isTouchDevice()) return;
+        if(this.parent.ui.disableFindInteractions) return;
+        this.setModel.unhighlight(d);
       });
 
     listItem.append("span")
       .attr("class", "vzb-closecross")
       .text("✖️")
+      .classed("vzb-hidden", dataLength === 1)
       .on("click", (event, d) => {
-        if (!utils.isTouchDevice()) this.MDL.highlighted.data.filter.delete(d);
-        this.MDL.selected.data.filter.delete(d);
-        this.parent.findChild({type: "SectionRemove"}).setModel(d);
+        this.setModel.unhighlight(d);
+        this.setModel.deselect(d);
+        const principalDimension = this.model.data.space[0];
+        this.parent.findChild({type: "SectionRemove"}).setModel(Object.assign({}, d, {prop: principalDimension, dim: principalDimension}));
+        this.parent._clearSearch();
+        this.parent.updateSearch();
       });
   }
 
+  setModel = {
+    select: (d) => {
+      if (d.missingData) return;
+      runInAction(() => d.children.forEach(child => this.MDL.selected.data.filter.toggle(child)));
+    },
+    deselect: (d) => {
+      runInAction(() => d.children.forEach(child => this.MDL.selected.data.filter.delete(child)));
+    },
+    highlight: (d) => {
+      if (d.missingDataForFrame || d.missingData) return;
+      runInAction(() => d.children.forEach(child => this.MDL.highlighted.data.filter.set(child)));
+    },
+    unhighlight: (d) => {
+      runInAction(() => d.children.forEach(child => this.MDL.highlighted.data.filter.delete(child)));
+    },
+  }
+
   updatemissingDataForFrame() {
+    if(!this.listReady) return;
     this.entitiesWithMissingData;
     const currentDataMap = this.model.dataMap;
     const listItems = this.DOM.listItems;
 
     listItems.data().forEach(d => {
-      d.missingDataForFrame = !currentDataMap.hasByStr(d[KEY]) && !d.missingData;
+      d.missingDataForFrame = !d.missingData && d.children.every(child => !currentDataMap.hasByStr(child[KEY]));
     });
 
     const frame = this.localise(this.MDL.frame.value);
@@ -134,7 +170,8 @@ class SectionFind extends MarkerControlsSection {
     return randomItem.name;
   }
 
-  _selectDataPoints() {
+  updateSelection() {
+    if(!this.listReady) return;
     const selected = this.MDL.selected.data.filter;
     this.DOM.listItems.order().select("input")
       .property("checked", function(d) {
@@ -150,18 +187,20 @@ class SectionFind extends MarkerControlsSection {
   }
 
   updateSearch(text = "") {
+    if(!this.listReady) return;
     let hiddenItems = 0;
+
     const items = this.DOM.list.selectAll(".vzb-item")
       .classed("vzb-hidden", d => {
-        const hide = !(d.name || "").toString().toLowerCase().includes(text);
-        hiddenItems += hide;
+        const hide = text && !(d.name || "").toString().toLowerCase().includes(text);
+        hiddenItems += +hide;
         return hide;
       });
     this.showHideHeader(items.size() - hiddenItems);
   }
 
   getListItemCount() {
-    return this.DOM.list.selectAll(".vzb-item").size();
+    return this.DOM.list.selectAll(".vzb-item:not(.vzb-hidden)").size();
   }
 
   concludeSearch(text = "") {
@@ -179,7 +218,8 @@ class SectionFind extends MarkerControlsSection {
 
 const decorated = decorate(SectionFind, {
   "MDL": computed,
-  "entitiesWithMissingData": observable
+  "entitiesWithMissingData": observable,
+  "listReady": observable
 });
 
 export {decorated as SectionFind};

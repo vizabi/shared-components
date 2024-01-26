@@ -277,6 +277,12 @@ $vzb-dialog-content-height: 250px;
         input[type=checkbox]:checked + label::after {
           @include opacity(1);
         }
+
+        input[type=checkbox].vzb-hidden + label {
+          cursor: default;
+          text-indent: 0px;
+          &::before, &::after {display: none}
+        }
       }
 
       &.notransition {

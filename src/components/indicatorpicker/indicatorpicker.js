@@ -87,7 +87,7 @@ export class IndicatorPicker extends BaseComponent {
         const constant = this.MDL.model.data.constant;
         const scaleModelType = this.MDL.model.scale.config.modelType;
         selectText = this.localise("indicator/" + constant + (scaleModelType ? "/" + scaleModelType : ""));
-      } else if (this.showHoverValues && this.MDL.highlighted.data.filter.any() && !this.MDL.model.scale.isPattern) {
+      } else if (this.showHoverValues && this.MDL.highlighted.data.filter.markers.size === 1 && !this.MDL.model.scale.isPattern) {
         const highlightedMarkers = this.MDL.highlighted.data.filter.markers;
         const [key, payload] = highlightedMarkers.entries().next().value;
         const hoverKey = (this.model.dataMap.getByStr(key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
