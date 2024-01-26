@@ -82,17 +82,19 @@ class SectionFind extends MarkerControlsSection {
       .data(data, d => d[KEY] )
       .join("div")
       .attr("class", "vzb-item vzb-dialog-checkbox")
-      .call(this._createListItem.bind(this));
+      .call(this._createListItem.bind(this, data.length));
 
     this.listReady = true;
   }
 
-  _createListItem(listItem) {
+  _createListItem(dataLength, listItem) {
 
     listItem.append("input")
       .attr("type", "checkbox")
+      .classed("vzb-hidden", this.parent.ui.disableFindInteractions)
       .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
+        if(this.parent.ui.disableFindInteractions) return;
         this.setModel.select(d);
         this.parent.DOM.content.node().scrollTop = 0;
         this.parent._clearSearch();
@@ -103,16 +105,19 @@ class SectionFind extends MarkerControlsSection {
       .attr("for", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("mouseover", (event, d) => {
         if (utils.isTouchDevice()) return;
+        if(this.parent.ui.disableFindInteractions) return;
         this.setModel.highlight(d);
       })
       .on("mouseout", (event, d) => {
         if (utils.isTouchDevice()) return;
+        if(this.parent.ui.disableFindInteractions) return;
         this.setModel.unhighlight(d);
       });
 
     listItem.append("span")
       .attr("class", "vzb-closecross")
       .text("✖️")
+      .classed("vzb-hidden", dataLength === 1)
       .on("click", (event, d) => {
         this.setModel.unhighlight(d);
         this.setModel.deselect(d);
