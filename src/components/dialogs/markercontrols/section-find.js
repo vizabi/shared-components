@@ -91,7 +91,6 @@ class SectionFind extends MarkerControlsSection {
 
     listItem.append("input")
       .attr("type", "checkbox")
-      .classed("vzb-hidden", this.parent.ui.disableFindInteractions)
       .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
         if(this.parent.ui.disableFindInteractions) return;
@@ -102,6 +101,7 @@ class SectionFind extends MarkerControlsSection {
       });
 
     listItem.append("label")
+      .classed("vzb-disabled", this.parent.ui.disableFindInteractions)
       .attr("for", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("mouseover", (event, d) => {
         if (utils.isTouchDevice()) return;
