@@ -72,7 +72,7 @@ class SectionFind extends MarkerControlsSection {
       .map(([key, children]) => ({
         [KEY]: key, 
         children, 
-        name: children[0].label[primaryDimension], 
+        name: children[0].label?.[primaryDimension] || children[0].name, 
         missingData: children.every(child => child.missingData)
       }));
   
