@@ -1,5 +1,5 @@
 import { MarkerControlsSection } from "./section.js";
-import { computed, decorate, toJS } from "mobx";
+import { decorate } from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
@@ -30,7 +30,7 @@ class SectionRemove extends MarkerControlsSection {
   }
 
   concludeSearch(text = "") {
-    this.search();
+    this.search(text);
   }
 
   _getKey(element, key, dim) {
@@ -48,7 +48,7 @@ class SectionRemove extends MarkerControlsSection {
           .filter(d => !dataKeys.includes(d))
           .map(d => {
             if (spaceCatalog[dim].entities && spaceCatalog[dim].entities.has(d)) {
-              const entity = spaceCatalog[dim].entities.get(d)
+              const entity = spaceCatalog[dim].entities.get(d);
               return ({
                 [KEY]: entity[KEY],
                 [dim]: entity[dim],
@@ -65,7 +65,7 @@ class SectionRemove extends MarkerControlsSection {
               dim
             });
           })
-        )
+        );
       }
 
       this.catalog = [...this.parent.dimMarkersData.values(), ...markersFromIn];
@@ -79,7 +79,7 @@ class SectionRemove extends MarkerControlsSection {
           if (dimFilter[key].$nin) {
             dimFilter[key].$nin.forEach(element => {
               dimNinEntities.push(this._getKey(element, key, dim));
-            })
+            });
           }
         }
         const dimProps = spaceCatalog[dim].properties;

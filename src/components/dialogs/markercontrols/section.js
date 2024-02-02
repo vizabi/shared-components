@@ -1,4 +1,3 @@
-import * as utils from "../../../legacy/base/utils.js";
 import { BaseComponent } from "../../base-component.js";
 
 export class MarkerControlsSection extends BaseComponent {

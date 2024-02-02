@@ -216,7 +216,7 @@ class SectionSlice extends MarkerControlsSection {
     const allRequiredAreInSubspace = this.model.requiredEncodings && this.model.requiredEncodings.length > 0 
       && encodingStatus.every(({enc, status}) => status.status === "subspaceAvailable" || !isRequired(enc));
 
-    const someActionRequired = encodingStatus.some(({enc, status}) => status.actionReqired)
+    const someActionRequired = encodingStatus.some(({status}) => status.actionReqired);
     const alreadyInSpace = proposedSpace?.space && spacesAreEqual(proposedSpace.space, this.model.data.space);
 
     this.DOM.actionSummary

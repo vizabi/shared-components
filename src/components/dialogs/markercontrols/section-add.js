@@ -1,4 +1,4 @@
-import { computed, decorate, toJS } from "mobx";
+import { decorate } from "mobx";
 import { MarkerControlsSection } from "./section.js";
 import * as utils from "../../../legacy/base/utils";
 import * as d3 from "d3";
@@ -32,7 +32,7 @@ class SectionAdd extends MarkerControlsSection {
   }
 
   concludeSearch(text = "") {
-    this.search();
+    this.search(text);
   }
 
   _getKey(element, key, dim) {
@@ -97,9 +97,9 @@ class SectionAdd extends MarkerControlsSection {
                       prop: prop.concept,
                       propName: prop.name,
                       dim
-                    })
+                    });
                   }
-                })
+                });
               }
               return result;
             }, []));

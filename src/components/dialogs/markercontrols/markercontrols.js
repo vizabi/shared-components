@@ -6,7 +6,7 @@ import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
 import { SectionSwitch } from "./section-switch.js";
 import { SectionSlice } from "./section-slice.js";
-import {computed, decorate, runInAction, _allowStateChangesInsideComputed} from "mobx";
+import {computed, decorate, runInAction} from "mobx";
 import { ICON_QUESTION } from "../../../icons/iconset.js";
 import * as d3 from "d3";
 
@@ -109,7 +109,7 @@ class _MarkerControls extends Dialog {
       const command = this.magicCommands.find(f => text === f || text.indexOf(f + " ") === 0) || false;
       const arg = command ? text.replace(command, "").trim() : text;
       return {command, arg};
-    }
+    };
     this._clearSearch = () => {this.DOM.input_search.node().value = "";};
 
 
@@ -187,7 +187,7 @@ class _MarkerControls extends Dialog {
     return this.element.classed("vzb-fullscreenish");
   }
 
-  concludeSearch({command, arg} = this._getSearchTerm()) {
+  concludeSearch({arg} = this._getSearchTerm()) {
     this.sections.forEach(section => section.concludeSearch(arg));
   }
 
@@ -259,9 +259,9 @@ class _MarkerControls extends Dialog {
 
     if (typeof d.label == "object") {
       return Object.entries(d.label)
-        .filter(([k, v]) => k != this.MDL.frame.data.concept)
+        .filter(([k]) => k != this.MDL.frame.data.concept)
         //sort parts of the name along the marker space array, so we get geo, gender instead of gender, geo
-        .sort(([ak, av], [bk, bv]) => markerSpace.indexOf(ak) - markerSpace.indexOf(bk))
+        .sort(([a], [b]) => markerSpace.indexOf(a) - markerSpace.indexOf(b))
         //add keys where values are numbers, such as "age: 69"
         .map(([k, v]) => utils.isNumber(v) ? k + ": " + v : v)
         .join(", ");
@@ -305,7 +305,7 @@ class _MarkerControls extends Dialog {
           });
         }
       });
-    })
+    });
     return data;
   }
 }

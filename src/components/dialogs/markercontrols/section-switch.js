@@ -1,9 +1,5 @@
-import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
-import { decorate, computed, runInAction, observable } from "mobx";
-import * as d3 from "d3";
-
-const KEY = Symbol.for("key");
+import { decorate, runInAction, observable } from "mobx";
 
 const ellipsis = (string, n)  => string.length > n ? string.substr(0, n) + "…" : string;
 

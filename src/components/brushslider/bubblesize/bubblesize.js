@@ -80,21 +80,19 @@ export class BubbleSize extends BrushSlider {
       .endAngle(1.5*Math.PI);
     this.DOM.sliderArcs.data(s)
       .attr("d", valueArc)
-      .attr("transform", d => "translate(0,0)");
+      .attr("transform", "translate(0,0)");
   }
 
   _updateLabels(s) {
     if (s) { this.DOM.sliderLabels.data(s); }
     const isRTL = this.services.locale.isRTL();
     this.DOM.sliderLabels
-      .attr("transform", (d, i) => {
-        const textMargin = { v: this.options.TEXT_PARAMS.TOP, h: this.options.TEXT_PARAMS.LEFT };
+      .attr("transform", (d) => {
         const dX = this.rescaler(d);
-        //const dX = textMargin.h * (i ? -0.5 : 1.0) + this.rescaler(d);
         const dY = 0;
         return "translate(" + ((isRTL ? -1 : 1) * dX) + "," + (dY) + ")";
       })
-      .attr("text-anchor", (d, i) => !isRTL && (d < this.__labelSideSwitchEdge) || isRTL && (d >= this.__labelSideSwitchEdge) ? "start" : "end")
+      .attr("text-anchor", (d) => !isRTL && (d < this.__labelSideSwitchEdge) || isRTL && (d >= this.__labelSideSwitchEdge) ? "start" : "end")
       .attr("dx", (d, i) => ((isRTL ? -1 : 1) * ((d < this.__labelSideSwitchEdge) ? i ? 0.3 : 0.1 : i ? -0.3 : -0.4 )) + "em");
   }
 
@@ -129,7 +127,7 @@ export class BubbleSize extends BrushSlider {
   }
 
   _setBrushExtent() {
-    return this.brush.extent([[this.rescaler.range()[0], 0], [this._getComponentWidth(), this._getComponentHeight()]])
+    return this.brush.extent([[this.rescaler.range()[0], 0], [this._getComponentWidth(), this._getComponentHeight()]]);
   }
 
   _updateRescaler() {

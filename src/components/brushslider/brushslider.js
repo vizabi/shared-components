@@ -234,7 +234,7 @@ class BrushSlider extends BaseComponent {
   }
 
   _setBrushExtent() {
-    return this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]])
+    return this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]);
   }
 
   _updateView() {
