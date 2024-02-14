@@ -95,6 +95,7 @@ class _MarkerControls extends Dialog {
     super.setup(options);
 
     this.DOM.input_search = this.element.select(".vzb-search");
+    this.DOM.searchForm = this.element.select("form");
     this.DOM.deselect_all = this.element.select(".vzb-deselect");
     this.DOM.opacity_nonselected = this.element.select(".vzb-dialog-bubbleopacity");
     this.DOM.title = this.element.select(".vzb-dialog-title");
@@ -125,7 +126,7 @@ class _MarkerControls extends Dialog {
       });
 
     //is this needed?
-    d3.select(this.DOM.input_search.node().parentNode)
+    this.DOM.searchForm
       .on("reset", () => {
         this._clearSearch();
         this.updateSearch();
@@ -164,13 +165,15 @@ class _MarkerControls extends Dialog {
   updateSearch({command, arg} = this._getSearchTerm()) {
     this.element.classed("vzb-clean-search", this.isCleanSearch()); 
     this.sections.forEach(section => {
-      section.hide( 0
-        // when using a specific command hide all irrelevant sections 
-        || command && section.magicCommand !== command 
-        // when clean search, keep only find
-        || !command && !arg && section.magicCommand !== "find" && section.magicCommand !== "add"
-        //hide section "and" when "find" had many items
-        || !command && !arg && section.magicCommand === "add" && this.sectionFind.getListItemCount() > 10
+      section.showHideSection( 0
+        //when clean search, keep "find" 
+        || !command && !arg && section.magicCommand === "find" 
+        //when clean search, keep invitationally "add" when "find" has few items
+        || !command && !arg && section.magicCommand === "add" && this.sectionFind.getListItemCount() < 10    
+        // show a specific section when using a command
+        || command && section.magicCommand === command 
+        // show all sections when searcing a global argument
+        || !command && arg
       );
       section.updateSearch(arg);
     });
@@ -207,7 +210,7 @@ class _MarkerControls extends Dialog {
     const sectionSliceExample = this.findChild({type: "SectionSlice"})?.example?.().toLowerCase();
     const infoHints = [
       {text: "Examples and tips", instruction: true},
-      {text: "Search in all commands like so:", instruction: true},
+      {text: "Search within all commands like so:", instruction: true},
       {action: globalExample, ellipsis: "..."},
       {text: "or use a specific command:", instruction: true},
       {icon: "👀", action: "find", example: sectionFindRemoveExample},
