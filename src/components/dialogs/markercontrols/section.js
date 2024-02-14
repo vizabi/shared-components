@@ -41,8 +41,8 @@ export class MarkerControlsSection extends BaseComponent {
     this.DOM.header.classed("vzb-hidden", !showHide);
   }
 
-  hide(arg) {
-    this.element.classed("vzb-hidden", arg);
+  showHideSection(showHide) {
+    this.element.classed("vzb-hidden", !showHide);
   }
 
   updateSearch() {
