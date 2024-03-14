@@ -148,14 +148,8 @@ class SectionSwitch extends MarkerControlsSection {
   }
 
   concludeSearch(text = "") {
-    runInAction(() => {
-      const data = [...this.parent.markersData.values()];
-      const filtered = data.filter(f => (f.name || "").toString().toLowerCase().includes(text));
-      if (filtered.length === 1) {
-        this.MDL.selected.data.filter.toggle(filtered[0]);
-        this.updateSearch();
-      }
-    });
+    const item = this.items.find(f => text && f.name.toString().toLowerCase().includes(text) && !this.isCurrentSetting(f));
+    if (item) this.setFilter(item);
   }
 
 }

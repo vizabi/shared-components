@@ -273,7 +273,7 @@ class _MarkerControls extends Dialog {
     return d[KEY];
   }
 
-  get markersData() {
+  get marksFromAllFrames() {
     const data = new Map();
     const space = this.model.data.space.filter(f => f !== this.model.encoding.frame.data.concept);
     this.model.getTransformedDataMap("filterRequired").each(frame => frame.forEach((valuesObj, key) => {
@@ -287,7 +287,7 @@ class _MarkerControls extends Dialog {
         data.set(key, newItem);
       }
     }));
-    return data;
+    return [...data.values()];
   }
 
   get dimMarkersData() {
@@ -296,7 +296,7 @@ class _MarkerControls extends Dialog {
       ? [this.ui.primaryDim] 
       : this.model.data.space.filter(f => f !== this.model.encoding.frame.data.concept);
     space.forEach(dim => {
-      this.markersData.forEach(valuesObj => {
+      this.marksFromAllFrames.forEach(valuesObj => {
         const key = "" + valuesObj[dim];
         if (!data.has(key)) {
           data.set(key, {
@@ -319,7 +319,7 @@ _MarkerControls.DEFAULT_UI = {
 };
 
 const MarkerControls = decorate(_MarkerControls, {
-  "markersData": computed,
+  "marksFromAllFrames": computed,
   "dimMarkersData": computed
 });
 

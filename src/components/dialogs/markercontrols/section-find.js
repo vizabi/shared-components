@@ -15,16 +15,16 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.title.text("Find");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.listReady = false;
-    this.entitiesWithMissingData = [];
+    this.entitiesWithMissingDataInAllFrames = [];
   }
 
   draw() {
     this.localise = this.services.locale.auto();
 
     this.addReaction(this.createList);
-    this.addReaction(this.updatemissingDataForFrame);
+    this.addReaction(this.updatemissingDataForCurrentFrame);
     this.addReaction(this.updateSelection);
-    this.addReaction(this.getEntitiesDeliberatelyAddedInFilterButMissingData);
+    this.addReaction(this.getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames);
   }
 
   get MDL() {
@@ -35,46 +35,56 @@ class SectionFind extends MarkerControlsSection {
     };
   }
 
-  getEntitiesDeliberatelyAddedInFilterButMissingData() {
-    const entitiesWithMissingData = [];
+  getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames() {
+    const entitiesWithMissingDataInAllFrames = [];
     this.model.data.spaceCatalog.then(spaceCatalog => {
-      for (const dim in spaceCatalog) {
-        const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
-        if (spaceCatalog[dim].entities) {
-          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
-          [...spaceCatalog[dim].entities.filter(filterSpec).values()].forEach(entity => {
-            if (dimOrIn.includes(entity[KEY]) && ![...this.parent.markersData.values()].some(s => s[dim] === entity[dim])) {
-              const push = {
-                [KEY]: entity[KEY],
-                [dim]: entity[dim], 
-                name: entity.name, 
-                missingData: true
-              };
-              entitiesWithMissingData.push(push);
-            }
-            
-          });
-        }
+      
+      //after we decided to make the list folded to first dimension only there is no need for multidimensionality
+      //otherwise here we would use: for (const dim in spaceCatalog) { instead of fixing dim to a constant
+      const dim = this._getPrimaryDim(); 
+      const filterSpecFromShow = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
+      if (spaceCatalog[dim].entities) {
+        const explicitlyAddedEntities = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
+        const allowedEntities = [...spaceCatalog[dim].entities.filter(filterSpecFromShow).values()];
+        allowedEntities.forEach(entity => {
+          if (explicitlyAddedEntities.includes(entity[KEY]) && !this.parent.marksFromAllFrames.some(s => s[dim] === entity[dim])) {
+            const push = {
+              [KEY]: entity[KEY],
+              [dim]: entity[dim], 
+              name: entity.name, 
+              missingData: true
+            };
+            entitiesWithMissingDataInAllFrames.push(push);
+          }
+          
+        });
       }
-
-      this.entitiesWithMissingData = entitiesWithMissingData;
+      this.entitiesWithMissingDataInAllFrames = entitiesWithMissingDataInAllFrames;
     });
   }
 
-  createList() {
-    this.listReady = false;
-    let data = [...this.parent.markersData.values()]
-      .concat(this.entitiesWithMissingData)
-      .toSorted((a, b) => (a.name < b.name) ? -1 : 1);
+  _getPrimaryDim() {
+    return this.parent.ui.primaryDim || this.model.data.space[0];
+  }
 
-    const primaryDimension = this.parent.ui.primaryDim ? this.parent.ui.primaryDim : this.model.data.space[0];
-    data = d3.groups(data, d =>d[primaryDimension])
+  _foldEntityListToPrimaryDimension(data) {
+    const primaryDimension = this._getPrimaryDim();
+    return d3.groups(data, d =>d[primaryDimension])
       .map(([key, children]) => ({
         [KEY]: key, 
         children, 
         name: children[0].label?.[primaryDimension] || children[0].name, 
         missingData: children.every(child => child.missingData)
       }));
+  }
+
+  createList() {
+    this.listReady = false;
+    const data = this._foldEntityListToPrimaryDimension(
+      this.parent.marksFromAllFrames
+        .concat(this.entitiesWithMissingDataInAllFrames)
+        .toSorted((a, b) => (a.name < b.name) ? -1 : 1)
+    );  
   
     const list = this.DOM.list.text("");
 
@@ -121,8 +131,8 @@ class SectionFind extends MarkerControlsSection {
       .on("click", (event, d) => {
         this.setModel.unhighlight(d);
         this.setModel.deselect(d);
-        const principalDimension = this.model.data.space[0];
-        this.parent.findChild({type: "SectionRemove"}).setModel(Object.assign({}, d, {prop: principalDimension, dim: principalDimension}));
+        const primaryDimension = this._getPrimaryDim();
+        this.parent.findChild({type: "SectionRemove"}).setModel(Object.assign({}, d, {prop: primaryDimension, dim: primaryDimension}));
         this.parent._clearSearch();
         this.parent.updateSearch();
       });
@@ -145,9 +155,9 @@ class SectionFind extends MarkerControlsSection {
     },
   }
 
-  updatemissingDataForFrame() {
+  updatemissingDataForCurrentFrame() {
     if(!this.listReady) return;
-    this.entitiesWithMissingData;
+    this.entitiesWithMissingDataInAllFrames;
     const currentDataMap = this.model.dataMap;
     const listItems = this.DOM.listItems;
 
@@ -165,7 +175,7 @@ class SectionFind extends MarkerControlsSection {
   }
 
   example() {
-    const data = [...this.parent.markersData.values()];
+    const data = this.parent.marksFromAllFrames;
     const randomItem = data[Math.floor(Math.random() * data.length)];
     return randomItem.name;
   }
@@ -205,7 +215,7 @@ class SectionFind extends MarkerControlsSection {
 
   concludeSearch(text = "") {
     runInAction(() => {
-      const data = [...this.parent.markersData.values()];
+      const data = this.parent.marksFromAllFrames;
       const filtered = data.filter(f => (f.name || "").toString().toLowerCase().includes(text));
       if (filtered.length === 1) {
         this.MDL.selected.data.filter.toggle(filtered[0]);
@@ -218,7 +228,7 @@ class SectionFind extends MarkerControlsSection {
 
 const decorated = decorate(SectionFind, {
   "MDL": computed,
-  "entitiesWithMissingData": observable,
+  "entitiesWithMissingDataInAllFrames": observable,
   "listReady": observable
 });
 
