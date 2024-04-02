@@ -285,7 +285,9 @@ class ColorLegend extends BaseComponent {
         filter.config.dimensions[colorSpace][concept] = d[concept];
       },
       clickToSelect(d) {
-        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
+        //experimentally removed this limitation, because discovered that the "string" concept property works too
+        //this is especially useful for CSV-only data because there are no entity props linking to other entities, just strings
+        // if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
         const concept = _this.MDL.color.data.concept;
         const colorMdlName = _this.MDL.color.name;
@@ -360,7 +362,9 @@ class ColorLegend extends BaseComponent {
     this.DOM.selectDialogTitle.text(d.name);
 
     this.DOM.selectAllButton
-      .classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
+      //experimentally removed this limitation, because discovered that the "string" concept property works too
+      //this is especially useful for CSV-only data because there are no entity props linking to other entities, just strings
+      //.classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
       .on("click", () => {
         this._interact().clickToSelect(d);
         this._closeSelectDialog();
