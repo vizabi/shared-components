@@ -565,11 +565,11 @@ export class ButtonList extends BaseComponent {
       if (space.includes(sideConcept)) {
         this.model.config.data.space = space.toSpliced(space.indexOf(sideConcept), 1);
         this.model.encoding.side.config.data.constant = "_default";
-        delete this.model.encoding.side.config.data.concept;
+        this.model.encoding.side.config.data.concept = null;
       } else {
         this.model.config.data.space = [...space, sideConcept];
         this.model.encoding.side.config.data.concept = sideConcept;
-        delete this.model.encoding.side.config.data.constant;
+        this.model.encoding.side.config.data.constant = null;
       }
     })
   }
