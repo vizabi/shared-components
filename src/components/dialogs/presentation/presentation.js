@@ -18,6 +18,7 @@ export class Presentation extends Dialog {
           <div class="vzb-time-background-switch"></div>
           <div class="vzb-titles-switch"></div>
           <div class="vzb-time-trails-switch"></div>
+          <div class="vzb-overhang-switch"></div>
           <div class="vzb-format-si-prefix-switch"></div>
         </div>
 
@@ -58,6 +59,13 @@ export class Presentation extends Dialog {
       placeholder: ".vzb-time-trails-switch",
       options: {
         checkbox: "timeInTrails",
+        submodel: "root.ui.chart"
+      }
+    }, {
+      type: SimpleCheckbox,
+      placeholder: ".vzb-overhang-switch",
+      options: {
+        checkbox: "overhang",
         submodel: "root.ui.chart"
       }
     }, {

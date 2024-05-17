@@ -1,6 +1,7 @@
 import * as utils from "../../legacy/base/utils";
 import * as iconset from "../../icons/iconset";
 import { BaseComponent } from "../base-component";
+import { runInAction } from "mobx";
 import "./buttonlist.scss";
 import * as d3 from "d3";
 
@@ -148,6 +149,14 @@ export class ButtonList extends BaseComponent {
       "side": {
         title: "buttons/side",
         icon: "side",
+        required: false
+      },
+      "sided": {
+        title: "buttons/sided",
+        icon: "side",
+        func: this.toggleSided.bind(this),
+        statebind: "root.model",
+        statebindfunc: this.setSided.bind(this),
         required: false
       },
       "_default": {
@@ -548,6 +557,28 @@ export class ButtonList extends BaseComponent {
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
 
     btn.classed(class_active_locked, this.root.ui.chart.inpercent);
+  }
+  toggleSided() {
+    const sideConcept = this.model.encoding.side.config.defaultConcept;
+    const space = this.model.data.space;
+    runInAction(() => {
+      if (space.includes(sideConcept)) {
+        this.model.config.data.space = space.toSpliced(space.indexOf(sideConcept), 1);
+        this.model.encoding.side.config.data.constant = "_default";
+        this.model.encoding.side.config.data.concept = null;
+      } else {
+        this.model.config.data.space = [...space, sideConcept];
+        this.model.encoding.side.config.data.concept = sideConcept;
+        this.model.encoding.side.config.data.constant = null;
+      }
+    })
+  }
+  setSided(model) {
+    const id = "sided";
+    const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
+    const sideConcept = this.model.encoding.side.config.defaultConcept;
+    const space = this.model.data.space;
+    btn.classed(class_active_locked, space.includes(sideConcept));
   }
   togglePresentationMode() {
     this.services.layout.projector = !this.services.layout.projector;
