@@ -1,6 +1,6 @@
 .vzb-dialogs {
   .vzb-dialogs-dialog {
-    &[data-dlg="colors"] {
+    &[data-dlg="colors"], &[data-dlg="mapcolors"] {
       .vzb-dialog-content {
         padding-left: 5px;
         padding-right: 5px;
@@ -92,7 +92,7 @@
   &.vzb-dialog-expand-true {
     .vzb-dialogs-dialog {
       &.vzb-sidebar {
-        &[data-dlg="colors"] {
+        &[data-dlg="colors"], &[data-dlg="mapcolors"]  {
           z-index: auto !important;
           flex: none;
 
