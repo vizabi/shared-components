@@ -53,6 +53,7 @@ export class ZoomButtonList extends BaseComponent {
         icon: "cursorHand",
         func: this.toggleCursorMode.bind(this),
         required: true,
+        hide: "root.ui.chart.panWithArrow",
         statebind: "root.ui.chart.cursorMode",
         statebindfunc: this.setCursorMode.bind(this)
       },
@@ -82,7 +83,12 @@ export class ZoomButtonList extends BaseComponent {
     });
 
     this._addButtons(Object.keys(this._available_buttons), []);
+    this.addReaction(this.updateHiding);
+  }
 
+  updateHiding(){
+    this.element.selectAll("button")
+      .classed("vzb-hidden", d => d.hide && utils.getProp(this, d.hide.split(".")) );
   }
 
   /*
