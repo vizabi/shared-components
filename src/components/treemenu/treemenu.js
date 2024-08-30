@@ -46,7 +46,7 @@ function getItemName(item){
 
 
 function resolveDefaultScales(concept) {
-  if (concept.scales) return JSON.parse(concept.scales);
+  if (concept.scales) return JSON.parse(concept.scales).map(m => m.trim());
   switch (concept.concept_type) {
   case "measure": return ["linear", "log"];
   case "string": return ["ordinal"];
@@ -277,7 +277,7 @@ export class TreeMenu extends BaseComponent {
           name: concept.name || concept.concept,
           name_catalog: concept.name_catalog,
           description: concept.description,
-          scales: concept.scales ? JSON.parse(concept.scales) : null
+          scales: concept.scales ? JSON.parse(concept.scales).map(m => m.trim()) : null
         };
 
         if (concept.concept_type == "time" || concept.concept == "_default"){
