@@ -16,13 +16,6 @@ function isTrailBubble(d){
   return !!d[Symbol.for("trailHeadKey")];
 }
 
-function euclideanColorDistance0to1(color1 = "#fff", color2 = "#fff"){
-  const {r: r1, g: g1, b: b1} = d3.color(color1);
-  const {r: r2, g: g2, b: b2} = d3.color(color2);
-  const max = 255, norm = Math.sqrt(3 * max ** 2);
-  return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)) / norm;
-}
-
 class ColorLegend extends BaseComponent {
   constructor(config) {
     config.template = `
@@ -188,11 +181,10 @@ class ColorLegend extends BaseComponent {
 
     colorOptions.each(function(d) {
       const cvalue = cScale(d[_this.which]);
-      const isTooBright = euclideanColorDistance0to1(cvalue, "#fff") < 0.3;
 
       d3.select(this).select(".vzb-cl-color-sample")
         .style("background-color", cvalue)
-        .style("border", `1px solid ${isTooBright ? "black" : cvalue}`);
+        .style("border", `1px solid black`);
       //Apply names to color legend entries if color is a property
       let label = d["name"];
       if (!label && label !== 0) label = d[_this.which];
