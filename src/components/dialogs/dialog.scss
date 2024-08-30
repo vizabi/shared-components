@@ -229,6 +229,7 @@ $vzb-dialog-content-height: 250px;
           &.vzb-find-item-missingDataForFrame .vzb-frame {
             color: $vzb-color-grey-light;
             text-decoration: line-through;
+            margin-left: 5px;
           }
 
           &.vzb-find-item-missingData {

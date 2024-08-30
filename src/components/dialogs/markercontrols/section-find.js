@@ -112,6 +112,11 @@ class SectionFind extends MarkerControlsSection {
         if (utils.isTouchDevice()) return;
         if(this.parent.ui.disableFindInteractions) return;
         this.setModel.unhighlight(d);
+      })
+      .each(function(){
+        const view = d3.select(this);
+        view.append("span").attr("class", "vzb-label");
+        view.append("span").attr("class", "vzb-frame");
       });
 
     listItem.append("span")
@@ -160,8 +165,14 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.listItems.select("label")
       .classed("vzb-find-item-missingDataForFrame", d => d.missingDataForFrame)
       .classed("vzb-find-item-missingData", d => d.missingData)
-      .html(d => d.missingDataForFrame ? `<span>${d.name}</span> <span class=vzb-frame>${frame}</span>` : d.name)
-      .attr("title", d => "key: " + d[KEY] + (d.missingDataForFrame ? ", " + noDataSubstr : ""));
+      .attr("title", d => "key: " + d[KEY] + (d.missingDataForFrame ? ", " + noDataSubstr : ""))
+      //the HTML parsing here takes a very long CPU time! instead the .each() is faster
+      //.html(d => d.missingDataForFrame ? `<span>${d.name}</span> <span class=vzb-frame>${frame}</span>` : d.name)
+      .each(function(d) {
+        const view = d3.select(this);
+        view.select(".vzb-label").text(d.name);
+        view.select(".vzb-frame").text(d.missingDataForFrame ? frame : "");
+      });
   }
 
   example() {
