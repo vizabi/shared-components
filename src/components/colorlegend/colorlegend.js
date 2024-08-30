@@ -143,7 +143,7 @@ class ColorLegend extends BaseComponent {
   }
 
   _getUniqueColorValuesInAllFramesThatShouldAppearInTheChart(){
-    const unique = new Set()
+    const unique = new Set();
     this.model.getTransformedDataMap("filterRequired")
       .each(frame => frame.forEach(e => unique.add(e[this.colorModelName]) ));
     return unique;

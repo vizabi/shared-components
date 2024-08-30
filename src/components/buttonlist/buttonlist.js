@@ -571,9 +571,9 @@ export class ButtonList extends BaseComponent {
         this.model.encoding.side.config.data.concept = sideConcept;
         this.model.encoding.side.config.data.constant = null;
       }
-    })
+    });
   }
-  setSided(model) {
+  setSided() {
     const id = "sided";
     const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
     const sideConcept = this.model.encoding.side.config.defaultConcept;
