@@ -91,11 +91,6 @@ export function getConceptNameMinusShortName(enc, localise) {
   return regexpResult[1] || regexpResult[0] || "";
 }
 
-export function getConceptUnit(enc) {
-  const cp = enc.data.conceptProps;
-  return cp && cp.unit || "";
-}
-
 export function getDefaultStateTree(defaultState, component) {
   const _defaultState = getChildrenDefaultState(defaultState, component.DEFAULT_UI);
   component.children.forEach(child => {
