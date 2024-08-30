@@ -280,11 +280,20 @@ class ColorLegend extends BaseComponent {
       clickToShow(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
 
-        const filter = _this.model.data.filter;
         const colorSpace = _this.model.encoding.color.data.space;
         const concept = _this.MDL.color.data.concept;
-        
-        filter.config.dimensions[colorSpace][concept] = d[concept];
+        const filterConfig = _this.model.data.filter.config.dimensions;
+
+        // dimensions: { "geo": { "$or": [{ "un_state": true }] } }
+        if (filterConfig[colorSpace] && filterConfig[colorSpace]["$or"]) {
+          const indexInOr = filterConfig[colorSpace]["$or"].findIndex(f => f.hasOwnProperty(concept));
+          if (indexInOr === -1)
+            filterConfig[colorSpace]["$or"].push({[concept]: d[concept]});
+          else
+            filterConfig[colorSpace]["$or"][indexInOr][concept] = d[concept];
+        } else {
+          filterConfig[colorSpace] = {"$or": [{[concept]: d[concept]}]};
+        }
       },
       clickToSelect(d) {
         //experimentally removed this limitation, because discovered that the "string" concept property works too
