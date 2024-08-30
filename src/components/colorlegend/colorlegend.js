@@ -142,6 +142,13 @@ class ColorLegend extends BaseComponent {
     updateRainbowLegend.bind(this)(!this.MDL.color.scale.isDiscrete());
   }
 
+  _getUniqueColorValuesInAllFramesThatShouldAppearInTheChart(){
+    const unique = new Set()
+    this.model.getTransformedDataMap("filterRequired")
+      .each(frame => frame.forEach(e => unique.add(e[this.colorModelName]) ));
+    return unique;
+  }
+
   _updateListLegend(isVisible) {
     this.DOM.listColors.classed("vzb-hidden", !isVisible);
     if (!isVisible) return;
@@ -152,7 +159,10 @@ class ColorLegend extends BaseComponent {
     let colorOptionsArray = [];
 
     if (this._legendHasOwnModel() && this._isLegendModelReady() && !this.MDL.color.data.isConstant) {
-      colorOptionsArray = this.MDL.legend.dataArray;
+      
+      const relevantListItems = this._getUniqueColorValuesInAllFramesThatShouldAppearInTheChart();
+      colorOptionsArray = this.MDL.legend.dataArray
+        .filter(f => relevantListItems.has(f[this.which]));
     } else {
       colorOptionsArray = cScale.domain().map(value => {
         const result = {};
