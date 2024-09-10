@@ -61,18 +61,11 @@ class SectionFind extends MarkerControlsSection {
 
   createList() {
     this.listReady = false;
-    let data = [...this.parent.markersData.values()]
-      .concat(this.entitiesWithMissingData)
-      .toSorted((a, b) => (a.name < b.name) ? -1 : 1);
-
-    const primaryDimension = this.parent.ui.primaryDim ? this.parent.ui.primaryDim : this.model.data.space[0];
-    data = d3.groups(data, d =>d[primaryDimension])
-      .map(([key, children]) => ({
-        [KEY]: key, 
-        children, 
-        name: children[0].label?.[primaryDimension] || children[0].name, 
-        missingData: children.every(child => child.missingData)
-      }));
+    const data = this._foldEntityListToPrimaryDimension(
+      this.parent.marksFromAllFrames
+        .concat(this.entitiesWithMissingDataInAllFrames)
+        .toSorted((a, b) => (a.name < b.name) ? -1 : 1)
+    );  
   
     const list = this.DOM.list.text("");
 
@@ -83,6 +76,21 @@ class SectionFind extends MarkerControlsSection {
       .call(this._createListItem.bind(this, data.length));
 
     this.listReady = true;
+  }
+
+  _getPrimaryDim() {
+    return this.parent.ui.primaryDim || this.model.data.space[0];
+  }
+
+  _foldEntityListToPrimaryDimension(data) {
+    const primaryDimension = this._getPrimaryDim();
+    return d3.groups(data, d =>d[primaryDimension])
+      .map(([key, children]) => ({
+        [KEY]: key, 
+        children, 
+        name: children[0].label?.[primaryDimension] || children[0].name, 
+        missingData: children.every(child => child.missingData)
+      }));
   }
 
   _createListItem(dataLength, listItem) {
@@ -124,8 +132,8 @@ class SectionFind extends MarkerControlsSection {
       .on("click", (event, d) => {
         this.setModel.unhighlight(d);
         this.setModel.deselect(d);
-        const principalDimension = this.model.data.space[0];
-        this.parent.findChild({type: "SectionRemove"}).setModel(Object.assign({}, d, {prop: principalDimension, dim: principalDimension}));
+        const primaryDimension = this._getPrimaryDim();
+        this.parent.findChild({type: "SectionRemove"}).setModel(Object.assign({}, d, {prop: primaryDimension, dim: primaryDimension}));
         this.parent._clearSearch();
         this.parent.updateSearch();
       });
