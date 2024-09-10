@@ -38,16 +38,20 @@ class SectionFind extends MarkerControlsSection {
   getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames() {
     const entitiesWithMissingDataInAllFrames = [];
     this.model.data.spaceCatalog.then(spaceCatalog => {
-      for (const dim in spaceCatalog) {
-        const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
-        if (spaceCatalog[dim].entities) {
-          const dimOrIn = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
-          [...spaceCatalog[dim].entities.filter(filterSpec).values()].forEach(entity => {
-            if (dimOrIn.includes(entity[KEY]) && ![...this.parent.markersData.values()].some(s => s[dim] === entity[dim])) {
-              const push = {
-                [KEY]: entity[KEY],
-                [dim]: entity[dim], 
-                name: entity.name, 
+      
+      //after we decided to make the list folded to first dimension only there is no need for multidimensionality
+      //otherwise here we would use: for (const dim in spaceCatalog) { instead of fixing dim to a constant
+      const dim = this._getPrimaryDim(); 
+      const filterSpecFromShow = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
+      if (spaceCatalog[dim].entities) {
+        const explicitlyAddedEntities = this.model.data.filter.dimensions?.[dim]?.$or?.find( f => f[dim])?.[dim]?.$in || [];
+        const allowedEntities = [...spaceCatalog[dim].entities.filter(filterSpecFromShow).values()];
+        allowedEntities.forEach(entity => {
+          if (explicitlyAddedEntities.includes(entity[KEY]) && !this.parent.marksFromAllFrames.some(s => s[dim] === entity[dim])) {
+            const push = {
+              [KEY]: entity[KEY],
+              [dim]: entity[dim], 
+              name: entity.name, 
               missingData: true
             };
             entitiesWithMissingDataInAllFrames.push(push);
