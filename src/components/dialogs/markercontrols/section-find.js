@@ -15,16 +15,16 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.title.text("Find");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.listReady = false;
-    this.entitiesWithMissingData = [];
+    this.entitiesWithMissingDataInAllFrames = [];
   }
 
   draw() {
     this.localise = this.services.locale.auto();
 
     this.addReaction(this.createList);
-    this.addReaction(this.updatemissingDataForFrame);
+    this.addReaction(this.updatemissingDataForCurrentFrame);
     this.addReaction(this.updateSelection);
-    this.addReaction(this.getEntitiesDeliberatelyAddedInFilterButMissingData);
+    this.addReaction(this.getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames);
   }
 
   get MDL() {
@@ -35,8 +35,8 @@ class SectionFind extends MarkerControlsSection {
     };
   }
 
-  getEntitiesDeliberatelyAddedInFilterButMissingData() {
-    const entitiesWithMissingData = [];
+  getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames() {
+    const entitiesWithMissingDataInAllFrames = [];
     this.model.data.spaceCatalog.then(spaceCatalog => {
       for (const dim in spaceCatalog) {
         const filterSpec = this.model.encoding?.show?.data?.filter?.dimensions?.[dim] || {};
@@ -48,16 +48,14 @@ class SectionFind extends MarkerControlsSection {
                 [KEY]: entity[KEY],
                 [dim]: entity[dim], 
                 name: entity.name, 
-                missingData: true
-              };
-              entitiesWithMissingData.push(push);
-            }
-            
-          });
-        }
+              missingData: true
+            };
+            entitiesWithMissingDataInAllFrames.push(push);
+          }
+          
+        });
       }
-
-      this.entitiesWithMissingData = entitiesWithMissingData;
+      this.entitiesWithMissingDataInAllFrames = entitiesWithMissingDataInAllFrames;
     });
   }
 
@@ -150,9 +148,9 @@ class SectionFind extends MarkerControlsSection {
     },
   }
 
-  updatemissingDataForFrame() {
+  updatemissingDataForCurrentFrame() {
     if(!this.listReady) return;
-    this.entitiesWithMissingData;
+    this.entitiesWithMissingDataInAllFrames;
     const currentDataMap = this.model.dataMap;
     const listItems = this.DOM.listItems;
 
@@ -176,7 +174,7 @@ class SectionFind extends MarkerControlsSection {
   }
 
   example() {
-    const data = [...this.parent.markersData.values()];
+    const data = this.parent.marksFromAllFrames;
     const randomItem = data[Math.floor(Math.random() * data.length)];
     return randomItem.name;
   }
@@ -216,7 +214,7 @@ class SectionFind extends MarkerControlsSection {
 
   concludeSearch(text = "") {
     runInAction(() => {
-      const data = [...this.parent.markersData.values()];
+      const data = this.parent.marksFromAllFrames;
       const filtered = data.filter(f => (f.name || "").toString().toLowerCase().includes(text));
       if (filtered.length === 1) {
         this.MDL.selected.data.filter.toggle(filtered[0]);
@@ -229,7 +227,7 @@ class SectionFind extends MarkerControlsSection {
 
 const decorated = decorate(SectionFind, {
   "MDL": computed,
-  "entitiesWithMissingData": observable,
+  "entitiesWithMissingDataInAllFrames": observable,
   "listReady": observable
 });
 
