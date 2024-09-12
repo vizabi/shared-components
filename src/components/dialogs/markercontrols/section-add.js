@@ -148,14 +148,7 @@ class SectionAdd extends MarkerControlsSection {
         }
       })
       .on("click", (event, d) => {
-        const dimNin = this.model.data.filter.dimensions?.[d.dim]?.[d.prop]?.$nin || [];
-
-        if (dimNin.includes(d[KEY])) {
-          this.model.data.filter.deleteFromDimensionsFirstINstatement(d, [d.dim, d.prop, "$nin"]);
-        } else {
-          this.model.data.filter.addToDimensionsFirstINstatement(d, [d.dim, "$or", 0, d.prop, "$in"]);
-        }
-
+        this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim: d.dim, prop: d.prop});
         this.concludeSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);

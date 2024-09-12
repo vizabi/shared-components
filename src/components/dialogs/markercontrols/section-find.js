@@ -137,7 +137,7 @@ class SectionFind extends MarkerControlsSection {
         this.setModel.unhighlight(d);
         this.setModel.deselect(d);
         const primaryDimension = this._getPrimaryDim();
-        this.parent.findChild({type: "SectionRemove"}).setModel(Object.assign({}, d, {prop: primaryDimension, dim: primaryDimension}));
+        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: primaryDimension, prop: primaryDimension});
         this.parent._clearSearch();
         this.parent.updateSearch();
       });

@@ -141,24 +141,13 @@ class SectionRemove extends MarkerControlsSection {
         }
       })
       .on("click", (event, d) => {
-        this.setModel(d);
+        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: d.dim, prop: d.prop});
         this.concludeSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);
 
     this.showHideHeader(matches.length);
   }
-
-  setModel(d){
-    const dimOrIn = this.model.data.filter.dimensions?.[d.dim]?.$or?.find( f => f[d.prop])?.[d.prop]?.$in || [];
-
-    if (dimOrIn.includes(d[KEY])) {
-      this.model.data.filter.deleteFromDimensionsFirstINstatement(d, [d.dim, "$or", 0, d.prop, "$in"]);
-    } else {
-      this.model.data.filter.addToDimensionsFirstINstatement(d, [d.dim, d.prop, "$nin"]);
-    }
-  }
-
 }
 
 const decorated = decorate(SectionRemove, {
