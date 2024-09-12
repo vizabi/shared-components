@@ -15,6 +15,7 @@ import * as d3 from "d3";
 function isTrailBubble(d){
   return !!d[Symbol.for("trailHeadKey")];
 }
+const KEY = Symbol.for("key");
 
 class ColorLegend extends BaseComponent {
   constructor(config) {
@@ -113,7 +114,6 @@ class ColorLegend extends BaseComponent {
     this.which = this.MDL.color.data.constant || this.MDL.color.data.concept;
 
     this.addReaction(this._updateView);
-    this.addReaction(this._translateSelectDialog);
     this.addReaction(this.closeSelectDialogOnConceptChange);
   }
 
@@ -257,6 +257,7 @@ class ColorLegend extends BaseComponent {
     return {
       mouseover(d) {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", false);
+        if (_this._interact().disableSelectHover()) return;
 
         const concept = _this.MDL.color.data.concept;
         const colorMdlName = _this.MDL.color.name;
@@ -272,28 +273,57 @@ class ColorLegend extends BaseComponent {
 
       mouseout() {
         _this.DOM.moreOptionsHint.classed("vzb-hidden", true);
+        if (_this._interact().disableSelectHover()) return;
 
         _this.root.ui?.chart?.superhighlightOnMinimapHover && _this.MDL.superHighlighted ?
           _this.MDL.superHighlighted.data.filter.clear() :
           _this.MDL.highlighted.data.filter.clear();
       },
-      clickToShow(d) {
+      clickToAddAll(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
-
-        const colorSpace = _this.model.encoding.color.data.space;
-        const concept = _this.MDL.color.data.concept;
-        const filterConfig = _this.model.data.filter.config.dimensions;
-
-        // dimensions: { "geo": { "$or": [{ "un_state": true }] } }
-        if (filterConfig[colorSpace] && filterConfig[colorSpace]["$or"]) {
-          const indexInOr = filterConfig[colorSpace]["$or"].findIndex(f => f.hasOwnProperty(concept));
-          if (indexInOr === -1)
-            filterConfig[colorSpace]["$or"].push({[concept]: d[concept]});
-          else
-            filterConfig[colorSpace]["$or"][indexInOr][concept] = d[concept];
-        } else {
-          filterConfig[colorSpace] = {"$or": [{[concept]: d[concept]}]};
-        }
+        const dim = _this.model.encoding.color.data.space[0];
+        const prop = _this.MDL.color.data.concept;
+        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
+      },
+      clickToRemoveAll(d) {
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
+        const dim = _this.model.encoding.color.data.space[0];
+        const prop = _this.MDL.color.data.concept;
+        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop});
+      },
+      clickToRemoveEverythingElse(d) {
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
+        const everythingElse = _this.MDL.legend.dataArray.map(m => m[KEY]).filter(f => f !== d[KEY]);
+        const dim = _this.model.encoding.color.data.space[0];
+        const prop = _this.MDL.color.data.concept;
+        _this.model.data.filter.deleteUsingLimitedStructure({key: everythingElse, dim, prop});
+      },
+      disableSelectHover(){
+        if (_this.root.ui.dialogs?.markercontrols?.disableFindInteractions) return true;
+      },
+      disableAddAll(d){
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return true;
+        if (_this.root.ui.dialogs?.markercontrols?.disableAddRemoveGroups) return true;
+        const dim = _this.model.encoding.color.data.space[0];
+        const prop = _this.MDL.color.data.concept;
+        return !_this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: d[KEY], dim, prop});
+      },
+      disableRemoveAll(d){
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return true;
+        if (_this.root.ui.dialogs?.markercontrols?.disableAddRemoveGroups) return true;
+        const dim = _this.model.encoding.color.data.space[0];
+        const prop = _this.MDL.color.data.concept;
+        return _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: d[KEY], dim, prop});
+      },
+      disableRemoveEverythingElse(d){
+        if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return true;
+        if (_this.root.ui.dialogs?.markercontrols?.disableAddRemoveGroups) return true;
+        const dim = _this.model.encoding.color.data.space[0];
+        const prop = _this.MDL.color.data.concept;
+        const everythingElse = _this.MDL.legend.dataArray.map(m => m[KEY]).filter(f => f !== d[KEY]);
+        return _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: d[KEY], dim, prop}) 
+          //everything else is already removed
+          || everythingElse.every(key => _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key, dim, prop}) );
       },
       clickToSelect(d) {
         //experimentally removed this limitation, because discovered that the "string" concept property works too
@@ -327,11 +357,17 @@ class ColorLegend extends BaseComponent {
       .html(iconClose)
       .on("click", () => this._closeSelectDialog());
 
-    this.DOM.selectAllButton = this.DOM.selectDialog.append("div")
+    this.DOM.selectAllinGroup = this.DOM.selectDialog.append("div")
       .attr("class", "vzb-cl-select-dialog-item vzb-clickable");
 
-    this.DOM.removeElseButton = this.DOM.selectDialog.append("div")
-      .attr("class", "vzb-cl-select-dialog-item vzb-clickable");
+    this.DOM.addAllinGroup = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-cl-select-dialog-item vzb-clickable");  
+
+    this.DOM.removeAllinGroup = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-cl-select-dialog-item vzb-clickable");  
+
+    this.DOM.removeEverythingElse = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-cl-select-dialog-item vzb-clickable");  
 
     this.DOM.editColorButton = this.DOM.selectDialog.append("div")
       .attr("class", "vzb-cl-select-dialog-item vzb-cl-select-dialog-item-moreoptions");
@@ -349,14 +385,19 @@ class ColorLegend extends BaseComponent {
       .attr("class", "vzb-cl-select-dialog-item-tooltip");
   }
 
-  _translateSelectDialog() {
+  _updateUiStrings(name) {
     const t = this.localise;
+    this.DOM.selectDialogTitle.text(name);
     this.DOM.moreOptionsHint.text(t("hints/color/more"));
-    this.DOM.selectAllButton.text("✅ " + t("dialogs/color/select-all"));
-    this.DOM.removeElseButton.text("🗑️ " + t("dialogs/color/remove-else"));
+    this.DOM.selectAllinGroup.text("✅ " + t("dialogs/color/select-all-in-group") + " " + name);
+    this.DOM.addAllinGroup.text("✳️ " + t("dialogs/color/add-all-in-group") + " " + name);
+    this.DOM.removeAllinGroup.text("🗑️ " + t("dialogs/color/remove-all-in-group") + " " + name);
+    this.DOM.removeEverythingElse.text("🎯 " + t("dialogs/color/remove-else"));
     this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
     this.DOM.editColorButton.select("span").text(t("buttons/reset"));
-    this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint"));
+    this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint") 
+      + " " + (this.MDL.color.data.conceptProps.name || this.MDL.color.data.concept)
+    );
   }
   
   closeSelectDialogOnConceptChange(){
@@ -370,21 +411,33 @@ class ColorLegend extends BaseComponent {
 
   _bindSelectDialogItems(d) {
     const _this = this;
-    this.DOM.selectDialogTitle.text(d.name);
+    this._updateUiStrings(d.name);
 
-    this.DOM.selectAllButton
+    this.DOM.selectAllinGroup
       //experimentally removed this limitation, because discovered that the "string" concept property works too
       //this is especially useful for CSV-only data because there are no entity props linking to other entities, just strings
-      //.classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
+      .classed("vzb-hidden", () => this._interact().disableSelectHover(d))
       .on("click", () => {
         this._interact().clickToSelect(d);
         this._closeSelectDialog();
       });
 
-    this.DOM.removeElseButton
-      .classed("vzb-cl-select-dialog-item-disabled", !isEntityConcept(this.MDL.color.data.conceptProps))
+    this.DOM.addAllinGroup
+      .classed("vzb-hidden", () => this._interact().disableAddAll(d))
       .on("click", () => {
-        this._interact().clickToShow(d);
+        this._interact().clickToAddAll(d);
+        this._closeSelectDialog();
+      });
+    this.DOM.removeAllinGroup
+      .classed("vzb-hidden", () => this._interact().disableRemoveAll(d))
+      .on("click", () => {
+        this._interact().clickToRemoveAll(d);
+        this._closeSelectDialog();
+      });
+    this.DOM.removeEverythingElse
+      .classed("vzb-hidden", () => this._interact().disableRemoveEverythingElse(d))
+      .on("click", () => {
+        this._interact().clickToRemoveEverythingElse(d);
         this._closeSelectDialog();
       });
 

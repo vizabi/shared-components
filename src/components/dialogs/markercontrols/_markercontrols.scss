@@ -316,6 +316,9 @@
             content: "❌";
             margin-right: 5px;
           }
+          &.vzb-dialog-all-entites::before {
+            content: "🗑";
+          }
         }
       }
     }
