@@ -188,7 +188,9 @@
           float: right;
         }
         float: left;
-        margin: 2px auto;
+        overflow-x: hidden;
+        width: 100%;
+        text-overflow: ellipsis;
 
         // &-moreoptions {
         //   display: none;
@@ -225,6 +227,9 @@
       &-title {
         margin-bottom: 5px;
         font-weight: bold;
+        overflow-x: hidden;
+        width: 90%;
+        text-overflow: ellipsis;
       }
     }
 
