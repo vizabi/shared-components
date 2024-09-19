@@ -4,6 +4,23 @@ import {decorate, computed, runInAction, observable} from "mobx";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
+function _getLeafChildren(d, result = []) {
+  if (d.folder) {
+    d.children.forEach(_d => _getLeafChildren(_d, result))
+  } else {
+    result.push(...d.children);
+  }
+  return result;
+}
+
+function _getLeafChildrenCount(d, result = [0]) {
+  if (d.folder) {
+    d.children.forEach(_d => _getLeafChildrenCount(_d, result))
+  } else {
+    result[0] += d.children.length;
+  }
+  return result[0];
+}
 
 class SectionFind extends MarkerControlsSection {
   constructor(config) {
@@ -16,6 +33,9 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.listReady = false;
     this.entitiesWithMissingDataInAllFrames = [];
+    this.drilldownValues = new Map();
+    this.listData = [];
+
   }
 
   draw() {
@@ -25,6 +45,8 @@ class SectionFind extends MarkerControlsSection {
     this.addReaction(this.updatemissingDataForCurrentFrame);
     this.addReaction(this.updateSelection);
     this.addReaction(this.getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames);
+    this.addReaction(this.getDrilldownValues);
+    this.addReaction(this.getListData);
   }
 
   get MDL() {
@@ -33,6 +55,78 @@ class SectionFind extends MarkerControlsSection {
       selected: this.model.encoding.selected,
       highlighted: this.model.encoding.highlighted
     };
+  }
+
+  getDrilldownValues() {
+    if (!this.isFindInFolderView()) return;
+    const dim = this._getPrimaryDim();
+    const drilldownProps = this._getDrilldownProps();
+    const entityQuery = {
+      select: {
+          key: [dim],
+          value: [...drilldownProps, "name"]
+      },
+      from: "entities",
+      locale: this.model.data.source.locale,
+    };
+    
+    this.model.data.source.query(entityQuery).then(response => {
+      this.drilldownValues = response.forQueryKey();
+    });
+  }
+
+  // getDrilldownValues2() {
+  //   const primaryDim = this._getPrimaryDim();
+  //   const data = this._foldEntityListToPrimaryDimension(
+  //     this.parent.marksFromAllFrames
+  //       .concat(this.entitiesWithMissingDataInAllFrames)
+  //       .toSorted((a, b) => (a.name < b.name) ? -1 : 1)
+  //   );
+  //   Promise.all(data.map(d=>{
+  //     return this.model.data.source.drillup({
+  //       dim: primaryDim,
+  //       entity: d.children[0][primaryDim]
+  //     })
+  //   })).then(result=>{
+  //     console.log(result);
+  //   })
+
+  // }
+
+  getListData() {
+    const flatData = this._foldEntityListToPrimaryDimension(
+      this.parent.marksFromAllFrames
+        .concat(this.entitiesWithMissingDataInAllFrames)
+        .toSorted((a, b) => (a.name < b.name) ? -1 : 1)
+    );  
+
+    if (!this.isFindInFolderView()) {
+      this.listData = flatData;
+      return;
+    }
+    if (!this.drilldownValues.size) return;
+
+    const dim = this._getPrimaryDim(); 
+    const drilldownProps = this._getDrilldownProps();    
+    
+    flatData.forEach(d => {
+      drilldownProps.forEach(prop => {
+        d[prop] = this.drilldownValues.get(d.children[0][dim])?.[prop];
+      })
+    });
+
+    const mapGroupData = ([key, children]) => {
+      return {
+        [KEY]: key, 
+        children: children[0]?.[0] ? children.map(mapGroupData) : children, 
+        name: this.drilldownValues.get(key).name,
+        folder: true
+      };
+    }
+
+    const result = d3.groups.apply(null, [flatData, ...drilldownProps.map(prop => d => d[prop])]).map(mapGroupData);
+    
+    this.listData = result;
   }
 
   getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames() {
@@ -65,25 +159,28 @@ class SectionFind extends MarkerControlsSection {
 
   createList() {
     this.listReady = false;
-    const data = this._foldEntityListToPrimaryDimension(
-      this.parent.marksFromAllFrames
-        .concat(this.entitiesWithMissingDataInAllFrames)
-        .toSorted((a, b) => (a.name < b.name) ? -1 : 1)
-    );  
   
     const list = this.DOM.list.text("");
 
     this.DOM.listItems = list.selectAll("div")
-      .data(data, d => d[KEY] )
+      .data(this.listData, d => d[KEY] )
       .join("div")
-      .attr("class", "vzb-item vzb-dialog-checkbox")
-      .call(this._createListItem.bind(this, data.length));
+      .attr("class", d => `vzb-item vzb-item-toplevel vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
+      .call(this._createListItem.bind(this, this.listData.length));
 
     this.listReady = true;
   }
 
+  isFindInFolderView() {
+    return this._getDrilldownProps().length != 0;
+  }
+
   _getPrimaryDim() {
     return this.parent.ui.primaryDim || this.model.data.space[0];
+  }
+
+  _getDrilldownProps() {
+    return this.parent.ui.drilldown?.split?.(".") || [];
   }
 
   _foldEntityListToPrimaryDimension(data) {
@@ -103,8 +200,12 @@ class SectionFind extends MarkerControlsSection {
       .attr("type", "checkbox")
       .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
-        if(this.parent.ui.disableFindInteractions) return;
-        this.setModel.select(d);
+        if (this.parent.ui.disableFindInteractions) return;
+        if (event.target.checked) {
+          this.setModel.select(d);
+        } else {
+          this.setModel.deselect(d);
+        }
         this.parent.DOM.content.node().scrollTop = 0;
         this.parent._clearSearch();
         this.parent.updateSearch();
@@ -123,9 +224,25 @@ class SectionFind extends MarkerControlsSection {
         if(this.parent.ui.disableFindInteractions) return;
         this.setModel.unhighlight(d);
       })
-      .each(function(){
+      .each(function(d) {
         const view = d3.select(this);
-        view.append("span").attr("class", "vzb-label");
+        view.append("span")
+          .attr("class", "vzb-label")
+          .text(d => d.name)
+          .on("click", function(event, d) {
+            if (!d.folder) return;
+            
+            event.stopPropagation();
+            event.preventDefault();
+            const view = d3.select(this.parentNode.parentNode);
+            const isOpened = view.classed("vzb-item-opened");
+            if (isOpened) {
+              view.classed("vzb-item-opened", false);
+              view.selectAll(".vzb-item.vzb-item-folder").classed("vzb-item-opened", false);
+            } else {
+              view.classed("vzb-item-opened", true);
+            }
+          });
         view.append("span").attr("class", "vzb-frame");
       });
 
@@ -141,22 +258,36 @@ class SectionFind extends MarkerControlsSection {
         this.parent._clearSearch();
         this.parent.updateSearch();
       });
+
+    const _this = this;
+    listItem.each(function(d){
+      if (d.folder) {
+        const view = d3.select(this);
+        view.append("div")
+          .attr("class", "vzb-item-children")
+          .selectAll("div")
+            .data(d.children, d => d[KEY] )
+            .join("div")
+            .attr("class", d => `vzb-item vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
+            .call(_this._createListItem.bind(_this, d.children.length));
+      }
+    });
   }
 
   setModel = {
     select: (d) => {
       if (d.missingData) return;
-      runInAction(() => d.children.forEach(child => this.MDL.selected.data.filter.toggle(child)));
+      runInAction(() => _getLeafChildren(d).forEach(child => this.MDL.selected.data.filter.toggle(child)));
     },
     deselect: (d) => {
-      runInAction(() => d.children.forEach(child => this.MDL.selected.data.filter.delete(child)));
+      runInAction(() => _getLeafChildren(d).forEach(child => this.MDL.selected.data.filter.delete(child)));
     },
     highlight: (d) => {
       if (d.missingDataForFrame || d.missingData) return;
-      runInAction(() => d.children.forEach(child => this.MDL.highlighted.data.filter.set(child)));
+      runInAction(() => _getLeafChildren(d).forEach(child => this.MDL.highlighted.data.filter.set(child)));
     },
     unhighlight: (d) => {
-      runInAction(() => d.children.forEach(child => this.MDL.highlighted.data.filter.delete(child)));
+      runInAction(() => _getLeafChildren(d).forEach(child => this.MDL.highlighted.data.filter.delete(child)));
     },
   }
 
@@ -164,15 +295,15 @@ class SectionFind extends MarkerControlsSection {
     if(!this.listReady) return;
     this.entitiesWithMissingDataInAllFrames;
     const currentDataMap = this.model.dataMap;
-    const listItems = this.DOM.listItems;
+    const listItems = this.DOM.list.selectAll(".vzb-item");
 
     listItems.data().forEach(d => {
-      d.missingDataForFrame = !d.missingData && d.children.every(child => !currentDataMap.hasByStr(child[KEY]));
+      d.missingDataForFrame = !d.missingData && _getLeafChildren(d).every(child => !currentDataMap.hasByStr(child[KEY]));
     });
 
     const frame = this.localise(this.MDL.frame.value);
     const noDataSubstr = frame + ": " + this.localise("hints/nodata");
-    this.DOM.listItems.select("label")
+    listItems.select("label")
       .classed("vzb-find-item-missingDataForFrame", d => d.missingDataForFrame)
       .classed("vzb-find-item-missingData", d => d.missingData)
       .attr("title", d => "key: " + d[KEY] + (d.missingDataForFrame ? ", " + noDataSubstr : ""))
@@ -180,7 +311,7 @@ class SectionFind extends MarkerControlsSection {
       //.html(d => d.missingDataForFrame ? `<span>${d.name}</span> <span class=vzb-frame>${frame}</span>` : d.name)
       .each(function(d) {
         const view = d3.select(this);
-        view.select(".vzb-label").text(d.name);
+        //view.select(".vzb-label").text(d.name);
         view.select(".vzb-frame").text(d.missingDataForFrame ? frame : "");
       });
   }
@@ -194,30 +325,43 @@ class SectionFind extends MarkerControlsSection {
   updateSelection() {
     if(!this.listReady) return;
     const selected = this.MDL.selected.data.filter;
-    this.DOM.listItems.order().select("input")
+    this.DOM.list.selectAll("input")
       .property("checked", function(d) {
         const isSelected = selected.has(d);
         d3.select(this.parentNode).classed("vzb-checked", isSelected);
         return isSelected;
       });
-    
+
+    this.DOM.list.selectAll(".vzb-item-folder").each(function(d) {
+      const folderItemElement = d3.select(this);
+      const checkedCount = folderItemElement.selectAll(".vzb-checked").size();
+      const itemCount = _getLeafChildrenCount(d);
+      folderItemElement.select("input")
+        .property("checked", checkedCount)
+        .property("indeterminate", checkedCount && checkedCount != itemCount);
+    });
+
     const checkedItems = this.DOM.list.selectAll(".vzb-checked");
     checkedItems
       .lower()
-      .classed("vzb-separator", (d, i) => !i);    
+      .classed("vzb-separator", (d, i) => !i);
+
+    this.DOM.list.selectAll("vzb-item-folder");
   }
 
   updateSearch(text = "") {
     if(!this.listReady) return;
     let hiddenItems = 0;
 
-    const items = this.DOM.list.selectAll(".vzb-item")
-      .classed("vzb-hidden", d => {
-        const hide = text && !(d.name || "").toString().toLowerCase().includes(text);
-        hiddenItems += +hide;
-        return hide;
-      });
-    this.showHideHeader(items.size() - hiddenItems);
+    const items = this.DOM.list.selectAll(".vzb-item:not(.vzb-item-folder)").each(function(d) {
+      const view = d3.select(this);
+      const hide = !(d.name || "").toString().toLowerCase().includes(text);
+      hiddenItems += +(text && hide);
+      view.classed("vzb-hidden", text && hide);
+      view.classed("vzb-item-insearch", text && !hide);
+    });
+    this.DOM.list.selectAll(".vzb-item-folder").classed("vzb-item-insearch", text);
+    this.showHideHeader(items.size() - hiddenItems); 
   }
 
   getListItemCount() {
@@ -240,7 +384,9 @@ class SectionFind extends MarkerControlsSection {
 const decorated = decorate(SectionFind, {
   "MDL": computed,
   "entitiesWithMissingDataInAllFrames": observable,
-  "listReady": observable
+  "listReady": observable,
+  "drilldownValues": observable.struct,
+  "listData": observable.struct
 });
 
 export {decorated as SectionFind};
