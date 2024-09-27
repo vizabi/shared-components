@@ -243,13 +243,17 @@
       }
 
       .vzb-find {
+        .vzb-list {
+          overflow: hidden;
 
-        .vzb-list > .vzb-item:first-child {
-          margin-top: 8px;
+          > .vzb-item:first-child {
+            margin-top: 2px;
+          }
         }
         
         .vzb-item {
           height: auto;
+          margin-top: 4px;
           margin-bottom: 0;
           padding: 0;
 
@@ -257,6 +261,7 @@
             .vzb-closecross {opacity: 1}
           }
           .vzb-closecross {
+            top: 0;
             right: 0;
             position: absolute;
             opacity: 0;
@@ -266,11 +271,14 @@
           label {
             position: relative;
             padding-left: 2em;
-            line-height: 18px;
-            top: -1px
+            line-height: 20px;
+            display: block;
+            text-indent: 0;
           }
 
           &.vzb-item-folder {
+            line-height: 20px;
+
             >.vzb-item-children {
               height: 0;
               overflow: hidden;
@@ -279,7 +287,7 @@
             &:hover {
               background: none;
 
-              &:not(:has(.vzb-item-children:hover)) {
+              &:not(:has(.vzb-item-children:hover)):not(:has(.vzb-folder-mark:hover)) {
                 background-color: $vzb-color-primary-lightest;
               }
             }
@@ -297,16 +305,35 @@
               border: none;
             }
 
-            >label>span.vzb-label {
-              &::after {
-                content: " ▼";
+            >label {
+              display: inline-flex;
+              max-width: calc(100% - 40px);
+              .vzb-label {
+                overflow: hidden;
+                text-overflow: ellipsis;
               }
+            }
+            >.vzb-folder-mark {
+              cursor: pointer;
+              opacity: 0.6;
+              padding-top: 2px;
+              padding-bottom: 4px;
+              padding-right: 100%;
+              &:hover {
+                opacity: 1;
+              }
+              &::after {
+                content: " ▶";
+              }
+            }
+            >.vzb-closecross {
+              pointer-events: none;
             }
 
             &.vzb-item-opened {
-              >label>span.vzb-label {
+              >.vzb-folder-mark {
                 &::after {
-                  content: " ▶";
+                  content: " ▼";
                 }
               }
               >.vzb-item-children {
@@ -315,14 +342,14 @@
               &.vzb-dialog-checkbox input[type=checkbox]:checked + label::after {
                 opacity: 1;
               }
-              &:not(:has(.vzb-item-children:hover)):hover label::after {
+              &:not(:has(.vzb-item-children:hover)):not(:has(.vzb-folder-mark:hover)):hover label::after {
                 opacity: 0.3;
               }
             }
 
             &.vzb-item-insearch {
               margin-top: 0;
-              >label {
+              >label, >.vzb-folder-mark {
                 display: none;
               }
               .vzb-item-children {
