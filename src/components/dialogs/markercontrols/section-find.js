@@ -26,6 +26,28 @@ function nameLocaleCompare(a, b) {
   return a.name.localeCompare(b.name);
 }
 
+function folderAndNameLocaleCompare(a, b) {
+  return (a.folder || 0) - (b.folder || 0) || a.name.localeCompare(b.name);
+}
+
+function scrollTopTween(scrollTop) { 
+  return function() { 
+      var i = d3.interpolateNumber(this.scrollTop, scrollTop); 
+      return function(t) { this.scrollTop = i(t); }; 
+  }; 
+}
+
+function sortItems(groups) {
+  const items = groups.selectChildren(".vzb-item:not(.vzb-item-folder)");
+  items.filter(":not(.vzb-checked)")
+    .sort(nameLocaleCompare)
+    .classed("vzb-separator", false);
+  items.filter(".vzb-checked")
+    .lower()
+    .sort(nameLocaleCompare)
+    .classed("vzb-separator", (d, i, g) => i == g.length - 1);
+}
+
 class SectionFind extends MarkerControlsSection {
   constructor(config) {
     super(config);
@@ -39,6 +61,7 @@ class SectionFind extends MarkerControlsSection {
     this.entitiesWithMissingDataInAllFrames = [];
     this.drilldownValues = new Map();
     this.listData = [];
+    this.listScrollTransitionFlag = false;
 
   }
 
@@ -131,7 +154,7 @@ class SectionFind extends MarkerControlsSection {
     
     const result = mapGroupData([null, d3.groups.apply(null, [flatData, ...drilldownProps.map(prop => d => d[prop])])]);
     
-    this.listData = result.sort(nameLocaleCompare);
+    this.listData = result.sort(folderAndNameLocaleCompare);
   }
 
   getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames() {
@@ -164,6 +187,7 @@ class SectionFind extends MarkerControlsSection {
 
   createList() {
     this.listReady = false;
+    const isFindInFolderView = this.isFindInFolderView();
   
     const list = this.DOM.list.text("");
 
@@ -171,7 +195,11 @@ class SectionFind extends MarkerControlsSection {
       .data(this.listData, d => d[KEY] )
       .join("div")
       .attr("class", d => `vzb-item vzb-item-toplevel vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
-      .call(this._createListItem.bind(this, this.listData.length));
+      .call(this._createListItem.bind(this, isFindInFolderView ? d3.sum(this.listData.map(d => _getLeafChildrenCount(d))) : this.listData.length));
+
+    if (isFindInFolderView) {
+      this.DOM.listItems = this.DOM.list.selectAll(".vzb-item");
+    } 
 
     this.listReady = true;
   }
@@ -208,12 +236,39 @@ class SectionFind extends MarkerControlsSection {
       .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("change", (event, d) => {
         if (this.parent.ui.disableFindInteractions) return;
+        
+        const itemNode = event.target.parentNode;
+        const separatorNode = d3.select(itemNode.parentNode).selectChildren(".vzb-separator").node();
+        const contentNode = this.parent.DOM.content.node();
+        const scrollDelta = itemNode.offsetTop - (separatorNode?.offsetTop || 0);
+        const newScrollTop = contentNode.scrollTop - scrollDelta + (scrollDelta > 0 ? itemNode.clientHeight * 2 : -itemNode.clientHeight);
+
+        this.setModel.unhighlight(d);
         if (event.target.checked) {
           this.setModel.select(d);
         } else {
           this.setModel.deselect(d);
         }
-        this.parent.DOM.content.node().scrollTop = 0;
+
+        this.listScrollTransitionFlag = true;
+        utils.defer(() => {
+          if (d.folder) {
+            this.parent.DOM.content.interrupt();
+            this.listScrollTransitionFlag = false;
+          } else if (scrollDelta <= 0) {
+            this.parent.DOM.content.interrupt();
+            contentNode.scrollTop = newScrollTop;
+            this.listScrollTransitionFlag = false;
+          } else {
+            this.parent.DOM.content.transition()
+              .duration(300) 
+              .tween("scrollTopTween", scrollTopTween(newScrollTop))
+              .on("end", () => {
+                this.listScrollTransitionFlag = false;
+              });
+          }
+        });
+      
         this.parent._clearSearch();
         this.parent.updateSearch();
       });
@@ -223,12 +278,14 @@ class SectionFind extends MarkerControlsSection {
       .attr("for", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
       .on("mouseover", (event, d) => {
         if (utils.isTouchDevice()) return;
-        if(this.parent.ui.disableFindInteractions) return;
+        if (this.listScrollTransitionFlag) return;
+        if (this.parent.ui.disableFindInteractions) return;
         this.setModel.highlight(d);
       })
       .on("mouseout", (event, d) => {
         if (utils.isTouchDevice()) return;
-        if(this.parent.ui.disableFindInteractions) return;
+        if (this.listScrollTransitionFlag) return;
+        if (this.parent.ui.disableFindInteractions) return;
         this.setModel.unhighlight(d);
       })
       .each(function(d) {
@@ -253,19 +310,17 @@ class SectionFind extends MarkerControlsSection {
         view.append("span").attr("class", "vzb-frame");
       });
 
-    if (listItem.datum().folder) {
-      listItem.append("span").attr("class", "vzb-folder-mark")
-        .on("click", function(event, d) {
-          const view = d3.select(this.parentNode);
-          const isOpened = view.classed("vzb-item-opened");
-          if (isOpened) {
-            view.classed("vzb-item-opened", false);
-            view.selectAll(".vzb-item.vzb-item-folder").classed("vzb-item-opened", false);
-          } else {
-            view.classed("vzb-item-opened", true);
-          }
-        });
-    }
+    listItem.filter(d => d.folder).append("span").attr("class", "vzb-folder-mark")
+      .on("click", function(event, d) {
+        const view = d3.select(this.parentNode);
+        const isOpened = view.classed("vzb-item-opened");
+        if (isOpened) {
+          view.classed("vzb-item-opened", false);
+          view.selectAll(".vzb-item.vzb-item-folder").classed("vzb-item-opened", false);
+        } else {
+          view.classed("vzb-item-opened", true);
+        }
+      });
 
     listItem.append("span")
       .attr("class", "vzb-closecross")
@@ -282,7 +337,7 @@ class SectionFind extends MarkerControlsSection {
 
     listItem.each(function(d){
       if (d.folder) {
-        d.children.sort(nameLocaleCompare);
+        d.children.sort(folderAndNameLocaleCompare);
         const view = d3.select(this);
         view.append("div")
           .attr("class", "vzb-item-children")
@@ -290,7 +345,7 @@ class SectionFind extends MarkerControlsSection {
             .data(d.children, d => d[KEY] )
             .join("div")
             .attr("class", d => `vzb-item vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
-            .call(_this._createListItem.bind(_this, d.children.length));
+            .call(_this._createListItem.bind(_this, dataLength));
       }
     });
   }
@@ -316,7 +371,7 @@ class SectionFind extends MarkerControlsSection {
     if(!this.listReady) return;
     this.entitiesWithMissingDataInAllFrames;
     const currentDataMap = this.model.dataMap;
-    const listItems = this.DOM.list.selectAll(".vzb-item");
+    const listItems = this.DOM.listItems;
 
     listItems.data().forEach(d => {
       d.missingDataForFrame = !d.missingData && _getLeafChildren(d).every(child => !currentDataMap.hasByStr(child[KEY]));
@@ -346,14 +401,14 @@ class SectionFind extends MarkerControlsSection {
   updateSelection() {
     if(!this.listReady) return;
     const selected = this.MDL.selected.data.filter;
-    this.DOM.list.selectAll("input")
+    this.DOM.listItems.select("input")
       .property("checked", function(d) {
         const isSelected = selected.has(d);
         d3.select(this.parentNode).classed("vzb-checked", isSelected);
         return isSelected;
       });
 
-    this.DOM.list.selectAll(".vzb-item-folder").each(function(d) {
+    this.DOM.listItems.filter(".vzb-item-folder").each(function(d) {
       const folderItemElement = d3.select(this);
       const checkedCount = folderItemElement.selectAll(".vzb-checked").size();
       const itemCount = _getLeafChildrenCount(d);
@@ -362,15 +417,8 @@ class SectionFind extends MarkerControlsSection {
         .property("indeterminate", checkedCount && checkedCount != itemCount);
     });
 
-    const leafItems = this.DOM.list.selectAll(":not(:has(.vzb-item-children)).vzb-item-children");
-    const checkedItems = leafItems.selectAll(".vzb-checked");
-    leafItems.selectAll(".vzb-item:not(.vzb-checked)")
-      .sort(nameLocaleCompare)
-      .classed("vzb-separator", false);
-    checkedItems
-      .lower()
-      .sort(nameLocaleCompare)
-      .classed("vzb-separator", (d, i, g) => i == g.length - 1);
+    sortItems(this.DOM.listItems.select(".vzb-item-children"));
+    sortItems(this.DOM.list);
   }
 
   updateSearch(text = "") {
