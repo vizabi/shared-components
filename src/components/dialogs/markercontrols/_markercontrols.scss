@@ -253,15 +253,14 @@
         
         .vzb-item {
           height: auto;
-          margin-top: 4px;
-          margin-bottom: 0;
+          margin: 0;
           padding: 0;
 
           &:not(.vzb-item-folder):hover {
             .vzb-closecross {opacity: 1}
           }
           .vzb-closecross {
-            top: 0;
+            top: 2px;
             right: 0;
             position: absolute;
             opacity: 0;
@@ -271,14 +270,18 @@
           label {
             position: relative;
             padding-left: 2em;
-            line-height: 20px;
+            line-height: 24px;
             display: block;
             text-indent: 0;
+            &::before {
+              top: 2px;
+            }
+            &::after {
+              top: 7px;
+            }
           }
 
           &.vzb-item-folder {
-            line-height: 20px;
-
             >.vzb-item-children {
               height: 0;
               overflow: hidden;
@@ -299,7 +302,7 @@
               height: 12px;
               position: absolute;
               left: 4px;
-              top: 4px;
+              top: 6px;
               background-color: $vzb-color-primary;
               transform: none;
               border: none;
@@ -316,8 +319,8 @@
             >.vzb-folder-mark {
               cursor: pointer;
               opacity: 0.6;
-              padding-top: 2px;
-              padding-bottom: 4px;
+              padding-top: 4px;
+              padding-bottom: 5px;
               padding-right: 100%;
               &:hover {
                 opacity: 1;
