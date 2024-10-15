@@ -10,11 +10,11 @@ export function updateRainbowLegend(isVisible) {
   
   //Hide rainbow element if showing minimap or if color is discrete
   DOM.rainbowHolder.classed("vzb-hidden", !isVisible);
-  if (!isVisible) return;
+  const gradientWidth = DOM.rainbow.node().getBoundingClientRect().width;
+  if (!isVisible || !gradientWidth) return;
   
   const localise = this.localise;
   const colorModel = this.MDL.color.scale;
-  const gradientWidth = DOM.rainbow.node().getBoundingClientRect().width;
   const paletteKeys = colorModel.palette.paletteDomain.map(parseFloat);
   const paletteLabels = colorModel.palette.paletteLabels;
   const cScale = colorModel.d3Scale.copy();
