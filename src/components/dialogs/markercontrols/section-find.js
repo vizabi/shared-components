@@ -6,7 +6,7 @@ import * as d3 from "d3";
 const KEY = Symbol.for("key");
 function _getLeafChildren(d, result = []) {
   if (d.folder) {
-    d.children.forEach(_d => _getLeafChildren(_d, result))
+    d.children.forEach(_d => _getLeafChildren(_d, result));
   } else {
     result.push(...d.children);
   }
@@ -15,7 +15,7 @@ function _getLeafChildren(d, result = []) {
 
 function _getLeafChildrenCount(d, result = [0]) {
   if (d.folder) {
-    d.children.forEach(_d => _getLeafChildrenCount(_d, result))
+    d.children.forEach(_d => _getLeafChildrenCount(_d, result));
   } else {
     result[0] += d.children.length;
   }
@@ -32,8 +32,8 @@ function folderAndNameLocaleCompare(a, b) {
 
 function scrollTopTween(scrollTop) { 
   return function() { 
-      var i = d3.interpolateNumber(this.scrollTop, scrollTop); 
-      return function(t) { this.scrollTop = i(t); }; 
+    var i = d3.interpolateNumber(this.scrollTop, scrollTop); 
+    return function(t) { this.scrollTop = i(t); }; 
   }; 
 }
 
@@ -90,8 +90,8 @@ class SectionFind extends MarkerControlsSection {
     const drilldownProps = this._getDrilldownProps();
     const entityQuery = {
       select: {
-          key: [dim],
-          value: [...drilldownProps, "name"]
+        key: [dim],
+        value: [...drilldownProps, "name"]
       },
       from: "entities",
       locale: this.model.data.source.locale,
@@ -139,7 +139,7 @@ class SectionFind extends MarkerControlsSection {
     flatData.forEach(d => {
       drilldownProps.forEach(prop => {
         d[prop] = this.drilldownValues.get(d.children[0][dim])?.[prop];
-      })
+      });
     });
 
     const mapGroupData = ([key, children], i) => {
@@ -150,7 +150,7 @@ class SectionFind extends MarkerControlsSection {
         name: this.drilldownValues.get(key).name,
         folder: true
       };
-    }
+    };
     
     const result = mapGroupData([null, d3.groups.apply(null, [flatData, ...drilldownProps.map(prop => d => d[prop])])]);
     
@@ -288,7 +288,7 @@ class SectionFind extends MarkerControlsSection {
         if (this.parent.ui.disableFindInteractions) return;
         this.setModel.unhighlight(d);
       })
-      .each(function(d) {
+      .each(function() {
         const view = d3.select(this);
         view.append("span")
           .attr("class", "vzb-label")
@@ -311,7 +311,7 @@ class SectionFind extends MarkerControlsSection {
       });
 
     listItem.filter(d => d.folder).append("span").attr("class", "vzb-folder-mark")
-      .on("click", function(event, d) {
+      .on("click", function() {
         const view = d3.select(this.parentNode);
         const isOpened = view.classed("vzb-item-opened");
         if (isOpened) {
@@ -342,10 +342,10 @@ class SectionFind extends MarkerControlsSection {
         view.append("div")
           .attr("class", "vzb-item-children")
           .selectAll("div")
-            .data(d.children, d => d[KEY] )
-            .join("div")
-            .attr("class", d => `vzb-item vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
-            .call(_this._createListItem.bind(_this, dataLength));
+          .data(d.children, d => d[KEY] )
+          .join("div")
+          .attr("class", d => `vzb-item vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
+          .call(_this._createListItem.bind(_this, dataLength));
       }
     });
   }

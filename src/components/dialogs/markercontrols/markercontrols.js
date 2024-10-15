@@ -8,7 +8,6 @@ import { SectionSwitch } from "./section-switch.js";
 import { SectionSlice } from "./section-slice.js";
 import {computed, decorate, runInAction} from "mobx";
 import { ICON_QUESTION } from "../../../icons/iconset.js";
-import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
 

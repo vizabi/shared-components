@@ -1,5 +1,5 @@
 import { MarkerControlsSection } from "./section.js";
-import { decorate, runInAction, observable } from "mobx";
+import { decorate, observable } from "mobx";
 
 const ellipsis = (string, n)  => string.length > n ? string.substr(0, n) + "…" : string;
 
