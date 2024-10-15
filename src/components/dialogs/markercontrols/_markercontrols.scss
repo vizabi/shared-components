@@ -243,15 +243,128 @@
       }
 
       .vzb-find {
+        .vzb-list {
+          overflow: hidden;
+
+          > .vzb-item:first-child {
+            margin-top: 2px;
+          }
+        }
         
         .vzb-item {
-          &:hover {.vzb-closecross {opacity: 1}}
+          height: auto;
+          margin: 0;
+          padding: 0;
+
+          &:not(.vzb-item-folder):hover {
+            .vzb-closecross {opacity: 1}
+          }
           .vzb-closecross {
+            top: 2px;
             right: 0;
             position: absolute;
             opacity: 0;
             cursor: pointer;
-          }          
+          }
+          
+          label {
+            position: relative;
+            padding-left: 2em;
+            line-height: 24px;
+            display: block;
+            text-indent: 0;
+            &::before {
+              top: 2px;
+            }
+            &::after {
+              top: 7px;
+            }
+          }
+
+          &.vzb-item-folder {
+            >.vzb-item-children {
+              height: 0;
+              overflow: hidden;
+            }
+
+            &:hover {
+              background: none;
+
+              &:not(:has(.vzb-item-children:hover)):not(:has(.vzb-folder-mark:hover)) {
+                background-color: $vzb-color-primary-lightest;
+              }
+            }
+
+            &.vzb-dialog-checkbox input[type=checkbox]:indeterminate+label:after {
+              opacity: 1;
+              content: "";
+              width: 12px;
+              height: 12px;
+              position: absolute;
+              left: 4px;
+              top: 6px;
+              background-color: $vzb-color-primary;
+              transform: none;
+              border: none;
+            }
+
+            >label {
+              display: inline-flex;
+              max-width: calc(100% - 40px);
+              .vzb-label {
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+            >.vzb-folder-mark {
+              cursor: pointer;
+              opacity: 0.6;
+              padding-top: 4px;
+              padding-bottom: 5px;
+              padding-right: 100%;
+              &:hover {
+                opacity: 1;
+              }
+              &::after {
+                content: " ▶";
+              }
+            }
+            >.vzb-closecross {
+              pointer-events: none;
+            }
+
+            &.vzb-item-opened {
+              >.vzb-folder-mark {
+                &::after {
+                  content: " ▼";
+                }
+              }
+              >.vzb-item-children {
+                height: auto;
+              }
+              &.vzb-dialog-checkbox input[type=checkbox]:checked + label::after {
+                opacity: 1;
+              }
+              &:not(:has(.vzb-item-children:hover)):not(:has(.vzb-folder-mark:hover)):hover label::after {
+                opacity: 0.3;
+              }
+            }
+
+            &.vzb-item-insearch {
+              margin-top: 0;
+              >label, >.vzb-folder-mark {
+                display: none;
+              }
+              .vzb-item-children {
+                padding-left: 0;
+                height: auto;
+              }
+            }
+          }
+        }
+
+        .vzb-item-children {
+          padding-left: 1em;
         }
       }
 
