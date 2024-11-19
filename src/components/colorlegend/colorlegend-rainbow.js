@@ -13,7 +13,7 @@ export function updateRainbowLegend(isVisible) {
   const gradientWidth = DOM.rainbow.node().getBoundingClientRect().width;
   if (!isVisible || !gradientWidth) return;
   
-  const localise = this.localise;
+  const localise = this.services.locale.auto(this.MDL.color.data?.conceptProps?.format);
   const colorModel = this.MDL.color.scale;
   const paletteKeys = colorModel.palette.paletteDomain.map(parseFloat);
   const paletteLabels = colorModel.palette.paletteLabels;

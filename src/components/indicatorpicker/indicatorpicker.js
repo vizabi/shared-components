@@ -92,14 +92,15 @@ export class IndicatorPicker extends BaseComponent {
         const [key, payload] = highlightedMarkers.entries().next().value;
         const hoverKey = (this.model.dataMap.getByStr(key) || (payload !== true && JSON.parse(payload)) || {})[this.targetProp];
 
-        if (["entity_domain", "entity_set"].includes(this.MDL.model.data.conceptProps.concept_type)){
-          // entity domain or set and may gave an extra model to resolve names from  
+        if (["entity_domain", "entity_set", "string"].includes(this.MDL.model.data.conceptProps.concept_type)){
+          // entity domain or set or string and may gave an extra model to resolve names from  
           if (this.state.hoverKeyLabels && this.state.hoverKeyLabels[hoverKey] != null)
             selectText = this.state.hoverKeyLabels[hoverKey];
           else
             selectText = this.localise(hoverKey);          
         } else {        
-          selectText = this.localise(hoverKey);
+          const localiseValue = this.services.locale.auto(this.MDL.model.data?.conceptProps?.format);
+          selectText = localiseValue(hoverKey);
         }
           
       } else {
