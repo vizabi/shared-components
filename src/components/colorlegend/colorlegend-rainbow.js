@@ -114,7 +114,7 @@ export function updateRainbowLegend(isVisible) {
   
     DOM.subtitleText
       .classed("vzb-hidden", subtitle == "")
-      .text(subtitle);
+      .text(conceptProps.name_short ? subtitle : "");
 
     DOM.subtitleReset
       .text(localise("buttons/reset"))

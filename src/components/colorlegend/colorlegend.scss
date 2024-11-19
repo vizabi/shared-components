@@ -134,19 +134,26 @@
       width: 100%;
       svg {height: 100%;}
     }
-    .vzb-cl-subtitle-text {
-      display: block;
-      white-space: normal;
+    .vzb-cl-subtitle {
+      position: relative;
+      left: 0;
+      right: 0;
+
+      .vzb-cl-subtitle-text {
+        display: block;
+        white-space: normal;
+      }
+      
+      .vzb-cl-subtitle-reset {
+        position: absolute;
+        right: 20px;
+        bottom: 0px;
+        color: $vzb-color-red;
+        font-size: $vzb-font-size-small;
+        cursor: pointer;
+      }
     }
     
-    .vzb-cl-subtitle-reset {
-      position: absolute;
-      right: 20px;
-      bottom: 0px;
-      color: $vzb-color-red;
-      font-size: $vzb-font-size-small;
-      cursor: pointer;
-    }
 
 
     .vzb-cl-more-hint {
