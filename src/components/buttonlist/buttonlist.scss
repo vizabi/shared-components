@@ -167,10 +167,9 @@ $vzb-button-color-border: #cce6ed;
     .vzb-sidebar .vzb-buttonlist .vzb-buttonlist-btn {
       &[data-btn="sidebarcollapse"] {
         @include rtl {
-          left: 54px;
-          right: auto;
+          right: 54px;
           .vzb-buttonlist-btn-icon .vzb-icon {
-            transform: rotateY(180deg) scaleY(1.4);
+            transform: scaleY(1.4);
           }
         }
         position: absolute;
@@ -178,7 +177,7 @@ $vzb-button-color-border: #cce6ed;
         height: 200px;
         width: 13px;
         padding: 0;
-        right: 54px;
+        left: 54px;
         margin: 0;
         display: flex;
         justify-content: center;
@@ -205,7 +204,7 @@ $vzb-button-color-border: #cce6ed;
             flex: 0 0 9px;
             align-self: center;
             opacity: 0.5;
-            transform: scaleY(1.4);
+            transform: rotateY(180deg) scaleY(1.4);
             stroke: $vzb-color-white;
             stroke-width: 30px;
           }
@@ -262,15 +261,14 @@ $vzb-button-color-border: #cce6ed;
           }
           &[data-btn="sidebarcollapse"] {
             @include rtl {
-              left: 284px;
-              right: auto;
+              right: 284px;
               .vzb-buttonlist-btn-icon .vzb-icon {
-                transform: scaleY(1.4);
+                transform: rotateY(180deg) scaleY(1.4);
               }
             }
-            right: 284px;
+            left: 284px;
             .vzb-buttonlist-btn-icon .vzb-icon {
-              transform: rotateY(180deg) scaleY(1.4);
+              transform: scaleY(1.4);
             }
           }
         }

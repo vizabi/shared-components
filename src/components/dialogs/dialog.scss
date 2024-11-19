@@ -437,13 +437,13 @@ $vzb-dialog-content-height: 250px;
             margin-left: $size-button-list;
             margin-right: 0;
           }
-          @include position(absolute, 20px -10px auto auto);
+          @include position(absolute, 20px auto auto 10px );
           margin-right: $size-button-list;
           &.vzb-active {
             @include rtl {
               right: calc(100% - 330px);
             }
-            @include position(absolute, 20px -10px auto auto);
+            @include position(absolute, 20px  auto auto 10px);
           }
         }
       }
@@ -512,14 +512,14 @@ $vzb-dialog-content-height: 250px;
             margin-left: $size-button-list;
             margin-right: 0;
           }
-          @include position(absolute, -1000px -10px auto auto);
+          @include position(absolute, -1000px auto auto 10px);
           margin-right: $size-button-list;
           &.vzb-active {
             @include rtl {
               left: -10px;
               right: auto;
             }
-            @include position(absolute, 5px -10px auto auto);
+            @include position(absolute, 5px auto auto 10px);
           }
         }
       }
@@ -542,12 +542,12 @@ $vzb-dialog-content-height: 250px;
               margin-right: 0;
               right: calc(100% - 300px);
             }
-            @include position(absolute, auto -10px 70px auto);
+            @include position(absolute, auto auto 70px 10px);
             &.vzb-active {
               @include rtl {
                 right: calc(100% - 300px);
               }
-              @include position(absolute, auto -10px 70px auto);
+              @include position(absolute, auto auto 70px 10px);
             }
           }
           &.vzb-sidebar {
