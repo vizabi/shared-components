@@ -235,9 +235,11 @@ export class TreeMenu extends BaseComponent {
 
   _addIndicatorToTheTree(id, item, folder) {
     const existing = folder.children.find(f => f.id == id);
-    if (existing) {
+    if (existing && existing.type !== "folder") {
       //add to an existing item group
       existing.byDataSources.push(item);
+    } else if (existing && existing.type === "folder") {
+      console.warn(`Treemenu: collision between folder ID and indicator ID ${id}`)
     } else {
       //create a new item group
       folder.children.push({ id: id, concept_type: item.concept_type, type: "indicator", scales: item.scales, byDataSources: [item] });
