@@ -8,6 +8,8 @@ const FALLBACK_PATH = "./assets/locale/";
 const FALLBACK_ID = "en";
 const RTL_CSS_CLASS = "vzb-rtl";
 
+const SHARE = "share";
+const PERCENT = "percent";
 class _LocaleService extends BaseService {
 
   static DEFAULTS = {
@@ -87,13 +89,11 @@ class _LocaleService extends BaseService {
   }
 
   _initFormatters(){
-    this.numberF = function (x,  options) {
+    this.shortNumberF = function (x,  options) {
         
       // share works like rounded if set to SHARE, but multiplies by 100 and suffixes with "%"
       // percent works like rounded if set to PERCENT, but suffixes with "%"
-      const SHARE = "share";
-      const PERCENT = "percent";
-      const NOSUFFIX = "nosuffix";
+      
       const EPSILON = 0.00000000000001;
 
       if (options === SHARE) x *= 100;
@@ -104,7 +104,6 @@ class _LocaleService extends BaseService {
       const prec = 3; //round to so many significant digits
   
       let suffix = "";
-      if (options === NOSUFFIX) return d3.format("." + prec + format)(x);
   
       //---------------------
       // BEAUTIFIERS GO HOME!
@@ -113,19 +112,14 @@ class _LocaleService extends BaseService {
       // the tiny constant compensates epsilon-error when doing logarithms
       /* eslint-disable */
       switch (Math.floor(Math.log(Math.abs(x)) / Math.LN10 + EPSILON)) {
-        case -13: x *= 1000000000000; suffix = "p"; break; //0.1p
-        case -10: x *= 1000000000; suffix = "n"; break; //0.1n
-        case -7: x *= 1000000; suffix = "µ"; break; //0.1µ
-        case -6: x *= 1000000; suffix = "µ"; break; //1µ
-        case -5: x *= 1000000; suffix = "µ"; break; //10µ
-        case -4: break; //0.0001
-        case -3: break; //0.001
-        case -2: break; //0.01
-        case -1: break; //0.1
         case 0:  break; //1
+        case -1: break; //0.1
         case 1:  break; //10
+        case -2: break; //0.01
         case 2:  break; //100
+        case -3: break; //0.001
         case 3:  break; //1000
+        case -4: break; //0.0001
         case 4:  x /= 1000; suffix = "k"; break; //10k
         case 5:  x /= 1000; suffix = "k"; break; //100k
         case 6:  x /= 1000000; suffix = "M"; break; //1M
@@ -137,6 +131,13 @@ class _LocaleService extends BaseService {
         case 12: x /= 1000000000000; suffix = "TR"; break; //1TR
         case 13: x /= 1000000000000; suffix = "TR"; break; //10TR
         case 14: x /= 1000000000000; suffix = "TR"; break; //100TR
+        
+        case -5: x *= 1000000; suffix = "µ"; break; //10µ
+        case -6: x *= 1000000; suffix = "µ"; break; //1µ
+        case -7: x *= 1000000; suffix = "µ"; break; //0.1µ
+        case -10: x *= 1000000000; suffix = "n"; break; //0.1n
+        case -13: x *= 1000000000000; suffix = "p"; break; //0.1p
+
         //use the D3 SI formatting for the extreme cases
         default: return (d3.format("." + prec + "s")(x)).replace("G", "B");
       }
@@ -148,11 +149,16 @@ class _LocaleService extends BaseService {
       return (formatted + suffix + (options === PERCENT || options === SHARE ? "%" : ""));
     };
 
-    this.longNumberF = d3.formatLocale({
+    const d3LongNumberFormatter = d3.formatLocale({
       decimal: ".",
       thousands: " ", //short space
       grouping: [3],
     }).format(",.3~r");
+
+    this.longNumberF = function(x, options) {
+      if (options === SHARE) x *= 100;
+      return d3LongNumberFormatter(x) + (options === PERCENT || options === SHARE ? "%" : "");
+    }
 
     this.dateF = {
       year: d3.utcFormat("%Y"),
@@ -173,11 +179,11 @@ class _LocaleService extends BaseService {
     };
   }
   
-  getFormattedNumber(arg) {
-    return this.shortNumberFormat ? this.numberF(arg) : this.longNumberF(arg);
+  getFormattedNumber(arg, options) {
+    return this.shortNumberFormat ? this.shortNumberF(arg, options) : this.longNumberF(arg, options);
   }
 
-  getFormattedDate(arg, dateIntervalSize) {
+  getFormattedDate(arg, dateIntervalSize = "year") {
     return this.dateF[dateIntervalSize](arg);
   }
   
@@ -185,12 +191,12 @@ class _LocaleService extends BaseService {
     return this.stringF(arg);
   }
 
-  auto(dateIntervalSize = "year"){
+  auto(options){
     return (function(arg){
       // null, NaN and undefined are bypassing any formatter
       if (!arg && arg !== 0 && arg !== "") return arg;
-      if (typeof arg === "number") return this.getFormattedNumber(arg);
-      if (arg instanceof Date) return this.getFormattedDate(arg, dateIntervalSize);
+      if (typeof arg === "number") return this.getFormattedNumber(arg, options);
+      if (arg instanceof Date) return this.getFormattedDate(arg, options);
       if (typeof arg === "string") return this.getUIstring(arg);
     }).bind(this);
   }
