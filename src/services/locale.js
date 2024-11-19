@@ -158,7 +158,7 @@ class _LocaleService extends BaseService {
     this.longNumberF = function(x, options) {
       if (options === SHARE) x *= 100;
       return d3LongNumberFormatter(x) + (options === PERCENT || options === SHARE ? "%" : "");
-    }
+    };
 
     this.dateF = {
       year: d3.utcFormat("%Y"),

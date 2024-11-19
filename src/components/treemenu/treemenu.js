@@ -239,7 +239,7 @@ export class TreeMenu extends BaseComponent {
       //add to an existing item group
       existing.byDataSources.push(item);
     } else if (existing && existing.type === "folder") {
-      console.warn(`Treemenu: collision between folder ID and indicator ID ${id}`)
+      console.warn(`Treemenu: collision between folder ID and indicator ID ${id}`);
     } else {
       //create a new item group
       folder.children.push({ id: id, concept_type: item.concept_type, type: "indicator", scales: item.scales, byDataSources: [item] });
