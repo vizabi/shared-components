@@ -1,0 +1,15 @@
+@import "../../styles/common.scss";
+
+.vzb-tool {
+  .vzb-label-boxremoved {
+    &:not(.vzb-highlighted) {
+      .vzb-label-fill {
+        opacity: 0;
+      }
+      .vzb-label-glow {
+        stroke: none;
+        fill: none;
+      }
+    }
+  }
+}
