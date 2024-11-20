@@ -142,11 +142,18 @@ class SectionFind extends MarkerControlsSection {
       });
     });
 
+    const mapChildren = (children) => {
+      if (!children[children.length - 1][0]) {
+        return children.slice(0, -1).map(mapGroupData).concat(mapGroupData(children[children.length - 1]));
+      } else {
+        return children.map(mapGroupData);
+      }
+    }
     const mapGroupData = ([key, children], i) => {
-      if (!key) return (children[0]?.[0] && children[0]?.[1]) ? children.map(mapGroupData) : children[0]?.[1] ? mapGroupData(children[0], i) : i === undefined ? children : children[0];
+      if (!key) return (children[0]?.[0] && children[0]?.[1]) ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0], i) : i === undefined ? children : children[0];
       return {
         [KEY]: key, 
-        children: children[0]?.[0] ? children.map(mapGroupData) : children[0]?.[1] ? mapGroupData(children[0]) : children,
+        children: children[0]?.[0] ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0]) : children,
         name: this.drilldownValues.get(key).name,
         folder: true
       };
