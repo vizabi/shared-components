@@ -17,6 +17,9 @@ function url(text = "", link = ""){
   if (!link) return text;
   return `<a class='vzb-underline' href='${link}' target='_blank'>⧉ ${text}</a>`;
 }
+function mailto(mailto = ""){
+  return `💌 <a class='vzb-underline' href='mailto:${mailto}' target='_blank'>${mailto}</a>`;
+}
 
 export class About extends Dialog {
   constructor(config) {
@@ -62,8 +65,9 @@ export class About extends Dialog {
     const author = this.root.constructor.versionInfo?.sharedComponents?.package?.author || {};
 
     this.DOM.header.html("");
-    this.DOM.header.append("p").html(url("Report a problem", "https://github.com/Gapminder/tools-page/issues"));
-    this.DOM.header.append("p").html("This chart is made with Vizabi, <br/> a project by " + url(author.name, author.url));
+    this.DOM.header.append("p").html("Next level data graphics");
+    this.DOM.header.append("p").html("This chart is made with Vizabi, <br/> an open-source project originally <br/> built at " + url(author.name, author.url) + "<br/> Currently maintained and extended by <br/> Angie and team at "  + url("Visual Encodings AB", "https://visual-encodings.com"));
+    this.DOM.header.append("p").html("If you would like to use these graphs, we <br/> can help you set them up and customise <br/>"  + mailto("info@visual-encodings.com"));
   }
 
 
