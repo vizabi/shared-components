@@ -300,7 +300,7 @@ class Labels extends BaseComponent {
     if (tooltipText) {
       let position = 0;
       const _cssPrefix = this.options.CSS_PREFIX;
-      this.tooltipEl.raise().text(null);
+      this.tooltipEl.raise().text(null).classed("vzb-invisible", false);
       this.label(this.tooltipEl, true);
       if (d) {
         const cache = {};
@@ -555,7 +555,7 @@ class Labels extends BaseComponent {
       if (topCornerCase) {
         vPosNew++;
         const deltaX = resolvedX0 - cached.rectBBox.width;
-        resolvedY = resolvedY0 + cached.rectBBox.height - offsetY * 0.5 + (deltaX > 0 ? utils.cathetus(cached.scaledS0, deltaX) : cached.scaledS0);
+        resolvedY = resolvedY0 + cached.rectBBox.height - offsetY * 0.5 + (deltaX > 0 && cached.scaledS0 > deltaX ? utils.cathetus(cached.scaledS0, deltaX) : cached.scaledS0);
       }
     }
 
