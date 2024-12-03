@@ -55,7 +55,6 @@ class SectionFind extends MarkerControlsSection {
 
   setup(options) {
     super.setup(options);
-    this.DOM.title.text("Find");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.listReady = false;
     this.entitiesWithMissingDataInAllFrames = [];
@@ -193,6 +192,7 @@ class SectionFind extends MarkerControlsSection {
   }
 
   createList() {
+    this.DOM.title.text(this.localise("markercontrols/section/find"));
     this.listReady = false;
     const isFindInFolderView = this.isFindInFolderView();
   

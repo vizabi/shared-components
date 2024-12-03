@@ -10,7 +10,6 @@ class SectionSwitch extends MarkerControlsSection {
 
   setup(options) {
     super.setup(options);
-    this.DOM.title.text("Switch to");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.DOM.hint = this.DOM.content.append("div").attr("class", "vzb-hint");
     this.items = [];
@@ -87,6 +86,7 @@ class SectionSwitch extends MarkerControlsSection {
   }
 
   createList() {
+    this.DOM.title.text(this.localise("markercontrols/section/switch"));
     const list = this.DOM.list;
     this.model.data.filter;
 
@@ -110,7 +110,7 @@ class SectionSwitch extends MarkerControlsSection {
           .property("checked", d => this.isCurrentSetting(d))
       );
 
-    this.DOM.hint.text("number shows how many measures are available in dataset " + this.model.data.source.id + " for each of the options above");
+    this.DOM.hint.text(this.localise("markercontrols/section/switchNumberHint").replace("{{dataset}}", this.model.data.source.id) ); 
   }
 
 

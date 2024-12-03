@@ -208,10 +208,10 @@ class _MarkerControls extends Dialog {
     const sectionSwitchExample = this.findChild({type: "SectionSwitch"})?.example?.().toLowerCase();
     const sectionSliceExample = this.findChild({type: "SectionSlice"})?.example?.().toLowerCase();
     const infoHints = [
-      {text: "Examples and tips", instruction: true},
-      {text: "Search within all commands like so:", instruction: true},
+      {text: this.localise("markercontrols/tips_header"), instruction: true},
+      {text: this.localise("markercontrols/tips_toptext"), instruction: true},
       {action: globalExample, ellipsis: "..."},
-      {text: "or use a specific command:", instruction: true},
+      {text: this.localise("markercontrols/tips_middletext"), instruction: true},
       {icon: "👀", action: "find", example: sectionFindRemoveExample},
       {icon: "➕", action: "add", example: sectionAddExample},
       {icon: "❌", action: "remove", example: sectionFindRemoveExample},

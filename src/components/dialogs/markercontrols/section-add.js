@@ -13,7 +13,6 @@ class SectionAdd extends MarkerControlsSection {
 
   setup(options) {
     super.setup(options);
-    this.DOM.title.text("Add");
     this.DOM.matches = this.DOM.content.append("ul").attr("class", "vzb-addgeo-matches");
 
     this.catalog = [];
@@ -40,6 +39,7 @@ class SectionAdd extends MarkerControlsSection {
   }
 
   buildList() {
+    this.DOM.title.text(this.localise("markercontrols/section/add"));
     this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
       const catalog = [];
       const allCatalog = [];

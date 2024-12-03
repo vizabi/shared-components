@@ -11,7 +11,6 @@ class SectionRemove extends MarkerControlsSection {
 
   setup(options) {
     super.setup(options);
-    this.DOM.title.text("Remove");
     this.DOM.matches = this.DOM.content.append("ul").attr("class", "vzb-remove-matches");
 
     this.catalog = [];
@@ -38,6 +37,7 @@ class SectionRemove extends MarkerControlsSection {
   }
 
   createList() {
+    this.DOM.title.text(this.localise("markercontrols/section/remove"));
     this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
       const dataKeys = [...this.parent.dimMarkersData.keys()];
       const markersFromIn = [];
