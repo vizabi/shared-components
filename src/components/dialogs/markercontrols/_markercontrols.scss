@@ -156,6 +156,13 @@
           content: "➡️";
           margin-right: 5px;
         }
+        &.vzb-current-choice{
+          pointer-events: none;
+          label::before {
+            content: "✔";
+            margin-right: 5px;
+          } 
+        }
       }
 
       &:not(.vzb-fullscreenish) .vzb-slice .vzb-spaceconfig-showallencs {
