@@ -118,8 +118,8 @@ class _DataWarning extends BaseComponent {
 
   updateButtonOpacityScale() {
     this.wScale = this.MDL.frame.scale.d3Scale.copy()
-      .domain(this.ui.doubtDomain.map(m => this.MDL.frame.parseValue("" + m)))
-      .range(this.ui.doubtRange)
+      .domain(this.ui?.doubtDomain.map(m => this.MDL.frame.parseValue("" + m)))
+      .range(this.ui?.doubtRange)
       .clamp(true);
   }
 
@@ -128,7 +128,7 @@ class _DataWarning extends BaseComponent {
 
     if (opacity == null) opacity = this.wScale(this.MDL.frame.value);
     if (this.MDL.selected.data.filter.any()) opacity = 1;
-    this.DOM.button.style("opacity", opacity);
+    this.DOM.button.style("opacity", this.ui?.enable === false ? 0 : opacity);
   }
 
   updateButtonPosition() {
