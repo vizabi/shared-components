@@ -291,7 +291,7 @@ export class TreeMenu extends BaseComponent {
           const keyConcept = source.getConcept(spaces[0][0]);
           const folderName = keyConcept.concept + "_properties";
           if (!tags[folderName]) {
-            tags[folderName] = { id: folderName, name: (keyConcept.name || keyConcept.concept) + " properties", type: "folder", children: [] };
+            tags[folderName] = { id: folderName, name: (keyConcept.name || keyConcept.concept) + " " + this.localise("treemenu/properties"), type: "folder", children: [] };
             tagsRoot.children.push(tags[folderName]);
           }
           this._addIndicatorToTheTree(id, props, tags[folderName]);
