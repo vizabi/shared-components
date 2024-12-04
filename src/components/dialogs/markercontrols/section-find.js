@@ -1,5 +1,6 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
+import { ICON_CLOSE as iconClose } from "../../../icons/iconset";
 import {decorate, computed, runInAction, observable} from "mobx";
 import * as d3 from "d3";
 
@@ -55,13 +56,16 @@ class SectionFind extends MarkerControlsSection {
 
   setup(options) {
     super.setup(options);
+    this.DOM.selectDialog = this.DOM.content.append("div").attr("class", "vzb-find-select-dialog vzb-hidden");
+    this.DOM.selectDialog.append("div").attr("class", "vzb-find-select-dialog-title");
+    this.DOM.selectDialog.append("div").attr("class", "vzb-find-select-dialog-close");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.listReady = false;
     this.entitiesWithMissingDataInAllFrames = [];
     this.drilldownValues = new Map();
     this.listData = [];
     this.listScrollTransitionFlag = false;
-
+    this._initSelectDialog();
   }
 
   draw() {
@@ -77,6 +81,7 @@ class SectionFind extends MarkerControlsSection {
 
   get MDL() {
     return {
+      color: this.model.encoding.color,
       frame: this.model.encoding.frame,
       selected: this.model.encoding.selected,
       highlighted: this.model.encoding.highlighted
@@ -147,7 +152,8 @@ class SectionFind extends MarkerControlsSection {
       } else {
         return children.map(mapGroupData);
       }
-    }
+    };
+
     const mapGroupData = ([key, children], i) => {
       if (!key) return (children[0]?.[0] && children[0]?.[1]) ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0], i) : i === undefined ? children : children[0];
       return {
@@ -250,9 +256,18 @@ class SectionFind extends MarkerControlsSection {
         const scrollDelta = itemNode.offsetTop - (separatorNode?.offsetTop || 0);
         const newScrollTop = contentNode.scrollTop - scrollDelta + (scrollDelta > 0 ? itemNode.clientHeight * 2 : -itemNode.clientHeight);
 
-        this.setModel.unhighlight(d);
+        if (!(event.target.checked && d.folder)) this.setModel.unhighlight(d);
         if (event.target.checked) {
-          this.setModel.select(d);
+          if (d.folder) {
+            event.target.checked = false;
+            this._bindSelectDialogItems(d);
+            this.DOM.selectDialog.classed("vzb-hidden", false);
+            const dialogTop = itemNode.offsetTop - contentNode.scrollTop;
+            const dialogTopAdjust = this.DOM.selectDialog.node().offsetHeight + dialogTop - contentNode.offsetHeight - contentNode.offsetTop;
+            this.DOM.selectDialog.style("top", (dialogTopAdjust > 0 ? dialogTop - dialogTopAdjust : dialogTop) + "px");
+          } else {
+            this.setModel.select(d);
+          }
         } else {
           this.setModel.deselect(d);
         }
@@ -456,6 +471,193 @@ class SectionFind extends MarkerControlsSection {
         this.updateSearch();
       }
     });
+  }
+
+  _interact() {
+    const _this = this;
+
+    return {
+      clickToAddAll(d) {
+        const dim = _this.model.data.space[0];
+        const prop = dim;
+
+        _this.model.data.filter.addUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
+      },
+      clickToRemoveAll(d) {
+        const dim = _this.model.data.space[0];
+        const prop = dim;
+
+        _this.model.data.filter.deleteUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
+      },
+      clickToRemoveEverythingElse(d) {
+        const childrenKeys = _getLeafChildren(d).map(m => m[KEY]);
+        const everythingElse = _this.listData.flatMap(d => _getLeafChildren(d)).map(m => m[KEY]).filter(f => !childrenKeys.includes(f));
+        const dim = _this.model.data.space[0];
+        const prop = dim;
+        _this.model.data.filter.deleteUsingLimitedStructure({key: everythingElse, dim, prop});
+        _this.parent.DOM.content.node().scrollTop = 0;
+      },
+      disableSelectHover(){
+        if (_this.root.ui.dialogs?.markercontrols?.disableFindInteractions) return true;
+      },
+      disableAddAll(){
+        if (_this.root.ui.dialogs?.markercontrols?.disableFindAddRemoveGroups) return true;
+        return true;
+        // const dim = _this.model.data.space[0];
+        // const prop = dim;
+        // return !_this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
+      },
+      disableRemoveAll(d){
+        if (_this.root.ui.dialogs?.markercontrols?.disableFindAddRemoveGroups) return true;
+        const dim = _this.model.data.space[0];
+        const prop = dim;
+        return _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
+      },
+      disableRemoveEverythingElse(){
+        if (_this.root.ui.dialogs?.markercontrols?.disableFindAddRemoveGroups) return true;
+        return false;
+        // const dim = _this.model.data.space[0];
+        // const prop = dim;
+        // const everythingElse = _this.model.dataArray.map(m => m[KEY]).filter(f => f !== d[KEY]);
+        // return _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: d[KEY], dim, prop}) 
+        //   //everything else is already removed
+        //   || everythingElse.every(key => _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key, dim, prop}) );
+      },
+      clickToSelect(d) {
+        _this.setModel.select(d);
+      }
+    };
+  }
+
+  _initSelectDialog() {
+    //this.DOM.moreOptionsHint = this.DOM.wrapper.select(".vzb-find-more-hint");
+
+    this.DOM.selectDialog.on("mouseleave", () => {
+      this._closeSelectDialog();
+    });
+    
+    this.DOM.selectDialogTitle = this.DOM.selectDialog.select(".vzb-find-select-dialog-title");
+
+    this.DOM.selectDialogClose = this.DOM.selectDialog.select(".vzb-find-select-dialog-close");
+    this.DOM.selectDialogClose
+      .html(iconClose)
+      .on("click", () => this._closeSelectDialog());
+
+    this.DOM.selectAllinGroup = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-find-select-dialog-item vzb-clickable");
+
+    this.DOM.addAllinGroup = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-find-select-dialog-item vzb-clickable");  
+
+    this.DOM.removeAllinGroup = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-find-select-dialog-item vzb-clickable");  
+
+    this.DOM.removeEverythingElse = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-find-select-dialog-item vzb-clickable");  
+
+    this.DOM.editColorButton = this.DOM.selectDialog.append("div")
+      .attr("class", "vzb-find-select-dialog-item vzb-find-select-dialog-item-moreoptions");
+    this.DOM.editColorButton.append("label")
+      .attr("class", "vzb-clickable")
+      .attr("for", "vzb-find-select-dialog-color-" + this.id);
+    this.DOM.editColorButton.append("input")
+      .attr("type", "color")
+      .attr("class", "vzb-invisible")
+      .attr("id", "vzb-find-select-dialog-color-" + this.id);
+    this.DOM.editColorButton.append("span")
+      .attr("class", "vzb-clickable");
+
+    this.DOM.editColorButtonTooltip = this.DOM.editColorButton.append("div")
+      .attr("class", "vzb-find-select-dialog-item-tooltip");
+  }
+
+  _updateUiStrings(name) {
+    const t = this.localise;
+    this.DOM.selectDialogTitle.text(name);
+    //this.DOM.moreOptionsHint.text(t("hints/color/more"));
+    this.DOM.selectAllinGroup.text("✅ " + t("dialogs/color/select-all-in-group") + " " + name);
+    this.DOM.addAllinGroup.text("✳️ " + t("dialogs/color/add-all-in-group") + " " + name);
+    this.DOM.removeAllinGroup.text("🗑️ " + t("dialogs/color/remove-all-in-group") + " " + name);
+    this.DOM.removeEverythingElse.text("🎯 " + t("dialogs/color/remove-else"));
+    this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
+    this.DOM.editColorButton.select("span").text(t("buttons/reset"));
+    this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint") 
+      + " " + (this.MDL.color.data.conceptProps.name || this.MDL.color.data.concept)
+    );
+  }
+
+  _closeSelectDialog() {
+    this._selectDialogDatum && this.setModel.unhighlight(this._selectDialogDatum);
+    this._selectDialogDatum = null;
+    this.DOM.selectDialog.classed("vzb-hidden", true);
+  }
+
+  _bindSelectDialogItems(d) {
+    //const _this = this;
+    this._selectDialogDatum = d;
+    this._updateUiStrings(d.name);
+
+    this.DOM.selectAllinGroup
+      //experimentally removed this limitation, because discovered that the "string" concept property works too
+      //this is especially useful for CSV-only data because there are no entity props linking to other entities, just strings
+      .classed("vzb-hidden", () => this._interact().disableSelectHover(d))
+      .on("click", () => {
+        this._interact().clickToSelect(d);
+        this._closeSelectDialog();
+      });
+
+    this.DOM.addAllinGroup
+      .classed("vzb-hidden", () => this._interact().disableAddAll(d))
+      .on("click", () => {
+        this._interact().clickToAddAll(d);
+        this._closeSelectDialog();
+      });
+    this.DOM.removeAllinGroup
+      .classed("vzb-hidden", () => this._interact().disableRemoveAll(d))
+      .on("click", () => {
+        this._interact().clickToRemoveAll(d);
+        this._closeSelectDialog();
+      });
+    this.DOM.removeEverythingElse
+      .classed("vzb-hidden", () => this._interact().disableRemoveEverythingElse(d))
+      .on("click", () => {
+        this._interact().clickToRemoveEverythingElse(d);
+        this._closeSelectDialog();
+      });
+
+    this.DOM.editColorButtonTooltip.classed("vzb-hidden", true);
+    this.DOM.editColorButton.classed("vzb-hidden", true);
+
+    // const isColorSelectable = this.MDL.color.scale.palette.isUserSelectable;
+    // this.DOM.editColorButtonTooltip.classed("vzb-hidden", isColorSelectable);
+    // this.DOM.editColorButton.select("span").classed("vzb-hidden", !isColorSelectable);
+    // this.DOM.editColorButton.classed("vzb-find-select-dialog-item-disabled", !isColorSelectable);
+    
+    // if (isColorSelectable){
+    //   const colorScaleModel = this.MDL.color.scale;
+    //   const concept = this.MDL.color.data.concept;
+    //   const target = this.MDL.color.data.isConstant ? "_default" : d[concept];
+    //   const colorOld = colorScaleModel.palette.getColor(target);
+    //   const colorDef = colorScaleModel.palette.getColor(target, colorScaleModel.palette.defaultPalette);
+    //   this.DOM.editColorButton.select("input")
+    //     .property("value", colorOld)
+    //     .on("input", function(){
+    //       const value = d3.select(this).property("value");
+    //       colorScaleModel.palette.setColor(value, target);
+    //     })
+    //     .on("change", function(){
+    //       _this._closeSelectDialog();
+    //     });
+
+    //   //reset color
+    //   this.DOM.editColorButton.select("span")
+    //     .classed("vzb-hidden", colorOld == colorDef)
+    //     .style("color", colorDef)
+    //     .on("click", function(){
+    //       colorScaleModel.palette.removeColor(target);
+    //       _this._closeSelectDialog();
+    //     });
+    // }
   }
 
 }
