@@ -89,6 +89,8 @@ class _LocaleService extends BaseService {
   }
 
   _initFormatters(){
+    const percentSymbol = this.getPercentSymbol();
+
     this.shortNumberF = function (x,  options) {
         
       // share works like rounded if set to SHARE, but multiplies by 100 and suffixes with "%"
@@ -146,7 +148,7 @@ class _LocaleService extends BaseService {
       let formatted = d3.format("." + prec + format)(x);
   
       // use manual formatting for the cases above
-      return (formatted + suffix + (options === PERCENT || options === SHARE ? "%" : ""));
+      return (formatted + suffix + (options === PERCENT || options === SHARE ? percentSymbol : ""));
     };
 
     const d3LongNumberFormatter = d3.formatLocale({
@@ -157,7 +159,7 @@ class _LocaleService extends BaseService {
 
     this.longNumberF = function(x, options) {
       if (options === SHARE) x *= 100;
-      return d3LongNumberFormatter(x) + (options === PERCENT || options === SHARE ? "%" : "");
+      return d3LongNumberFormatter(x) + (options === PERCENT || options === SHARE ? percentSymbol : "");
     };
 
     this.dateF = {
@@ -203,6 +205,10 @@ class _LocaleService extends BaseService {
 
   isRTL(){
     return !!this.content[this.id].rtl;
+  }
+
+  getPercentSymbol(){
+    return this.content[this.id].percentSymbol || "%";
   }
 }
 
