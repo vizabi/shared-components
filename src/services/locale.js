@@ -91,14 +91,14 @@ class _LocaleService extends BaseService {
   _initFormatters(){
     const percentSymbol = this.getPercentSymbol();
 
-    this.shortNumberF = function (x,  options) {
+    this.shortNumberF = function (x,  shareOrPercent) {
         
       // share works like rounded if set to SHARE, but multiplies by 100 and suffixes with "%"
       // percent works like rounded if set to PERCENT, but suffixes with "%"
       
       const EPSILON = 0.00000000000001;
 
-      if (options === SHARE) x *= 100;
+      if (shareOrPercent === SHARE) x *= 100;
   
       if (Math.abs(x) < EPSILON) return "0";
   
@@ -148,7 +148,7 @@ class _LocaleService extends BaseService {
       let formatted = d3.format("." + prec + format)(x);
   
       // use manual formatting for the cases above
-      return (formatted + suffix + (options === PERCENT || options === SHARE ? percentSymbol : ""));
+      return (formatted + suffix + (shareOrPercent === PERCENT || shareOrPercent === SHARE ? percentSymbol : ""));
     };
 
     const d3LongNumberFormatter = d3.formatLocale({
@@ -157,9 +157,9 @@ class _LocaleService extends BaseService {
       grouping: [3],
     }).format(",.3~r");
 
-    this.longNumberF = function(x, options) {
-      if (options === SHARE) x *= 100;
-      return d3LongNumberFormatter(x) + (options === PERCENT || options === SHARE ? percentSymbol : "");
+    this.longNumberF = function(x, shareOrPercent) {
+      if (shareOrPercent === SHARE) x *= 100;
+      return d3LongNumberFormatter(x) + (shareOrPercent === PERCENT || shareOrPercent === SHARE ? percentSymbol : "");
     };
 
     this.dateF = {
@@ -181,8 +181,8 @@ class _LocaleService extends BaseService {
     };
   }
   
-  getFormattedNumber(arg, options) {
-    return this.shortNumberFormat ? this.shortNumberF(arg, options) : this.longNumberF(arg, options);
+  getFormattedNumber(arg, shareOrPercent) {
+    return this.shortNumberFormat ? this.shortNumberF(arg, shareOrPercent) : this.longNumberF(arg, shareOrPercent);
   }
 
   getFormattedDate(arg, dateIntervalSize = "year") {
@@ -193,12 +193,12 @@ class _LocaleService extends BaseService {
     return this.stringF(arg);
   }
 
-  auto(options){
+  auto(options = {}){
     return (function(arg){
       // null, NaN and undefined are bypassing any formatter
       if (!arg && arg !== 0 && arg !== "") return arg;
-      if (typeof arg === "number") return this.getFormattedNumber(arg, options);
-      if (arg instanceof Date) return this.getFormattedDate(arg, options);
+      if (typeof arg === "number") return this.getFormattedNumber(arg, options.shareOrPercent);
+      if (arg instanceof Date) return this.getFormattedDate(arg, options.interval);
       if (typeof arg === "string") return this.getUIstring(arg);
     }).bind(this);
   }

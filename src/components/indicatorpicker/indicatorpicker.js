@@ -99,7 +99,7 @@ export class IndicatorPicker extends BaseComponent {
           else
             selectText = this.localise(hoverKey);          
         } else {        
-          const localiseValue = this.services.locale.auto(this.MDL.model.data?.conceptProps?.format);
+          const localiseValue = this.services.locale.auto({shareOrPercent: this.MDL.model.data?.conceptProps?.format});
           selectText = localiseValue(hoverKey);
         }
           

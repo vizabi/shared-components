@@ -84,7 +84,7 @@ class DateTimeBackground extends BaseComponent {
   }
 
   draw() {
-    this.localise = this.services.locale.auto(this.MDL.frame.interval);
+    this.localise = this.services.locale.auto({interval: this.MDL.frame.interval});
 
     if (this.updateLayoutProfile()) return; //return if exists with error
 

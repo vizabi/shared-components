@@ -49,8 +49,13 @@ locale.getFormattedNumber(456454644) //"456M"
 locale.getFormattedDate(new Date()) //"2019"
 locale.getUIstring("buttons/apply") //"Apply"
   
-//convenience method
-locale.auto(this.MDL.frame.interval);
+//convenience method auto with examples:
+//auto will detect what typr of argument it receives and redirect to one of the above functions
+locale.auto()("buttons/apply"); //"Apply"
+locale.auto({interval: "year"})(new Date()); //"2025"
+locale.auto({interval: this.MDL.frame.interval})(new Date());
+locale.auto({shareOrPercent: "share"})(0.5); //"50%" 
+locale.auto({shareOrPercent: x.data?.conceptProps?.format})(158.31);
 
 
 ### Layout service
