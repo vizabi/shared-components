@@ -143,7 +143,7 @@ class SectionSwitch extends MarkerControlsSection {
       })
       .classed("vzb-current-choice", d => {
         return this.isCurrentSetting(d) && !this.parent.isFullscreenish();
-      })
+      });
     this.showHideHeader(items.size() - hiddenItems);
     this.DOM.hint.classed("vzb-hidden", !(items.size() - hiddenItems));
   }

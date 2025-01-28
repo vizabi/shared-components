@@ -6,6 +6,7 @@ import { SectionAdd } from "./section-add.js";
 import { SectionRemove } from "./section-remove.js";
 import { SectionSwitch } from "./section-switch.js";
 import { SectionSlice } from "./section-slice.js";
+import { ShortcutForSwitch } from "./ShortcutForSwitch.js";
 import {computed, decorate, runInAction} from "mobx";
 import { ICON_QUESTION } from "../../../icons/iconset.js";
 
@@ -41,6 +42,7 @@ class _MarkerControls extends Dialog {
           </div>
         </div>
 
+        <div class="vzb-shortcutforswitch"></div>
         <div class="vzb-dialog-buttons">
           <div class="vzb-dialog-bubbleopacity vzb-dialog-control" data-panel="markercontrols"></div>
           <div class="vzb-dialog-button vzb-deselect" data-panel="markercontrols">
@@ -73,6 +75,9 @@ class _MarkerControls extends Dialog {
     },{
       type: SectionRemove,
       placeholder: ".vzb-remove"
+    },{
+      type: ShortcutForSwitch,
+      placeholder: ".vzb-shortcutforswitch"
     }];
     
     if (!config.default_ui.disableSwitch)

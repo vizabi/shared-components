@@ -518,6 +518,44 @@
           }
         }
       }
+
+
+      .vzb-shortcutforswitch {
+        align-self: center;
+        font-size: $vzb-font-size-small;
+        font-family: $vzb-font-family-alt;
+        margin-top: 8px;
+
+        span {
+          padding: 2px 7px;
+          border: 1px solid $vzb-color-primary-dark;
+          color: $vzb-color-primary-darkest;
+          margin-left: -1px;
+          cursor: pointer;
+          &:hover {
+            box-shadow: inset 0px 1px 10px $vzb-color-primary-light;
+            background-color: $vzb-color-primary-lightest;
+          }
+          &:first-child {
+            @include rtl {
+              border-radius: 0 4px 4px 0;
+            }
+            border-radius: 4px 0 0 4px;
+          }
+          &:last-child {
+            @include rtl {
+              border-radius: 4px 0 0 4px;
+            }
+            border-radius: 0 4px 4px 0;
+          }
+        }
+
+        .vzb-active {
+          box-shadow: inset 0px 1px 10px $vzb-color-primary-light;
+          background-color: $vzb-color-primary-lightest;
+          pointer-events: none;
+        }
+      }
     }
   }
 }
