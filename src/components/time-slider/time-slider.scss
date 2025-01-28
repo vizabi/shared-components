@@ -117,7 +117,7 @@ $color-text: rgb(15, 14, 14);
           @include opacity(1);
           fill: none;
           stroke: $vzb-ts-slider-color;
-          stroke-opacity: 0.1;
+          stroke-opacity: 0.9;
           stroke-width: 5px;
           stroke-linecap: round;
         }

@@ -31,6 +31,7 @@
     grid-column-start: 1;
     grid-column-end: 1;
 
+    pointer-events: none;
     display: flex;
     .vzb-timeslider {
       flex: 1 1 auto;
