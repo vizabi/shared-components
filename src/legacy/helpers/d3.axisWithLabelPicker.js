@@ -14,6 +14,7 @@ export default function axisSmart(_orient) {
     const OPTIMISTIC = "optimistic approximation: labels have different lengths";
     const PESSIMISTIC = "pessimistic approximation: all labels have the largest length";
     const DEFAULT_LOGBASE = 10;
+    const DEFAULT_TICKS_NUMBER = 5;
 
     function onlyUnique(value, index, self) {
       return self.indexOf(value) === index;
@@ -435,7 +436,7 @@ export default function axisSmart(_orient) {
 
       let tickValues = options.showOuter ? [min, max] : [];
       let tickValuesMinor = []; //[min, max];
-      let ticksNumber = 5;
+      let ticksNumber = DEFAULT_TICKS_NUMBER;
 
       function getBaseLog(x, base) {
         if (x == 0 || base == 0) {
@@ -760,6 +761,30 @@ export default function axisSmart(_orient) {
 
       if (labelsJustDontFit) tickValues = [];
       tickValuesMinor = tickValuesMinor.filter(d => tickValues.indexOf(d) == -1 && min <= d && d <= max);
+
+      const viewportLength = options.viewportLength;      
+      if (viewportLength && lengthRange > 3 * viewportLength) {
+        const flipped = range[0] > range.at(-1);
+        const leftRange = Math.max(flipped ? range.at(-1) : range[0], -viewportLength);
+        const rightRange = Math.min(flipped ? range[0] : range.at(-1), 2 * viewportLength);
+        const leftDomain = axis.scale().invert(flipped ? rightRange : leftRange);
+        const rightDomain = axis.scale().invert(flipped ? leftRange : rightRange);
+        const filteredTickValues = [];
+        let i = 0;
+        while (tickValues[i] < leftDomain) {
+          i++;
+        }
+        for (;i < tickValues.length; i++) {
+          if (tickValues[i] > rightDomain) {
+            break;
+          }
+          filteredTickValues.push(tickValues[i]);
+        }
+        tickValues = filteredTickValues;
+        tickValuesMinor = tickValuesMinor.filter(d => d > leftDomain && d < rightDomain);
+        ticksNumber *= Math.abs(rightRange - leftRange) / lengthRange;
+        ticksNumber = Math.max(ticksNumber, DEFAULT_TICKS_NUMBER);
+      }
 
 
       meow("final result", tickValues);
