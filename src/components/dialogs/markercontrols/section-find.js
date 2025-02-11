@@ -396,6 +396,12 @@ class SectionFind extends MarkerControlsSection {
     const currentDataMap = this.model.dataMap;
     const listItems = this.DOM.listItems;
 
+    //OPTIMISATION!
+    //when there is a log of marks, run this function only after dragging timeslider was released or playing was stopped
+    const timeSlider = () => this.root.findChild({type: "TimeSlider"});
+    if (listItems.data().length > 1000 && (this.MDL.frame.playing || timeSlider().ui.dragging)) return;
+    //END OF OPTIMISATION
+
     listItems.data().forEach(d => {
       d.missingDataForFrame = !d.missingData && _getLeafChildren(d).every(child => !currentDataMap.hasByStr(child[KEY]));
     });
