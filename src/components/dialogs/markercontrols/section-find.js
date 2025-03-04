@@ -263,9 +263,12 @@ class SectionFind extends MarkerControlsSection {
             event.target.checked = false;
             this._bindSelectDialogItems(d);
             this.DOM.selectDialog.classed("vzb-hidden", false);
-            const dialogTop = itemNode.offsetTop - contentNode.scrollTop;
-            const dialogTopAdjust = this.DOM.selectDialog.node().offsetHeight + dialogTop - contentNode.offsetHeight - contentNode.offsetTop;
-            this.DOM.selectDialog.style("top", (dialogTopAdjust > 0 ? dialogTop - dialogTopAdjust : dialogTop) + "px");
+
+            //calculate offset to position the floating dialog
+            const itemNodeBBInfo = itemNode.getBoundingClientRect();
+            const contentNodeBBInfo = contentNode.getBoundingClientRect();
+            const offset = itemNodeBBInfo.top - contentNodeBBInfo.top + contentNode.scrollTop + itemNodeBBInfo.height * 0.6;
+            this.DOM.selectDialog.style("top", offset + "px");
           } else {
             this.setModel.select(d);
           }

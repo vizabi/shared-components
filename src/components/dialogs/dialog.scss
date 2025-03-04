@@ -48,6 +48,7 @@ $vzb-dialog-content-height: 250px;
         //max-height: $vzb-dialog-content-height;
         overflow: hidden;
         overflow-y: auto;
+        position: relative;
         padding: 0 20px 2px;
 
         &.vzb-dialog-content-fixed {
