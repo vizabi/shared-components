@@ -56,7 +56,7 @@ export class _AddGeo extends BaseComponent {
 
   draw(){
     this.localise = this.services.locale.auto();
-    this.addReaction(this.updateSize);
+    this.addReaction(this.updateSize, {throttle_ms: 500});
     this.addReaction(this.redraw);
   }
   

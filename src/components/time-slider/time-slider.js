@@ -164,7 +164,7 @@ class TimeSlider extends BaseComponent {
 
     this.addReaction(this._configEndBeforeForecast);
     this.addReaction(this._adjustFrameScaleDomainConfig);
-    this.addReaction(this._updateSize);
+    this.addReaction(this._updateSize, {throttle_ms: 100});
     this.addReaction(this._redrawForecast);
     this.addReaction(this._optionClasses);
     this.addReaction(this._processForecast);

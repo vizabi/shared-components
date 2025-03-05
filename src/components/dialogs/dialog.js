@@ -99,7 +99,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
 
     if (this._updateLayoutProfile()) return; //return if exists with error
     this.addReaction(this._pinButtonUpdate);
-    this.addReaction(this._updateSize);
+    this.addReaction(this._updateSize, {throttle_ms: 500});
   }
 
   resize() {

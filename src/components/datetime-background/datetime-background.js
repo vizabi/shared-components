@@ -89,7 +89,7 @@ class DateTimeBackground extends BaseComponent {
     if (this.updateLayoutProfile()) return; //return if exists with error
 
     this.addReaction(this.updateText);
-    this.addReaction(this.updateSize);
+    this.addReaction(this.updateSize, {throttle_ms: 50});
   }
 
   updateText() {

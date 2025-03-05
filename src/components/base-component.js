@@ -65,7 +65,7 @@ class _BaseComponent {
 
     this.setup(this.options);
     this.addReaction(this.draw);
-    this.addReaction(this.loading, true);
+    this.addReaction(this.loading, {ignoreStatus: true});
     this.addReaction(this.resize);
   }
 
@@ -79,12 +79,13 @@ class _BaseComponent {
     return _ui(defaults, ui, baseUI);
   }
 
-  addReaction(method, ignoreStatus){
+  addReaction(method, {ignoreStatus = false, throttle_ms = null} = {}){
     if(!method) return utils.warn("Basecomponent: addReaction() method not found", method);
     if(!this.reactions.has(method)){
       this.reactions.set(method, 
         autorun(() => {
-          if(ignoreStatus || this.status === STATUS.READY) method.bind(this)();
+          const run = throttle_ms ? utils.throttle(method.bind(this), throttle_ms) : method.bind(this);
+          if(ignoreStatus || this.status === STATUS.READY) run();
         }, {
           name: method.name, 
           onError: (err) => {

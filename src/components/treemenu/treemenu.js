@@ -1048,7 +1048,7 @@ export class TreeMenu extends BaseComponent {
 
   draw() {
     this.localise = this.services.locale.auto();
-    this.addReaction(this._prepareTags, true);
+    this.addReaction(this._prepareTags, {ignoreStatus: true});
 
     this._updateLayoutProfile();
     this.addReaction(this._resize);

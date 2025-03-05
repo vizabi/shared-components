@@ -17,7 +17,7 @@ class _Repeater extends BaseComponent {
 
 
   loading(){
-    this.addReaction(this.addRemoveSubcomponents, true);
+    this.addReaction(this.addRemoveSubcomponents, {ignoreStatus: true});
   }
 
 

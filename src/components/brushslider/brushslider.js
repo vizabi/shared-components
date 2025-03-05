@@ -126,7 +126,7 @@ class BrushSlider extends BaseComponent {
     if(this.element.classed("vzb-hidden")) return;
     if(this._updateLayoutProfile()) return;
 
-    this.addReaction(this._updateSize);
+    this.addReaction(this._updateSize, {throttle_ms: 500});
     this.addReaction(this._updateView);
   }
 

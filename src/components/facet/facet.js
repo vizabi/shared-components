@@ -25,7 +25,7 @@ class _Facet extends BaseComponent {
 
 
   loading() {
-    //this.addReaction(this.addRemoveSubcomponents, true);
+    //this.addReaction(this.addRemoveSubcomponents, {ignoreStatus: true});
   }
 
   draw() {
@@ -33,7 +33,7 @@ class _Facet extends BaseComponent {
     if (this.updateLayoutProfile()) return; //return if exists with error
     this.addReaction(this.addRemoveSubcomponents);
     this.addReaction(this.updatePositionInRepeat);
-    this.addReaction(this.updateSize);
+    this.addReaction(this.updateSize, {throttle_ms: 50});
   }
 
   updatePositionInRepeat() {
