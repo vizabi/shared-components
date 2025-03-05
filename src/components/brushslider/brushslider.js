@@ -126,7 +126,7 @@ class BrushSlider extends BaseComponent {
     if(this.element.classed("vzb-hidden")) return;
     if(this._updateLayoutProfile()) return;
 
-    this.addReaction(this._updateSize, {throttle_ms: 500});
+    this.addReaction(this.updateSize, {throttle_ms: 500});
     this.addReaction(this._updateView);
   }
 
@@ -201,7 +201,7 @@ class BrushSlider extends BaseComponent {
   _updateThumbs() {
   }
 
-  _updateSize() {
+  updateSize() {
     this.services.layout.size;
 
     const svgWidth = this._getComponentWidth() + this.padding.left + this.padding.right;

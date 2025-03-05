@@ -253,7 +253,7 @@ class _MarkerControls extends Dialog {
     if (someSelected) {
       runInAction(() => {
         const opacityNonSelectedSlider = this.findChild({ type: "SingleHandleSlider" });
-        opacityNonSelectedSlider._updateSize();
+        opacityNonSelectedSlider.updateSize();
         opacityNonSelectedSlider._updateView();
       });
     }

@@ -99,7 +99,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
 
     if (this._updateLayoutProfile()) return; //return if exists with error
     this.addReaction(this._pinButtonUpdate);
-    this.addReaction(this._updateSize, {throttle_ms: 500});
+    this.addReaction(this.updateSize, {throttle_ms: 500});
   }
 
   resize() {
@@ -123,7 +123,7 @@ class Dialog extends CollectionMixin(BaseComponent) {
     if (!this.height || !this.width) return utils.warn("Dialog _updateProfile() abort: container is too little or has display:none");
   }
 
-  _updateSize() {
+  updateSize() {
     this.services.layout.size;
     
     if (this.element.classed("vzb-top-dialog")) {

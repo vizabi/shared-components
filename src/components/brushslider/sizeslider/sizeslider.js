@@ -105,13 +105,13 @@ export class SizeSlider extends BrushSlider {
     };
   }
 
-  _updateSize() {
+  updateSize() {
     const propertyValues = this._getMinMaxDefaultPropertyValues();
 
     this.padding.top = propertyValues.max + this.options.BAR_WIDTH * 1.25;
     this.propertyScale.range([propertyValues.min, propertyValues.max]);
 
-    super._updateSize();
+    super.updateSize();
 
     const isRTL = this.services.locale.isRTL();
     this.DOM.sliderLabelsWrapper

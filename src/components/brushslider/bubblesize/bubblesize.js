@@ -115,9 +115,9 @@ export class BubbleSize extends BrushSlider {
     return { min, max };
   }
 
-  _updateSize() {
+  updateSize() {
 
-    super._updateSize();
+    super.updateSize();
 
     this.__labelSideSwitchEdge = this.rescaler.invert(this._getComponentWidth()) * 0.75;
 

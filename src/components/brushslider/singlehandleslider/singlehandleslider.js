@@ -115,8 +115,8 @@ export class SingleHandleSlider extends BrushSlider {
     return padding;
   }
 
-  _updateSize() {
-    super._updateSize();
+  updateSize() {
+    super.updateSize();
 
     const componentWidth = this._getComponentWidth();
     this.rescaler.range(d3.range(0, componentWidth || 1, (componentWidth / (this.rescaler.domain().length - 1)) || 1).concat([componentWidth]));

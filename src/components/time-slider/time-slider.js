@@ -164,7 +164,7 @@ class TimeSlider extends BaseComponent {
 
     this.addReaction(this._configEndBeforeForecast);
     this.addReaction(this._adjustFrameScaleDomainConfig);
-    this.addReaction(this._updateSize, {throttle_ms: 100});
+    this.addReaction(this.updateSize, {throttle_ms: 100});
     this.addReaction(this._redrawForecast);
     this.addReaction(this._optionClasses);
     this.addReaction(this._processForecast);
@@ -265,7 +265,7 @@ class TimeSlider extends BaseComponent {
    * Executes everytime the container or vizabi is resized
    * Ideally,it contains only operations related to size
    */
-  _updateSize() {
+  updateSize() {
     this.services.layout.size;
 
     const {
