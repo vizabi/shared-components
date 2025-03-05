@@ -53,8 +53,8 @@ export class SizeSlider extends BrushSlider {
 
   }
 
-  draw() { 
-    super.draw();
+  _updateView() { 
+    super._updateView();
 
     if (this.MDL.model.data.isConstant) {
       this.DOM.slider.selectAll(".w").classed("vzb-hidden", true);
@@ -66,7 +66,7 @@ export class SizeSlider extends BrushSlider {
       this.DOM.slider.select(".overlay").classed("vzb-pointerevents-none", false);
     }
 
-    this.addReaction(this._setLabelsText);
+    this._setLabelsText();
   }
 
   _updateThumbs(extent) {

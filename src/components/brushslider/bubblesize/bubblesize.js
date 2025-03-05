@@ -50,10 +50,9 @@ export class BubbleSize extends BrushSlider {
       .attr("dy", (d, i) => i ? "-0.5em" : "1.9em");
   }
 
-  draw() { 
-    super.draw();
-  
-    this.addReaction(this._setLabelsText);
+  _updateView() { 
+    super._updateView();
+    this._setLabelsText();
   }
 
   _getPadding() {
