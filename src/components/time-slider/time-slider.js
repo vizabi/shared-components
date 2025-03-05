@@ -114,6 +114,9 @@ class TimeSlider extends BaseComponent {
     //Axis
     this.xAxis = axisSmart("bottom");
 
+    this.sliderWidth = 0;
+    this.sliderHeight = 0;
+
     const { valueText, slider, slide, slider_outer } = this.DOM;
     //Value
     valueText.classed("stroke", true);

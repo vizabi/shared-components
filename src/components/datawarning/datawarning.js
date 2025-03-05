@@ -133,6 +133,8 @@ class _DataWarning extends BaseComponent {
 
   updateButtonPosition() {
     if(!this.DOM.button.size()) return utils.warn("quit updateButtonPosition of DataWarning because no button provided");
+    if(this.ui?.enable === false) return;
+    
     const {vertical, horizontal, width, height, wLimit} = this;
     const {top, bottom, left, right} = this;
 
