@@ -399,6 +399,7 @@ $vzb-dialog-content-height: 250px;
           }
         }
         >.vzb-dialog-content {
+          position: static;
           font-size: $vzb-font-size-regular;
           padding-bottom: 10px;
         }
