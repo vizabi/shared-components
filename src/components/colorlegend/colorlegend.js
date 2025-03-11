@@ -279,19 +279,19 @@ class ColorLegend extends BaseComponent {
           _this.MDL.superHighlighted.data.filter.clear() :
           _this.MDL.highlighted.data.filter.clear();
       },
-      clickToAddAll(d) {
+      clickToAddAllinGroup(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
         const dim = _this.model.encoding.color.data.space[0];
         const prop = _this.MDL.color.data.concept;
         _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
       },
-      clickToRemoveAll(d) {
+      clickToRemoveAllinGroup(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
         const dim = _this.model.encoding.color.data.space[0];
         const prop = _this.MDL.color.data.concept;
         _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop});
       },
-      clickToRemoveEverythingElse(d) {
+      clickToRemoveAllinOtherGroups(d) {
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return;
         const everythingElse = _this.MDL.legend.dataArray.map(m => m[KEY]).filter(f => f !== d[KEY]);
         const dim = _this.model.encoding.color.data.space[0];
@@ -315,7 +315,7 @@ class ColorLegend extends BaseComponent {
         const prop = _this.MDL.color.data.concept;
         return _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: d[KEY], dim, prop});
       },
-      disableRemoveEverythingElse(d){
+      disableRemoveAllinOtherGroups(d){
         if (!isEntityConcept(_this.MDL.color.data.conceptProps)) return true;
         if (_this.root.ui.dialogs?.markercontrols?.disableAddRemoveGroups) return true;
         const dim = _this.model.encoding.color.data.space[0];
@@ -366,7 +366,7 @@ class ColorLegend extends BaseComponent {
     this.DOM.removeAllinGroup = this.DOM.selectDialog.append("div")
       .attr("class", "vzb-cl-select-dialog-item vzb-clickable");  
 
-    this.DOM.removeEverythingElse = this.DOM.selectDialog.append("div")
+    this.DOM.removeAllinOtherGroups = this.DOM.selectDialog.append("div")
       .attr("class", "vzb-cl-select-dialog-item vzb-clickable");  
 
     this.DOM.editColorButton = this.DOM.selectDialog.append("div")
@@ -392,7 +392,7 @@ class ColorLegend extends BaseComponent {
     this.DOM.selectAllinGroup.text("✅ " + t("dialogs/color/select-all-in-group") + " " + name);
     this.DOM.addAllinGroup.text("✳️ " + t("dialogs/color/add-all-in-group") + " " + name);
     this.DOM.removeAllinGroup.text("🗑️ " + t("dialogs/color/remove-all-in-group") + " " + name);
-    this.DOM.removeEverythingElse.text("🎯 " + t("dialogs/color/remove-else"));
+    this.DOM.removeAllinOtherGroups.text("🎯 " + t("dialogs/color/remove-else"));
     this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
     this.DOM.editColorButton.select("span").text(t("buttons/reset"));
     this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint") 
@@ -425,19 +425,19 @@ class ColorLegend extends BaseComponent {
     this.DOM.addAllinGroup
       .classed("vzb-hidden", () => this._interact().disableAddAll(d))
       .on("click", () => {
-        this._interact().clickToAddAll(d);
+        this._interact().clickToAddAllinGroup(d);
         this._closeSelectDialog();
       });
     this.DOM.removeAllinGroup
       .classed("vzb-hidden", () => this._interact().disableRemoveAll(d))
       .on("click", () => {
-        this._interact().clickToRemoveAll(d);
+        this._interact().clickToRemoveAllinGroup(d);
         this._closeSelectDialog();
       });
-    this.DOM.removeEverythingElse
-      .classed("vzb-hidden", () => this._interact().disableRemoveEverythingElse(d))
+    this.DOM.removeAllinOtherGroups
+      .classed("vzb-hidden", () => this._interact().disableRemoveAllinOtherGroups(d))
       .on("click", () => {
-        this._interact().clickToRemoveEverythingElse(d);
+        this._interact().clickToRemoveAllinOtherGroups(d);
         this._closeSelectDialog();
       });
 

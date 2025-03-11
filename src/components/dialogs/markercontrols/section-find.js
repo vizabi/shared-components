@@ -92,10 +92,11 @@ class SectionFind extends MarkerControlsSection {
     if (!this.isFindInFolderView()) return;
     const dim = this._getPrimaryDim();
     const drilldownProps = this._getDrilldownProps();
+    const isnessProps = drilldownProps.map(m => "is--" + m);
     const entityQuery = {
       select: {
         key: [dim],
-        value: [...drilldownProps, "name"]
+        value: [...drilldownProps, ...isnessProps, "name"]
       },
       from: "entities",
       locale: this.model.data.source.locale,
@@ -157,10 +158,12 @@ class SectionFind extends MarkerControlsSection {
 
     const mapGroupData = ([key, children], i) => {
       if (!key) return (!children[0]?.children) ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0], i) : i === undefined ? children : children[0];
+      const ddValue = this.drilldownValues.get(key);
       return {
         [KEY]: key,
         children: (!children[0]?.children) ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0]) : children,
-        name: this.drilldownValues.get(key).name,
+        name: ddValue.name,
+        prop: drilldownProps.find(prop => ddValue["is--" + prop]),
         folder: true
       };
     };
@@ -487,24 +490,24 @@ class SectionFind extends MarkerControlsSection {
     const _this = this;
 
     return {
-      clickToAddAll(d) {
-        const dim = _this.model.data.space[0];
-        const prop = dim;
+      clickToAddAllinGroup(d) {
+        const dim = _this._getPrimaryDim();
+        const prop = d.prop;
 
-        _this.model.data.filter.addUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
+        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
       },
-      clickToRemoveAll(d) {
-        const dim = _this.model.data.space[0];
-        const prop = dim;
+      clickToRemoveAllinGroup(d) {
+        const dim = _this._getPrimaryDim();
+        const prop = d.prop;
 
-        _this.model.data.filter.deleteUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
+        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop});
       },
-      clickToRemoveEverythingElse(d) {
-        const childrenKeys = _getLeafChildren(d).map(m => m[KEY]);
-        const everythingElse = _this.listData.flatMap(d => _getLeafChildren(d)).map(m => m[KEY]).filter(f => !childrenKeys.includes(f));
-        const dim = _this.model.data.space[0];
-        const prop = dim;
-        _this.model.data.filter.deleteUsingLimitedStructure({key: everythingElse, dim, prop});
+      clickToRemoveAllinOtherGroups(d) {
+        const dim = _this._getPrimaryDim();
+        const prop = d.prop;
+        const otherGroups = [..._this.drilldownValues.values()].filter(f => f["is--" + d.prop] && f[KEY] !== d[KEY]);
+
+        _this.model.data.filter.deleteUsingLimitedStructure({key: otherGroups, dim, prop});
         _this.parent.DOM.content.node().scrollTop = 0;
       },
       disableSelectHover(){
@@ -523,7 +526,7 @@ class SectionFind extends MarkerControlsSection {
         const prop = dim;
         return _this.model.data.filter.isAlreadyRemovedUsingLimitedStructure({key: _getLeafChildren(d).map(m => m[KEY]), dim, prop});
       },
-      disableRemoveEverythingElse(){
+      disableRemoveAllinOtherGroups(){
         if (_this.root.ui.dialogs?.markercontrols?.disableFindAddRemoveGroups) return true;
         return false;
         // const dim = _this.model.data.space[0];
@@ -562,7 +565,7 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.removeAllinGroup = this.DOM.selectDialog.append("div")
       .attr("class", "vzb-find-select-dialog-item vzb-clickable");  
 
-    this.DOM.removeEverythingElse = this.DOM.selectDialog.append("div")
+    this.DOM.removeAllinOtherGroups = this.DOM.selectDialog.append("div")
       .attr("class", "vzb-find-select-dialog-item vzb-clickable");  
 
     this.DOM.editColorButton = this.DOM.selectDialog.append("div")
@@ -588,7 +591,7 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.selectAllinGroup.text("✅ " + t("dialogs/color/select-all-in-group") + " " + name);
     this.DOM.addAllinGroup.text("✳️ " + t("dialogs/color/add-all-in-group") + " " + name);
     this.DOM.removeAllinGroup.text("🗑️ " + t("dialogs/color/remove-all-in-group") + " " + name);
-    this.DOM.removeEverythingElse.text("🎯 " + t("dialogs/color/remove-else"));
+    this.DOM.removeAllinOtherGroups.text("🎯 " + t("dialogs/color/remove-else") + " " + name);
     this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
     this.DOM.editColorButton.select("span").text(t("buttons/reset"));
     this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint") 
@@ -619,19 +622,19 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.addAllinGroup
       .classed("vzb-hidden", () => this._interact().disableAddAll(d))
       .on("click", () => {
-        this._interact().clickToAddAll(d);
+        this._interact().clickToAddAllinGroup(d);
         this._closeSelectDialog();
       });
     this.DOM.removeAllinGroup
       .classed("vzb-hidden", () => this._interact().disableRemoveAll(d))
       .on("click", () => {
-        this._interact().clickToRemoveAll(d);
+        this._interact().clickToRemoveAllinGroup(d);
         this._closeSelectDialog();
       });
-    this.DOM.removeEverythingElse
-      .classed("vzb-hidden", () => this._interact().disableRemoveEverythingElse(d))
+    this.DOM.removeAllinOtherGroups
+      .classed("vzb-hidden", () => this._interact().disableRemoveAllinOtherGroups(d))
       .on("click", () => {
-        this._interact().clickToRemoveEverythingElse(d);
+        this._interact().clickToRemoveAllinOtherGroups(d);
         this._closeSelectDialog();
       });
 
