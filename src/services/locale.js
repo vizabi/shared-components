@@ -15,6 +15,7 @@ class _LocaleService extends BaseService {
   static DEFAULTS = {
     id: FALLBACK_ID,
     path: FALLBACK_PATH,
+    getExternalFileReader: null,
     placeholder: "body",
     shortNumberFormat: true
   }
@@ -22,6 +23,7 @@ class _LocaleService extends BaseService {
   setup(){
     this.status = STATUS.INIT;
     this.path = this.config.path || this.constructor.DEFAULTS.path;
+    this.getExternalFileReader = this.config.getExternalFileReader || this.constructor.DEFAULTS.getExternalFileReader;
     this.resolve = this.config.resolve;
     this.placeholder = this.config.placeholder || this.constructor.DEFAULTS.placeholder;
     this.element = d3.select(this.placeholder);
@@ -64,6 +66,7 @@ class _LocaleService extends BaseService {
     if (this.resolve?.[id] && utils.isObject(this.resolve?.[id])) {
       return Promise.resolve(this.resolve?.[id]);
     }
+    if(this.getExternalFileReader) return this.getExternalFileReader(id);
     const path = this.resolve?.[id] ? this.resolve?.[id] : (this.path + id + ".json");
     return d3.json(path);
   }
