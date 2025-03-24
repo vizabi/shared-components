@@ -269,18 +269,19 @@ class SectionSlice extends MarkerControlsSection {
             .attr("for", "vzb-spaceconfig-enc-space-new")
             .classed("vzb-hidden", !_this.showAllEncs),
         };
-        
 
-        
-        if(status.status == "constant"){
+        if (encoding.data.isConstant) {
           DOM.concept.text("constant: " + encoding.data.constant);
-
-        }else{
-
-          DOM.concept
-            .text(concept?.concept?.name || encoding.data.concept);
+          DOM.spaceCurrent.text("current space: none (constant value)");
+        }
+        else {
+          DOM.concept.text(concept?.concept?.name || encoding.data.concept);
           DOM.spaceCurrent
-            .text("current space: " + encoding.data.space.join() + (isSpaceSet? " (set)" : " (inherited)") );
+            .text("current space: " + encoding.data.space?.join() + (isSpaceSet? " (set)" : " (inherited)") );
+        }
+        
+        //was able to figure out space compatibility for this enc
+        if(status.status !== true || status.status !== false){
           
           if(status.status == "alreadyInSpace" || status.status == "entityPropertyDataConfig") {
             DOM.spaceNew.text("new space: " + (isSpaceSet ? " will reset to marker space" : "no change"));
