@@ -476,26 +476,6 @@ $vzb-button-expand-width: 290px;
     border: 0;
   }
 
-  //Data warning
-  .vzb-datawarning-button {
-    pointer-events: visible;
-    cursor: pointer;
-    fill: $vzb-color-accent-orange;
-
-    path {
-      fill: $vzb-color-accent-orange;
-    }
-
-    text {
-      text-transform: uppercase;
-      font-size: $vzb-font-size-small;
-    }
-
-    &:hover text {
-      text-decoration: underline;
-    }
-  }
-
   .vzb-colorpicker-svg {
     direction: ltr;
   }

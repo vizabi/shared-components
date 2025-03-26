@@ -1,6 +1,39 @@
 @import "../../styles/common.scss";
 
 .vzb-tool {
+  //Data warning
+  .vzb-datawarning-button {
+    position: absolute;
+    pointer-events: visible;
+    cursor: pointer;
+    font-size: $vzb-font-size-regular;
+    text-transform: uppercase;
+
+    .vzb-icon path {
+      fill: $vzb-color-accent-orange;
+      stroke-width: 80px;
+      stroke-opacity: 0.8;
+      stroke: white;
+      paint-order: stroke;
+    }
+
+    span {
+      position: relative;
+      top: -0.1em;
+      margin-left: 5px;
+      color: $vzb-color-accent-orange;
+      text-shadow:
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff; 
+      }
+
+    &:hover span {
+      text-decoration: underline;
+    }
+  }
+
   .vzb-datawarning {
     @include position(absolute, 0 0 null null);
     height: 100%;
@@ -27,6 +60,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      z-index: 3;
 
       .vzb-data-warning-link {
         @include rtl {
@@ -114,6 +148,9 @@
   }
 
   &.vzb-small.vzb-portrait {
+    .vzb-datawarning-button {
+      font-size: $vzb-font-size-small;
+    }
     .vzb-data-warning-box {
       @include position(absolute, 10% null null 5%);
       bottom: $size-button-list;
@@ -135,6 +172,9 @@
   }
 
   &.vzb-small.vzb-landscape {
+    .vzb-datawarning-button {
+      font-size: $vzb-font-size-small;
+    }
     .vzb-data-warning-box {
       @include position(absolute, 10% null null 10%);
       height: 80%;

@@ -1,12 +1,33 @@
 import * as utils from "../../legacy/base/utils.js";
 import { BaseComponent } from "../base-component.js";
-import {decorate, observable, computed, runInAction} from "mobx";
+import {decorate, computed} from "mobx";
 import "./datawarning.scss";
 
 import { ICON_WARN, ICON_CLOSE } from "../../icons/iconset.js";
 
+const PROFILE_CONSTANTS = () => ({
+  SMALL: {
+    infoElHeight: 16
+  },
+  MEDIUM: {
+    infoElHeight: 20,
+  },
+  LARGE: {
+    infoElHeight: 22
+  }
+});
+
+const PROFILE_CONSTANTS_FOR_PROJECTOR = () => ({
+  MEDIUM: {
+    infoElHeight: 26
+  },
+  LARGE: {
+    infoElHeight: 32
+  }
+});
+
+
 let hidden = true;
-const HIDE_WHEN_SMALLER_THAN = 100; //px
 class _DataWarning extends BaseComponent {
   constructor(config) {
     config.template = `
@@ -29,14 +50,14 @@ class _DataWarning extends BaseComponent {
       close: this.element.select(".vzb-data-warning-close"),
       title: this.element.select(".vzb-data-warning-title"),
       body: this.element.select(".vzb-data-warning-body"),
-      button: this.root.element.select(this.options.button)
+      button: this.root.element.select(this.options.appendButtonHere)
+        .append("div").attr("class", "vzb-datawarning-button vzb-noexport")
     };
     
     this.element.classed("vzb-hidden", true);
 
     this.setupDialog();
     this.setupTiggerButton();
-    this.setOptions();
   }
 
   setupDialog() {
@@ -63,8 +84,7 @@ class _DataWarning extends BaseComponent {
     if(!this.DOM.button.size()) return utils.warn("quit setupTiggerButton of DataWarning because no button provided");
     
     utils.setIcon(this.DOM.button, ICON_WARN)
-      .append("text")
-      .attr("text-anchor", "end")
+      .append("span")
       .on("click", () => {
         this.toggle();
       })
@@ -86,14 +106,30 @@ class _DataWarning extends BaseComponent {
   draw() {
     this.localise = this.services.locale.auto();
 
+    if (this._updateLayoutProfile()) return; //return if exists with error
+
     this.addReaction(this.updateUIstrings);
     this.addReaction(this.updateButtonOpacityScale);
     this.addReaction(this.updateButtonOpacity);
     this.addReaction(this.updateButtonPosition);
   }
 
+  _updateLayoutProfile(){
+    const size = this.services.layout.size;
+
+    this.height = size.height;
+    this.width = size.width;
+    
+    this.profileConstants = this.services.layout.getProfileConstants(
+      PROFILE_CONSTANTS(this.width, this.height), 
+      PROFILE_CONSTANTS_FOR_PROJECTOR(this.width, this.height)
+    );
+
+    if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
+  }
+
   updateUIstrings(){
-    if (this.DOM.button) this.DOM.button.select("text")
+    if (this.DOM.button) this.DOM.button.select("span")
       .text(this.localise("hints/dataWarning"));
 
     this.DOM.icon.select("div")
@@ -107,8 +143,7 @@ class _DataWarning extends BaseComponent {
   }
 
   toggle(arg) {
-    if (arg == null) arg = !hidden;
-    hidden = arg;
+    hidden = arg ?? !hidden;
     this.element.classed("vzb-hidden", hidden);
 
     this.root.children.forEach(c => {
@@ -132,88 +167,44 @@ class _DataWarning extends BaseComponent {
   }
 
   updateButtonPosition() {
+    this.services.layout.size;
+    
     if(!this.DOM.button.size()) return utils.warn("quit updateButtonPosition of DataWarning because no button provided");
     if(this.ui?.enable === false) return;
     
-    const {vertical, horizontal, width, height, wLimit} = this;
-    const {top, bottom, left, right} = this;
-
-    // reset font size to remove jumpy measurement
-    const dataWarningText = this.DOM.button.select("text")
-      .style("font-size", null);
-
-    // reduce font size if the caption doesn't fit
-    let warnBB = dataWarningText.node().getBBox();
-    const dataWarningWidth = warnBB.width + warnBB.height * 3;
-    if (wLimit > 0 && dataWarningWidth > wLimit) {
-      const font = parseInt(dataWarningText.style("font-size")) * wLimit / dataWarningWidth;
-      dataWarningText.style("font-size", font + "px");
-    }
+    const {infoElHeight} = this.profileConstants;
+    const vertical = this.ui.vertical;
+    const horizontal = this.ui.horizontal; 
+    const margin = this.ui.margin[this.services.layout.profile] || {};
 
     // position the warning icon
-    warnBB = dataWarningText.node().getBBox();
     this.DOM.button.select("svg")
-      .attr("width", warnBB.height * 0.75)
-      .attr("height", warnBB.height * 0.75)
-      .attr("x", -warnBB.width - warnBB.height * 1.2)
-      .attr("y", -warnBB.height * 0.65);
+      .attr("width", infoElHeight * 0.75)
+      .attr("height", infoElHeight * 0.75);
 
     // position the whole group
-    warnBB = this.DOM.button.node().getBBox();
     this.DOM.button
-      .classed("vzb-hidden", this.services.layout.projector || wLimit && wLimit < HIDE_WHEN_SMALLER_THAN)
-      .attr("transform", `translate(${
-        horizontal == "left" ? (left + warnBB.width) : (width - right)
-      }, ${
-        vertical == "top" ? (top + warnBB.height) : (height - bottom)
-      })`);
+      .style("left", horizontal === "left" ? margin.left + "px" : null)
+      .style("right", horizontal === "right" ? margin.right + "px" : null)
+      .style("top", vertical === "top" ? margin.top + "px" : null)
+      .style("bottom", vertical === "bottom" ? margin.bottom + "px": null);
   }
-
-  setOptions({
-    //container size
-    width = 0,
-    height = 0,
-    //alignment
-    vertical = "top", 
-    horizontal = "right", 
-    //margins
-    top = 0,
-    bottom = 0,
-    left = 0,
-    right = 0,
-    //size limit
-    wLimit = null
-  } = {}) {
-    runInAction(() => {
-      this.vertical = vertical;
-      this.horizontal = horizontal;
-      this.width = width;
-      this.height = height;
-      this.top = top;
-      this.bottom = bottom;
-      this.left = left;
-      this.right = right;
-      this.wLimit = wLimit || width;
-    });
-  }
-
 }
 
 _DataWarning.DEFAULT_UI = {
+  enable: false,
   doubtDomain: [],
-  doubtRange: []
+  doubtRange: [],
+  vertical: "bottom",
+  horizontal: "right",
+  margin: {
+    LARGE: { top: 20, right: 20, left: 20, bottom: 20 },
+    MEDIUM: { top: 20, right: 20, left: 20, bottom: 20 },
+    SMALL: { top: 20, right: 20, left: 20, bottom: 20 }
+  }
 };
 
 //export default BubbleChart;
 export const DataWarning = decorate(_DataWarning, {
-  "MDL": computed,
-  "vertical": observable, 
-  "horizontal": observable, 
-  "width": observable, 
-  "height": observable, 
-  "top": observable, 
-  "bottom": observable, 
-  "left": observable, 
-  "right": observable, 
-  "wLimit": observable
+  "MDL": computed
 });
