@@ -77,6 +77,7 @@ class SectionFind extends MarkerControlsSection {
     this.addReaction(this.getEntitiesExplicitlyAddedInFilterButMissingDataInAllFrames);
     this.addReaction(this.getDrilldownValues);
     this.addReaction(this.getListData);
+    this.addReaction(this.hideColorListinColorDialog);
   }
 
   get MDL() {
@@ -143,7 +144,9 @@ class SectionFind extends MarkerControlsSection {
     
     flatData.forEach(d => {
       drilldownProps.forEach(prop => {
-        d[prop] = this.drilldownValues.get(d.children[0][dim])?.[prop];
+        const ddValue = this.drilldownValues.get(d.children[0][dim]);
+        d[prop] = ddValue?.[prop];
+        d.prop = ddValue ? drilldownProps.find(prop => ddValue["is--" + prop]) : null;
       });
     });
 
@@ -205,14 +208,15 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.title.text(this.localise("markercontrols/section/find"));
     this.listReady = false;
     const isFindInFolderView = this.isFindInFolderView();
-  
+    const colorFields = this.colorFields;
+
     const list = this.DOM.list.text("");
 
     this.DOM.listItems = list.selectAll("div")
       .data(this.listData, d => d[KEY] )
       .join("div")
       .attr("class", d => `vzb-item vzb-item-toplevel vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
-      .call(this._createListItem.bind(this, isFindInFolderView ? d3.sum(this.listData.map(d => _getLeafChildrenCount(d))) : this.listData.length));
+      .call(this._createListItem.bind(this, isFindInFolderView ? d3.sum(this.listData.map(d => _getLeafChildrenCount(d))) : this.listData.length, colorFields));
 
     if (isFindInFolderView) {
       this.DOM.listItems = this.DOM.list.selectAll(".vzb-item");
@@ -244,10 +248,12 @@ class SectionFind extends MarkerControlsSection {
       }));
   }
 
-  _createListItem(dataLength, listItem) {
+  _createListItem(dataLength, colorFields, listItem) {
     if (listItem.empty()) return;
 
     const _this = this;
+    const colorConcept = this.MDL.color.data.concept;
+
     listItem.append("input")
       .attr("type", "checkbox")
       .attr("id", (d, i) => d[KEY] + "-find-" + i + "-" + this.id)
@@ -317,8 +323,16 @@ class SectionFind extends MarkerControlsSection {
         if (this.parent.ui.disableFindInteractions) return;
         this.setModel.unhighlight(d);
       })
-      .each(function() {
+      .each(function(data) {
         const view = d3.select(this);
+        if (colorFields && colorFields.includes(data.prop) && !data.folder) {
+          view.append("span")
+            .attr("class", "vzb-color")
+            .style("background-color", d => {
+              const color = _this.colorScale(d[colorConcept] || d[KEY]);
+              return color;
+            });
+        }
         view.append("span")
           .attr("class", "vzb-label")
           .text(d => d.name)
@@ -374,7 +388,7 @@ class SectionFind extends MarkerControlsSection {
           .data(d.children, d => d[KEY] )
           .join("div")
           .attr("class", d => `vzb-item vzb-dialog-checkbox ${d.folder ? "vzb-item-folder" : ""}`)
-          .call(_this._createListItem.bind(_this, dataLength));
+          .call(_this._createListItem.bind(_this, dataLength, colorFields));
       }
     });
   }
@@ -484,6 +498,23 @@ class SectionFind extends MarkerControlsSection {
         this.updateSearch();
       }
     });
+  }
+
+  get colorScale() {
+    return this.MDL.color.scale.d3Scale;
+  }
+
+  get colorFields() {
+    const colorConcept = this.MDL.color.data.concept;
+    const colorConceptProps = this.MDL.color.data.conceptProps;
+    const drilldownProps = this._getDrilldownProps();
+
+    return ["entity_domain", "entity_set"].includes(colorConceptProps.concept_type) && drilldownProps.includes(colorConcept) ? drilldownProps.slice(drilldownProps.indexOf(colorConcept)): null;
+  }
+
+  hideColorListinColorDialog() {
+    //add class to color dialog for hide colorlist
+    this.parent.parent.element.select(".vzb-top-dialog[data-dlg='colors']").classed("vzb-hide-colorlist", !!this.colorFields);
   }
 
   _interact() {
@@ -680,7 +711,9 @@ const decorated = decorate(SectionFind, {
   "entitiesWithMissingDataInAllFrames": observable,
   "listReady": observable,
   "drilldownValues": observable.struct,
-  "listData": observable.struct
+  "listData": observable.struct,
+  "colorScale": computed,
+  "colorFields": computed,
 });
 
 export {decorated as SectionFind};

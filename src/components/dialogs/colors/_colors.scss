@@ -118,6 +118,12 @@
 
           }
         }
+
+        &[data-dlg="colors"].vzb-hide-colorlist {
+          .vzb-cl-colorlist {
+            display: none;
+          }
+        }
       }
     }
   }
