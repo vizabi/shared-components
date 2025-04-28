@@ -59,6 +59,9 @@ class SectionFind extends MarkerControlsSection {
     this.DOM.selectDialog = this.DOM.content.append("div").attr("class", "vzb-find-select-dialog vzb-hidden");
     this.DOM.selectDialog.append("div").attr("class", "vzb-find-select-dialog-title");
     this.DOM.selectDialog.append("div").attr("class", "vzb-find-select-dialog-close");
+    this.DOM.contextDialog = this.DOM.content.append("div").attr("class", "vzb-find-context-dialog vzb-hidden");
+    this.DOM.contextDialog.append("div").attr("class", "vzb-find-context-dialog-title");
+    this.DOM.contextDialog.append("div").attr("class", "vzb-find-context-dialog-close");
     this.DOM.list = this.DOM.content.append("div").attr("class", "vzb-list");
     this.listReady = false;
     this.entitiesWithMissingDataInAllFrames = [];
@@ -66,6 +69,7 @@ class SectionFind extends MarkerControlsSection {
     this.listData = [];
     this.listScrollTransitionFlag = false;
     this._initSelectDialog();
+    this._initContextDialog();
   }
 
   draw() {
@@ -325,6 +329,21 @@ class SectionFind extends MarkerControlsSection {
       })
       .each(function(data) {
         const view = d3.select(this);
+        if (!data.folder) {
+          view.on("contextmenu", (event, d) => {
+            event.preventDefault();
+            _this._bindContextDialogItems(d);
+            _this.DOM.contextDialog.classed("vzb-hidden", false);
+            const itemNode = event.target.parentNode;
+            const contentNode = _this.parent.DOM.content.node();
+        
+            //calculate offset to position the floating dialog
+            const itemNodeBBInfo = itemNode.getBoundingClientRect();
+            const contentNodeBBInfo = contentNode.getBoundingClientRect();
+            const offset = itemNodeBBInfo.top - contentNodeBBInfo.top + contentNode.scrollTop + itemNodeBBInfo.height * 0.6;
+            _this.DOM.contextDialog.style("top", offset + "px");
+          });
+        }
         if (colorFields && colorFields.includes(data.prop) && !data.folder) {
           view.append("span")
             .attr("class", "vzb-color")
@@ -428,6 +447,7 @@ class SectionFind extends MarkerControlsSection {
 
     const frame = this.localise(this.MDL.frame.value);
     const noDataSubstr = frame + ": " + this.localise("hints/nodata");
+    listItems.select("input").property("disabled", d => d.missingData);
     listItems.select("label")
       .classed("vzb-find-item-missingDataForFrame", d => d.missingDataForFrame)
       .classed("vzb-find-item-missingData", d => d.missingData)
@@ -569,6 +589,33 @@ class SectionFind extends MarkerControlsSection {
       },
       clickToSelect(d) {
         _this.setModel.select(d);
+      },
+      disableExplode(d) {
+        const drilldownProps = _this._getDrilldownProps();
+        const index = drilldownProps.indexOf(d.prop);
+        return drilldownProps[index + 1] ? false : true;
+      },
+      disableFold(d) {
+        const drilldownProps = _this._getDrilldownProps();
+        const index = drilldownProps.indexOf(d.prop);
+        return drilldownProps[index - 1] ? false : true;
+      },
+      clickToExplode(d) {
+        const dim = _this._getPrimaryDim();
+        const prop = d.prop;
+        
+        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop: dim});
+        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
+      },
+      clickToFold(d) {
+        const dim = _this._getPrimaryDim();
+        const prop = d.prop;
+        const drilldownProps = _this._getDrilldownProps();
+        const foldProp = drilldownProps[drilldownProps.indexOf(prop) - 1];
+        const foldValue = d[foldProp];
+        
+        _this.model.data.filter.deleteUsingLimitedStructure({key: foldValue, dim, prop: foldProp});
+        _this.model.data.filter.addUsingLimitedStructure({key: foldValue, dim, prop: dim});
       }
     };
   }
@@ -702,6 +749,63 @@ class SectionFind extends MarkerControlsSection {
     //       _this._closeSelectDialog();
     //     });
     // }
+  }
+
+  _initContextDialog() {
+    this.DOM.contextDialog.on("mouseleave", () => {
+      this._closeContextDialog();
+    });
+    
+    this.DOM.contextDialogTitle = this.DOM.contextDialog.select(".vzb-find-context-dialog-title");
+
+    this.DOM.contextDialogClose = this.DOM.contextDialog.select(".vzb-find-context-dialog-close");
+    this.DOM.contextDialogClose
+      .html(iconClose)
+      .on("click", () => this._closeContextDialog());
+
+    this.DOM.fold = this.DOM.contextDialog.append("div")
+      .attr("class", "vzb-find-context-dialog-item vzb-clickable");
+
+    this.DOM.explode = this.DOM.contextDialog.append("div")
+      .attr("class", "vzb-find-context-dialog-item vzb-clickable");  
+  }
+
+  _updateContextDialogUiStrings(name, nameFold, nameExplode) {
+    const t = this.localise;
+    this.DOM.contextDialogTitle.text(name);
+    this.DOM.fold.text("❇️ " + t("dialogs/find/fold") + " " + nameFold);
+    this.DOM.explode.text("✳️ " + t("dialogs/find/explode") + " " + nameExplode);
+  }
+
+  _closeContextDialog() {
+    this._contextDialogDatum && this.setModel.unhighlight(this._contextDialogDatum);
+    this._contextDialogDatum = null;
+    this.DOM.contextDialog.classed("vzb-hidden", true);
+  }
+
+  _bindContextDialogItems(d) {
+    //const _this = this;
+    this._contextDialogDatum = d;
+    const drilldownProps = this._getDrilldownProps();
+    const index = drilldownProps.indexOf(d.prop);
+    const propNames = [drilldownProps[index - 1], drilldownProps[index + 1]].map(prop => prop ? this.model.data.source.getConcept(prop)?.name : null);
+    
+    this._updateContextDialogUiStrings(d.name, propNames[0], propNames[1]);
+
+    this.DOM.fold
+      .classed("vzb-hidden", () => this._interact().disableFold(d))
+      .on("click", () => {
+        this._interact().clickToFold(d);
+        this._closeContextDialog();
+      });
+
+    this.DOM.explode
+      .classed("vzb-hidden", () => this._interact().disableExplode(d))
+      .on("click", () => {
+        this._interact().clickToExplode(d);
+        this._closeContextDialog();
+      });
+
   }
 
 }

@@ -236,7 +236,7 @@ $vzb-dialog-content-height: 250px;
           &.vzb-find-item-missingData {
             color: $vzb-color-grey-light;
             text-decoration: line-through;
-            pointer-events: none;
+            //pointer-events: none;
           }
 
           &::before {
