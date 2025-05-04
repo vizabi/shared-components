@@ -166,13 +166,11 @@ class SectionFind extends MarkerControlsSection {
     const mapGroupData = ([key, children], i) => {
       if (!key) return (!children[0]?.children) ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0], i) : i === undefined ? children : children[0];
       const ddValue = this.drilldownValues.get(key);
-      return {
-        [KEY]: key,
+      return Object.assign({
         children: (!children[0]?.children) ? mapChildren(children) : children[0]?.[1] ? mapGroupData(children[0]) : children,
-        name: ddValue.name,
         prop: drilldownProps.find(prop => ddValue["is--" + prop]),
         folder: true
-      };
+      }, ddValue);
     };
     
     const result = mapGroupData([null, d3.groups.apply(null, [flatData, ...drilldownProps.map(prop => d => d[prop])])]);
@@ -344,7 +342,7 @@ class SectionFind extends MarkerControlsSection {
             _this.DOM.contextDialog.style("top", offset + "px");
           });
         }
-        if (colorFields && colorFields.includes(data.prop) && !data.folder) {
+        if (colorFields && colorFields.includes(data.prop)) {
           view.append("span")
             .attr("class", "vzb-color")
             .style("background-color", d => {
