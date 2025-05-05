@@ -278,7 +278,8 @@ class SectionFind extends MarkerControlsSection {
             //calculate offset to position the floating dialog
             const itemNodeBBInfo = itemNode.getBoundingClientRect();
             const contentNodeBBInfo = contentNode.getBoundingClientRect();
-            const offset = itemNodeBBInfo.top - contentNodeBBInfo.top + contentNode.scrollTop + itemNodeBBInfo.height * 0.6;
+            const itemLabelHeight = itemNode.firstElementChild.nextElementSibling.offsetHeight;
+            const offset = itemNodeBBInfo.top - contentNodeBBInfo.top + contentNode.scrollTop + itemLabelHeight * 0.6;
             this.DOM.selectDialog.style("top", offset + "px");
           } else {
             this.setModel.select(d);
