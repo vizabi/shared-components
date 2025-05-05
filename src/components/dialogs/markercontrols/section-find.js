@@ -527,7 +527,7 @@ class SectionFind extends MarkerControlsSection {
     const colorConceptProps = this.MDL.color.data.conceptProps;
     const drilldownProps = this._getDrilldownProps();
 
-    return ["entity_domain", "entity_set"].includes(colorConceptProps.concept_type) && drilldownProps.includes(colorConcept) ? drilldownProps.slice(drilldownProps.indexOf(colorConcept)): null;
+    return ["entity_domain", "entity_set"].includes(colorConceptProps?.concept_type) && drilldownProps.includes(colorConcept) ? drilldownProps.slice(drilldownProps.indexOf(colorConcept)): null;
   }
 
   hideColorListinColorDialog() {
