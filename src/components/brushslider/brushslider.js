@@ -136,7 +136,7 @@ class BrushSlider extends BaseComponent {
     this.profileConstants = this.services.layout.getProfileConstants(this.options.PROFILE_CONSTANTS, this.options.PROFILE_CONSTANTS_FOR_PROJECTOR);
     this.height = (this.element.node().clientHeight) || 0;
     this.width = (this.element.node().clientWidth) || 0;
-    if (!this.height || !this.width) return utils.warn("Slider _updateProfile() abort: container is too little or has display:none");
+    if (!this.height || !this.width) return "Slider _updateProfile() abort: container is too little or has display:none";
   }
 
   _getPadding() {

@@ -38,7 +38,7 @@ class DateTimeBackground extends BaseComponent {
     this.height = this.element.node().clientHeight || 0;
     this.width = this.element.node().clientWidth || 0;
 
-    if (!this.height || !this.width) return utils.warn("Chart _updateProfile() abort: container is too little or has display:none");
+    if (!this.height || !this.width) return "DateTimeBackground _updateProfile() abort: container is too little or has display:none";
   }
 
   setConditions(conditions) {
