@@ -1,5 +1,6 @@
 import * as legacy_utils from "../../legacy/base/utils";
 import * as Utils from "../../utils";
+import { ICON_QUESTION } from "../../icons/iconset.js";
 import { BaseComponent } from "../base-component";
 
 import "./indicatorpicker.scss";
@@ -57,6 +58,32 @@ export class IndicatorPicker extends BaseComponent {
     });
 
     //TODO: continue with Info
+    this._initInfoElement(this.DOM.info);
+  }
+
+
+  _initInfoElement(element) {
+    const _this = this;
+    const dataNotesDialog = () => this.root.findChild({type: "DataNotes"});
+    const timeSlider = () => this.root.findChild({type: "TimeSlider"});
+
+    legacy_utils.setIcon(element, ICON_QUESTION)
+      .on("click", () => {
+        dataNotesDialog().pin();
+      })
+      .on("mouseover", function(event) {
+        if (timeSlider().ui.dragging) return;
+        const coord = this.getBoundingClientRect();
+        const toolRect = _this.root.element.node().getBoundingClientRect();
+        dataNotesDialog()
+          .setEncoding(_this.MDL.model)
+          .show()
+          .setPos(coord.x - toolRect.left, coord.y - toolRect.top);
+      })
+      .on("mouseout", () => {
+        if (timeSlider().ui.dragging) return;
+        dataNotesDialog().hide();
+      });
   }
 
   draw() {
@@ -81,6 +108,8 @@ export class IndicatorPicker extends BaseComponent {
 
   _updateView() {
     let selectText;
+
+    this.DOM.info.classed("vzb-hidden", this.MDL.model.data.isConstant);
 
     if (this._isEncoding()) {
       if (this.MDL.model.data.isConstant) {
