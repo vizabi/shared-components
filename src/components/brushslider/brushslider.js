@@ -204,16 +204,23 @@ class BrushSlider extends BaseComponent {
   updateSize() {
     this.services.layout.size;
 
-    const svgWidth = this._getComponentWidth() + this.padding.left + this.padding.right;
+    const width = this._getComponentWidth();
+    const height = this._getComponentHeight();
+    if (!height || !width) return "Slider updateSize() abort: container is too little or has display:none";
+
+    const svgWidth = width + this.padding.left + this.padding.right;
 
     this.DOM.sliderSvg
-      .attr("height", this._getComponentHeight() + this.padding.top + this.padding.bottom)
+      .attr("height", height + this.padding.top + this.padding.bottom)
       .attr("width", svgWidth);
     this.DOM.sliderWrap
-      .attr("transform", this.services.locale.isRTL() ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)" :
-        "translate(" + this.padding.left + "," + this.padding.top + ")");
+      .attr("transform", this.services.locale.isRTL() 
+        ? "translate(" + (svgWidth - this.padding.right) + "," + this.padding.top + ") scale(-1,1)"
+        : "translate(" + this.padding.left + "," + this.padding.top + ")"
+      );
   
     this._updateRescaler();
+    this._updateView();
   }
 
   _updateRescaler() {
@@ -237,10 +244,12 @@ class BrushSlider extends BaseComponent {
     return this.brush.extent([[0, 0], [this._getComponentWidth(), this._getComponentHeight()]]);
   }
 
-  _updateView() {
-    this.services.layout.size;
+  _updateView() {    
+    const width = this._getComponentWidth();
+    const height = this._getComponentHeight();
+    if (!height || !width) return "Slider updateSize() abort: container is too little or has display:none";
+    
     const value = this.MDL.model[this.value];
-
     if (!value && value!==0 && value!==false) 
       console.error(`Slider inside ${this.parent.name || this.parent.constructor.name} was unable to access value ${this.value} in its model`);
 
