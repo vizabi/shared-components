@@ -8,7 +8,7 @@ import { SectionSwitch } from "./section-switch.js";
 import { SectionSlice } from "./section-slice.js";
 import { ShortcutForSwitch } from "./ShortcutForSwitch.js";
 import {computed, decorate, runInAction} from "mobx";
-import { ICON_QUESTION } from "../../../icons/iconset.js";
+import { ICON_ELLIPSIS_V } from "../../../icons/iconset.js";
 
 const KEY = Symbol.for("key");
 
@@ -141,7 +141,7 @@ class _MarkerControls extends Dialog {
       });
 
 
-    utils.setIcon(this.DOM.info, ICON_QUESTION)
+    utils.setIcon(this.DOM.info, ICON_ELLIPSIS_V)
       .on("click", (event) => {
         this.toggleInfoPopup();
         event.stopPropagation();
