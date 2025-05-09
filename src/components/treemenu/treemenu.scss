@@ -29,18 +29,18 @@
       }
 
       .vzb-treemenu-wrap-header {
-        padding: 0 25px;
+        padding: 0 10px;
 
         .vzb-treemenu-close {
           @include rtl {
             float: left;
-            left: -15px;
+            left: -5px;
             right: auto;
           }
           position: relative;
           float: right;
-          top: 10px;
-          right: -15px;
+          top: 5px;
+          right: -5px;
           .vzb-treemenu-close-icon {
             fill: $vzb-color-primary;
             fill-opacity: 0.7;
@@ -65,12 +65,12 @@
         }
         .vzb-treemenu-scaletypes {
           @include rtl {
-            left: -10px;
+            left: 0px;
             right: auto;
             float: left;
           }
           position: relative;
-          right: -10px;
+          right: 0px;
           top: 30px;
           font-size: $vzb-font-size-small;
           font-family: $vzb-font-family-alt;
@@ -140,7 +140,7 @@
 
       .vzb-treemenu-wrap {
         transition: 300ms ease-in-out;
-        padding: 0 25px 10px;
+        padding: 0 14px 10px;
         overflow-y: auto;
 
         * {
@@ -481,7 +481,8 @@
           }
           &.item-active:not(.vzb-treemenu-list-item-children) {
             > span {
-              color: $vzb-color-accent-orange;
+              color: $vzb-color-white;
+              background-color: $vzb-color-primary-strong;
             }
           }
           &.item-active {

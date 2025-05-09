@@ -16,7 +16,7 @@ const PROFILE_CONSTANTS = {
     col_width: 200
   },
   LARGE: {
-    col_width: 200
+    col_width: 250
   }
 };
 
@@ -25,7 +25,7 @@ const PROFILE_CONSTANTS_FOR_PROJECTOR = {
     col_width: 200
   },
   LARGE: {
-    col_width: 200
+    col_width: 250
   }
 };
 
