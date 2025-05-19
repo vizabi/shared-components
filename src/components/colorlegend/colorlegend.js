@@ -32,8 +32,9 @@ class ColorLegend extends BaseComponent {
 
           <div class="vzb-cl-rainbow-holder vzb-hidden">
             <div class="vzb-cl-rainbow">
-              <canvas></canvas>
+              <canvas class="vzb-cl-rainbow-canvas"></canvas>
             </div>
+            <canvas class="vzb-cl-rainbow-outliers"></canvas>
 
             <div class="vzb-cl-rainbow-legend">
               <div class="vzb-cl-rainbow-legend-eventarea"></div>
@@ -76,7 +77,8 @@ class ColorLegend extends BaseComponent {
 
     this.DOM.rainbowHolder = this.DOM.wrapper.select(".vzb-cl-rainbow-holder");
     this.DOM.rainbow = this.DOM.rainbowHolder.select(".vzb-cl-rainbow");
-    this.DOM.rainbowCanvas = this.DOM.rainbow.select("canvas");
+    this.DOM.rainbowCanvas = this.DOM.rainbow.select("canvas.vzb-cl-rainbow-canvas");
+    this.DOM.rainbowOutliers = this.DOM.rainbowHolder.select("canvas.vzb-cl-rainbow-outliers");
     this.DOM.rainbowLegend = this.DOM.rainbowHolder.select(".vzb-cl-rainbow-legend");
     this.DOM.rainbowLegendEventArea = this.DOM.rainbowLegend.select(".vzb-cl-rainbow-legend-eventarea");
 

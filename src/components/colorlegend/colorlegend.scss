@@ -80,6 +80,10 @@
         text {
           font-size: $vzb-font-size-small;
         }
+        .vzb-axis-value text {
+          font-size: $vzb-font-size-regular;
+          font-weight: bold;
+        }
       }
       .vzb-cl-subtitle {
         top: 30px;
@@ -128,6 +132,10 @@
       position: absolute;
       left: 0;
       right: 0;
+    }
+    .vzb-cl-rainbow-outliers {
+      position: absolute;
+      top: 10px;
     }
     .vzb-cl-minimap {
       height: 145px;

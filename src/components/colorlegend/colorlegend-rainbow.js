@@ -6,11 +6,13 @@ import * as d3 from "d3";
 const CIRCLE_RADIUS = 6;
 
 export function updateRainbowLegend(isVisible) {
+  const _this = this;
   const DOM = this.DOM;
   
   //Hide rainbow element if showing minimap or if color is discrete
   DOM.rainbowHolder.classed("vzb-hidden", !isVisible);
   const gradientWidth = DOM.rainbow.node().getBoundingClientRect().width;
+  const gradientHeight = 20;
   if (!isVisible || !gradientWidth) return;
   
   const localise = this.services.locale.auto({shareOrPercent: this.MDL.color.data?.conceptProps?.format});
@@ -51,6 +53,7 @@ export function updateRainbowLegend(isVisible) {
 
   updateLabelScale();
   updateRainbowCanvas();
+  updateHint();
   updateSubtitle();
 
   if (DOM.rainbowLegend.style("display") !== "none")
@@ -83,6 +86,77 @@ export function updateRainbowLegend(isVisible) {
     DOM.labelScaleG.call(labelsAxis);
   }
 
+
+  function addArrowToCanvas({ctx, direction = "LEFT", w = 30, h = gradientHeight, y0 = gradientHeight/2, x0 = 0}){
+    const margin_x = 2;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    if(direction === "LEFT"){
+      ctx.moveTo(x0 + margin_x + w/3, y0 - h/2);
+      ctx.lineTo(x0 + margin_x, y0);
+      ctx.lineTo(x0 + margin_x + w/3, y0 + h/2);
+      ctx.moveTo(x0 + margin_x, y0);
+      ctx.lineTo(x0 + margin_x + w, y0);
+    } else {
+      ctx.moveTo(x0 - margin_x - w/3, y0 - h/2);
+      ctx.lineTo(x0 - margin_x, y0);
+      ctx.lineTo(x0 - margin_x - w/3, y0 + h/2);
+      ctx.moveTo(x0 - margin_x, y0);
+      ctx.lineTo(x0 - margin_x - w, y0);
+    }
+    ctx.stroke();
+  }
+
+  function updateHint(){
+    const hltFilter = _this.MDL.highlighted.data.filter;
+    const canvas = DOM.rainbowOutliers.node()
+    const ctx = canvas.getContext("2d");
+
+    //only one mark is highlighted and the dialog is visible
+    if(hltFilter.markers.size === 1 && isVisible) {
+
+      DOM.rainbowOutliers
+        .attr("width", gradientWidth + 15 + 15)
+        .attr("height", gradientHeight)
+        .style("width", (gradientWidth + 15 + 15) + "px")
+        .style("height", gradientHeight + "px");
+
+
+      if (window.devicePixelRatio > 1) {
+        var canvasWidth = canvas.width;
+        var canvasHeight = canvas.height;
+    
+        canvas.width = canvasWidth * window.devicePixelRatio;
+        canvas.height = canvasHeight * window.devicePixelRatio;
+        canvas.style.width = canvasWidth + "px";
+        canvas.style.height = canvasHeight + "px";
+    
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      const key = hltFilter.markers.keys().next().value;
+      const value = _this.model.dataMap.getByStr(key)[_this.colorModelName];
+      const x = labelScale(value);
+
+      const marginLeft = 15;
+      const marginRight = 15;
+    
+      if(x > 0 && x < gradientWidth) 
+        ctx.fillRect(x + marginLeft - 1, 0, 2, gradientHeight);     
+      else if(x <= 0)
+        addArrowToCanvas({ctx, direction: "LEFT", x0: 0});
+      else if (x >= gradientWidth) 
+        addArrowToCanvas({ctx, direction: "RIGHT", x0: gradientWidth + marginLeft + marginRight});
+      
+      //add highlighted value in axis
+      DOM.labelScaleG.call(labelsAxis.highlightValue(value));
+    } else {
+      //remove highlighted value in axis
+      DOM.labelScaleG.call(labelsAxis.highlightValue("none"));
+      ctx.clearRect(0, 0, gradientWidth + marginLeft + marginRight, gradientHeight);
+    }
+    return hltFilter;
+  }
 
   function updateRainbowCanvas(){
     DOM.rainbow
@@ -136,7 +210,7 @@ export function updateRainbowLegend(isVisible) {
       .style("top", "3px");
 
     DOM.labelScale.selectAll(".vzb-axis-value text")
-      .attr("dy", "1.5em");
+      .attr("dy", "1em");
 
     DOM.rainbowLegendEventArea
       .style("width", gradientWidth + "px")
