@@ -45,7 +45,7 @@ $vzb-dialog-content-height: 250px;
       .vzb-dialog-content {
         color: $vzb-color-grey-dark;
         font-size: $vzb-font-size-small;
-        //max-height: $vzb-dialog-content-height;
+        height: 100%;
         overflow: hidden;
         overflow-y: auto;
         position: relative;
