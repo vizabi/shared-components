@@ -398,7 +398,7 @@ class ColorLegend extends BaseComponent {
     this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
     this.DOM.editColorButton.select("span").text(t("buttons/reset"));
     this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint") 
-      + " " + (this.MDL.color.data.conceptProps.name || this.MDL.color.data.concept)
+      + " " + (this.MDL.color.data.conceptProps?.name || this.MDL.color.data.concept)
     );
   }
   
