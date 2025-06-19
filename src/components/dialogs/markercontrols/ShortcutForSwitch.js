@@ -33,15 +33,27 @@ export class ShortcutForSwitch extends BaseComponent {
     
     const isCurrentSetting = switchSection.isCurrentSetting.bind(switchSection);
     const setFilter = switchSection.setFilter.bind(switchSection);
+    const resetFilter = switchSection.resetFilter.bind(switchSection);
+    const canResetFilter = switchSection.canResetFilter.bind(switchSection);
 
-    this.DOM.container
-      .style("display", items.length ? "block" : "none")
-      .selectAll("span")
-      .data(items)
-      .join("span")
-      .classed("vzb-active", d => isCurrentSetting(d))
-      .text(d => d.name)
-      .on("click", (event, d) => setFilter(d));
+    if (canResetFilter({dim: "geo"})){
+      this.DOM.container.text("");
+      this.DOM.container
+        .style("display", "block")
+        .append("a").text("❌ Reset filter")
+        .on("click", () => resetFilter())
+    } else {
+      this.DOM.container.text("");
+      this.DOM.container
+        .style("display", items.length ? "block" : "none")
+        .selectAll("span")
+        .data(items)
+        .join("span")
+        .classed("vzb-active", d => isCurrentSetting(d))
+        .text(d => d.name)
+        .on("click", (event, d) => setFilter(d));
+    }
+    
   }
 
 }

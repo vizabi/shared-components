@@ -544,20 +544,21 @@ class SectionFind extends MarkerControlsSection {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
 
-        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
+        _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
       },
       clickToRemoveAllinGroup(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
 
-        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop});
+        _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
       },
       clickToRemoveAllinOtherGroups(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
-        const otherGroups = [..._this.drilldownValues.values()].filter(f => f["is--" + d.prop] && f[KEY] !== d[KEY]);
 
-        _this.model.data.filter.deleteUsingLimitedStructure({key: otherGroups, dim, prop});
+        _this.model.data.filter.config.dimensions[dim]["$or"].forEach(item => {
+          item[prop] = {"$in": [d[KEY]]}
+        })
         _this.parent.DOM.content.node().scrollTop = 0;
       },
       disableSelectHover(){
@@ -602,9 +603,13 @@ class SectionFind extends MarkerControlsSection {
       clickToExplode(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
-        
-        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop: dim});
-        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
+        const drilldownProps = _this._getDrilldownProps();
+        const explodeProp = drilldownProps[drilldownProps.indexOf(prop) + 1];
+
+        runInAction(() => {
+          _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
+          _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + explodeProp, prop, key: d[KEY]});
+        })
       },
       clickToFold(d) {
         const dim = _this._getPrimaryDim();
@@ -613,8 +618,10 @@ class SectionFind extends MarkerControlsSection {
         const foldProp = drilldownProps[drilldownProps.indexOf(prop) - 1];
         const foldValue = d[foldProp];
         
-        _this.model.data.filter.deleteUsingLimitedStructure({key: foldValue, dim, prop: foldProp});
-        _this.model.data.filter.addUsingLimitedStructure({key: foldValue, dim, prop: dim});
+        runInAction(() => {
+          _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop: foldProp, key: foldValue});
+          _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + foldProp, prop: foldProp, key: foldValue});
+        })
       }
     };
   }

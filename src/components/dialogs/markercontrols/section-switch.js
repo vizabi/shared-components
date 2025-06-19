@@ -76,13 +76,26 @@ class SectionSwitch extends MarkerControlsSection {
     });
   }
 
+  /*
+  * isCurrentSetting
+  * @returns 
+  */
   isCurrentSetting({dim, concept}) {
-    const filterDim = this.model.data.filter.dimensions[dim];
-    if (!filterDim && dim === concept) return true;
-    if (!filterDim) return false;
-    return filterDim[concept] || filterDim["is--" + concept] 
-      || filterDim["$or"] && (filterDim["$or"].some(s => s[concept] || s["is--" + concept]))
-      || false;
+    const filterModel = this.model.data.filter;
+    const isness = filterModel.findOutIsnessUsingLimitedStructure({dim});
+    // isness can be null, string: is--country or array of strings: [is--country, is--region]
+    if (Array.isArray(isness)) return isness.includes("is--" + concept);
+    //empty or invalid filter:
+    if (!isness && dim === concept) return true;
+    // only one isness -- is this the right one?
+    return isness && isness === ("is--" + concept); 
+  }
+
+  canResetFilter({dim}) {
+    const filterModel = this.model.data.filter;
+
+    const isness = filterModel.findOutIsnessUsingLimitedStructure({dim});
+    return !isness || Array.isArray(isness);
   }
 
   createList() {
@@ -120,8 +133,13 @@ class SectionSwitch extends MarkerControlsSection {
     return randomItem.name;
   }
 
+  resetFilter() {
+    if (this.items && this.items[0]) this.setFilter(this.items[0]);
+  }
+
   setFilter({dim, concept, concept_type}) {
     const filter = this.model.data.filter.config.dimensions;
+    console.log(dim, concept, concept_type, filter)
     if (!filter) return false;
     if (dim === concept)
       filter[dim] = null;
