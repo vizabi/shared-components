@@ -1,7 +1,8 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
 import { ICON_CLOSE as iconClose } from "../../../icons/iconset";
-import {decorate, computed, runInAction, observable} from "mobx";
+import { decorate, computed, runInAction, observable } from "mobx";
+import { getOffsetTop } from "../../../utils.js";
 import * as d3 from "d3";
 
 const KEY = Symbol.for("key");
@@ -327,16 +328,17 @@ class SectionFind extends MarkerControlsSection {
         if (!data.folder) {
           view.on("contextmenu", (event, d) => {
             event.preventDefault();
-            _this._bindContextDialogItems(d);
-            _this.DOM.contextDialog.classed("vzb-hidden", false);
             const itemNode = event.target.parentNode;
             const contentNode = _this.parent.DOM.content.node();
+            const rootNode = _this.root.element.node();
         
             //calculate offset to position the floating dialog
             const itemNodeBBInfo = itemNode.getBoundingClientRect();
             const contentNodeBBInfo = contentNode.getBoundingClientRect();
-            const offset = itemNodeBBInfo.top - contentNodeBBInfo.top + contentNode.scrollTop + itemNodeBBInfo.height * 0.6;
-            _this.DOM.contextDialog.style("top", offset + "px");
+            const offset = getOffsetTop(contentNode) - rootNode.offsetTop + itemNodeBBInfo.top - contentNodeBBInfo.top + itemNodeBBInfo.height * 0.6;
+            //set context menu
+            const contextMenuComponent = _this.root.findChild({type: "MarkerContextmenu"});
+            contextMenuComponent.show(d, {y: offset , x: itemNodeBBInfo.left});
           });
         }
         if (colorFields && colorFields.includes(data.prop)) {
