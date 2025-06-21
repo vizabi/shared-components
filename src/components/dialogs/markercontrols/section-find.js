@@ -542,20 +542,21 @@ class SectionFind extends MarkerControlsSection {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
 
-        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
+        _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
       },
       clickToRemoveAllinGroup(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
 
-        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop});
+        _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
       },
       clickToRemoveAllinOtherGroups(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
-        const otherGroups = [..._this.drilldownValues.values()].filter(f => f["is--" + d.prop] && f[KEY] !== d[KEY]);
 
-        _this.model.data.filter.deleteUsingLimitedStructure({key: otherGroups, dim, prop});
+        _this.model.data.filter.config.dimensions[dim]["$or"].forEach(item => {
+          item[prop] = {"$in": [d[KEY]]}
+        })
         _this.parent.DOM.content.node().scrollTop = 0;
       },
       disableSelectHover(){
