@@ -1,5 +1,5 @@
 import { BaseComponent } from "../base-component.js";
-import {decorate, computed} from "mobx";
+import { decorate, runInAction } from "mobx";
 import { ICON_CLOSE as iconClose } from "../../icons/iconset.js";
 import "./marker-contextmenu.scss";
 
@@ -139,9 +139,13 @@ class MarkerContextmenu extends BaseComponent {
       clickToExplode(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
-        
-        _this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim, prop: dim});
-        _this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim, prop});
+        const drilldownProps = _this._getDrilldownProps();
+        const explodeProp = drilldownProps[drilldownProps.indexOf(prop) + 1];
+
+        runInAction(() => {
+          _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
+          _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + explodeProp, prop, key: d[KEY]});
+        })
       },
       clickToFold(d) {
         const dim = _this._getPrimaryDim();
@@ -150,12 +154,13 @@ class MarkerContextmenu extends BaseComponent {
         const foldProp = drilldownProps[drilldownProps.indexOf(prop) - 1];
         const foldValue = d[foldProp];
         
-        _this.model.data.filter.deleteUsingLimitedStructure({key: foldValue, dim, prop: foldProp});
-        _this.model.data.filter.addUsingLimitedStructure({key: foldValue, dim, prop: dim});
+        runInAction(() => {
+          _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop: foldProp, key: foldValue});
+          _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + foldProp, prop: foldProp, key: foldValue});
+        })
       }
     }
   }
-
 }
 
 MarkerContextmenu.DEFAULT_UI = {

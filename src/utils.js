@@ -195,4 +195,4 @@ export function computeObjectsSimilarityScore(forConfig, againstConfig, specialK
 export function getOffsetTop(element) {
   if (!element) return 0;
   return getOffsetTop(element.offsetParent) + element.offsetTop;
-};
+}
