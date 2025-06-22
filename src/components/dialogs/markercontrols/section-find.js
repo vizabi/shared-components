@@ -1,7 +1,7 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
 import { ICON_CLOSE as iconClose } from "../../../icons/iconset";
-import { decorate, computed, runInAction, observable } from "mobx";
+import { decorate, computed, runInAction, observable, action } from "mobx";
 import { getOffsetTop } from "../../../utils.js";
 import * as d3 from "d3";
 
@@ -392,7 +392,7 @@ class SectionFind extends MarkerControlsSection {
         this.setModel.unhighlight(d);
         this.setModel.deselect(d);
         const primaryDimension = this._getPrimaryDim();
-        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: primaryDimension, prop: primaryDimension});
+        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: primaryDimension, prop: primaryDimension, isness: "is--" + d.prop});
         this.parent._clearSearch();
         this.parent.updateSearch();
       });
@@ -544,22 +544,36 @@ class SectionFind extends MarkerControlsSection {
       clickToAddAllinGroup(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
+        const drilldownProps = _this._getDrilldownProps();
+        const index = drilldownProps.indexOf(prop);
+        const oneLevelDeeper = drilldownProps[index + 1];
+        if (!oneLevelDeeper) return;
 
-        _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
+        _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
       },
       clickToRemoveAllinGroup(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
+        const drilldownProps = _this._getDrilldownProps();
+        const index = drilldownProps.indexOf(prop);
+        const levelsBelow = drilldownProps.slice(index + 1);
 
-        _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
+        _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: levelsBelow.map(m => "is--" + m), prop, key: d[KEY]});
       },
       clickToRemoveAllinOtherGroups(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
+        const drilldownProps = _this._getDrilldownProps();
+        const index = drilldownProps.indexOf(prop);
+        const oneLevelDeeper = drilldownProps[index + 1];
+        if (!oneLevelDeeper) return;
 
-        _this.model.data.filter.config.dimensions[dim]["$or"].forEach(item => {
-          item[prop] = {"$in": [d[KEY]]}
+        runInAction(() => {
+          _this.model.data.filter.config.dimensions[dim]["$nor"] = [];
+          _this.model.data.filter.config.dimensions[dim]["$or"] = [];
+          _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
         })
+        
         _this.parent.DOM.content.node().scrollTop = 0;
       },
       disableSelectHover(){

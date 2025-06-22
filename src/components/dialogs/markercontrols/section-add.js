@@ -38,6 +38,14 @@ class SectionAdd extends MarkerControlsSection {
     return dim + "¬" + key + "¬" + element;
   }
 
+  _getDrilldownProps() {
+    return this.ui.drilldown?.split?.(".") || [];
+  }
+
+  _getPrimaryDim() {
+    return this.parent.ui.primaryDim || this.model.data.space[0];
+  }
+
   buildList() {
     this.DOM.title.text(this.localise("markercontrols/section/add"));
     this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
@@ -148,7 +156,14 @@ class SectionAdd extends MarkerControlsSection {
         }
       })
       .on("click", (event, d) => {
-        this.model.data.filter.addUsingLimitedStructure({key: d[KEY], dim: d.dim, prop: d.prop});
+        const dim = this._getPrimaryDim();
+        const prop = d.prop;
+        const drilldownProps = this._getDrilldownProps();
+        const index = drilldownProps.indexOf(prop);
+        const oneLevelDeeper = drilldownProps[index + 1];
+        if (!oneLevelDeeper) return;
+
+        this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
         this.concludeSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);

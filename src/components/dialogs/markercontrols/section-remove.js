@@ -36,6 +36,14 @@ class SectionRemove extends MarkerControlsSection {
     return dim + "¬" + key + "¬" + element;
   }
 
+  _getDrilldownProps() {
+    return this.ui.drilldown?.split?.(".") || [];
+  }
+
+  _getPrimaryDim() {
+    return this.parent.ui.primaryDim || this.model.data.space[0];
+  }
+
   createList() {
     this.DOM.title.text(this.localise("markercontrols/section/remove"));
     this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
@@ -141,7 +149,13 @@ class SectionRemove extends MarkerControlsSection {
         }
       })
       .on("click", (event, d) => {
-        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: d.dim, prop: d.prop});
+        const dim = this._getPrimaryDim();
+        const prop = d.prop;
+        const drilldownProps = this._getDrilldownProps();
+        const index = drilldownProps.indexOf(prop);
+        const levelsBelow = drilldownProps.slice(index + 1);
+
+        this.model.data.filter.deleteUsingLimitedStructure({dim, isness: levelsBelow.map(m => "is--" + m), prop, key: d[KEY]});
         this.concludeSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);
