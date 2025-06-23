@@ -651,14 +651,14 @@ class SectionFind extends MarkerControlsSection {
       .attr("class", "vzb-find-select-dialog-item-tooltip");
   }
 
-  _updateUiStrings(name) {
+  _updateUiStrings(name, childPropName) {
     const t = this.localise;
     this.DOM.selectDialogTitle.text(name);
     //this.DOM.moreOptionsHint.text(t("hints/color/more"));
-    this.DOM.selectAllinGroup.text("✅ " + t("dialogs/color/select-all-in-group") + " " + name);
-    this.DOM.addAllinGroup.text("✳️ " + t("dialogs/color/add-all-in-group") + " " + name);
-    this.DOM.removeAllinGroup.text("🗑️ " + t("dialogs/color/remove-all-in-group") + " " + name);
-    this.DOM.removeAllinOtherGroups.text("🎯 " + t("dialogs/color/remove-else") + " " + name);
+    this.DOM.selectAllinGroup.html(`✅  ${t("dialogs/color/select-all-in-group")} <br/> ${t("dialogs/color/within")} ${name}`);
+    this.DOM.addAllinGroup.html(`✳️ ${t("dialogs/color/add-all-in-group")} ${name}`);
+    this.DOM.removeAllinGroup.html(`🗑️  ${t("dialogs/color/remove-all-in-group")} ${childPropName} <br/> ${t("dialogs/color/within")} ${name}`);
+    this.DOM.removeAllinOtherGroups.html(`🎯  ${t("dialogs/color/remove-else")} ${childPropName} <br/> ${t("dialogs/color/within")} ${name}`);
     this.DOM.editColorButton.select("label").text("🎨 " + t("dialogs/color/edit-color"));
     this.DOM.editColorButton.select("span").text(t("buttons/reset"));
     this.DOM.editColorButtonTooltip.text(t("dialogs/color/edit-color-blocked-hint") 
@@ -675,7 +675,13 @@ class SectionFind extends MarkerControlsSection {
   _bindSelectDialogItems(d) {
     //const _this = this;
     this._selectDialogDatum = d;
-    this._updateUiStrings(d.name);
+
+    const prop = d.prop;
+    const drilldownProps = this._getDrilldownProps();
+    const index = drilldownProps.indexOf(prop);
+    const oneLevelDeeper = drilldownProps[index + 1];
+
+    this._updateUiStrings(d.name, oneLevelDeeper);
 
     this.DOM.selectAllinGroup
       //experimentally removed this limitation, because discovered that the "string" concept property works too
