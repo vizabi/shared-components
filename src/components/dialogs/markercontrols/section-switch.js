@@ -141,17 +141,16 @@ class SectionSwitch extends MarkerControlsSection {
   }
 
   setFilter({dim, concept, concept_type}) {
-    const filter = this.model.data.filter.config.dimensions;
-    console.log(dim, concept, concept_type, filter)
+    const filter = this.model.data.filter;
     if (!filter) return false;
+  
     if (dim === concept)
-      filter[dim] = null;
+      //switch to show all possible marks (kill filter spec)
+      filter.clearFilterUsingLimitedStructure({dim});
+    else if (concept_type === "boolean")
+      console.error(`switch command for concept_type=boolean ${concept} is not implemented`);
     else 
-      filter[dim] = {
-        "$or": [{
-          [concept_type === "boolean" ? concept : ("is--" + concept)]: true
-        }]
-      };
+      filter.switchIsenssUsingLimitedStructure({dim, isness: "is--" + concept});
   }
 
   updateSearch(text = "") {
