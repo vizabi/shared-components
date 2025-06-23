@@ -556,9 +556,10 @@ class SectionFind extends MarkerControlsSection {
         const prop = d.prop;
         const drilldownProps = _this._getDrilldownProps();
         const index = drilldownProps.indexOf(prop);
-        const levelsBelow = drilldownProps.slice(index + 1);
+        const oneLevelDeeper = drilldownProps[index + 1];
+        if (!oneLevelDeeper) return;
 
-        _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: levelsBelow.map(m => "is--" + m), prop, key: d[KEY]});
+        _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
       },
       clickToRemoveAllinOtherGroups(d) {
         const dim = _this._getPrimaryDim();
