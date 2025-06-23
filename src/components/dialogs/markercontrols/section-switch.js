@@ -113,7 +113,10 @@ class SectionSwitch extends MarkerControlsSection {
               .attr("type", "radio")
               .attr("id", d => this.id + "--" + d.concept)
               .attr("name", this.id + "--radiogroup")
-              .on("change", (event, d) => this.setFilter(d));
+              .on("change", (event, d) => {
+                this.setFilter(d);
+                this.parent._clearSearch();
+              });
 
             view.append("label")
               .attr("for", d => this.id + "--" + d.concept)

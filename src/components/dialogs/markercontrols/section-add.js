@@ -178,7 +178,7 @@ class SectionAdd extends MarkerControlsSection {
         if (!oneLevelDeeper) return;
 
         this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
-        this.concludeSearch();
+        this.parent._clearSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);
 

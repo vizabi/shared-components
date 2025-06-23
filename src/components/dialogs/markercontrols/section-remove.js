@@ -173,7 +173,7 @@ class SectionRemove extends MarkerControlsSection {
         if (!oneLevelDeeper) return;
 
         this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
-        this.concludeSearch();
+        this.parent._clearSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);
 
