@@ -15,6 +15,7 @@ class SectionRemove extends MarkerControlsSection {
 
     this.catalog = [];
     this.allCatalog = [];
+    this.entitySetsColorScale = d3.scaleOrdinal(d3.schemePastel2);
   }
 
   draw() {
@@ -42,6 +43,11 @@ class SectionRemove extends MarkerControlsSection {
 
   _getPrimaryDim() {
     return this.parent.ui.primaryDim || this.model.data.space[0];
+  }
+
+  _isLevelAllowedToAddRemoveAllWithin(prop){
+    //every level in drilldown chain except the lowest
+    return this._getDrilldownProps().slice(0, -1).includes(prop);
   }
 
   createList() {
@@ -80,13 +86,14 @@ class SectionRemove extends MarkerControlsSection {
 
       const allCatalog = [];
       for (const dim in spaceCatalog) {
-        const dimFilter = this.model.data.filter.dimensions?.[dim] || {};
-        const dimNinEntities = [];
-        for (const key in dimFilter) {
+        const dimNor = this.model.data.filter.dimensions?.[dim]?.$nor?.[0];
+        const dimOrNinEntityKeys = [];
+
+        for (const key in dimNor) {
           if (key == dim) continue;
-          if (dimFilter[key].$nin) {
-            dimFilter[key].$nin.forEach(element => {
-              dimNinEntities.push(this._getKey(element, key, dim));
+          if (dimNor[key].$in) {
+            dimNor[key].$in.forEach(value => {
+              dimOrNinEntityKeys.push(this._getKey(value, key, dim));
             });
           }
         }
@@ -95,7 +102,10 @@ class SectionRemove extends MarkerControlsSection {
           for (const prop in dimProps) {
             if (dimProps[prop]?.concept?.concept_type == "entity_set") {
               dimProps[prop].entities.forEach((entityObj, key) => {
-                if (!dimNinEntities.includes(this._getKey(key, prop, dim))) {
+                if (
+                  !dimOrNinEntityKeys.includes(this._getKey(key, prop, dim))
+                  && this._isLevelAllowedToAddRemoveAllWithin(prop)
+                ) {
                   allCatalog.push({
                     __allElements: true,
                     [KEY]: key,
@@ -140,8 +150,14 @@ class SectionRemove extends MarkerControlsSection {
       .enter().append("li")
       .html((d) => {
         if (d.__allElements) {
-          return "ALL "
-            + this.localise("marker-plural/" + this.model.id.replace("-splash", ""))
+          const prop = d.prop;
+          const drilldownProps = this._getDrilldownProps();
+          const index = drilldownProps.indexOf(prop);
+          const oneLevelDeeper = drilldownProps[index + 1];
+          if (!oneLevelDeeper) return;
+
+          return "ALL"
+            + `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale("is--" + oneLevelDeeper)}">${oneLevelDeeper}</span>`
             + " where</br>"
             + d.propName + " = " + d.name;
         } else {
@@ -153,9 +169,10 @@ class SectionRemove extends MarkerControlsSection {
         const prop = d.prop;
         const drilldownProps = this._getDrilldownProps();
         const index = drilldownProps.indexOf(prop);
-        const levelsBelow = drilldownProps.slice(index + 1);
+        const oneLevelDeeper = drilldownProps[index + 1];
+        if (!oneLevelDeeper) return;
 
-        this.model.data.filter.deleteUsingLimitedStructure({dim, isness: levelsBelow.map(m => "is--" + m), prop, key: d[KEY]});
+        this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
         this.concludeSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);

@@ -46,6 +46,11 @@ class SectionAdd extends MarkerControlsSection {
     return this.parent.ui.primaryDim || this.model.data.space[0];
   }
 
+  _isLevelAllowedToAddRemoveAllWithin(prop){
+    //every level in drilldown chain except the lowest
+    return this._getDrilldownProps().slice(0, -1).includes(prop);
+  }
+
   buildList() {
     this.DOM.title.text(this.localise("markercontrols/section/add"));
     this.model.encoding.label.data.spaceCatalog.then(spaceCatalog => {
@@ -97,7 +102,10 @@ class SectionAdd extends MarkerControlsSection {
               const props = entity.isness.filter(d => d.isProp);
               if (props.length) {
                 props.forEach(prop => {
-                  if (!dimOrInEntityKeys.includes(this._getKey(entity[KEY], prop.concept, dim))) {
+                  if (
+                    !dimOrInEntityKeys.includes(this._getKey(entity[KEY], prop.concept, dim))
+                    && this._isLevelAllowedToAddRemoveAllWithin(prop.concept)
+                  ) {
                     result.push({
                       __allElements: true,
                       [KEY]: entity[KEY],
@@ -147,8 +155,14 @@ class SectionAdd extends MarkerControlsSection {
       .enter().append("li")
       .html((d) => {
         if (d.__allElements) {
-          return "ALL "
-            + this.localise("marker-plural/" + this.model.id.replace("-splash", ""))
+          const prop = d.prop;
+          const drilldownProps = this._getDrilldownProps();
+          const index = drilldownProps.indexOf(prop);
+          const oneLevelDeeper = drilldownProps[index + 1];
+          if (!oneLevelDeeper) return;
+
+          return "ALL"
+            + `<span class="vzb-dialog-isness" style="background-color:${this.entitySetsColorScale("is--" + oneLevelDeeper)}">${oneLevelDeeper}</span>`
             + " where</br>"
             + d.propName + " = " + d.name;
         } else {

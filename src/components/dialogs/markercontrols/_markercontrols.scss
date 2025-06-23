@@ -473,13 +473,15 @@
           padding-top: 2px;
           padding-bottom: 3px;
           .vzb-dialog-isness {
+            position: relative;
+            top: -1px;
             font-size: $vzb-font-size-tiny;
             background-color: $vzb-color-accent-yellow;
             border: 1px solid $vzb-color-grey-light;
             border-radius: 2px;
             padding: 1px 3px 1px 3px;
             margin-left: 4px;
-            opacity: 0.5;
+            opacity: 0.8;
           }
           &:hover {
             background-color: $vzb-color-primary-lightest;
@@ -509,15 +511,21 @@
           padding-top: 2px;
           padding-bottom: 3px;
           .vzb-dialog-isness {
+            position: relative;
+            top: -1px;
             font-size: $vzb-font-size-tiny;
             background-color: $vzb-color-accent-yellow;
             border: 1px solid $vzb-color-grey-light;
             border-radius: 2px;
             padding: 1px 3px 1px 3px;
             margin-left: 4px;
+            opacity: 0.8;
           }
           &:hover {
-              background-color: $vzb-color-primary-lightest;
+            background-color: $vzb-color-primary-lightest;
+            &::before, .vzb-dialog-isness {
+              opacity: 1;
+            }
           }
           &::before {
             content: "❌";
