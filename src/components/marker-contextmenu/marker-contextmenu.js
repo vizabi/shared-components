@@ -27,8 +27,7 @@ class MarkerContextmenu extends BaseComponent {
       container: this.element.select(".vzb-mkcm-container"),
       title: this.element.select(".vzb-marker-contextmenu-title"),
       closecross: this.element.select(".vzb-marker-contextmenu-close"),
-      fold: this.element.select(".vzb-marker-contextmenu-item-fold"),
-      explode: this.element.select(".vzb-marker-contextmenu-item-explode")
+      fold: this.element.select(".vzb-marker-contextmenu-item-fold")
     };
 
 
@@ -65,11 +64,10 @@ class MarkerContextmenu extends BaseComponent {
       .style("left", xy.x + "px")
   }
 
-  _updateContextDialogUiStrings(name, nameFold, nameExplode) {
+  _updateContextDialogUiStrings(name, nameFold) {
     const t = this.localise;
     this.DOM.title.text(name);
     this.DOM.fold.text("❇️ " + t("dialogs/find/fold") + " " + nameFold);
-    this.DOM.explode.text("✳️ " + t("dialogs/find/explode") + " " + nameExplode);
   }
 
   _getPrimaryDim() {
@@ -102,9 +100,9 @@ class MarkerContextmenu extends BaseComponent {
       d.prop = props[1];
       const drilldownProps = this._getDrilldownProps();
       const index = drilldownProps.indexOf(d.prop);
-      const propNames = [drilldownProps[index - 1], drilldownProps[index + 1]].map(prop => prop ? this.model.data.source.getConcept(prop)?.name : null);
+      const foldPropName = [drilldownProps[index - 1]].map(prop => prop ? this.model.data.source.getConcept(prop)?.name : null)[0];
       
-      this._updateContextDialogUiStrings(d.name, propNames[0], propNames[1]);
+      this._updateContextDialogUiStrings(d.name, foldPropName);
 
       this.DOM.fold
         .classed("vzb-hidden", () => this._interact().disableFold(d))
@@ -113,24 +111,36 @@ class MarkerContextmenu extends BaseComponent {
           this.hide();
         });
 
-      this.DOM.explode
-        .classed("vzb-hidden", () => this._interact().disableExplode(d))
-        .on("click", () => {
-          this._interact().clickToExplode(d);
-          this.hide();
-        });
+      this.DOM.container.selectAll(".vzb-marker-contextmenu-item-explode").remove();
+      this.DOM.container.selectAll(".vzb-marker-contextmenu-item-explode").data(this._getExplodeProps(d))
+        .join("div")
+          .classed("vzb-marker-contextmenu-item vzb-marker-contextmenu-item-explode vzb-clickable", true)
+          .text(d => "✳️ " + this.localise("dialogs/find/explode") + " " + d.explodePropName)
+          .on("click", (event, d) => {
+            this._interact().clickToExplode(d);
+            this.hide();
+          });
     });
+  }
+
+  _getExplodeProps(d) {
+    const drilldownProps = this._getDrilldownProps();
+    const index = drilldownProps.indexOf(d.prop);
+    return index == -1 ? [] : drilldownProps.slice(index + 1).map(prop => {
+        return ({
+          [KEY]: d[KEY],
+          prop: d.prop,
+          explodeProp: prop,
+          explodePropName: this.model.data.source.getConcept(prop)?.name || prop
+        })
+      } 
+    );
   }
 
   _interact() {
     const _this = this;
 
     return {
-      disableExplode(d) {
-        const drilldownProps = _this._getDrilldownProps();
-        const index = drilldownProps.indexOf(d.prop);
-        return drilldownProps[index + 1] ? false : true;
-      },
       disableFold(d) {
         const drilldownProps = _this._getDrilldownProps();
         const index = drilldownProps.indexOf(d.prop);
@@ -139,8 +149,7 @@ class MarkerContextmenu extends BaseComponent {
       clickToExplode(d) {
         const dim = _this._getPrimaryDim();
         const prop = d.prop;
-        const drilldownProps = _this._getDrilldownProps();
-        const explodeProp = drilldownProps[drilldownProps.indexOf(prop) + 1];
+        const explodeProp = d.explodeProp;
 
         runInAction(() => {
           _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
