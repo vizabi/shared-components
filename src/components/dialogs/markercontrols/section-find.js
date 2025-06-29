@@ -328,22 +328,20 @@ class SectionFind extends MarkerControlsSection {
       })
       .each(function(data) {
         const view = d3.select(this);
-        if (!data.folder) {
-          view.on("contextmenu", (event, d) => {
-            event.preventDefault();
-            const itemNode = event.target.parentNode;
-            const contentNode = _this.parent.DOM.content.node();
-            const rootNode = _this.root.element.node();
-        
-            //calculate offset to position the floating dialog
-            const itemNodeBBInfo = itemNode.getBoundingClientRect();
-            const contentNodeBBInfo = contentNode.getBoundingClientRect();
-            const offset = getOffsetTop(contentNode) - rootNode.offsetTop + itemNodeBBInfo.top - contentNodeBBInfo.top + itemNodeBBInfo.height * 0.6;
-            //set context menu
-            const contextMenuComponent = _this.root.findChild({type: "MarkerContextmenu"});
-            contextMenuComponent.show(d, {y: offset , x: itemNodeBBInfo.left});
-          });
-        }
+        view.on("contextmenu", (event, d) => {
+          event.preventDefault();
+          const itemNode = event.target.parentNode;
+          const contentNode = _this.parent.DOM.content.node();
+          const rootNode = _this.root.element.node();
+      
+          //calculate offset to position the floating dialog
+          const itemNodeBBInfo = itemNode.getBoundingClientRect();
+          const contentNodeBBInfo = contentNode.getBoundingClientRect();
+          const offset = getOffsetTop(contentNode) - rootNode.offsetTop + itemNodeBBInfo.top - contentNodeBBInfo.top + itemNodeBBInfo.height * 0.6;
+          //set context menu
+          const contextMenuComponent = _this.root.findChild({type: "MarkerContextmenu"});
+          contextMenuComponent.show(d, {y: offset , x: itemNodeBBInfo.left});
+        });
         if (colorFields && colorFields.includes(data.prop)) {
           view.append("span")
             .attr("class", "vzb-color")
