@@ -52,7 +52,7 @@ export function updateRainbowLegend(isVisible) {
     .range([0, 100]);
 
   updateLabelScale();
-  updateRainbowCanvas();
+  if (domain.length) updateRainbowCanvas();
   updateHint();
   updateSubtitle();
 
@@ -135,7 +135,7 @@ export function updateRainbowLegend(isVisible) {
       }
 
       const key = hltFilter.markers.keys().next().value;
-      const value = _this.model.dataMap.getByStr(key)[_this.colorModelName];
+      const value = _this.model.dataMap.getByStr(key)?.[_this.colorModelName];
       const x = labelScale(value);
 
       const marginLeft = 15;
