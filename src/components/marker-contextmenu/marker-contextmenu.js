@@ -31,7 +31,7 @@ class MarkerContextmenu extends BaseComponent {
     };
 
 
- this.DOM.contextDialog
+    this.DOM.contextDialog;
     this.element
       .on("mouseleave", () => {
         this.hide();
@@ -61,7 +61,7 @@ class MarkerContextmenu extends BaseComponent {
     this._bindContextDialogItems(d);
     this.element.classed("vzb-hidden", false)
       .style("top", xy.y + "px")
-      .style("left", xy.x + "px")
+      .style("left", xy.x + "px");
   }
 
   _updateContextDialogUiStrings(name, nameFold) {
@@ -114,12 +114,12 @@ class MarkerContextmenu extends BaseComponent {
       this.DOM.container.selectAll(".vzb-marker-contextmenu-item-explode").remove();
       this.DOM.container.selectAll(".vzb-marker-contextmenu-item-explode").data(this._getExplodeProps(d))
         .join("div")
-          .classed("vzb-marker-contextmenu-item vzb-marker-contextmenu-item-explode vzb-clickable", true)
-          .text(d => "✳️ " + this.localise("dialogs/find/explode") + " " + d.explodePropName)
-          .on("click", (event, d) => {
-            this._interact().clickToExplode(d);
-            this.hide();
-          });
+        .classed("vzb-marker-contextmenu-item vzb-marker-contextmenu-item-explode vzb-clickable", true)
+        .text(d => "✳️ " + this.localise("dialogs/find/explode") + " " + d.explodePropName)
+        .on("click", (event, d) => {
+          this._interact().clickToExplode(d);
+          this.hide();
+        });
     });
   }
 
@@ -127,13 +127,13 @@ class MarkerContextmenu extends BaseComponent {
     const drilldownProps = this._getDrilldownProps();
     const index = drilldownProps.indexOf(d.prop);
     return index == -1 ? [] : drilldownProps.slice(index + 1).map(prop => {
-        return ({
-          [KEY]: d[KEY],
-          prop: d.prop,
-          explodeProp: prop,
-          explodePropName: this.model.data.source.getConcept(prop)?.name || prop
-        })
-      } 
+      return ({
+        [KEY]: d[KEY],
+        prop: d.prop,
+        explodeProp: prop,
+        explodePropName: this.model.data.source.getConcept(prop)?.name || prop
+      });
+    } 
     );
   }
 
@@ -214,7 +214,7 @@ class MarkerContextmenu extends BaseComponent {
           });
         }
       }
-    }
+    };
   }
 }
 

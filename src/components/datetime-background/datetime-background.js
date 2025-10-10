@@ -1,5 +1,4 @@
 import {BaseComponent} from "../base-component.js";
-import * as utils from "../../legacy/base/utils.js";
 import "./datetime-background.scss";
 
 import {decorate, computed} from "mobx";

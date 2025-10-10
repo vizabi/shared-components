@@ -71,7 +71,7 @@ export class IndicatorPicker extends BaseComponent {
       .on("click", () => {
         dataNotesDialog().pin();
       })
-      .on("mouseover", function(event) {
+      .on("mouseover", function() {
         if (timeSlider().ui.dragging) return;
         const coord = this.getBoundingClientRect();
         const toolRect = _this.root.element.node().getBoundingClientRect();

@@ -109,7 +109,7 @@ export function updateRainbowLegend(isVisible) {
 
   function updateHint(){
     const hltFilter = _this.MDL.highlighted.data.filter;
-    const canvas = DOM.rainbowOutliers.node()
+    const canvas = DOM.rainbowOutliers.node();
     const ctx = canvas.getContext("2d");
 
     //only one mark is highlighted and the dialog is visible

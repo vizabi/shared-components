@@ -41,7 +41,7 @@ export class ShortcutForSwitch extends BaseComponent {
       this.DOM.container
         .style("display", "block")
         .append("a").text("❌ Reset filter")
-        .on("click", () => resetFilter())
+        .on("click", () => resetFilter());
     } else {
       this.DOM.container.text("");
       this.DOM.container

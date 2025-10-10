@@ -1,7 +1,7 @@
 import * as utils from "../../../legacy/base/utils.js";
 import { MarkerControlsSection } from "./section.js";
 import { ICON_CLOSE as iconClose } from "../../../icons/iconset";
-import { decorate, computed, runInAction, observable, action } from "mobx";
+import { decorate, computed, runInAction, observable } from "mobx";
 import { getOffsetTop } from "../../../utils.js";
 import * as d3 from "d3";
 
@@ -571,7 +571,7 @@ class SectionFind extends MarkerControlsSection {
           _this.model.data.filter.config.dimensions[dim]["$nor"] = [];
           _this.model.data.filter.config.dimensions[dim]["$or"] = [];
           _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
-        })
+        });
         
         _this.parent.DOM.content.node().scrollTop = 0;
       },
