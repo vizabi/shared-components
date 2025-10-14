@@ -72,6 +72,14 @@ export class ButtonList extends BaseComponent {
         func: this.toggleFullScreen.bind(this),
         required: true
       },
+      "pivot": {
+        title: "buttons/pivot",
+        icon: "axes",
+        func: this.toggleSpreadsheetPivot.bind(this),
+        required: false,
+        statebind: "root.ui.chart.pivot",
+        statebindfunc: this.setSpreadsheetPivot.bind(this)
+      },
       "trails": {
         title: "buttons/trails",
         icon: "trails",
@@ -471,6 +479,17 @@ export class ButtonList extends BaseComponent {
     this.root.element.classed("vzb-dialog-expand-true", !this.ui.sidebarCollapse);
   }
 
+  toggleSpreadsheetPivot() {
+    this.root.ui.chart.pivot = !this.root.ui.chart.pivot;
+    this.setSpreadsheetPivot();
+  }
+  setSpreadsheetPivot() {
+    if (typeof ((this.root.ui.chart || {}).pivot) === "undefined") return;
+    const id = "pivot";
+    const btn = this.element.selectAll(".vzb-buttonlist-btn[data-btn='" + id + "']");
+
+    btn.classed(class_active_locked, this.root.ui.chart.pivot);
+  }
   toggleBubbleTrails() {
     if (this.model.encoding) {
       const trail = this.model.encoding.trail;
