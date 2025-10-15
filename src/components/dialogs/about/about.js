@@ -15,7 +15,7 @@ function formatBuild(timestamp){
 
 function url(text = "", link = ""){
   if (!link) return text;
-  return `<a class='vzb-underline' href='${link}' target='_blank'>⧉ ${text}</a>`;
+  return `<a class='vzb-underline' href='${link}' target='_blank'>${text}</a>`;
 }
 function mailto(mailto = ""){
   return `💌 <a class='vzb-underline' href='mailto:${mailto}' target='_blank'>${mailto}</a>`;
