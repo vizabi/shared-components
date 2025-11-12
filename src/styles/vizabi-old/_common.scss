@@ -12,8 +12,16 @@
 // ----------------------------------------------------------------------------
 //   Text
 // ----------------------------------------------------------------------------
-$vzb-font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-$vzb-font-family-alt: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+// Default fallback fonts (used if custom properties not set)
+$vzb-font-family-fallback: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+$vzb-font-family-alt-fallback: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+$vzb-font-family-mono-fallback: "Courier New", monospace;
+
+// Use CSS custom properties with fallbacks
+$vzb-font-family: var(--vzb-font-family, #{$vzb-font-family-fallback});
+$vzb-font-family-alt: var(--vzb-font-family-alt, #{$vzb-font-family-alt-fallback});
+$vzb-font-family-mono: var(--vzb-font-family-mono, #{$vzb-font-family-mono-fallback});
+
 $vzb-font-size-base: 16px;
 $vzb-font-size-tiny: 0.625em;
 $vzb-font-size-small: 0.8em;
