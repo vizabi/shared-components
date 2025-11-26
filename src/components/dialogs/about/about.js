@@ -1,5 +1,6 @@
 import { Dialog } from "../dialog";
 import * as d3 from "d3";
+import {VIZABI_CHARTS_LOGO} from "./vizabi-charts.svg.js";
 
 /*
  * About dialog
@@ -65,9 +66,24 @@ export class About extends Dialog {
     const author = this.root.constructor.versionInfo?.sharedComponents?.package?.author || {};
 
     this.DOM.header.html("");
-    this.DOM.header.append("p").html("Next level data graphics");
-    this.DOM.header.append("p").html("This chart is made with Vizabi, <br/> an open-source project originally <br/> built at " + url(author.name, author.url) + "<br/> Currently maintained and extended by <br/> Angie and team at "  + url("Visual Encodings AB", "https://visual-encodings.com"));
-    this.DOM.header.append("p").html("If you would like to use these graphs, we <br/> can help you set them up and customise <br/>"  + mailto("info@visual-encodings.com"));
+    this.DOM.header.append("p").html(url(VIZABI_CHARTS_LOGO, "https://vizabi.com"));
+    this.DOM.header.append("p").html(""
+      + "This chart is made with Vizabi, <br/>" 
+      + " a free open-source software <br/>"
+      + "that animates numbers over time, <br/>"
+      + "bringing them to life — so that <br/>"
+      + "the truth can win over buzzwords. <br/>"
+      + "<br/>"
+      + "Built at " + url(author.name, author.url) + ",<br/> "
+      + "Currently maintained and extended by <br/>"
+      + "Angie & Dmitry at Encharted Media AB, <br/>"
+      + "see " + url("vizabi.com", "https://vizabi.com")
+    );
+    this.DOM.header.append("p").html(""
+      + "Hire us to set up and customise <br/>"
+      + "these graphs for your data! <br/>"
+      + mailto("info@enchart.me")
+    );
   }
 
 

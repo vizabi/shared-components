@@ -12,7 +12,11 @@
 
         p {
           margin-bottom: 2em;
-          span {margin-right: 1em}
+          span {margin-right: 1em};
+          svg {
+            max-width: 230px;
+            height: auto;
+          }
         }
 
         h1 {
