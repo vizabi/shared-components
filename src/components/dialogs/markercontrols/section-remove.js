@@ -168,11 +168,25 @@ class SectionRemove extends MarkerControlsSection {
         const dim = this._getPrimaryDim();
         const prop = d.prop;
         const drilldownProps = this._getDrilldownProps();
-        const index = drilldownProps.indexOf(prop);
-        const oneLevelDeeper = drilldownProps[index + 1];
-        if (!oneLevelDeeper) return;
 
-        this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + oneLevelDeeper, prop, key: d[KEY]});
+        let isness = null;
+        if (prop === dim) {
+          //Single item into dim section and prop subsection
+          //maybe use isness if we care about those
+          if (drilldownProps?.length) isness = d.isness[0]?.id || null;
+        } else {
+          //Multiple items. EXAMPLE:
+          //for primary dimension (dim="geo") add all counties (isness="is--county") of a state (prop="state" key="alabama")
+          if (drilldownProps?.length) { 
+            const index = drilldownProps.indexOf(prop);
+            const oneLevelDeeper = drilldownProps[index + 1];
+            if (index === -1 || !oneLevelDeeper) 
+              return console.error("Markercontrols Section Remove: cannot remove all within, drilldown level not found", {d, dim, drilldownProps});
+            isness = "is--" + oneLevelDeeper;
+          }
+        }
+
+        this.model.data.filter.deleteUsingLimitedStructure({dim, isness, prop, key: d[KEY]});
         this.parent._clearSearch();
       })
       .classed("vzb-dialog-all-entites", d => d.__allElements);
