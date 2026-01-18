@@ -179,6 +179,13 @@
         }
       }
 
+      .vzb-dialog-panel-markercontrols {
+        position: absolute;
+        .vzb-section {
+          width: 229px;
+        }
+      }
+
       .vzb-switch .vzb-hint{
         color: $vzb-color-primary-light;
         font-size: $vzb-font-size-small;
