@@ -390,7 +390,8 @@ class SectionFind extends MarkerControlsSection {
         this.setModel.unhighlight(d);
         this.setModel.deselect(d);
         const primaryDimension = this._getPrimaryDim();
-        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: primaryDimension, prop: primaryDimension, isness: "is--" + d.prop});
+        const isness = d.prop ? "is--" + d.prop : null;
+        this.model.data.filter.deleteUsingLimitedStructure({key: d[KEY], dim: primaryDimension, prop: primaryDimension, isness});
         this.parent._clearSearch();
         this.parent.updateSearch();
       });
