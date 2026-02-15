@@ -3,6 +3,7 @@ import { Dialog } from "../dialog";
 
 import { IndicatorPicker } from "../../indicatorpicker/indicatorpicker";
 import { BubbleSize } from "../../brushslider/bubblesize/bubblesize";
+import { MinMaxInputs } from "../../minmaxinputs/minmaxinputs";
 /*
  * Size dialog
  */
@@ -17,6 +18,7 @@ export class Size extends Dialog {
           <span data-localise="buttons/size"></span>
           <div class="vzb-dialog-bubblesize"></div>
           <span class="vzb-saxis-selector"></span>
+          <div class="vzb-saxis-minmax vzb-dialog-paragraph"></div>
         </div>
         <div class="vzb-dialog-content">
           <span class="vzb-dialog-subtitle"></span>
@@ -36,6 +38,15 @@ export class Size extends Dialog {
         submodel: "encoding",
         targetProp: "size",
         showHoverValues: true
+      }
+    },{
+      type: MinMaxInputs,
+      placeholder: ".vzb-saxis-minmax",
+      state: {
+        submodel: "encoding.size.scale"
+      },
+      options: {
+        targetProp: "domain"
       }
     },{
       type: BubbleSize,

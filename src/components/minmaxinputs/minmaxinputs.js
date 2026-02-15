@@ -16,23 +16,27 @@ class MinMaxInputs extends BaseComponent {
         <input type="text" class="vzb-mmi-zoomedmin" name="min">
         <span class="vzb-mmi-zoomedmax-label"></span>
         <input type="text" class="vzb-mmi-zoomedmax" name="max">
-
+        <span class="vzb-mmi-reset">✖️</span>
       </div>
     `;
 
     super(config);
   }
 
-  setup() {
+  setup(options) {
+    this.targetProp = options.targetProp || "zoomed";
+
     this.DOM = {
       zoomed_labelMin: this.element.select(".vzb-mmi-zoomedmin-label"),
       zoomed_labelMax: this.element.select(".vzb-mmi-zoomedmax-label"),
       zoomed_fieldMin: this.element.select(".vzb-mmi-zoomedmin"),
-      zoomed_fieldMax: this.element.select(".vzb-mmi-zoomedmax")
+      zoomed_fieldMax: this.element.select(".vzb-mmi-zoomedmax"),
+      zoomed_reset: this.element.select(".vzb-mmi-reset")
     };
 
     this.DOM.zoomed_fieldMin.on("change", this._setModel.bind(this));
     this.DOM.zoomed_fieldMax.on("change", this._setModel.bind(this));
+    this.DOM.zoomed_reset.on("click", this._resetModel.bind(this));
 
     this.element.selectAll("input")
       .on("keypress", (event) => {
@@ -63,11 +67,12 @@ class MinMaxInputs extends BaseComponent {
   }
 
   _updateView() {
+    this.DOM.zoomed_reset.classed("vzb-hidden", !this.MDL.model.config[this.targetProp]);
     this.DOM.zoomed_labelMin.text(this.localise("hints/min") + ":");
     this.DOM.zoomed_labelMax.text(this.localise("hints/max") + ":");
 
-    this.DOM.zoomed_fieldMin.property("value", this.formatter(this.MDL.model.zoomed[0]));
-    this.DOM.zoomed_fieldMax.property("value", this.formatter(this.MDL.model.zoomed[1]));
+    this.DOM.zoomed_fieldMin.property("value", this.formatter(this.MDL.model[this.targetProp][0]));
+    this.DOM.zoomed_fieldMax.property("value", this.formatter(this.MDL.model[this.targetProp][1]));
   }
 
   _getModel() {
@@ -91,7 +96,13 @@ class MinMaxInputs extends BaseComponent {
     if(values.some(f => !f && f!==0)) {
       this._updateView();
     } else {
-      this.MDL.model.config.zoomed = values;
+      this.MDL.model.config[this.targetProp] = values;
+    }
+  }
+
+  _resetModel() {
+    if (this.MDL.model.config[this.targetProp]) {
+      this.MDL.model.config[this.targetProp] = undefined;
     }
   }
 }

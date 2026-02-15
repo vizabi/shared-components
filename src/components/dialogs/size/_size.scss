@@ -35,14 +35,15 @@
       //hiding elements when in sidebar mode
       &.vzb-sidebar {
         .vzb-dialog-subtitle,
-        .vzb-dialog-bubblesize {
+        .vzb-dialog-bubblesize,
+        .vzb-saxis-minmax {
           display: none;
         }
   	  }
 
       .vzb-dialog-modal {        
         display: grid;
-        grid-template-rows: 40px 175px;
+        grid-template-rows: 40px 205px;
 
         .vzb-dialog-title {
           .vzb-saxis-selector {
@@ -56,7 +57,13 @@
 
           .vzb-dialog-bubblesize {
             position: absolute;
-            top: 40px;
+            top: 70px;
+          }
+
+          .vzb-saxis-minmax {
+            margin-top: 10px;
+            margin-left: 5px;
+            position: relative;
           }
         }
 
