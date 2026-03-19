@@ -137,6 +137,37 @@ class MarkerContextmenu extends BaseComponent {
     );
   }
 
+  _getSelectedFilter() {
+    return this.model.encoding.selected.data.filter;
+  }
+
+  _getChildKeys({dim, parentKey, targetProp}) {
+    return this.model.data.source.drilldown({dim, entity: parentKey}).then(drilldown => {
+      const keys = drilldown?.[targetProp] || [];
+      return Array.isArray(keys) ? keys : [keys];
+    });
+  }
+
+  _transferSelectionOnExplode({dim, parentKey, targetProp}) {
+    const selectedFilter = this._getSelectedFilter();
+    if (!selectedFilter.has({[KEY]: parentKey})) return;
+    this._getChildKeys({dim, parentKey, targetProp}).then(childKeys => {
+      runInAction(() => {
+        childKeys.forEach(key => selectedFilter.set({[KEY]: key}));
+        selectedFilter.delete({[KEY]: parentKey});
+      });
+    });
+  }
+
+  _deselectChildrenOnFold({dim, parentKey, childProp}) {
+    this._getChildKeys({dim, parentKey, targetProp: childProp}).then(childKeys => {
+      runInAction(() => {
+        const selectedFilter = this._getSelectedFilter();
+        childKeys.forEach(key => selectedFilter.delete({[KEY]: key}));
+      });
+    });
+  }
+
   _interact() {
     const _this = this;
 
@@ -155,6 +186,9 @@ class MarkerContextmenu extends BaseComponent {
         const prevProp = drilldownProps[drilldownProps.indexOf(prop) - 1];
         const nextProp = drilldownProps[drilldownProps.indexOf(prop) + 1];
         const explodeNextProp = drilldownProps[drilldownProps.indexOf(explodeProp) + 1];
+
+        _this._transferSelectionOnExplode({dim, parentKey: d[KEY], targetProp: explodeProp});
+
         if (!prevProp) {
           _this.model.data.source.drilldown({dim, entity: d[KEY]}).then(drilldown => {
             runInAction(() => {
@@ -182,6 +216,8 @@ class MarkerContextmenu extends BaseComponent {
         const foldProp = drilldownProps[drilldownProps.indexOf(prop) - 1];
         const foldValue = d[foldProp];
         const nextProp = drilldownProps[drilldownProps.indexOf(prop) + 1];
+
+        _this._deselectChildrenOnFold({dim, parentKey: foldValue, childProp: prop});
 
         if (nextProp) {
           _this.model.data.source.drilldown({dim, entity: foldValue}).then(drilldown => {
