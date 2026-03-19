@@ -160,25 +160,17 @@ class MarkerContextmenu extends BaseComponent {
             runInAction(() => {
               if (nextProp == explodeProp) {
                 _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + explodeNextProp, prop: nextProp, key: drilldown[nextProp]});
-                _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + explodeNextProp, prop: nextProp, key: drilldown[nextProp]});
               } else {
-                _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + nextProp, prop: nextProp, key: drilldown[nextProp]});
                 _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + nextProp, prop: nextProp, key: drilldown[nextProp]});
               }
 
               _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + explodeProp, prop: nextProp, key: drilldown[nextProp]});
-              _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + explodeProp, prop: nextProp, key: drilldown[nextProp]});
-
-              _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
               _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
             });
           });
         } else {
           runInAction(() => {
             _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + explodeProp, prop, key: d[KEY]});
-            _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + explodeProp, prop, key: d[KEY]});
-
-            _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
             _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop, key: d[KEY]});
           });
         }
@@ -195,21 +187,13 @@ class MarkerContextmenu extends BaseComponent {
           _this.model.data.source.drilldown({dim, entity: foldValue}).then(drilldown => {
             runInAction(() => {
               _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + nextProp, prop: prop, key: drilldown[prop]});
-              _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + nextProp, prop: prop, key: drilldown[prop]});
-
               _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop: prop, key: drilldown[prop]});
-              _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop: prop, key: drilldown[prop]});
-
-              _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + foldProp, prop: foldProp, key: foldValue});
               _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + foldProp, prop: foldProp, key: foldValue});
             });
           });
         } else {
           runInAction(() => {
             _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop: foldProp, key: foldValue});
-            _this.model.data.filter.deleteUsingLimitedStructure({dim, isness: "is--" + prop, prop: foldProp, key: foldValue});
-
-            _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + foldProp, prop: foldProp, key: foldValue});
             _this.model.data.filter.addUsingLimitedStructure({dim, isness: "is--" + foldProp, prop: foldProp, key: foldValue});
           });
         }
