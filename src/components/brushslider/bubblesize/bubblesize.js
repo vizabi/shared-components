@@ -13,7 +13,7 @@ const OPTIONS = {
   BAR_WIDTH: 3,
   TEXT_PARAMS: { TOP: 11, LEFT: 10, MAX_WIDTH: 42, MAX_HEIGHT: 16 },
   THUMB_STROKE_WIDTH: 2,
-  THUMB_HEIGHT: 15,
+  THUMB_HEIGHT: 18,
   labelsValue: "domain",
 
   PROFILE_CONSTANTS: {
@@ -47,7 +47,7 @@ export class BubbleSize extends BrushSlider {
     this.DOM.sliderLabels = this.DOM.sliderLabelsWrapper.selectAll("text").data([0, 0]).enter()
       .append("text")
       .attr("class", "vzb-bs-slider-thumb-label")
-      .attr("dy", (d, i) => i ? "-0.5em" : "1.9em");
+      .attr("dy", (d, i) => i ? "-0.5em" : "2em");
   }
 
   _updateView() { 

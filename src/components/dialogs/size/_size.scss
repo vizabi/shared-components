@@ -15,36 +15,53 @@
 
       &.vzb-popup,
       &.vzb-sidebar {
-        .vzb-dialog-title {
+        .vzb-dialog-title { // Title row with span and indicator picker
           display: flex;
           flex-direction: row;
           align-items: center;
-          > span:first-child {
+          > span:first-child { // Translatable title
             display: block;
             flex: 0 0 auto;
           } 
-        }
-
-        .vzb-saxis-selector {
-          display: block;
-          flex: 1 1 auto;
-          min-width: 1px;
+          .vzb-saxis-selector {
+            display: block;
+            flex: 1 1 auto;
+            min-width: 1px;
+          }
         }
       }
 
-      //hiding elements when in sidebar mode
+      //Custom tuning when in sidebar mode
+      &.vzb-sidebar:not(.vzb-force-show-sliders) {
+        .vzb-dialog-modal {
+          height: auto;
+          .vzb-dialog-bubblesize {
+            display: none;
+          }
+        }
+      }
       &.vzb-sidebar {
-        .vzb-dialog-subtitle,
-        .vzb-dialog-bubblesize,
-        .vzb-saxis-minmax {
-          display: none;
+        .vzb-dialog-modal {
+          height: 120px;
+          .vzb-dialog-title {
+            z-index: 1;
+          }
+          .vzb-dialog-bubblesize {
+            top: -50px;
+          }
+          .vzb-dialog-content {
+            display: none;
+          }
         }
   	  }
 
-      .vzb-dialog-modal {        
-        display: grid;
-        grid-template-rows: 40px 205px;
-
+      .vzb-dialog-modal {
+        height: 225px;
+        .vzb-dialog-bubblesize {
+          position: absolute;
+          top: 50px;
+          font-size: 13px;
+        }
         .vzb-dialog-title {
           .vzb-saxis-selector {
             .vzb-ip-select {
@@ -54,22 +71,17 @@
               }
             }
           }
+        }
 
-          .vzb-dialog-bubblesize {
+        .vzb-dialog-content {
+          .vzb-dialog-subtitle {
             position: absolute;
-            top: 70px;
+            bottom: 0px;
           }
-
           .vzb-saxis-minmax {
-            margin-top: 10px;
             margin-left: 5px;
             position: relative;
           }
-        }
-
-        .vzb-dialog-subtitle {
-          position: absolute;
-          bottom: 0px;
         }
       }
     }

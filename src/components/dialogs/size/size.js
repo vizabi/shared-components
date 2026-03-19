@@ -9,19 +9,23 @@ import { MinMaxInputs } from "../../minmaxinputs/minmaxinputs";
  */
 
 export class Size extends Dialog {
+  static DEFAULT_UI = {
+    showSlidersWhenInSidebar: false
+  };
+
   constructor(config) {
     config.template = `
       <div class='vzb-dialog-modal'>
         <span class="thumb-tack-class thumb-tack-class-ico-pin fa" data-dialogtype="size" data-click="pinDialog"></span>
         <span class="thumb-tack-class thumb-tack-class-ico-drag fa" data-dialogtype="size" data-click="dragDialog"></span>
+        <div class="vzb-dialog-bubblesize"></div>
         <div class="vzb-dialog-title"> 
           <span data-localise="buttons/size"></span>
-          <div class="vzb-dialog-bubblesize"></div>
           <span class="vzb-saxis-selector"></span>
-          <div class="vzb-saxis-minmax vzb-dialog-paragraph"></div>
         </div>
         <div class="vzb-dialog-content">
           <span class="vzb-dialog-subtitle"></span>
+          <div class="vzb-saxis-minmax vzb-dialog-paragraph"></div>
         </div>
         <div class="vzb-dialog-buttons">
           <div data-click="closeDialog" class="vzb-dialog-button vzb-label-primary">
@@ -64,6 +68,19 @@ export class Size extends Dialog {
     super.draw();
 
     this.addReaction(this._updateSubtitle);
+    this.addReaction(this._updateShowSlidersInSidebar);
+  }
+
+  _updateShowSlidersInSidebar() {
+    const show = this.ui.showSlidersWhenInSidebar;
+    this.element.classed("vzb-force-show-sliders", show);
+    if (show) {
+      //force layout size update so that BubbleSize's draw() autorun
+      //re-runs now that its container is no longer display:none
+
+      this.findChild({type: "BubbleSize"}).updateSize();
+      //this.services.layout._resizeHandler();
+    }
   }
 
   _updateSubtitle() {
