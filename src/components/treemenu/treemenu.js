@@ -33,6 +33,38 @@ function getTagNameForDs(ds){
   return "dataset " + ds.id;
 }
 
+/**
+ * Parse a concept list field (scales, tags) from its raw string value into an array of strings.
+ * This is the single authoritative place for this parsing.
+ *
+ * New format: space-separated  e.g. "log linear"  or  "_root newborn_infants"
+ * Old formats (transitionary — emit a console warning to help track down datasets to migrate):
+ *   JSON array string:   '["log","linear"]'
+ *   Comma-separated:     '_root,newborn_infants'
+ */
+function parseListField(value) {
+  if (!value) return [];
+  const str = String(value).trim();
+  if (!str) return [];
+  // Old format: JSON array string
+  if (str.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(str);
+      if (Array.isArray(parsed)) {
+        console.warn(`[DDF] Old-format JSON array in concept list field. Migrate dataset to space-separated format. Value: ${str}`);
+        return parsed.map(s => String(s).trim()).filter(Boolean);
+      }
+    } catch(e) { /* not valid JSON — fall through to comma/space handling */ }
+  }
+  // Old format: comma-separated
+  if (str.includes(",")) {
+    console.warn(`[DDF] Old-format comma-separated value in concept list field. Migrate dataset to space-separated format. Value: ${str}`);
+    return str.split(",").map(s => s.trim()).filter(Boolean);
+  }
+  // New format: space-separated (multiple consecutive spaces = one separator)
+  return str.split(/\s+/).filter(Boolean);
+}
+
 function getItemName(item){
   if (item.type == "indicator"){
     return item.byDataSources.map(m => m.name_catalog)
@@ -46,7 +78,7 @@ function getItemName(item){
 
 
 function resolveDefaultScales(concept) {
-  if (concept.scales) return JSON.parse(concept.scales).map(m => m.trim());
+  if (concept.scales) return parseListField(concept.scales);
   switch (concept.concept_type) {
   case "measure": return ["linear", "log"];
   case "string": return ["ordinal"];
@@ -268,7 +300,7 @@ export class TreeMenu extends BaseComponent {
           concept: this.model.data.source.getConcept(d)
         }; 
       }))
-      .filter(f =>  (!f.concept.tags || f.concept.tags !== "_none") && f.concept.concept && f.concept.concept.slice(0,4) !== "is--" )
+      .filter(f =>  (!f.concept.tags || !parseListField(f.concept.tags).includes("_none")) && f.concept.concept && f.concept.concept.slice(0,4) !== "is--" )
       .forEach(({concept, spaces, source}) => {
 
         const id = concept.concept;
@@ -279,7 +311,7 @@ export class TreeMenu extends BaseComponent {
           name: concept.name || concept.concept,
           name_catalog: concept.name_catalog,
           description: concept.description,
-          scales: concept.scales ? JSON.parse(concept.scales).map(m => m.trim()) : null
+          scales: concept.scales ? parseListField(concept.scales) : null
         };
 
         if (concept.concept_type == "time" || concept.concept == "_default"){
@@ -298,8 +330,8 @@ export class TreeMenu extends BaseComponent {
 
         } else {
           //regulat indicators
-          const conceptTags = concept.tags || getTagNameForDs(source) || "_root";
-          conceptTags.split(",").forEach(tag => {
+          const conceptTags = parseListField(concept.tags || getTagNameForDs(source) || "_root");
+          conceptTags.forEach(tag => {
             tag = tag.trim();
             if (tags[tag]) {
               this._addIndicatorToTheTree(id, props, tags[tag]);
