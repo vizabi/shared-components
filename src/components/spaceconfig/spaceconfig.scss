@@ -1,8 +1,8 @@
-@import "../../styles/common.scss";
-
 .vzb-tool {
   .vzb-spaceconfig {
-    @include position(absolute, 0 0 null null);
+    position: absolute;
+    top: 0;
+    right: 0;
     height: 100%;
     width: 100%;
 
@@ -123,7 +123,9 @@
 
   &.vzb-small.vzb-portrait {
     .vzb-spaceconfig-box {
-      @include position(absolute, 10% null null 5%);
+      position: absolute;
+      top: 10%;
+      left: 5%;
       bottom: $size-button-list;
       width: 90%;
       height: 80%;
@@ -144,7 +146,9 @@
 
   &.vzb-small.vzb-landscape {
     .vzb-spaceconfig-box {
-      @include position(absolute, 10% null null 10%);
+      position: absolute;
+      top: 10%;
+      left: 10%;
       height: 80%;
       margin-right: 10px;
       right: $size-button-list;
@@ -166,7 +170,9 @@
 
   &.vzb-medium {
     .vzb-spaceconfig-box {
-      @include position(absolute, 10% null null 20%);
+      position: absolute;
+      top: 10%;
+      left: 20%;
       height: 80%;
       width: 60%;
 
@@ -186,7 +192,9 @@
 
   &.vzb-large {
     .vzb-spaceconfig-box {
-      @include position(absolute, 10% null null 25%);
+      position: absolute;
+      top: 10%;
+      left: 25%;
       width: 50%;
       height: 80%;
 

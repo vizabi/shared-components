@@ -1,100 +1,104 @@
-.vzb-dialogs {
-  .vzb-dialogs-dialog {
-    &[data-dlg="size"] {
-      &.vzb-popup {
-        .vzb-dialog-modal {        
-          .vzb-dialog-title {
-            @include rtl {
-              padding-left: 5px;
-              padding-right: 25px;
+@use "common" as *;
+
+.vzb-tool {
+  .vzb-dialogs {
+    .vzb-dialogs-dialog {
+      &[data-dlg="size"] {
+        &.vzb-popup {
+          .vzb-dialog-modal {        
+            .vzb-dialog-title {
+              @include rtl {
+                padding-left: 5px;
+                padding-right: 25px;
+              }
+              padding-right: 5px;
             }
-            padding-right: 5px;
           }
         }
-      }
 
-      &.vzb-popup,
-      &.vzb-sidebar {
-        .vzb-dialog-title { // Title row with span and indicator picker
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          > span:first-child { // Translatable title
-            display: block;
-            flex: 0 0 auto;
-          } 
-          .vzb-saxis-selector {
-            display: block;
-            flex: 1 1 auto;
-            min-width: 1px;
+        &.vzb-popup,
+        &.vzb-sidebar {
+          .vzb-dialog-title { // Title row with span and indicator picker
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            > span:first-child { // Translatable title
+              display: block;
+              flex: 0 0 auto;
+            } 
+            .vzb-saxis-selector {
+              display: block;
+              flex: 1 1 auto;
+              min-width: 1px;
+            }
           }
         }
-      }
 
-      //Custom tuning when in sidebar mode
-      &.vzb-sidebar:not(.vzb-force-show-sliders) {
+        //Custom tuning when in sidebar mode
+        &.vzb-sidebar:not(.vzb-force-show-sliders) {
+          .vzb-dialog-modal {
+            height: auto;
+            .vzb-dialog-bubblesize {
+              display: none;
+            }
+          }
+        }
+        &.vzb-sidebar {
+          .vzb-dialog-modal {
+            height: 120px;
+            .vzb-dialog-title {
+              z-index: 1;
+            }
+            .vzb-dialog-bubblesize {
+              top: -50px;
+            }
+            .vzb-dialog-content {
+              display: none;
+            }
+          }
+        }
+
         .vzb-dialog-modal {
-          height: auto;
+          height: 225px;
           .vzb-dialog-bubblesize {
-            display: none;
+            position: absolute;
+            top: 50px;
+            font-size: 13px;
           }
-        }
-      }
-      &.vzb-sidebar {
-        .vzb-dialog-modal {
-          height: 120px;
           .vzb-dialog-title {
-            z-index: 1;
-          }
-          .vzb-dialog-bubblesize {
-            top: -50px;
-          }
-          .vzb-dialog-content {
-            display: none;
-          }
-        }
-  	  }
-
-      .vzb-dialog-modal {
-        height: 225px;
-        .vzb-dialog-bubblesize {
-          position: absolute;
-          top: 50px;
-          font-size: 13px;
-        }
-        .vzb-dialog-title {
-          .vzb-saxis-selector {
-            .vzb-ip-select {
-              background-color: $vzb-color-white;
-              &:hover {
-                background-color: $vzb-color-grey-light;
+            .vzb-saxis-selector {
+              .vzb-ip-select {
+                background-color: $vzb-color-white;
+                &:hover {
+                  background-color: $vzb-color-grey-light;
+                }
               }
             }
           }
-        }
 
-        .vzb-dialog-content {
-          .vzb-dialog-subtitle {
-            position: absolute;
-            bottom: 0px;
-          }
-          .vzb-saxis-minmax {
-            margin-left: 5px;
-            position: relative;
+          .vzb-dialog-content {
+            .vzb-dialog-subtitle {
+              position: absolute;
+              bottom: 0px;
+            }
+            .vzb-saxis-minmax {
+              margin-left: 5px;
+              position: relative;
+            }
           }
         }
       }
     }
   }
-}
 
-//responsiveness
-&.vzb-large {
-  &.vzb-dialog-expand-true {
-    .vzb-dialogs-dialog {
-      &[data-dlg="size"] {
-        &.vzb-sidebar {
-          flex: none;
+  //responsiveness
+  &.vzb-large {
+    &.vzb-dialog-expand-true {
+      .vzb-dialogs-dialog {
+        &[data-dlg="size"] {
+          &.vzb-sidebar {
+            flex: none;
+          }
         }
       }
     }

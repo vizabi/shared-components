@@ -1,34 +1,38 @@
-.vzb-dialogs {
-  .vzb-dialogs-dialog {
-    &[data-dlg="about"] {
-      &.vzb-moreoptions.vzb-accordion-section.vzb-accordion-active {
-        max-height: 2000px !important;
+@use "common" as *;
 
-        .vzb-about-header,
-        .vzb-about-body,
-        .vzb-about-footer {
-          margin-bottom: 2em;
-        }
+.vzb-tool {
+  .vzb-dialogs {
+    .vzb-dialogs-dialog {
+      &[data-dlg="about"] {
+        &.vzb-moreoptions.vzb-accordion-section.vzb-accordion-active {
+          max-height: 2000px !important;
 
-        p {
-          margin-bottom: 2em;
-          span {margin-right: 1em};
-          svg {
-            max-width: 230px;
-            height: auto;
+          .vzb-about-header,
+          .vzb-about-body,
+          .vzb-about-footer {
+            margin-bottom: 2em;
           }
-        }
 
-        h1 {
-          font-size: 1.2em;
-          font-weight: bold;
-        }
-        
-        a.vzb-underline {
-          color: $vzb-color-primary-strong;
-          text-decoration: underline;
-        }
+          p {
+            margin-bottom: 2em;
+            span {margin-right: 1em};
+            svg {
+              max-width: 230px;
+              height: auto;
+            }
+          }
 
+          h1 {
+            font-size: 1.2em;
+            font-weight: bold;
+          }
+          
+          a.vzb-underline {
+            color: $vzb-color-primary-strong;
+            text-decoration: underline;
+          }
+
+        }
       }
     }
   }

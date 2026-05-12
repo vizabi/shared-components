@@ -1,4 +1,4 @@
-
+import "./styles/_index.scss";
 import * as _Icons from "./icons/iconset";
 import * as _Utils from "./utils";
 import {selection} from "d3";

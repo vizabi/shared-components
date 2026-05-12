@@ -1,18 +1,21 @@
-.vzb-dialogs {
-  .vzb-dialogs-dialog {
-    &[data-dlg="timedisplay"] {
-      min-height: 128px;
-      .vzb-dialog-modal{
-        height: 100%;
-        .vzb-dialog-content.vzb-dialog-content-fixed {
-          fill: $vzb-color-primary-strong;
-          padding: 0;
-          height: 128px;
-          overflow: hidden;
+@use "common" as *;
+
+.vzb-tool {
+  .vzb-dialogs {
+    .vzb-dialogs-dialog {
+      &[data-dlg="timedisplay"] {
+        min-height: 128px;
+        .vzb-dialog-modal{
+          height: 100%;
+          .vzb-dialog-content.vzb-dialog-content-fixed {
+            fill: $vzb-color-primary-strong;
+            padding: 0;
+            height: 128px;
+            overflow: hidden;
+          }
         }
       }
     }
   }
 }
-
 

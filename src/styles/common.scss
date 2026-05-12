@@ -1,7 +1,6 @@
-@import '../../node_modules/bourbon/core/bourbon';
-@import './vizabi-old/main';
-@import './layout';
-
+@forward 'vizabi-old/variables';
+@forward 'vizabi-old/mixins';
+@forward 'vizabi-old/chart';
 
 $theme-color: rgb(233, 255, 172);
 

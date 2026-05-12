@@ -1,4 +1,7 @@
-.vzb-dialogs {
+@use "common" as *;
+
+.vzb-tool {
+  .vzb-dialogs {
     .vzb-dialogs-dialog {
       &[data-dlg="repeat"] {
         .vzb-dialog-content {
@@ -67,4 +70,4 @@
       }
     }
   }
-  
+}

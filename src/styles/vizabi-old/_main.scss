@@ -1,7 +1,9 @@
-@import 'mixins';
-@import 'common';
-@import 'reset';
-@import 'chart';
+@use "sass:color";
+@use 'variables' as *;
+@use 'common';
+@use 'mixins';
+@use 'reset';
+@use 'chart';
 
 .vzb-tool {
   background-color: $vzb-color-white;
@@ -36,13 +38,17 @@
   //all other loadings would not hide the div and be semi-transparent
   &.vzb-loading-data {
     &::before {
-      @include opacity(0.8);
+      @include mixins.opacity(0.8);
     }
   }
 
   //loading anything
   &.vzb-force-fullscreen {
-    @include position(fixed, 0 0 0 0);
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     display: block;
     height: auto !important;
     margin: 0;
@@ -79,7 +85,7 @@
     }
     
     .vzb-error-message-box {
-      @include box-shadow(0, 8px, 15px, rgba(0, 0, 0, 0.24));
+      @include mixins.box-shadow(0, 8px, 15px, rgba(0, 0, 0, 0.24));
       z-index: 9997;
       background-color: #fff;
       border-top: 1px solid #f7f7f7;
@@ -95,7 +101,7 @@
     }
     
     .vzb-error-message-close {
-      @include rtl {
+      @include mixins.rtl {
         left: 5px;
         right: auto;
       }
@@ -149,19 +155,19 @@
 }
 
 .vzb-dialog-scrollable {
-  @include overflow-mobile;
+  @include mixins.overflow-mobile;
   &::-webkit-scrollbar {
     width: 6px;
     -webkit-appearance: none;
   }
   &::-webkit-scrollbar-thumb {
-    background: lighten($vzb-color-primary, 30%);
+    background: color.adjust($vzb-color-primary, $lightness: 30%);
     border-radius: 2px;
     cursor: pointer;
   }
   &::-webkit-scrollbar-track {
     width: 5px;
-    background: lighten($vzb-color-primary, 30%);
+    background: color.adjust($vzb-color-primary, $lightness: 30%);
     border-radius: 2px;
     background-clip: content-box;
     border: 2px solid transparent;
@@ -197,7 +203,10 @@ $vzb-button-expand-width: 290px;
   }
 
   .vzb-tool-title {
-    @include position(absolute, 0 0 null 0);
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
     background-color: $vzb-color-primary-lightest;
     color: $vzb-color-grey-dark;
     display: none !important;
@@ -285,7 +294,11 @@ $vzb-button-expand-width: 290px;
   //Responsiveness
   &.vzb-small {
     //$pos-top: $height-title - 8px;
-    //@include position(absolute, $pos-top 0 0 0);
+    //position: absolute;
+    //top: $pos-top;
+    //right: 0;
+    //bottom: 0;
+    //left: 0;
 
     .vzb-tool-stage {
       .vzb-tool-time-speed-sliders {
@@ -363,8 +376,8 @@ $vzb-button-expand-width: 290px;
 
   //tooltip
   .vzb-tooltip {
-    @include border-radius(3px);
-    @include opacity(0.9);
+    @include mixins.border-radius(3px);
+    @include mixins.opacity(0.9);
     background: $vzb-color-grey-dark;
     color: $vzb-color-white;
     font-size: $vzb-font-size-regular;
@@ -394,12 +407,12 @@ $vzb-button-expand-width: 290px;
         background-color: $vzb-color-primary-lightest;
         cursor: pointer;
         &::after {
-          @include rtl {
-            @include rotate(225deg);
+          @include mixins.rtl {
+            @include mixins.rotate(225deg);
             left: 0.75em;
             right: auto;
           }
-          @include rotate(45deg);
+          @include mixins.rotate(45deg);
           content: '';
           position: absolute;
           top: 0.75em;
@@ -414,7 +427,7 @@ $vzb-button-expand-width: 290px;
         max-height: none;
         transition: max-height 0.3s ease-in-out;
         .vzb-accordion-section-title>span:first-child::after {
-          @include rotate(135deg);
+          @include mixins.rotate(135deg);
         }
       }
     }

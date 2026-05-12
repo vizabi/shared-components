@@ -1,8 +1,8 @@
-@import "../../styles/common.scss";
-
 .vzb-tool {
   .vzb-treemenu {
-    @include position(absolute, 0 0 null null);
+    position: absolute;
+    top: 0;
+    right: 0;
     z-index: 9998;
     width: 100%;
     height: 100%;
@@ -593,7 +593,9 @@
 
   &.vzb-small {
     .vzb-treemenu-wrap-outer {
-      @include position(absolute, 10% null null 10%);
+      position: absolute;
+      top: 10%;
+      left: 10%;
       width: 80%;
       height: 80%;
       display: flex;

@@ -51,6 +51,7 @@ export default {
     (process.env.NODE_ENV === "production" && eslint()),
     commonjs(),
     scss({
+      silenceDeprecations: ["legacy-js-api"],
       include: path.resolve(__dirname,"src/**/*.scss"),
       //output: "build/VizabiSharedComponents.css",
       output(styles) {

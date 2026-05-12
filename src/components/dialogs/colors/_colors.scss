@@ -1,127 +1,131 @@
-.vzb-dialogs {
-  .vzb-dialogs-dialog {
-    &[data-dlg="colors"], &[data-dlg="mapcolors"] {
-      .vzb-dialog-content {
-        padding-left: 5px;
-        padding-right: 5px;
-        .vzb-cl-minimap {
-          padding-left: 15px;
-          padding-right: 15px;
-        }
-        .vzb-cl-colorlist {
-          padding-left: 15px;
-          padding-right: 15px;
-          overflow: visible;
-          min-height: 115px;
-        }
-        .vzb-cl-rainbow, .vzb-cl-subtitle {
-          left: 15px;
-          right: 15px;
-        }
-      }
+@use "common" as *;
 
-      &.vzb-popup {
-        .vzb-dialog-modal {
-          .vzb-dialog-content {
-            padding-left: 10px;
-            padding-right: 10px;
-            overflow: auto;
-            .vzb-cl-rainbow, .vzb-cl-subtitle {
-              left: 15px;
-              right: 18px;
+.vzb-tool {
+  .vzb-dialogs {
+    .vzb-dialogs-dialog {
+      &[data-dlg="colors"], &[data-dlg="mapcolors"] {
+        .vzb-dialog-content {
+          padding-left: 5px;
+          padding-right: 5px;
+          .vzb-cl-minimap {
+            padding-left: 15px;
+            padding-right: 15px;
+          }
+          .vzb-cl-colorlist {
+            padding-left: 15px;
+            padding-right: 15px;
+            overflow: visible;
+            min-height: 115px;
+          }
+          .vzb-cl-rainbow, .vzb-cl-subtitle {
+            left: 15px;
+            right: 15px;
+          }
+        }
+
+        &.vzb-popup {
+          .vzb-dialog-modal {
+            .vzb-dialog-content {
+              padding-left: 10px;
+              padding-right: 10px;
+              overflow: auto;
+              .vzb-cl-rainbow, .vzb-cl-subtitle {
+                left: 15px;
+                right: 18px;
+              }
             }
           }
         }
-      }
 
-      &.vzb-moreoptions {
-        .vzb-cl-colorlist {
-          min-height: 115px;
+        &.vzb-moreoptions {
+          .vzb-cl-colorlist {
+            min-height: 115px;
+          }
+
+          .vzb-dialog-modal {
+            .vzb-dialog-content {
+              padding-left: 10px;
+              padding-right: 10px;
+              overflow: auto;
+              max-height: 200px;
+              .vzb-cl-rainbow, .vzb-cl-subtitle {
+                left: 16px;
+                right: auto;
+                width: 214px;
+              }
+              .vzb-cl-unit {
+                padding-left: 1px;
+              }
+            }
+            .vzb-caxis-selector {
+              .vzb-ip-select {
+                flex: none;
+                width: 214px;
+              }
+            }
+
+          }
         }
 
-        .vzb-dialog-modal {
-          .vzb-dialog-content {
-            padding-left: 10px;
-            padding-right: 10px;
-            overflow: auto;
-            max-height: 200px;
-            .vzb-cl-rainbow, .vzb-cl-subtitle {
-              left: 16px;
-              right: auto;
-              width: 214px;
-            }
-            .vzb-cl-unit {
-              padding-left: 1px;
+        &.vzb-popup,
+        &.vzb-sidebar {
+          .vzb-dialog-title {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            > span:first-child {
+              display: block;
+              flex: 0 0 auto;
             }
           }
+
           .vzb-caxis-selector {
-            .vzb-ip-select {
-              flex: none;
-              width: 214px;
-            }
-          }
-
-        }
-      }
-
-      &.vzb-popup,
-      &.vzb-sidebar {
-        .vzb-dialog-title {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          > span:first-child {
             display: block;
-            flex: 0 0 auto;
+            flex: 1 1 auto;
+            min-width: 1px;
           }
         }
 
-        .vzb-caxis-selector {
-          display: block;
-          flex: 1 1 auto;
-          min-width: 1px;
-        }
       }
-
     }
   }
-}
 
-//responsiveness
-&.vzb-large {
-  &.vzb-dialog-expand-true {
-    .vzb-dialogs-dialog {
-      &.vzb-sidebar {
-        &[data-dlg="colors"], &[data-dlg="mapcolors"]  {
-          z-index: auto !important;
-          flex: none;
+  //responsiveness
+  &.vzb-large {
+    &.vzb-dialog-expand-true {
+      .vzb-dialogs-dialog {
+        &.vzb-sidebar {
+          &[data-dlg="colors"], &[data-dlg="mapcolors"]  {
+            z-index: auto !important;
+            flex: none;
 
-          .vzb-dialog-content {
-            //max-height: 190px;
-            max-height: '';
-            //min-height: 120px;
-            margin-bottom: 5px;
-            .vzb-colorpicker-svg {
-              z-index: 10;
-            }
-          }
-
-          .vzb-cl-outer {
-            max-height: 145px;
-            .vzb-cl-holder {
-              //max-height: 160px;
-              //overflow-y: scroll;
+            .vzb-dialog-content {
+              //max-height: 190px;
               max-height: '';
-              overflow-y: hidden;
-              overflow-x: hidden;
+              //min-height: 120px;
+              margin-bottom: 5px;
+              .vzb-colorpicker-svg {
+                z-index: 10;
+              }
             }
 
-          }
-        }
+            .vzb-cl-outer {
+              max-height: 145px;
+              .vzb-cl-holder {
+                //max-height: 160px;
+                //overflow-y: scroll;
+                max-height: '';
+                overflow-y: hidden;
+                overflow-x: hidden;
+              }
 
-        &[data-dlg="colors"].vzb-hide-colorlist {
-          .vzb-cl-colorlist {
-            display: none;
+            }
+          }
+
+          &[data-dlg="colors"].vzb-hide-colorlist {
+            .vzb-cl-colorlist {
+              display: none;
+            }
           }
         }
       }
